@@ -215,8 +215,10 @@ public class YaVersion {
   // - NOTIFIER_COMPONENT_VERSION was incremented to 2.
   // For YOUNG_ANDROID_VERSION 72:
   // - WEBVIEWER_COMPONENT_VERSION was incremented to 3
+  // For YOUNG_ANDROID_VERSION 73:
+  // - SEMANTIC_WEB_COMPONENT_VERSION was added.
 
-  public static final int YOUNG_ANDROID_VERSION = 72;
+  public static final int YOUNG_ANDROID_VERSION = 73;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -606,4 +608,5 @@ public class YaVersion {
   // - Add UsesLocation property to set location permissions
   public static final int WEBVIEWER_COMPONENT_VERSION = 3;
 
+  public static final int SEMANTIC_WEB_COMPONENT_VERSION = 1;
 }
