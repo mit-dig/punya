@@ -81,7 +81,7 @@
         <pathelement location="lib/jena/jena-core-2.10.0.jar" />
         <pathelement location="lib/jena/jena-arq-2.10.0.jar" />
         <pathelement location="lib/jena/jena-iri-0.9.5.jar" />
-        <pathelement location="lib/jena/xercesImpl-2.10.0.jar" />
+<!--        <pathelement location="lib/jena/xercesImpl-2.10.0.jar" />-->
         <pathelement location="lib/jena/jcl-over-slf4j-1.6.4.jar" />
         <pathelement location="lib/jena/slf4j-api-1.6.4.jar" />
         <pathelement location="lib/jena/slf4j-log4j12-1.6.4.jar" />
