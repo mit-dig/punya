@@ -1,5 +1,9 @@
 package com.google.appinventor.components.runtime;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -15,6 +19,17 @@ import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsyncCallbackPair;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.WebServiceUtil;
+import com.google.appinventor.components.runtime.util.YailList;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 
 import android.os.Handler;
 
@@ -25,8 +40,8 @@ import android.os.Handler;
     iconName = "images/semanticWeb.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
-@UsesLibraries(libraries = "jcl-over-slf4j.jar," + "slf4j-api.jar," +
-    "slf4j-log4j12.jar," + "jena-iri.jar," + "jena-core.jar," +
+@UsesLibraries(libraries = "xercesImpl.jar," + "slf4j-api.jar," +
+    "slf4j-nop.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")
 public class SemanticWeb extends AndroidNonvisibleComponent implements
 		Component {
@@ -127,5 +142,83 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   @SimpleEvent
   public void WebServiceError(String message) {
     EventDispatcher.dispatchEvent(this, "WebServiceError", message);
+  }
+
+  /**
+   * Execute a SPARQL query on the set EndpointURL of this semantic web component.
+   * Currently only supports SELECT queries, and converts all integer types into Long
+   * and decimal types into Double.
+   * @param query Query text to execute
+   */
+  @SimpleFunction
+  public void ExecuteQuery(final String query) {
+    final Runnable call = new Runnable() {
+      public void run() { executeQuery(query); }
+    };
+    AsynchUtil.runAsynchronously(call);
+  }
+
+  private void executeQuery(String queryText) {
+    Query query = QueryFactory.create(queryText);
+    QueryEngineHTTP qe = QueryExecutionFactory.createServiceRequest(EndpointURL(), query);
+    qe.setSelectContentType("application/json");
+    if(query.isSelectType()) {
+      ResultSet rs = qe.execSelect();
+      final LinkedList<?> bindings = new LinkedList<Object>();
+      while(rs.hasNext()) {
+        LinkedList<?> binding = new LinkedList<Object>();
+        Binding b = rs.nextBinding();
+        Iterator<Var> vars = b.vars();
+        while(vars.hasNext()) {
+          Var var = vars.next();
+          b.get(var);
+          LinkedList<Object> pair = new LinkedList<Object>();
+          pair.add(var.getName());
+          Node node = b.get(var);
+          if(node.isLiteral()) {
+            if(node.getLiteralDatatype() == XSDDatatype.XSDinteger) {
+              pair.add(Long.parseLong(node.getLiteralLexicalForm()));
+            } else if(node.getLiteralDatatype() == XSDDatatype.XSDdouble) {
+              pair.add(node.getLiteralValue());
+            } else if(node.getLiteralDatatype() == XSDDatatype.XSDdecimal) {
+              pair.add(Double.parseDouble(node.getLiteralLexicalForm()));
+            }
+          } else if(node.isURI()) {
+            pair.add(node.getURI());
+          }
+        }
+      }
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          RetrievedResults("SELECT", bindings);
+        }
+      });
+    } else {
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          UnsupportedQueryType();
+        }
+      });
+    }
+  }
+
+  /**
+   * This event is raised after a SPARQL engine finishes processing
+   * a query and the client has received the results.
+   * @param type Type of query executed, e.g. SELECT
+   * @param bindings A list of bindings satisfying the SPARQL query
+   */
+  @SimpleEvent
+  public void RetrievedResults(String type, Collection<?> bindings) {
+    EventDispatcher.dispatchEvent(this, "RetrievedResults", type, bindings);
+  }
+
+  /**
+   * Event raised when a SPARQL query to be executed is not supported
+   * by the Semantic Web component.
+   */
+  @SimpleEvent
+  public void UnsupportedQueryType() {
+    EventDispatcher.dispatchEvent(this, "UnsupportedQueryType");
   }
 }
