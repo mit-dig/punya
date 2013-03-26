@@ -1,5 +1,6 @@
 package com.google.appinventor.components.runtime;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -27,11 +28,13 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 
 import android.os.Handler;
+import android.util.Log;
 
 @DesignerComponent(version = YaVersion.SEMANTIC_WEB_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
@@ -40,8 +43,8 @@ import android.os.Handler;
     iconName = "images/semanticWeb.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
-@UsesLibraries(libraries = "xercesImpl.jar," + "slf4j-api.jar," +
-    "slf4j-nop.jar," + "jena-iri.jar," + "jena-core.jar," +
+@UsesLibraries(libraries = "xercesImpl.jar," + 
+    "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")
 public class SemanticWeb extends AndroidNonvisibleComponent implements
 		Component {
@@ -161,16 +164,23 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   private void executeQuery(String queryText) {
     Query query = QueryFactory.create(queryText);
     QueryEngineHTTP qe = QueryExecutionFactory.createServiceRequest(EndpointURL(), query);
-    qe.setSelectContentType("application/json");
+    qe.setSelectContentType("application/sparql-results+json");
     if(query.isSelectType()) {
       ResultSet rs = qe.execSelect();
-      final LinkedList<?> bindings = new LinkedList<Object>();
+//      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//      ResultSetFormatter.outputAsJSON(baos, rs);
+//      try {
+//        Log.i(LOG_TAG, "Query result: "+baos.toString("UTF-8"));
+//      } catch(Exception e) { }
+      final LinkedList<Object> bindings = new LinkedList<Object>();
       while(rs.hasNext()) {
-        LinkedList<?> binding = new LinkedList<Object>();
+        Log.i(LOG_TAG, "Processing binding...");
+        LinkedList<Object> binding = new LinkedList<Object>();
         Binding b = rs.nextBinding();
         Iterator<Var> vars = b.vars();
         while(vars.hasNext()) {
           Var var = vars.next();
+          Log.i(LOG_TAG, "Processing var..."+var.toString());
           b.get(var);
           LinkedList<Object> pair = new LinkedList<Object>();
           pair.add(var.getName());
@@ -182,11 +192,21 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
               pair.add(node.getLiteralValue());
             } else if(node.getLiteralDatatype() == XSDDatatype.XSDdecimal) {
               pair.add(Double.parseDouble(node.getLiteralLexicalForm()));
+            } else {
+              pair.add(node.getLiteralLexicalForm());
             }
           } else if(node.isURI()) {
             pair.add(node.getURI());
+          } else {
+            Log.w(LOG_TAG, "Variable not URI nor Literal");
+          }
+          if(pair.size()==2) {
+            binding.add(pair);
+          } else {
+            Log.w(LOG_TAG, "Pair not of size 2");
           }
         }
+        bindings.add(binding);
       }
       form.runOnUiThread(new Runnable() {
         public void run() {
