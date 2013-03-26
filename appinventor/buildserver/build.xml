@@ -138,9 +138,10 @@
     <copy toFile="${classes.files.dir}/xercesImpl.jar" file="${lib.dir}/jena/xercesLite.jar" />
 <!--    <copy toFile="${classes.files.dir}/xml-apis.jar" file="${lib.dir}/jena/xml-apis-1.4.01.jar" />-->
 <!--    <copy toFile="${classes.files.dir}/jcl-over-slf4j.jar" file="${lib.dir}/jena/jcl-over-slf4j-1.6.4.jar" />-->
-    <copy toFile="${classes.files.dir}/slf4j-api.jar" file="${lib.dir}/jena/slf4j-api-1.6.4.jar" />
+<!--    <copy toFile="${classes.files.dir}/slf4j-api.jar" file="${lib.dir}/jena/slf4j-api-1.6.4.jar" />-->
 <!--    <copy toFile="${classes.files.dir}/slf4j-log4j12.jar" file="${lib.dir}/jena/slf4j-log4j12-1.6.4.jar" />-->
-    <copy toFile="${classes.files.dir}/slf4j-nop.jar" file="${lib.dir}/jena/slf4j-nop-1.6.4.jar" />
+<!--    <copy toFile="${classes.files.dir}/slf4j-nop.jar" file="${lib.dir}/jena/slf4j-nop-1.6.4.jar" />-->
+    <copy toFile="${classes.files.dir}/slf4j-android.jar" file="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
     <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables.jar" />
     <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />

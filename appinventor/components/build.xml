@@ -128,9 +128,10 @@
         <pathelement location="${lib.dir}/jena/xercesLite.jar" />
 <!--        <pathelement location="${lib.dir}/jena/xml-apis-1.4.01.jar" />-->
 <!--        <pathelement location="${lib.dir}/jena/jcl-over-slf4j-1.6.4.jar" />-->
-        <pathelement location="${lib.dir}/jena/slf4j-api-1.6.4.jar" />
+<!--        <pathelement location="${lib.dir}/jena/slf4j-api-1.6.4.jar" />-->
 <!--        <pathelement location="${lib.dir}/jena/slf4j-log4j12-1.6.4.jar" />-->
-        <pathelement location="${lib.dir}/jena/slf4j-nop-1.6.4.jar" />
+<!--        <pathelement location="${lib.dir}/jena/slf4j-nop-1.6.4.jar" />-->
+        <pathelement location="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
         <pathelement location="${lib.dir}/fusiontables/fusiontables.jar" />
         <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
         <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
@@ -235,9 +236,10 @@
           <pathelement location="${lib.dir}/jena/xercesLite.jar" />
 <!--          <pathelement location="${lib.dir}/jena/xml-apis-1.4.01.jar" />-->
 <!--          <pathelement location="${lib.dir}/jena/jcl-over-slf4j-1.6.4.jar" />-->
-          <pathelement location="${lib.dir}/jena/slf4j-api-1.6.4.jar" />
+<!--          <pathelement location="${lib.dir}/jena/slf4j-api-1.6.4.jar" />-->
 <!--          <pathelement location="${lib.dir}/jena/slf4j-log4j12-1.6.4.jar" />-->
-          <pathelement location="${lib.dif}/jena/slf4j-nop-1.6.4.jar" />
+<!--          <pathelement location="${lib.dif}/jena/slf4j-nop-1.6.4.jar" />-->
+          <pathelement location="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
           <pathelement location="${lib.dir}/fusiontables/fusiontables.jar" />
           <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
           <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
