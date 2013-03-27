@@ -1,6 +1,5 @@
 package com.google.appinventor.components.runtime;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -20,20 +19,16 @@ import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsyncCallbackPair;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.WebServiceUtil;
-import com.google.appinventor.components.runtime.util.YailList;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 
-import android.os.Handler;
 import android.util.Log;
 
 @DesignerComponent(version = YaVersion.SEMANTIC_WEB_COMPONENT_VERSION,
@@ -50,15 +45,11 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
 		Component {
 
   private static final String LOG_TAG = "SemanticWeb";
-  private static final String URI_PARAMETER = "uri";
-  private static final String VALUE_PARAMETER = "value";
 
   private String endpointURL;
-  private Handler androidUIHandler;
 
   public SemanticWeb(ComponentContainer container) {
 	  super(container.$form());
-	  androidUIHandler = new Handler();
 	  endpointURL = "http://dbpedia.org/sparql";
   }
 
@@ -167,11 +158,6 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
     qe.setSelectContentType("application/sparql-results+json");
     if(query.isSelectType()) {
       ResultSet rs = qe.execSelect();
-//      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//      ResultSetFormatter.outputAsJSON(baos, rs);
-//      try {
-//        Log.i(LOG_TAG, "Query result: "+baos.toString("UTF-8"));
-//      } catch(Exception e) { }
       final LinkedList<Object> bindings = new LinkedList<Object>();
       while(rs.hasNext()) {
         Log.i(LOG_TAG, "Processing binding...");
