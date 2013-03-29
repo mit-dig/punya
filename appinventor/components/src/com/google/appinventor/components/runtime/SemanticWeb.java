@@ -1,8 +1,11 @@
 package com.google.appinventor.components.runtime;
 
+import java.io.FileOutputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -25,9 +28,14 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
+import com.hp.hpl.jena.vocabulary.RDF;
 
 import android.util.Log;
 
@@ -226,5 +234,79 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   @SimpleEvent
   public void UnsupportedQueryType() {
     EventDispatcher.dispatchEvent(this, "UnsupportedQueryType");
+  }
+
+  private Map<String, Model> models = new HashMap<String, Model>();
+
+  @SimpleFunction
+  public String OpenModel() {
+    Model m = ModelFactory.createDefaultModel();
+    models.put(m.toString(), m);
+    return m.toString();
+  }
+
+  @SimpleFunction
+  public boolean LoadModel(String model, String path) {
+    if(!models.containsKey(model)) {
+      return false;
+    }
+    Model m = models.get(model);
+    try {
+      String type = "RDF/XML";
+      if(path.endsWith(".n3")) {
+        type = "N3";
+      } else if(path.endsWith(".ttl")) {
+        type = "TURTLE";
+      }
+      m.read(path, type);
+    } catch(Exception e) {
+      Log.w(LOG_TAG, "Unable to read model.", e);
+      return false;
+    }
+    return true;
+  }
+
+  @SimpleFunction
+  public void AddObjectTriple(String model, String subject, String predicate, String object) {
+    if(!models.containsKey(model)) {
+      return;
+    }
+    if(predicate.equals("a")) {
+      predicate = RDF.type.getURI();
+    }
+    Model m = models.get(model);
+    Resource s,o;
+    Property p;
+    s = m.getResource(subject);
+    p = m.getProperty(predicate);
+    o = m.getResource(object);
+    m.add(s, p, o);
+  }
+
+  @SimpleFunction
+  public boolean SaveModel(String model, String path) {
+    if(!models.containsKey(model)) {
+      return false;
+    }
+    Model m = models.get(model);
+    try {
+      String type = "RDF/XML";
+      if(path.endsWith(".n3")) {
+        type = "N3";
+      } else if(path.endsWith(".ttl")) {
+        type = "TURTLE";
+      }
+      FileOutputStream fos = new FileOutputStream(path);
+      m.write(fos, type);
+    } catch(Exception e) {
+      Log.w(LOG_TAG, "Unable to write model.", e);
+      return false;
+    }
+    return true;
+  }
+
+  @SimpleFunction
+  public void CloseModel(String model) {
+    models.remove(model);
   }
 }
