@@ -378,6 +378,33 @@ public abstract class TextBoxBase extends AndroidViewComponent
     view.invalidate();
   }
 
+
+  /**
+   * ConceptURI getter method.
+   *
+   * @return  concept uri
+   */
+  @SimpleProperty(
+      category = PropertyCategory.APPEARANCE,
+      description = "Resource URI that identifies the concept being entered for this field")
+  public String ConceptURI() {
+    return hint;
+  }
+
+  /**
+   * Concept URI property setter method.
+   *
+   * @param concept uri
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
+      defaultValue = "")
+  @SimpleProperty
+  public void ConceptURI(String hint) {
+    this.hint = hint;
+    view.setHint(hint);
+    view.invalidate();
+  }
+
   /**
    * Returns the textbox contents.
    *
