@@ -30,7 +30,7 @@ import android.widget.EditText;
 
 @SimpleObject
 public abstract class TextBoxBase extends AndroidViewComponent
-    implements OnFocusChangeListener {
+    implements OnFocusChangeListener, LDComponent {
 
   protected final EditText view;
 
@@ -378,7 +378,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
     view.invalidate();
   }
 
-
+  private String conceptUri = "";
   /**
    * ConceptURI getter method.
    *
@@ -388,7 +388,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
       category = PropertyCategory.APPEARANCE,
       description = "Resource URI that identifies the concept being entered for this field")
   public String ConceptURI() {
-    return hint;
+    return conceptUri;
   }
 
   /**
@@ -399,10 +399,8 @@ public abstract class TextBoxBase extends AndroidViewComponent
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
       defaultValue = "")
   @SimpleProperty
-  public void ConceptURI(String hint) {
-    this.hint = hint;
-    view.setHint(hint);
-    view.invalidate();
+  public void ConceptURI(String uri) {
+    this.conceptUri = uri;
   }
 
   /**
@@ -479,5 +477,28 @@ public abstract class TextBoxBase extends AndroidViewComponent
     } else {
       LostFocus();
     }
+  }
+
+  private String propertyUri;
+  /**
+   * 
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
+      defaultValue = "")
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public void PropertyURI(String uri) {
+    this.propertyUri = uri;
+  }
+
+  /**
+   * 
+   */
+  @SimpleProperty
+  public String PropertyURI() {
+    return propertyUri;
+  }
+
+  public Object Value() {
+    return Text();
   }
 }
