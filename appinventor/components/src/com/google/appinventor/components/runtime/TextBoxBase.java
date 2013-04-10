@@ -396,7 +396,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
    *
    * @param concept uri
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
       defaultValue = "")
   @SimpleProperty
   public void ConceptURI(String uri) {
@@ -483,7 +483,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
   /**
    * 
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI,
       defaultValue = "")
   @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   public void PropertyURI(String uri) {

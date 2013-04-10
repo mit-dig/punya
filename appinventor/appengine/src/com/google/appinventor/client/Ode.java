@@ -33,6 +33,7 @@ import com.google.appinventor.client.widgets.boxes.ColumnLayout.Column;
 import com.google.appinventor.client.widgets.boxes.WorkAreaPanel;
 import com.google.appinventor.client.youngandroid.CodeblocksManager;
 import com.google.appinventor.common.version.AppInventorFeatures;
+import com.google.appinventor.server.SemWebServiceImpl;
 import com.google.appinventor.shared.rpc.GetMotdService;
 import com.google.appinventor.shared.rpc.GetMotdServiceAsync;
 import com.google.appinventor.shared.rpc.ServerLayout;
@@ -43,6 +44,9 @@ import com.google.appinventor.shared.rpc.launch.LaunchServiceAsync;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.ProjectService;
 import com.google.appinventor.shared.rpc.project.ProjectServiceAsync;
+import com.google.appinventor.shared.rpc.semweb.SemWebConstants;
+import com.google.appinventor.shared.rpc.semweb.SemWebService;
+import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
 import com.google.appinventor.shared.rpc.user.User;
 import com.google.appinventor.shared.rpc.user.UserInfoService;
 import com.google.appinventor.shared.rpc.user.UserInfoServiceAsync;
@@ -162,6 +166,10 @@ public class Ode implements EntryPoint {
 
   // Web service for get motd information
   private final GetMotdServiceAsync getMotdService = GWT.create(GetMotdService.class);
+
+  // Web service for semantic web related services
+  private final SemWebConstants semwebConstants = GWT.create(SemWebConstants.class);
+  private final SemWebServiceAsync semwebService = GWT.create(SemWebService.class);
 
   private boolean windowClosing;
 
@@ -884,5 +892,25 @@ public class Ode implements EntryPoint {
       dialogBox.show();
     }
     return dialogBox;
+  }
+
+  /**
+   * Gets the default parameters from SemWebConstants.properties
+   * used for implementing client side logic
+   * @deprecated
+   * @return An instance of SemWebConstants from the server.
+   */
+  public SemWebConstants getSemanticWeb() {
+    return semwebConstants;
+  }
+
+  /**
+   * Obtains a reference to the Semantic Web service used
+   * for interacting with linked data and ontologies.
+   * @see SemWebServiceImpl
+   * @return
+   */
+  public SemWebServiceAsync getSemanticWebService() {
+    return semwebService;
   }
 }

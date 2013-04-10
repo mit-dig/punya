@@ -26,12 +26,16 @@
   <inherits name="com.google.appinventor.common.CommonVersion" />
   <inherits name="com.google.common.annotations.Annotations" />
   <inherits name="com.allen_sauer.gwt.dnd.gwt-dnd" />
+  <inherits name='com.xedge.jquery.GWTJQuery'/>
+  <inherits name='com.xedge.jquery.ui.GWTJQueryUI'/>
+  <inherits name="com.google.gwt.logging.Logging"/>
 
   <!-- servlets -->
   <servlet path="/download" class="com.google.appinventor.server.DownloadServlet" />
   <servlet path="/getmotd" class="com.google.appinventor.server.GetMotdServiceImpl" />
   <servlet path="/help" class="com.google.appinventor.server.HelpServiceImpl" />
   <servlet path="/projects" class="com.google.appinventor.server.ProjectServiceImpl" />
+  <servlet path="/semweb" class="com.google.appinventor.server.SemWebServiceImpl" />
   <servlet path="/upload" class="com.google.appinventor.server.UploadServlet" />
   <servlet path="/userinfo" class="com.google.appinventor.server.UserInfoServiceImpl" />
   <servlet path="/webstartfile" class="com.google.appinventor.server.WebStartFileServlet" />
@@ -78,6 +82,7 @@
   <source path="shared/rpc/help"/>
   <source path="shared/rpc/launch"/>
   <source path="shared/rpc/project"/>
+  <source path="shared/rpc/semweb"/>
   <source path="shared/rpc/user"/>
   <source path="shared/rpc/project/youngandroid"/>
 

@@ -5,6 +5,8 @@
 
 package com.google.appinventor.shared.rpc;
 
+import com.google.appinventor.server.SemWebServiceImpl;
+
 /**
  * Configuration of the URL namespace on the ODE server.
  *
@@ -195,6 +197,12 @@ public class ServerLayout {
    * Name of the form element to upload user files.
    */
   public static final String UPLOAD_USERFILE_FORM_ELEMENT = "uploadUserFile";
+
+  /**
+   * Relative path of the {@link com.google.appinventor.server.SemWebServiceImpl}
+   * within the ODE GWT module.
+   */
+  public static final String SEMWEB_SERVICE = "semweb";
 
   public static String genRelativeDownloadPath(long projectId, String target) {
     return DOWNLOAD_SERVLET_BASE + DOWNLOAD_PROJECT_OUTPUT + "/" + projectId + "/" + target;
