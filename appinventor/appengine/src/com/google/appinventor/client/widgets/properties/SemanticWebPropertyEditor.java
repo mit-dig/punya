@@ -10,8 +10,10 @@ import com.google.appinventor.client.jquery.AsyncAutoCompleteOptions;
 import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
+import com.xedge.jquery.client.JQEvent;
 import com.xedge.jquery.client.JQuery;
 import com.xedge.jquery.ui.client.JQueryUI;
+import com.xedge.jquery.ui.client.handlers.AutoCompleteUIEventResultWithItemHandler;
 import com.xedge.jquery.ui.client.model.LabelValuePair;
 
 /**
@@ -96,6 +98,15 @@ public class SemanticWebPropertyEditor extends PropertyEditor {
         } else {
           service.searchProperties(value, continuation);
         }
+      }
+    });
+    options.setSelectHandler(new AutoCompleteUIEventResultWithItemHandler() {
+      @Override
+      public boolean eventComplete(JQEvent event, JQuery currentJQuery,
+          LabelValuePair item) {
+        uri = item.getValue();
+        property.setValue(uri);
+        return true;
       }
     });
     options.setMinLength(3);
