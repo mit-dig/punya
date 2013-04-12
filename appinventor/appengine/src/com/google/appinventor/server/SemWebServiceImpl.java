@@ -77,7 +77,7 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
       e1.printStackTrace();
     }
     String ontologiesList = props.getProperty("ontologies", "");
-    String ontologies[] = ontologiesList.split("[^\\\\],");
+    String ontologies[] = ontologiesList.split(",");
 
     // configure the index writer to use serial merge as
     // AppEngine does not allow spawning threads
