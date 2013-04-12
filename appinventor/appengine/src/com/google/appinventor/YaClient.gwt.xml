@@ -28,7 +28,6 @@
   <inherits name="com.allen_sauer.gwt.dnd.gwt-dnd" />
   <inherits name='com.xedge.jquery.GWTJQuery'/>
   <inherits name='com.xedge.jquery.ui.GWTJQueryUI'/>
-  <inherits name="com.google.gwt.logging.Logging"/>
 
   <!-- servlets -->
   <servlet path="/download" class="com.google.appinventor.server.DownloadServlet" />
