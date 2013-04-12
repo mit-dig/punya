@@ -5,8 +5,6 @@
 
 package com.google.appinventor.shared.rpc;
 
-import com.google.appinventor.server.SemWebServiceImpl;
-
 /**
  * Configuration of the URL namespace on the ODE server.
  *

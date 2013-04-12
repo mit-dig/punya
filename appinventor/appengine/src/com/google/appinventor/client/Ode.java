@@ -33,7 +33,6 @@ import com.google.appinventor.client.widgets.boxes.ColumnLayout.Column;
 import com.google.appinventor.client.widgets.boxes.WorkAreaPanel;
 import com.google.appinventor.client.youngandroid.CodeblocksManager;
 import com.google.appinventor.common.version.AppInventorFeatures;
-import com.google.appinventor.server.SemWebServiceImpl;
 import com.google.appinventor.shared.rpc.GetMotdService;
 import com.google.appinventor.shared.rpc.GetMotdServiceAsync;
 import com.google.appinventor.shared.rpc.ServerLayout;

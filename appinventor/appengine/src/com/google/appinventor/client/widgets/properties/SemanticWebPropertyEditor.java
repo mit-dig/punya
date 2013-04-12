@@ -7,7 +7,6 @@ import java.util.Map;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.jquery.AsyncAutoCompleteObjectListHandler;
 import com.google.appinventor.client.jquery.AsyncAutoCompleteOptions;
-import com.google.appinventor.components.runtime.LDComponent;
 import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
