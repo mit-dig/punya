@@ -111,6 +111,7 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         // and ultimately will cause this to fail. By using our own connection
         // we bypass this issue.
         HttpURLConnection conn = (HttpURLConnection)new URL(ontologies[i]).openConnection();
+        conn.addRequestProperty("accept", "application/rdf+xml,text/turtle,text/n3");
         conn.setDoInput(true);
         conn.connect();
         ontologyModel.read(conn.getInputStream(), ontologies[i]);
