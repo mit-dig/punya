@@ -26,6 +26,7 @@ import com.google.appinventor.client.editor.simple.components.MockNonVisibleComp
 import com.google.appinventor.client.editor.simple.components.MockPasswordTextBox;
 import com.google.appinventor.client.editor.simple.components.MockPhoneNumberPicker;
 import com.google.appinventor.client.editor.simple.components.MockRadioButton;
+import com.google.appinventor.client.editor.simple.components.MockSemanticForm;
 import com.google.appinventor.client.editor.simple.components.MockTableArrangement;
 import com.google.appinventor.client.editor.simple.components.MockTextBox;
 import com.google.appinventor.client.editor.simple.components.MockVerticalArrangement;
@@ -285,6 +286,8 @@ public final class SimpleComponentDescriptor {
       return new MockVideoPlayer(editor);
     } else if (name.equals(MockWebViewer.TYPE)) {
       return new MockWebViewer(editor);
+    } else if (name.equals(MockSemanticForm.TYPE)) {
+      return new MockSemanticForm(editor);
     } else {
       // TODO(user): add 3rd party mock component proxy here
       throw new UnsupportedOperationException("unknown component: " + name);
