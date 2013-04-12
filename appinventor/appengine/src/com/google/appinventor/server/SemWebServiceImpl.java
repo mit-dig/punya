@@ -135,8 +135,11 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
    * @param uri URI (value) to be used as the actual identifier
    * @return
    */
-  private Map<String, String> createEntry(String label, String uri) {
+  private Map<String, String> createEntry(String label, String uri, String prefix) {
     Map<String, String> x = new HashMap<String, String>();
+    if(prefix != null) {
+      label = label + " ("+prefix+")";
+    }
     x.put("label", label);
     x.put("value", uri);
     return x;
@@ -160,8 +163,9 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         QuerySolution qs = rs.nextSolution();
         final String label = qs.getLiteral("label").getString();
         final String value = qs.getResource("uri").getURI();
-        Logger.getRootLogger().info(label+","+value);
-        pairs.add(createEntry(label, value));
+        final String prefix = ontologyModel.qnameFor(value);
+        Logger.getRootLogger().info(label+","+value+","+prefix);
+        pairs.add(createEntry(label, value, prefix));
       }
       Logger.getRootLogger().info("Finished query");
     } else {
@@ -178,7 +182,7 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         "PREFIX owl: <http://www.w3.org/2002/07/owl#> "+
         "SELECT DISTINCT ?uri ?label WHERE { "+
         "?uri a owl:Class ; rdfs:label ?label . " +
-        "FILTER(langMatches(lang(?label), \"EN\")) . " +
+        "FILTER(lang(?label) = \"\" || langMatches(lang(?label), \"EN\")) . " +
         "FILTER(regex(?label, \""+text+"\", \"i\")) "+
         "} ORDER BY ?label";
     return processQuery(queryText);
@@ -193,7 +197,7 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         "SELECT DISTINCT ?uri ?label WHERE { "+
         "{ ?uri a owl:ObjectProperty } UNION { ?uri a owl:DatatypeProperty }  " +
         "?uri rdfs:label ?label . " +
-        "FILTER(langMatches(lang(?label), \"EN\")) . " +
+        "FILTER(lang(?label) = \"\" || langMatches(lang(?label), \"EN\")) . " +
         "FILTER(regex(?label, \""+text+"\", \"i\")) . "+
         "} ORDER BY ?label";
     return processQuery(queryText);
