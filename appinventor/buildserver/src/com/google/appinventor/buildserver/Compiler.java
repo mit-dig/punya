@@ -96,9 +96,21 @@ public final class Compiler {
       RUNTIME_FILES_DIR + "kawa.jar";
   private static final String ACRA_RUNTIME =
       RUNTIME_FILES_DIR + "acra-4.4.0.jar";
+  private static final String TWITTER_RUNTIME =
+      RUNTIME_FILES_DIR + "twitter4j.jar";
+  private static final String FUNF_RUNTIME =
+	RUNTIME_FILES_DIR + "funf.jar";
   private static final String DX_JAR =
       RUNTIME_FILES_DIR + "dx.jar";
-
+  private static final String DROPBOX_RUNTIME = 
+    RUNTIME_FILES_DIR + "dropbox.jar";
+  private static final String HTTPMIME_RUNTIME = 
+    RUNTIME_FILES_DIR + "apache-httpcomponent-httpmime.jar";
+  private static final String JSONSIMPLE_RUNTIME = 
+    RUNTIME_FILES_DIR + "json-simple.jar";
+  
+  
+  
   @VisibleForTesting
   static final String YAIL_RUNTIME =
       RUNTIME_FILES_DIR + "runtime.scm";
@@ -329,6 +341,47 @@ public final class Compiler {
       out.write("      </intent-filter>\n");
       out.write("    </activity>\n");
 
+	  // Add the FUNF probe services
+       
+      out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
+	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
+	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
+	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
+
+	  // new version of configurations to include in the manifest.xml. Now need not include each probe individually, 
+	  // but just include the FunfManager service
+	  out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+      out.write(" </service>\n");  
+	  out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
+	  out.write("    <intent-filter>\n");
+	  out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
+	  out.write("    </intent-filter>\n");
+	  out.write("</receiver>\n");
+	  
+	  //add UploadServices and DataBaseService
+	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.HttpsUploadService\"></service> \n");
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.DropboxUploadService\"></service> \n");
+	  
+	  
+	  // try the same thing here for TimerManager (Disabled for now)
+	  
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.TimerManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+      out.write(" </service>\n");  
+	  out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\">\n");
+	  out.write("    <intent-filter>\n");
+	  out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
+	  out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
+	  out.write("    </intent-filter>\n");
+	  out.write("</receiver>");
+	  
       // BroadcastReceiver for Texting Component
       if (componentTypes.contains("Texting")) {
         System.out.println("Android Manifest: including <receiver> tag");
@@ -346,6 +399,7 @@ public final class Compiler {
         "</receiver> \n");
       }
 
+	  // Close the application tag
       out.write("  </application>\n");
       out.write("</manifest>\n");
       out.close();
@@ -377,7 +431,6 @@ public final class Compiler {
                                 PrintStream out, PrintStream err, PrintStream userErrors,
                                 boolean isForRepl, boolean isForWireless, String keystoreFilePath, int childProcessRam) throws IOException, JSONException {
     long start = System.currentTimeMillis();
-
 
     // Create a new compiler instance for the compilation
     Compiler compiler = new Compiler(project, componentTypes, out, err, userErrors, isForRepl, isForWireless,
@@ -711,10 +764,6 @@ public final class Compiler {
       // This works when a JDK is installed with the JRE.
       jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
           File.separator + "jarsigner");
-      if (System.getProperty("os.name").startsWith("Windows")){
-        jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
-            File.separator + "jarsigner.exe");
-      }
       if (!jarsignerFile.exists()) {
         LOG.warning("YAIL compiler - could not find jarsigner.");
         err.println("YAIL compiler - could not find jarsigner.");

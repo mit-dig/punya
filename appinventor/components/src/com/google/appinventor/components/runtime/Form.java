@@ -27,13 +27,14 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
+import android.widget.Toast;
+
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -51,7 +52,6 @@ import com.google.appinventor.components.runtime.collect.Lists;
 import com.google.appinventor.components.runtime.collect.Maps;
 import com.google.appinventor.components.runtime.collect.Sets;
 import com.google.appinventor.components.runtime.util.AlignmentUtil;
-import com.google.appinventor.components.runtime.util.AnimationUtil;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.FullScreenVideoUtil;
 import com.google.appinventor.components.runtime.util.JsonUtil;
@@ -59,6 +59,7 @@ import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.OnInitializeListener;
 import com.google.appinventor.components.runtime.util.SdkLevel;
 import com.google.appinventor.components.runtime.util.ViewUtil;
+
 
 /**
  * Component underlying activities and UI apps, not directly accessible to Simple programmers.
@@ -78,7 +79,7 @@ import com.google.appinventor.components.runtime.util.ViewUtil;
 public class Form extends Activity
     implements Component, ComponentContainer, HandlesEventDispatching {
   private static final String LOG_TAG = "Form";
-
+  
   // *** set this back to false after review
   private static final boolean DEBUG = true;
 
@@ -153,8 +154,18 @@ public class Form extends Activity
   // the name of the secondary screen. It is saved so that it can be passed to the OtherScreenClosed
   // event.
   private String nextFormName;
-
   private FullScreenVideoUtil fullScreenVideoUtil;
+
+  private long lastBackPressTime;
+
+// This is the constant value that will be passed in as the key in the intent's putExtra to find
+// the component that the Form will pass the intent's extra value to 
+// The convention for naming a extra value that requires the Form to pass along can be: 
+// APP_INVENTOR_XYZ (XYZ = component's name)
+// The value for component XYZ will be retrieved through form.getXYZStartValues()
+private static final String ARGUMENT_SURVEY = "APP_INVENTOR_SURVEY";
+//Set to the optional String-valued Extra passed in via an Intent on startup.(for Survey component only)
+private String startupValueForSurvey = ""; 
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -192,6 +203,19 @@ public class Form extends Activity
     // before initialization finishes. Instead the compiler suppresses the invocation of the
     // event and leaves it up to the library implementation.
     Initialize();
+  }
+  
+  
+  /*
+   * 1) This method is to pass the start value that a Form gets when it is created by some other app using
+   * activityStarter or Fuming's create notification (using Android Intent)
+   * 2) The alternative to pass the intent's extra values could use listeners such as resgisterForXXX in 
+   * Form.java. ,  
+   */
+  public String getSurveyStartValues(){
+
+	  return startupValueForSurvey;
+
   }
 
   private void defaultPropertyValues() {
@@ -236,31 +260,31 @@ public class Form extends Activity
       });
     }
   }
-
-  /*
-   * Here we override the hardware back button, just to make sure
-   * that the closing screen animation is applied. (In API level
-   * 5, we can simply override the onBackPressed method rather
-   * than bothering with onKeyDown)
-   */
-  @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {      
-      if (!BackPressed()) {
-        boolean handled = super.onKeyDown(keyCode, event);
-        AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
-        return handled;
-      } else {
-        return true;
-      }      
-    }
-    return super.onKeyDown(keyCode, event);
-  }
-
-  @SimpleEvent(description = "Device back button pressed.")
-  public boolean BackPressed() {
-    return EventDispatcher.dispatchEvent(this, "BackPressed");
-  }
+//
+//  /*
+//   * Here we override the hardware back button, just to make sure
+//   * that the closing screen animation is applied. (In API level
+//   * 5, we can simply override the onBackPressed method rather
+//   * than bothering with onKeyDown)
+//   */
+//  @Override
+//  public boolean onKeyDown(int keyCode, KeyEvent event) {
+//    if (keyCode == KeyEvent.KEYCODE_BACK) {      
+//      if (!BackPressed()) {
+//        boolean handled = super.onKeyDown(keyCode, event);
+//        AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
+//        return handled;
+//      } else {
+//        return true;
+//      }      
+//    }
+//    return super.onKeyDown(keyCode, event);
+//  }
+//
+//  @SimpleEvent(description = "Device back button pressed.")
+//  public boolean BackPressed() {
+//    return EventDispatcher.dispatchEvent(this, "BackPressed");
+//  }
   
   // onActivityResult should be triggered in only two cases:
   // (1) The result is for some other component in the app, not this Form itself
@@ -281,11 +305,11 @@ public class Form extends Activity
         resultString = data.getStringExtra(RESULT_NAME);
       } else {
         resultString = "";
-      }
+      }  
       Object decodedResult = decodeJSONStringForForm(resultString, "other screen closed");
       // nextFormName was set when this screen opened the secondary screen
-      OtherScreenClosed(nextFormName, decodedResult);
-    } else {
+      OtherScreenClosed(nextFormName, decodedResult); 
+    } else { 
       // Another component (such as a ListPicker, ActivityStarter, etc) is expecting this result.
       ActivityResultListener component = activityResultMap.get(requestCode);
       if (component != null) {
@@ -293,7 +317,7 @@ public class Form extends Activity
       }
     }
   }
-
+  
   // functionName is a string to include in the error message that will be shown
   // if the JSON decoding fails
   private  static Object decodeJSONStringForForm(String jsonString, String functionName) {
@@ -583,7 +607,6 @@ public class Form extends Activity
     if (backgroundDrawable != null) {
       ViewUtil.setBackgroundImage(frameLayout, backgroundDrawable);
     }
-
     setContentView(frameLayout);
     frameLayout.requestLayout();
   }
@@ -894,7 +917,7 @@ public class Form extends Activity
   public void Icon(String name) {
     // We don't actually need to do anything.
   }
-
+  
   /**
    * Specifies the Version Code.
    *
@@ -906,7 +929,7 @@ public class Form extends Activity
   public void VersionCode(int vCode) {
     // We don't actually need to do anything.
   }
-
+  
   /**
    * Specifies the Version Name.
    *
@@ -918,7 +941,7 @@ public class Form extends Activity
   public void VersionName(String vName) {
     // We don't actually need to do anything.
   }
-
+  
   /**
    * Width property getter method.
    *
@@ -995,7 +1018,6 @@ public class Form extends Activity
     try {
       Log.i(LOG_TAG, "startNewForm starting activity:" + activityIntent);
       startActivityForResult(activityIntent, SWITCH_FORM_REQUEST_CODE);
-      AnimationUtil.ApplyOpenScreenAnimation(this, openAnimType);
     } catch (ActivityNotFoundException e) {
       dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_SCREEN_NOT_FOUND, nextFormName);
@@ -1023,12 +1045,12 @@ public class Form extends Activity
     }
     return jsonResult;
   }
-
+  
   @SimpleEvent(description = "Event raised when another screen has closed and control has " +
       "returned to this screen.")
   public void OtherScreenClosed(String otherScreenName, Object result) {
     if (DEBUG) {
-      Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " +
+      Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " + 
           otherScreenName + ", result = " + result.toString());
     }
     EventDispatcher.dispatchEvent(this, "OtherScreenClosed", otherScreenName, result);
@@ -1108,12 +1130,12 @@ public class Form extends Activity
   public static Object getStartValue() {
     if (activeForm != null) {
       return decodeJSONStringForForm(activeForm.startupValue, "get start value");
-    } else {
+    } else { 
       throw new IllegalStateException("activeForm is null");
     }
   }
-
-
+  
+ 
   /**
    * Closes the current screen, as opposed to finishApplication, which
    * exits the entire application.
@@ -1150,13 +1172,12 @@ public class Form extends Activity
     }
   }
 
-
+  
   protected void closeForm(Intent resultIntent) {
     if (resultIntent != null) {
       setResult(Activity.RESULT_OK, resultIntent);
     }
     finish();
-    AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
   }
 
   // This is called from runtime.scm when a "close application" block is executed.
@@ -1324,7 +1345,7 @@ public class Form extends Activity
       throw e.getTargetException();
     }
   }
-
+  
   /**
    * Perform some action related to fullscreen video display.
    * @param action
@@ -1361,4 +1382,27 @@ public class Form extends Activity
   public synchronized Bundle fullScreenVideoAction(int action, VideoPlayer source, Object data) {
     return fullScreenVideoUtil.performAction(action, source, data);
   }
+  
+  
+  
+  /*
+   * Added by Fuming to prevent AI user accidently kill activity that runs and binds to Background service
+   * @see android.app.Activity#onBackPressed()
+   */
+  @Override
+  public void onBackPressed() {
+    Toast toast = null;
+	if (this.lastBackPressTime < System.currentTimeMillis() - 4000) {
+      toast = Toast.makeText(this, "Press back again will kill the activity! Try press Home button", 4000);
+      toast.show();
+      this.lastBackPressTime = System.currentTimeMillis();
+    } else {
+      if (toast != null) {
+      toast.cancel();
+    }
+    super.onBackPressed();
+   }
+  }
+  
+  
 }
