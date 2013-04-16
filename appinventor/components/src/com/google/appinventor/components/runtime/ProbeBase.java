@@ -60,6 +60,7 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
@@ -94,6 +95,7 @@ import edu.mit.media.funf.time.DecimalTimeUnit;
   + "android.permission.READ_LOGS, "
   + "android.permission.VIBRATE, "
   + "android.permission.INTERNET")
+@UsesLibraries(libraries = "funf.jar")
 public abstract class ProbeBase extends AndroidNonvisibleComponent implements
 SensorComponent, OnDestroyListener, Pipeline{
 

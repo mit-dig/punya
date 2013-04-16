@@ -42,6 +42,7 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -84,7 +85,10 @@ import edu.mit.media.funf.storage.UploadService;
 		"android.permission.WRITE_EXTERNAL_STORAGE, " +
 		"android.permission.READ_LOGS, " + 
     "android.permission.ACCESS_NETWORK_STATE")
-		
+ @UsesLibraries(libraries =
+    "dropbox.jar," +
+    "apache-httpcomponent-httpmime.jar," +
+    "json-simple.jar")
 public class Dropbox extends AndroidNonvisibleComponent
   implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   public static final String TAG = "Dropbox";
