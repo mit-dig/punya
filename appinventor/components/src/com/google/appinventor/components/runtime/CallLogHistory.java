@@ -24,6 +24,7 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -50,6 +51,7 @@ import edu.mit.media.funf.time.TimeUnit;
 		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/calllogProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.READ_CONTACTS")
+@UsesLibraries(libraries = "funf.jar")
 public class CallLogHistory extends ProbeBase{
 	
 	private final String TAG = "CallLogProbe";

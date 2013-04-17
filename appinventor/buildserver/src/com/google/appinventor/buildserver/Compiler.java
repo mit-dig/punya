@@ -5,6 +5,7 @@
 
 package com.google.appinventor.buildserver;
 
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
@@ -77,6 +78,10 @@ public final class Compiler {
 
   private static final String COMPONENT_LIBRARIES =
     RUNTIME_FILES_DIR + "simple_components_libraries.json";
+  
+  private static final String COMPONENT_TMEPLATES =
+    RUNTIME_FILES_DIR + "simple_components_templates.json";
+
 
   /*
    * Resource paths to yail runtime, runtime library files and sdk tools.
@@ -96,21 +101,10 @@ public final class Compiler {
       RUNTIME_FILES_DIR + "kawa.jar";
   private static final String ACRA_RUNTIME =
       RUNTIME_FILES_DIR + "acra-4.4.0.jar";
-  private static final String TWITTER_RUNTIME =
-      RUNTIME_FILES_DIR + "twitter4j.jar";
-  private static final String FUNF_RUNTIME =
-	RUNTIME_FILES_DIR + "funf.jar";
   private static final String DX_JAR =
       RUNTIME_FILES_DIR + "dx.jar";
-  private static final String DROPBOX_RUNTIME = 
-    RUNTIME_FILES_DIR + "dropbox.jar";
-  private static final String HTTPMIME_RUNTIME = 
-    RUNTIME_FILES_DIR + "apache-httpcomponent-httpmime.jar";
-  private static final String JSONSIMPLE_RUNTIME = 
-    RUNTIME_FILES_DIR + "json-simple.jar";
-  
-  
-  
+
+
   @VisibleForTesting
   static final String YAIL_RUNTIME =
       RUNTIME_FILES_DIR + "runtime.scm";
@@ -128,6 +122,9 @@ public final class Compiler {
       new ConcurrentHashMap<String, Set<String>>();
 
   private final ConcurrentMap<String, Set<String>> componentLibraries =
+    new ConcurrentHashMap<String, Set<String>>();
+  
+  private final ConcurrentMap<String, Set<String>> componentTemplates = 
     new ConcurrentHashMap<String, Set<String>>();
 
   /**
@@ -160,6 +157,7 @@ public final class Compiler {
   // Maximum ram that can be used by a child processes, in MB.
   private final int childProcessRamMb;
   private Set<String> librariesNeeded; // Set of component libraries
+  private Set<String> templatesNeeded; // Set of component templates
 
 
   /*
@@ -216,6 +214,30 @@ public final class Compiler {
       librariesNeeded.addAll(componentLibraries.get(componentType));
     }
     System.out.println("Libraries needed, n= " + librariesNeeded.size());
+  }
+  
+  /*
+   * Generate the set of Android templates needd by this project.
+   */
+  @VisibleForTesting
+  void generateTemplateNames() {
+	    // Before we can use componentLibraries, we have to call loadComponentLibraries().
+	try {
+	  loadComponentTemplateNames();
+	} catch (IOException e) {
+	  // This is fatal.
+	  e.printStackTrace();
+	  userErrors.print(String.format(ERROR_IN_STAGE, "Templates"));
+	} catch (JSONException e) {
+	  // This is fatal, but shouldn't actually ever happen.
+	  e.printStackTrace();
+	  userErrors.print(String.format(ERROR_IN_STAGE, "Templates"));
+	}
+	templatesNeeded = Sets.newHashSet();
+	for (String componentType : componentTypes) {
+	  templatesNeeded.addAll(componentTemplates.get(componentType));
+	}
+	System.out.println("Templates needed, n= " + templatesNeeded.size());	  
   }
 
 
@@ -437,6 +459,13 @@ public final class Compiler {
                                      childProcessRam);
 
     compiler.generateLibraryNames();
+    
+    // TODO: code for copying all neededTemplates from AppEngine's /WEBINF/template to Android asset folder
+    // Move needed templates files to project's asset folder
+     
+    compiler.generateTemplateNames(); //after this we have all templateNames used by the components in templatesNeeded
+    compiler.copyTemplatesToAssets(out);
+    
 
     // Create build directory.
     File buildDir = createDirectory(project.getBuildDirectory());
@@ -537,7 +566,70 @@ public final class Compiler {
 
     return true;
   }
+  
+  /*
+   * Create asset files and copy all needed templates used by the components in this project
+   */
 
+  private boolean copyTemplatesToAssets(PrintStream out){
+	// checkout implementation in IdMap.java and Whiltelist.java
+	// 
+	  
+	LOG.info("The asset dir: " + project.getAssetsDirectory());
+ 
+	createDirectory(project.getAssetsDirectory());
+	
+	LOG.info("The asset dir: " + project.getAssetsDirectory());
+	String current;
+	try {
+		current = new java.io.File( "." ).getCanonicalPath();
+		LOG.info("During build, The current dir: " + current);
+	} catch (IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+
+
+	  
+	try {
+	  String templateFolder = System.getProperty("root.path") + "WEB-INF/template/";
+	  File assetFolder = project.getAssetsDirectory();
+	  
+	  for (String templateName : templatesNeeded) {
+		
+		out.println("(DEBUG) Copying " + templateFolder + templateName + 
+				" to " + assetFolder.getAbsolutePath() + "/" + templateName);
+		
+//		//use getResource
+		String source = templateFolder + templateName;
+		String target = assetFolder.getAbsolutePath() + "/" + templateName;
+//		getResource(source); //put it to cache, don't know if we need this or just directly use the absolute path
+//		getResource(target); //put it to cache
+
+	    FileInputStream fileInputStream = new FileInputStream(source);
+	    FileOutputStream fileOutputStream = new FileOutputStream(target);
+	    
+        int bufferSize;
+        byte[] bufffer = new byte[512];
+        
+        while ((bufferSize = fileInputStream.read(bufffer)) > 0) {
+          fileOutputStream.write(bufffer, 0, bufferSize);
+        }
+        fileInputStream.close();
+        fileOutputStream.close();
+
+	  }
+
+	  
+	} catch (IOException e) {
+	    e.printStackTrace();
+	    return false;
+	}
+
+	return true;
+
+  }
+  
   /*
    * Creates all the animation xml files.
    */
@@ -1048,8 +1140,9 @@ public final class Compiler {
     }
   }
 
+  
   /**
-   * Loads the names of library jars for each component and stores them in
+   * Loads the names of template jars for each component and stores them in
    * componentLibraries.
    *
    * @throws IOException
@@ -1080,6 +1173,40 @@ public final class Compiler {
       }
     }
   }
+  
+  /**
+   * Loads the names of template files for each component and stores them in
+   * componentTemplates.
+   *
+   * @throws IOException
+   * @throws JSONException
+   */
+  private void loadComponentTemplateNames() throws IOException, JSONException {
+    synchronized (componentTemplates) {
+      if (componentTemplates.isEmpty()) {
+        String templatesJson = Resources.toString(
+            Compiler.class.getResource(COMPONENT_TMEPLATES), Charsets.UTF_8);
+
+        JSONArray componentsArray = new JSONArray(templatesJson);
+        int componentslength = componentsArray.length();
+        for (int componentsIndex = 0; componentsIndex < componentslength; componentsIndex++) {
+          JSONObject componentObject = componentsArray.getJSONObject(componentsIndex);
+          String name = componentObject.getString("name");
+
+          Set<String> templatesForThisComponent = Sets.newHashSet();
+
+          JSONArray templatesArray = componentObject.getJSONArray("templates");
+          int templatesLength = templatesArray.length();
+          for (int templatesIndex = 0; templatesIndex < templatesLength; templatesIndex++) {
+            String templateName = templatesArray.getString(templatesIndex);
+            templatesForThisComponent.add(templateName);
+          }
+          componentTemplates.put(name, templatesForThisComponent);
+        }
+      }
+    }
+  }
+
 
   /**
    * Copy one file to another. If destination file does not exist, it is created.

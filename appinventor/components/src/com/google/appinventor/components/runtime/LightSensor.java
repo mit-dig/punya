@@ -14,6 +14,7 @@ import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -33,6 +34,7 @@ import edu.mit.media.funf.probe.builtin.RunningApplicationsProbe;
 		description = "Return information of the current illuminances (lux) by using the light sensor " , 
 		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/lightsensorProbe.png")
 @SimpleObject
+@UsesLibraries(libraries = "funf.jar")
 public class LightSensor extends ProbeBase {
 	
 	

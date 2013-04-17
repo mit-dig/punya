@@ -9,6 +9,7 @@ import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -30,6 +31,7 @@ import android.util.Log;
 		description = "Return information about the  " , 
 		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/screenProbe.png")
 @SimpleObject
+@UsesLibraries(libraries = "funf.jar")
 public class ScreenStatus extends ProbeBase{
 
 	private final String TAG = "ScreenStatus";

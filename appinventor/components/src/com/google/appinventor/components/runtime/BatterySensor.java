@@ -14,6 +14,7 @@ import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -36,6 +37,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys;
 		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/batterySensor.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.BATTERY_STATS")
+@UsesLibraries(libraries = "funf.jar")
 public class BatterySensor extends ProbeBase{
 	
 	private final String TAG = "BatterySensor";

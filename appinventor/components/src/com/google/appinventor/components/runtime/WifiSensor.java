@@ -27,6 +27,7 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -56,6 +57,7 @@ import edu.mit.media.funf.time.DecimalTimeUnit;
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_WIFI_STATE, "
 	+ "android.permission.CHANGE_WIFI_STATE")
+@UsesLibraries(libraries = "funf.jar")
 public class WifiSensor extends ProbeBase{
 
 	

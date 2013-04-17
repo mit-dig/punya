@@ -21,6 +21,7 @@ import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.UsesTemplates;
 import com.google.appinventor.components.common.ComponentCategory;
  
 import com.google.appinventor.components.common.YaVersion;
@@ -72,6 +73,16 @@ import android.util.Log;
         		"could customize survey question and survey types. After the questions " +
         		"are answered, they will be saved into local database and upload to remote server.")
 @SimpleObject
+@UsesTemplates(templateNames = "jquery.mobile.min.css," +
+		"jquery.min.js," +
+		"jquery.mobile.min.js," +
+		"checkbox.html," +
+		"chooselist.html," +
+		"multipleChoice.html," +
+		"scale.html," +
+		"textarea.html," +
+		"textbox.html," +
+		"yesno.html")
 @UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE, " +
 									"android.permission.INTERNET")
 public class Survey extends AndroidViewComponent{

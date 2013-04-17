@@ -340,10 +340,11 @@
   <!-- =====================================================================
        ComponentList: create simple_components.txt,
                       simple_components_permissions.json,
-                      and simple_components_libraries.json
+                      simple_components_libraries.json,
+                      and simple_components_templates.json                    
        ===================================================================== -->
   <target name="ComponentList"
-          description="Make simple_components.txt, simple_components_permissions.json, and simple_components_libraries.json."
+          description="Make simple_components.txt, simple_components_permissions.json, simple_components_libraries.json, and simple_components_templates.json."
           depends="AnnotationProcessors,AndroidRuntime,HtmlEntities,CommonConstants">
     <property name="ComponentList-class.dir" location="${class.dir}/ComponentList" />
     <mkdir dir="${ComponentList-class.dir}" />
@@ -358,6 +359,9 @@
           todir="${public.build.dir}"/>
     <copy file="${ComponentList-class.dir}/simple_components_libraries.json"
           todir="${public.build.dir}"/>
+    <copy file="${ComponentList-class.dir}/simple_components_templates.json"
+          todir="${public.build.dir}"/>
+  	
   </target>
 
   <!-- =====================================================================

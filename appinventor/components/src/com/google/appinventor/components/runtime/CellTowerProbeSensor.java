@@ -14,6 +14,7 @@ import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -37,6 +38,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.CellKeys;
 		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/cellTowerProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_COARSE_LOCATION")
+@UsesLibraries(libraries = "funf.jar")
 public class CellTowerProbeSensor extends ProbeBase{
 	
 	private final String TAG = "CellTowerProbe";

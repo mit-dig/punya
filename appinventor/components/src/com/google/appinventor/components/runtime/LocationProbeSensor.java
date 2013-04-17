@@ -18,6 +18,7 @@ import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -57,7 +58,7 @@ import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_COARSE_LOCATION, "
 		+ "android.permission.ACCESS_FINE_LOCATION")
-
+@UsesLibraries(libraries = "funf.jar")
 public class LocationProbeSensor extends ProbeBase{
 	
 	private final String TAG = "LocationProbe";

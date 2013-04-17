@@ -56,6 +56,10 @@
          use this feature. -->
 
     <property name="wifi.enabled" value="true" />
+    
+    <!-- Set this path for testing purpose -->
+    <property name="root.path" value="/Users/fuming/git/remote-storage-branch/appinventor/appengine/war"/>
+
 
   </system-properties>
 

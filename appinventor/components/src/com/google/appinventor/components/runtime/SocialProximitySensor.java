@@ -22,6 +22,7 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -56,6 +57,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.BluetoothKeys;
 @UsesPermissions(permissionNames = "android.permission.WAKE_LOCK, "
 		+ "android.permission.BLUETOOTH, "
 		+ "android.permission.BLUETOOTH_ADMIN")
+@UsesLibraries(libraries = "funf.jar")
 public class SocialProximitySensor extends ProbeBase{
 //	static final String SOCIAL_PROXIMITY_SENSOR_UPDATE_ACTION = "SOCIAL_PROXIMITY_SENSOR_UPDATE_ACTION";
 

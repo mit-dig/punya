@@ -193,6 +193,26 @@ private String startupValueForSurvey = "";
     }
 
     fullScreenVideoUtil = new FullScreenVideoUtil(this, androidUIHandler);
+    
+    /*
+     * Add by Fuming.
+     * We can save extras values that are intended for the Survey component, 
+     * and later the component can read the value through container$form 
+     * TODO: need to think about how to pass intent to a component through notification.
+     * Something like the activity starter: the extra_key will be the component name 
+     * the extra_value to pass in will be a json string. 
+     * 
+     * TODO: We could think of a more general approach that could work for arbitrary AI component that needs
+     * intent data at start up.
+     * 
+     */
+    
+    if (startIntent != null && startIntent.hasExtra(ARGUMENT_SURVEY)){
+    	Log.i("LOG_TAG", "surveyIntentValue:"+startIntent.getStringExtra(ARGUMENT_SURVEY));
+    	startupValueForSurvey = startIntent.getStringExtra(ARGUMENT_SURVEY); 
+    }
+     
+    
 
     // Add application components to the form
     $define();

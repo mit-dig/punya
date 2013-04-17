@@ -15,6 +15,7 @@ import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -38,6 +39,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.PedometerKeys;
 				"\"medium\", \"lower\", \"low\", \"very low\", \"extra low\". ", 
 		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/pedometerSensor.png")
 @SimpleObject
+@UsesLibraries(libraries = "funf.jar")
 public class PedometerSensor extends ProbeBase{
 
 

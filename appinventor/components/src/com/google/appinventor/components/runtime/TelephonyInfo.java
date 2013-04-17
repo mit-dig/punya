@@ -13,6 +13,7 @@ import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -49,6 +50,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.TelephonyKeys;
     
 @SimpleObject
 @UsesPermissions(permissionNames = "android.Manifest.permission.READ_PHONE_STATE")
+@UsesLibraries(libraries = "funf.jar")
 public class TelephonyInfo extends ProbeBase{
   
   private final String TAG = "Telephony";

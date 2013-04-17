@@ -14,6 +14,7 @@ import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -38,6 +39,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.CellKeys;
 				"Intervals are 1 seconds long." , 
 		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/activityProbe.png")
 @SimpleObject
+@UsesLibraries(libraries = "funf.jar")
 public class ActivityProbeSensor extends ProbeBase{
 	
 	private final String TAG = "ActivityProbe";
