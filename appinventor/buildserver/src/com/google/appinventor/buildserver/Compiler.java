@@ -81,6 +81,8 @@ public final class Compiler {
   
   private static final String COMPONENT_TMEPLATES =
     RUNTIME_FILES_DIR + "simple_components_templates.json";
+  
+  private static final String TEMPLATE_DIR = RUNTIME_FILES_DIR + "template/";
 
 
   /*
@@ -464,7 +466,7 @@ public final class Compiler {
     // Move needed templates files to project's asset folder
      
     compiler.generateTemplateNames(); //after this we have all templateNames used by the components in templatesNeeded
-    compiler.copyTemplatesToAssets(out);
+    compiler.copyTemplatesToAssets();
     
 
     // Create build directory.
@@ -571,52 +573,47 @@ public final class Compiler {
    * Create asset files and copy all needed templates used by the components in this project
    */
 
-  private boolean copyTemplatesToAssets(PrintStream out){
+  private boolean copyTemplatesToAssets(){
 	// checkout implementation in IdMap.java and Whiltelist.java
 	// 
 	  
 	LOG.info("The asset dir: " + project.getAssetsDirectory());
  
-	createDirectory(project.getAssetsDirectory());
-	
-	LOG.info("The asset dir: " + project.getAssetsDirectory());
-	String current;
-	try {
-		current = new java.io.File( "." ).getCanonicalPath();
-		LOG.info("During build, The current dir: " + current);
-	} catch (IOException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
+	createDirectory(project.getAssetsDirectory()); //make sure we have asset folder created
 
+	// checkout the files can be read in from the resource 
+	// icon = ImageIO.read(Compiler.class.getResource(DEFAULT_ICON));
+//    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(resourcePath)),
+//            file);
 
-	  
 	try {
-	  String templateFolder = System.getProperty("root.path") + "WEB-INF/template/";
+
 	  File assetFolder = project.getAssetsDirectory();
 	  
 	  for (String templateName : templatesNeeded) {
-		
-		out.println("(DEBUG) Copying " + templateFolder + templateName + 
-				" to " + assetFolder.getAbsolutePath() + "/" + templateName);
-		
-//		//use getResource
-		String source = templateFolder + templateName;
 		String target = assetFolder.getAbsolutePath() + "/" + templateName;
-//		getResource(source); //put it to cache, don't know if we need this or just directly use the absolute path
-//		getResource(target); //put it to cache
-
-	    FileInputStream fileInputStream = new FileInputStream(source);
-	    FileOutputStream fileOutputStream = new FileOutputStream(target);
-	    
-        int bufferSize;
-        byte[] bufffer = new byte[512];
-        
-        while ((bufferSize = fileInputStream.read(bufffer)) > 0) {
-          fileOutputStream.write(bufffer, 0, bufferSize);
-        }
-        fileInputStream.close();
-        fileOutputStream.close();
+		String source = TEMPLATE_DIR + templateName;
+		
+		out.println("(DEBUG) Copying " + source + 
+				" to " + assetFolder.getAbsolutePath() + "/" + templateName);
+	    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(source)),
+	    		  new File(target));
+		
+//		String source = templateFolder + templateName;
+//		String target = assetFolder.getAbsolutePath() + "/" + templateName;
+//
+//
+//	    FileInputStream fileInputStream = new FileInputStream(source);
+//	    FileOutputStream fileOutputStream = new FileOutputStream(target);
+//	    
+//        int bufferSize;
+//        byte[] bufffer = new byte[512];
+//        
+//        while ((bufferSize = fileInputStream.read(bufffer)) > 0) {
+//          fileOutputStream.write(bufffer, 0, bufferSize);
+//        }
+//        fileInputStream.close();
+//        fileOutputStream.close();
 
 	  }
 
