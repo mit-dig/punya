@@ -12,7 +12,11 @@ import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 
+import android.R;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -22,14 +26,64 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
+/*
+ * GCM registration process
+ * 
+ * 1. An android device sends a request to your server (you need to set it up or
+ * public server which runs the GCM client server code).
+ * 
+ * 2. Your client server sends request to the GCM Server to the register the device 
+ * upon the request from your server. 
+ * 
+ * 3. The GCM server returns the registration id to your server, and your server returns 
+ * the registration id back to your android device.
+ * 
+ * 4. If the android device wants to unregister itself from the list, the android device 
+ * need to send the unregister request directly to the GCM Server.
+ * 
+ * GCM message flow 
+ * 
+ * 1. Your server need to provide an interface for user to send messages to the registered 
+ * android devices.
+ * 
+ * 2. Your server will forward the send message request to the GCM Server. The GCM server 
+ * will process the request and will push the message to the registered android devices
+ * 
+ * Google Cloud Message Java file implementation 
+ * 
+ * 1. The components itself extends the AndroidNonvisibleComponent, and implements 
+ * the Component and the OnDestroyListener. 
+ * 
+ * 2. It has the mainUIThreadActivity. The mainUIThreadActivity binds the 
+ * GCMIntentService. 
+ * 
+ * 3. By default, the Google Cloud Message Server intent calls the GCMBroadcaseReceiver.
+ * The GCMBroadcaseReceiver will start the GCMIntentService. 
+ * 
+ * 4. The GCMIntentService calls the GCMEventListener. The GCMEventListener passes back 
+ * the message to the mainUIThreadActivity
+ * 
+ */
+
+ /* 
+ * @author wli17@mit.edu (Weihua Li)
+ */
 @DesignerComponent(version = YaVersion.GOOGLECLOUDMESSAGING_COMPONENT_VERSION, 
-description = "", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/info.png")
+description = "", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/googleCloudMessaging.png")
 @UsesPermissions(permissionNames = "com.google.android.c2dm.permission.RECEIVE, "
         + "android.permission.INTERNET, android.permission.GET_ACCOUNTS, "
         + "android.permission.WAKE_LOCK")
 public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 implements Component,OnDestroyListener{
 
+    /*
+     * Notification
+     */
+    private Notification notification;
+    private PendingIntent mContentIntent;
+    private NotificationManager mNM;
+    private final int PROBE_NOTIFICATION_ID = 1;
+    
     protected boolean mIsBound = false;
     protected GCMIntentService mBoundGCMIntentService = null;
     private final String TAG = "GoogleCloudMessaging";
@@ -106,7 +160,7 @@ implements Component,OnDestroyListener{
     /**
      * Authenticate to Google Cloud Messaging
      */
-    @SimpleFunction(description = "Removes the GCM authorization from this running app instance")
+    @SimpleFunction(description = "Add the GCM authorization to this running app instance")
     public void Register() {
         Log.i(TAG, "Start the registration process");
         Log.i(TAG, "The sender id is " + SENDER_ID);
@@ -229,5 +283,70 @@ implements Component,OnDestroyListener{
 
     public void registerGCMEvent() {
         this.mBoundGCMIntentService.requestGCMMessage(listener);
-    }   
+    }  
+    
+    /*
+     * Add notification with some message and the app (actually it's app.Screen1) it wants to activate
+     * @param title 
+     * @param text
+     * @param enabledSound
+     * @param enabledVibrate
+     * @param appName
+     * @param extraKey 
+     * @param extraVal 
+     * 
+     */
+    
+    @SimpleFunction(description = "Create a notication with message to wake up " +
+        "another activity when tap on the notification")
+    public void CreateNotification(String title, String text, boolean enabledSound, 
+        boolean enabledVibrate, String packageName, String className, String extraKey, String extraVal) 
+        throws ClassNotFoundException {
+
+      Intent activityToLaunch = new Intent(Intent.ACTION_MAIN);
+
+      Log.i(TAG, "packageName: " + packageName);
+      Log.i(TAG, "className: " + className);
+
+      // for local AI instance, all classes are under the package
+      // "appinventor.ai_test"
+      // but for those runs on Google AppSpot(AppEngine), the package name will be
+      // "appinventor.ai_GoogleAccountUserName"
+      // e.g. pakageName = appinventor.ai_HomerSimpson.HelloPurr
+      // && className = appinventor.ai_HomerSimpson.HelloPurr.Screen1
+
+      ComponentName component = new ComponentName(packageName, className);
+      activityToLaunch.setComponent(component);
+      activityToLaunch.putExtra(extraKey, extraVal);
+
+      
+      Log.i(TAG, "we found the class for intent to send into notificaiton");
+
+      activityToLaunch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+      mContentIntent = PendingIntent.getActivity(mainUIThreadActivity, 0, activityToLaunch, 0);
+
+      Long currentTimeMillis = System.currentTimeMillis();
+      notification = new Notification(R.drawable.stat_notify_chat,
+          "Activate Notification!", currentTimeMillis);
+
+      Log.i(TAG, "After creating notification");
+      notification.contentIntent = mContentIntent;
+      notification.flags = Notification.FLAG_AUTO_CANCEL;
+
+      // reset the notification
+      notification.defaults = 0;
+      
+      if(enabledSound)
+        notification.defaults |= Notification.DEFAULT_SOUND;
+      
+      if(enabledVibrate)
+        notification.defaults |= Notification.DEFAULT_VIBRATE;
+      
+      notification.setLatestEventInfo(mainUIThreadActivity, (CharSequence)title, 
+                        (CharSequence)text, mContentIntent);
+      Log.i(TAG, "after updated notification contents");
+      mNM.notify(PROBE_NOTIFICATION_ID, notification);
+      Log.i(TAG, "notified");
+    }
 }
