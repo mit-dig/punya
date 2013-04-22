@@ -444,7 +444,12 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/info.png")
   ImageResource telephonyInfo();
   
-
+  /**
+   * Designer palette item: TelephonyInfo Component
+   */
+  @Source("com/google/appinventor/images/info.png")
+  ImageResource googleCloudMessaging();
+  
   /**
    * Designer palette item: Lego Mindstorms NXT components
    */

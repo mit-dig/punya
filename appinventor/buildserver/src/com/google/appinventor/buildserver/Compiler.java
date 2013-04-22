@@ -308,6 +308,8 @@ public final class Compiler {
       // that before we can set the targetSdkVersion to 4 here.
       // out.write("  <uses-sdk android:targetSdkVersion=\"4\" />\n");
 
+      out.write("<permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
+      out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n"); 
       out.write("  <application ");
 
       // TODO(markf): The preparing to publish doc at
@@ -385,6 +387,18 @@ public final class Compiler {
 	  out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
 	  out.write("    </intent-filter>\n");
 	  out.write("</receiver>\n");
+	  
+	  // Add the GCM service
+	  // Declare and use a custom permission so only this application can receive GCM messages:
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");    
+	  out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
+	  out.write("    <intent-filter>");
+	  out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
+	  out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
+	  String temp787 ="        <category android:name=\""+packageName+"\" />\n"; 
+	  out.write(temp787);
+	  out.write("    </intent-filter>");
+	  out.write("</receiver>");
 	  
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");

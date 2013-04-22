@@ -250,9 +250,11 @@ public class YaVersion {
   // - The Telephony component was added
   // For YOUNG_ANDROID_VERSION 89;
   // - The Dropbox component was added
+  // For YOUNG_ANDROID_VERSION 90;
+  // - The Google Cloud Messaging component was added
     
  
-  public static final int YOUNG_ANDROID_VERSION = 89;
+  public static final int YOUNG_ANDROID_VERSION = 90;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -549,6 +551,7 @@ public class YaVersion {
   public static final int PEDOMETERSENSOR_COMPONENT_VERSION = 1;
   public static final int SURVEY_COMPONENT_VERSION = 1;
   public static final int TELEPHONY_COMPONENT_VERSION = 1;
+  public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
   public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 2;
