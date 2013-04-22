@@ -29,7 +29,8 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
@@ -111,10 +112,26 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         // and ultimately will cause this to fail. By using our own connection
         // we bypass this issue.
         HttpURLConnection conn = (HttpURLConnection)new URL(ontologies[i]).openConnection();
-        conn.addRequestProperty("accept", "application/rdf+xml,text/turtle,text/n3");
+        conn.addRequestProperty("Accept", "application/rdf+xml,text/turtle,text/n3");
         conn.setDoInput(true);
         conn.connect();
-        ontologyModel.read(conn.getInputStream(), ontologies[i]);
+        String contentType = conn.getContentType();
+        if(contentType.equals("application/rdf+xml")) {
+          ontologyModel.read(conn.getInputStream(), ontologies[i]);
+        } else if(contentType.equals("text/turtle")) {
+          ontologyModel.read(conn.getInputStream(), ontologies[i], "TTL");
+        } else if(contentType.equals("text/n3")) {
+          ontologyModel.read(conn.getInputStream(), ontologies[i], "N3");
+        } else if(contentType.equals("text/plain")) {
+          // for non-compliant servers that return turtle as plain text
+          try {
+            ontologyModel.read(conn.getInputStream(), ontologies[i], "TTL");
+          } catch(Exception e) {
+            log.warn("Unexpected content type 'text/plain' returned by server.");
+          }
+        } else {
+          log.warn("Unexpected content type '"+contentType+"' returned by server.");
+        }
       } catch(Exception e) {
         Logger.getRootLogger().warn("Unable to read ontology "+ontologies[i], e);
       }
@@ -123,6 +140,7 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
     ontologyModel.unregister(larqBuilder);
     LARQ.setDefaultIndex(larqBuilder.getIndex());
     log.info("Lucene initialization completed in " + (System.currentTimeMillis()-start) + " ms.");
+    ontologyModel.removeNsPrefix("");
   }
 
   public void initialize() {
@@ -152,24 +170,25 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
    * @return
    */
   private List<Map<String, String>> processQuery(String queryText) {
+    final Logger log = Logger.getRootLogger();
     final List<Map<String, String>> pairs = new ArrayList<Map<String, String>>();
     Query query = QueryFactory.create(queryText);
     QueryExecution qe = QueryExecutionFactory.create(query, ontologyModel);
     if(query.isSelectType()) {
       // handle SELECT queries
-      ResultSet rs = qe.execSelect();
+      ResultSetRewindable rs = ResultSetFactory.makeRewindable(qe.execSelect());
       while(rs.hasNext()) {
         // convert the query solution into a more compact representation
         QuerySolution qs = rs.nextSolution();
         final String label = qs.getLiteral("label").getString();
         final String value = qs.getResource("uri").getURI();
         final String prefix = ontologyModel.qnameFor(value);
-        Logger.getRootLogger().info(label+","+value+","+prefix);
+        log.info(label+","+value+","+prefix);
         pairs.add(createEntry(label, value, prefix));
       }
-      Logger.getRootLogger().info("Finished query");
+      log.info("Finished query");
     } else {
-      Logger.getRootLogger().warn("Unexpected query type");
+      log.warn("Unexpected query type");
     }
     return pairs;
   }
@@ -179,12 +198,14 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
     // TODO: Escape the incoming text
     String queryText = "PREFIX pf: <http://jena.hpl.hp.com/ARQ/property#> "+
         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+        "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> "+
         "PREFIX owl: <http://www.w3.org/2002/07/owl#> "+
-        "SELECT DISTINCT ?uri ?label WHERE { "+
-        "?uri a owl:Class ; rdfs:label ?label . " +
-        "FILTER(lang(?label) = \"\" || langMatches(lang(?label), \"EN\")) . " +
-        "FILTER(regex(?label, \""+text+"\", \"i\")) "+
-        "} ORDER BY ?label";
+        "SELECT DISTINCT ?uri (SAMPLE(?lbl) AS ?label) WHERE { "+
+        "{ ?uri a owl:Class } UNION { ?uri a rdfs:Class }" +
+        "{ ?uri rdfs:label ?lbl } UNION { ?uri skos:prefLabel ?lbl } " +
+        "FILTER(lang(?lbl) = \"\" || langMatches(lang(?lbl), \"EN\")) . " +
+        "FILTER(regex(?lbl, \""+text+"\", \"i\")) "+
+        "} GROUP BY ?uri ORDER BY ?label";
     return processQuery(queryText);
   }
 
@@ -193,13 +214,16 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
     // TODO: Escape the incoming text
     String queryText = "PREFIX pf: <http://jena.hpl.hp.com/ARQ/property#> "+
         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "+
+        "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> "+
         "PREFIX owl: <http://www.w3.org/2002/07/owl#> "+
-        "SELECT DISTINCT ?uri ?label WHERE { "+
-        "{ ?uri a owl:ObjectProperty } UNION { ?uri a owl:DatatypeProperty }  " +
-        "?uri rdfs:label ?label . " +
-        "FILTER(lang(?label) = \"\" || langMatches(lang(?label), \"EN\")) . " +
-        "FILTER(regex(?label, \""+text+"\", \"i\")) . "+
-        "} ORDER BY ?label";
+        "SELECT DISTINCT ?uri (SAMPLE(?lbl) AS ?label) WHERE { "+
+        "{ ?uri a owl:ObjectProperty } UNION { ?uri a owl:DatatypeProperty } " +
+        "UNION { ?uri a rdf:Property } " +
+        "{ ?uri rdfs:label ?lbl } UNION { ?uri skos:prefLabel ?lbl } " +
+        "FILTER(lang(?lbl) = \"\" || langMatches(lang(?lbl), \"EN\")) . " +
+        "FILTER(regex(?lbl, \""+text+"\", \"i\")) "+
+        "} GROUP BY ?uri ORDER BY ?label";
     return processQuery(queryText);
   }
 

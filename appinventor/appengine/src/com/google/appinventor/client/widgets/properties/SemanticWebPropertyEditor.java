@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.jquery.AsyncAutoCompleteObjectListHandler;
 import com.google.appinventor.client.jquery.AsyncAutoCompleteOptions;
+import com.google.appinventor.client.jquery.AutoCompletePosition;
 import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
@@ -110,6 +111,7 @@ public class SemanticWebPropertyEditor extends PropertyEditor {
       }
     });
     options.setMinLength(3);
+    options.setPosition(AutoCompletePosition.create("right top", "right bottom", "none"));
     ui.autocomplete(options);
   }
 

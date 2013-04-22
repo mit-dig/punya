@@ -175,4 +175,14 @@ public class PropertyTypeConstants {
    */
   public static final String PROPERTY_TYPE_TEXT_RECEIVING = "text_receiving";
 
+  /**
+   * Uri for semantic web resources.
+   */
+  public static final String PROPERTY_TYPE_URI = "uri";
+
+  /**
+   * Base URI for creating semantic web resources.
+   */
+  public static final String PROPERTY_TYPE_BASEURI = "baseuri";
+
 }

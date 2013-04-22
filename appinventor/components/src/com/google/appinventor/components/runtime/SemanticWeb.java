@@ -1,12 +1,8 @@
 package com.google.appinventor.components.runtime;
 
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -26,11 +22,6 @@ import com.google.appinventor.components.runtime.util.RdfUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil.Solution;
 import com.google.appinventor.components.runtime.util.WebServiceUtil;
 import com.google.appinventor.components.runtime.util.YailList;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -40,17 +31,13 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.engine.binding.Binding;
-import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.XSD;
 
 import android.util.Log;
 
 @DesignerComponent(version = YaVersion.SEMANTIC_WEB_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
-    category = ComponentCategory.MISC,
+    category = ComponentCategory.SEMANTICWEB,
     nonVisible = true,
     iconName = "images/semanticWeb.png")
 @SimpleObject
@@ -426,61 +413,22 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       Log.w(LOG_TAG, "Component does not implement LDComponent");
       return false;
     }
-    final LDComponent ldcomponent = (LDComponent) component;
-    final String conceptUri = ldcomponent.ConceptURI();
-    final String propertyUri = ldcomponent.PropertyURI();
-    // verify that propertyUri is set
-    if(propertyUri == null || propertyUri.isEmpty()) {
-      Log.w(LOG_TAG, "Property URI is empty");
-      return false;
-    }
-    final Object value = ldcomponent.Value();
-    // don't store null values
-    if(value == null) {
-      Log.w(LOG_TAG, "Component.value() is null");
-      return false;
-    }
-    Resource s = model.getResource( model.expandPrefix( subject ) );
-    Property p = model.getProperty( model.expandPrefix( propertyUri ) );
-    if ( conceptUri == null || conceptUri.isEmpty() ) {
-      // if no concept, try to infer xsd datatype
-      if ( value.getClass() == Boolean.class ) {
-        model.add( s, p, value.toString(), XSDDatatype.XSDboolean );
-      } else if ( value.getClass() == Calendar.class ) {
-        Date d = ((Calendar) value).getTime();
-        SimpleDateFormat formatter = new SimpleDateFormat("Y-m-d");
-        model.add( s, p, formatter.format(d), XSDDatatype.XSDdate );
-      } else if ( value.getClass() == String.class ) {
-        model.add( s, p, (String) value );
-      } else {
-        Log.w(LOG_TAG, "Concept URI not supplied and unable to determine appropriate XSD type from Value.getClass");
-        return false;
-      }
-    } else if( conceptUri.startsWith( XSD.getURI() ) ) {
-      // have a concept and it's in the xsd namespace
-      Literal l = model.createTypedLiteral( value.toString(), conceptUri );
-      model.add(s, p, l);
-    } else {
-      // since we are interpreting as a uri, we must have a string
-      if( value.getClass() != String.class ) {
-        Log.w(LOG_TAG, "Have ConceptURI but Value() is not of type java.lang.String");
-        return false;
-      }
-      Resource o = model.getResource( (String) value );
-      // apply the ConceptURI as the type of the value
-      if ( !model.contains( o, RDF.type ) ) {
-        model.add( o, RDF.type, model.getResource( conceptUri ) );
-      }
-      model.add( s, p, o );
-    }
-    return true;
+    return RdfUtil.triplifyComponent((LDComponent)component, subject, model);
   }
 
-  protected void triplifyForm(SemanticForm form, String subject) {
-  }
-
+  /**
+   * Takes a SemanticForm component and converts it and any nested elements into
+   * triples within the model encapsulated by this SemanticWeb component.
+   * @param form
+   * @return
+   */
   @SimpleFunction
   public boolean TriplifyFormInModel(SemanticForm form) {
-    return true;
+    try {
+      return RdfUtil.triplifyForm(form, RdfUtil.generateSubjectForForm(form), model);
+    } catch(Exception e) {
+      Log.w(LOG_TAG, "Unable to triplify form due to exception.", e);
+      return false;
+    }
   }
 }

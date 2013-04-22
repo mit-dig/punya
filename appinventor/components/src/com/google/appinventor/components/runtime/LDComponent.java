@@ -49,4 +49,13 @@ public interface LDComponent {
    * @return
    */
   public Object Value();
+
+  /**
+   * Returns whether or not the value of this field should be used
+   * to identify the subject of a Semantic Form.
+   * @see SemanticForm
+   * @return
+   */
+  public boolean SubjectIdentifier();
+
 }

@@ -55,6 +55,9 @@ public abstract class TextBoxBase extends AndroidViewComponent
   // Backing for text color
   private int textColor;
 
+  // If true, then text box is used for generating a subject uri.
+  private boolean isSubject;
+
   // This is our handle on Android's nice 3-d default textbox.
   private Drawable defaultTextBoxDrawable;
 
@@ -501,4 +504,19 @@ public abstract class TextBoxBase extends AndroidViewComponent
   public Object Value() {
     return Text();
   }
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+      defaultValue = "False")
+  @SimpleProperty
+  public void SubjectIdentifier(boolean isSubject) {
+    this.isSubject = isSubject;
+  }
+
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "")
+  @Override
+  public boolean SubjectIdentifier() {
+    return isSubject;
+  }
+
 }

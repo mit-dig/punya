@@ -5,6 +5,10 @@
 
 package com.google.appinventor.components.runtime;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import android.app.Activity;
 import android.view.View;
 
@@ -32,6 +36,7 @@ public class HVArrangement extends AndroidViewComponent implements Component, Co
   // Layout
   private final int orientation;
   private final LinearLayout viewLayout;
+  private final List<AndroidViewComponent> components;
 
   // translates App Inventor alignment codes to Android gravity
   private final AlignmentUtil alignmentSetter;
@@ -56,6 +61,7 @@ public class HVArrangement extends AndroidViewComponent implements Component, Co
     viewLayout = new LinearLayout(context, orientation,
         ComponentConstants.EMPTY_HV_ARRANGEMENT_WIDTH,
         ComponentConstants.EMPTY_HV_ARRANGEMENT_HEIGHT);
+    components = new ArrayList<AndroidViewComponent>();
     alignmentSetter = new AlignmentUtil(viewLayout);
 
     horizontalAlignment = ComponentConstants.HORIZONTAL_ALIGNMENT_DEFAULT;
@@ -81,6 +87,7 @@ public class HVArrangement extends AndroidViewComponent implements Component, Co
   @Override
   public void $add(AndroidViewComponent component) {
     viewLayout.add(component);
+    components.add(component);
   }
 
   @Override
@@ -179,6 +186,11 @@ public class HVArrangement extends AndroidViewComponent implements Component, Co
       container.$form().dispatchErrorOccurredEvent(this, "VerticalAlignment",
           ErrorMessages.ERROR_BAD_VALUE_FOR_VERTICAL_ALIGNMENT, alignment);
     }
+  }
+
+  @Override
+  public Iterator<AndroidViewComponent> iterator() {
+    return components.iterator();
   }
 
 }
