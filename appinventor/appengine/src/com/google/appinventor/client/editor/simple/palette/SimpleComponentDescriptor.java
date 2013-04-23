@@ -20,6 +20,7 @@ import com.google.appinventor.client.editor.simple.components.MockHorizontalArra
 import com.google.appinventor.client.editor.simple.components.MockImage;
 import com.google.appinventor.client.editor.simple.components.MockImagePicker;
 import com.google.appinventor.client.editor.simple.components.MockImageSprite;
+import com.google.appinventor.client.editor.simple.components.MockLDVisualization;
 import com.google.appinventor.client.editor.simple.components.MockLabel;
 import com.google.appinventor.client.editor.simple.components.MockListPicker;
 import com.google.appinventor.client.editor.simple.components.MockNonVisibleComponent;
@@ -122,6 +123,8 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/tinyDB.png", images.tinyDB());
     bundledImages.put("images/tinyWebDB.png", images.tinyWebDB());
     bundledImages.put("images/twitter.png", images.twitterComponent());
+    bundledImages.put("images/dropbox.png", images.dropbox());
+    bundledImages.put("images/chart.png", images.ldchart());
     bundledImages.put("images/voting.png", images.voting());
     bundledImages.put("images/web.png", images.web());
     imagesInitialized = true;
@@ -303,6 +306,8 @@ public final class SimpleComponentDescriptor {
       return new MockWebViewer(editor);
     } else if (name.equals(MockSurvey.TYPE)){
       return new MockSurvey(editor);
+    } else if (name.equals(MockLDVisualization.TYPE)){
+      return new MockLDVisualization(editor);
     }
       else {
       // TODO(user): add 3rd party mock component proxy here

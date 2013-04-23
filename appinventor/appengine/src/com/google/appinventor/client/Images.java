@@ -244,8 +244,25 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/surveybig.png")
   ImageResource surveybig();
   
+  /**
+   * Designer palette item: Linked Data Chart component
+   */
+  @Source("com/google/appinventor/images/chart.png")
+  ImageResource ldchart();
   
-
+  /**
+   * Designer item: Linked Data Chart component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/chartbig.png")
+  ImageResource ldchartbig();
+  
+  /**
+   * Designer item: Linked Data Chart component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/dropbox.png")
+  ImageResource dropbox();
   
   /**
    * Designer palette item: player component

@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
  
+import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
@@ -654,12 +655,18 @@ public class Survey extends AndroidViewComponent{
 			}
 
 		}
-		
-		
-		
+
 		
 	}
- 
+
+	/**
+	 * Indicates that a photo was taken with the camera and provides the path to
+	 * the stored picture.
+	 */
+	@SimpleEvent
+	public void AfterSurveyAnswer(String answer) {
+		EventDispatcher.dispatchEvent(this, "AfterSurveyAnswer", answer);
+	}
 	  
 	  
 	  

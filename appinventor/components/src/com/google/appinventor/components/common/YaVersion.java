@@ -250,9 +250,11 @@ public class YaVersion {
   // - The Telephony component was added
   // For YOUNG_ANDROID_VERSION 89;
   // - The Dropbox component was added
+  // For YOUNG_ANDROLD_VERSION 90;
+  // - The LinkedDataViz component was added
     
  
-  public static final int YOUNG_ANDROID_VERSION = 89;
+  public static final int YOUNG_ANDROID_VERSION = 90;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -671,4 +673,6 @@ public class YaVersion {
   public static final int DROPBOX_COMPONENT_VERSION = 1;
 
   public static final int SEMANTIC_WEB_COMPONENT_VERSION = 1;
+  
+  public static final int LINKED_DATA_COMPONENT_VERSION = 1;
 }
