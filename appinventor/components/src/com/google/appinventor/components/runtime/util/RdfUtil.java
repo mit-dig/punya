@@ -1,6 +1,13 @@
 package com.google.appinventor.components.runtime.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -451,4 +458,46 @@ public final class RdfUtil {
     return subject.toString();
   }
 
+  /**
+   * Publishes the a semantic web model to the given URI using the SPARQL
+   * Graph Protocol. Data will be transmitted using the text/turtle encoding
+   * with the UTF-8 charset. The method will return true if the server returns
+   * a 2xx response code, otherwise it will return false and log the reason
+   * for the failure to logcat.
+   * @see http://www.w3.org/TR/2013/REC-sparql11-http-rdf-update-20130321/#http-put
+   * @param uri An indirect graph URI (with a graph query parameter)
+   * @param model A Jena model containing the RDF content to HTTP PUT
+   * @return
+   */
+  public static boolean publishGraph(URI uri, Model model) {
+    boolean success = false;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    model.write(baos, "TTL");
+    HttpURLConnection conn = null;
+    try {
+      conn = (HttpURLConnection) uri.toURL().openConnection();
+      conn.setDoInput(true);
+      conn.setDoOutput(true);
+      conn.setRequestMethod("PUT");
+      conn.setRequestProperty("Content-Length", Integer.toString(baos.size()));
+      conn.setRequestProperty("Content-Type", "text/turtle;charset=utf-8");
+      conn.connect();
+      OutputStream os = conn.getOutputStream();
+      baos.writeTo(os);
+      int status = conn.getResponseCode();
+      if(status == 200 || status == 201 || status == 204) {
+        success = true;
+      } else {
+        Log.w(LOG_TAG, "Unable to put graph due to HTTP code "+status+" "+conn.getResponseMessage());
+      }
+      conn.disconnect();
+    } catch (MalformedURLException e) {
+      Log.w(LOG_TAG, "Unable to publish graph due to malformed URL", e);
+    } catch (ProtocolException e) {
+      Log.w(LOG_TAG, "Unable to perform HTTP PUT for given URI", e);
+    } catch (IOException e) {
+      Log.w(LOG_TAG, "Unable to publish graph due to IO failure", e);
+    }
+    return success;
+  }
 }

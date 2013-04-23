@@ -14,6 +14,7 @@ import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AlignmentUtil;
+import com.google.appinventor.components.runtime.util.RdfUtil;
 import com.google.appinventor.components.runtime.util.ViewUtil;
 
 import android.app.Activity;
@@ -232,4 +233,24 @@ public class SemanticForm extends AndroidViewComponent implements Component,
     return components.iterator();
   }
 
+  /**
+   * Returns a URI for the form either by examining its Subject property or
+   * generated from its contents.
+   * @return The empty string if no valid URL can be constructed for the form,
+   * or a valid URI that can be used to represent the contents of the form.
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "Provides a URI for the form even if SubjectURI is not set.")
+  public String GenerateSubjectURI() {
+    if(Subject().isEmpty()) {
+      String subj = RdfUtil.generateSubjectForForm(this);
+      if(subj == null) {
+        return "";
+      } else {
+        return subj;
+      }
+    } else {
+      return Subject();
+    }
+  }
 }

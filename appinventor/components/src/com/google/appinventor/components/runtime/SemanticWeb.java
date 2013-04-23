@@ -1,6 +1,8 @@
 package com.google.appinventor.components.runtime;
 
 import java.io.FileOutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -430,5 +432,78 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       Log.w(LOG_TAG, "Unable to triplify form due to exception.", e);
       return false;
     }
+  }
+
+  private void doPublishModel(final URI uri, final String graph) {
+    try {
+      if(RdfUtil.publishGraph(uri, model)) {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+            PublishedGraph(graph);
+          }
+        });
+      } else {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+            FailedToPublishGraph(graph, "See log for details.");
+          }
+        });
+      }
+    } catch(final Exception e) {
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          Log.w(LOG_TAG, "Unable to publish graph.", e);
+          FailedToPublishGraph(graph, e.getLocalizedMessage());
+        }
+      });
+    }
+  }
+
+  /**
+   * Publishes the model represented by the Semantic Web component to the
+   * RDF graph store represented by EndpointURL using the given graph URI.
+   * @param graph
+   */
+  @SimpleFunction
+  public void PublishModel(final String graph) {
+    try {
+      URI part = new URI(null, null, "rdf-graph-store", "graph="+graph, null);
+      final URI uri = URI.create(EndpointURL()).resolve(part);
+      Runnable call = new Runnable() {
+        public void run() {
+          doPublishModel(uri, graph);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (URISyntaxException e) {
+      Log.w(LOG_TAG, "Unable to generate RDF Graph Store URL.", e);
+      FailedToPublishGraph(graph, "Invalid endpoint URI. See log for details.");
+    }
+  }
+
+  /**
+   * This event is raised when the Semantic Web component fails to publish a
+   * graph to a remote SPARQL endpoint.
+   * @param graph
+   * @param error
+   */
+  @SimpleEvent
+  public void FailedToPublishGraph(String graph, String error) {
+    EventDispatcher.dispatchEvent(this, "FailedToPublishGraph", graph, error);
+  }
+
+  /**
+   * This event is raised when a graph is successfully published on a remote
+   * endpoint.
+   * @param graph
+   */
+  @SimpleEvent
+  public void PublishedGraph(String graph) {
+    EventDispatcher.dispatchEvent(this, "PublishedGraph", graph);
+  }
+
+  @SimpleFunction
+  public String SubjectURIForForm(final SemanticForm form) {
+    return RdfUtil.generateSubjectForForm(form);
   }
 }
