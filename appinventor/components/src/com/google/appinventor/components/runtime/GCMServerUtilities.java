@@ -43,7 +43,8 @@ public final class GCMServerUtilities {
     
     private static final String TAG = "ServerUtilities";
     
-    static String SERVER_URL = "http://air.csail.mit.edu:8030";
+    static String SERVER_URL = "http://18.189.6.103:8080";
+   
 
     /**
      * Register this account/device pair within the server.

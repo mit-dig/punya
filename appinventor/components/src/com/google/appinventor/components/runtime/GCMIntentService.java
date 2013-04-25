@@ -23,7 +23,8 @@ public class GCMIntentService extends GCMBaseIntentService {
     final HashSet<GCMEventListener> GCMEventListeners = new HashSet<GCMEventListener>();
 
     public GCMIntentService() {
-        super();        
+//        super("895146158148"); 
+        super();
     }
        
     @Override

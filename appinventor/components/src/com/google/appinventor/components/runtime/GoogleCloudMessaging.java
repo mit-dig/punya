@@ -67,27 +67,27 @@ import android.util.Log;
  * 
  */
 
- /* 
+/* 
  * @author wli17@mit.edu (Weihua Li)
  */
-@DesignerComponent(version = YaVersion.GOOGLECLOUDMESSAGING_COMPONENT_VERSION, 
-description = "", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/googleCloudMessaging.png")
+@DesignerComponent(version = YaVersion.GOOGLECLOUDMESSAGING_COMPONENT_VERSION, description = "", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/googleCloudMessaging.png")
 @UsesPermissions(permissionNames = "com.google.android.c2dm.permission.RECEIVE, "
         + "android.permission.INTERNET, android.permission.GET_ACCOUNTS, "
         + "android.permission.WAKE_LOCK")
 public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
-implements Component,OnDestroyListener{
+        implements Component, OnDestroyListener {
 
     // notification
     private Notification notification;
     private PendingIntent mContentIntent;
     private NotificationManager mNM;
     private final int PROBE_NOTIFICATION_ID = 1;
-    
+
     protected boolean mIsBound = false;
     protected GCMIntentService mBoundGCMIntentService = null;
     private final String TAG = "GoogleCloudMessaging";
-    public static final String INIT_INTENTSERVICE_ACTION = "bind_init"; //do nothing
+    public static final String INIT_INTENTSERVICE_ACTION = "bind_init"; // do
+                                                                        // nothing
 
     // gcmLock synchronizes uses of any/all gcm objects
     // in this class. As far as I can tell, these objects are not thread-safe
@@ -101,31 +101,41 @@ implements Component,OnDestroyListener{
     protected boolean enabledSchedule = false; // run periodically
 
     protected Activity mainUIThreadActivity;
-    
+
     private String gcmMessage = "";
+    private boolean serverRegistration = false;
+    private boolean GCMRegistration = false;
     
-//    private final SharedPreferences sharedPreferences;
-    
+    private final Handler handler;
+
+    // private final SharedPreferences sharedPreferences;
+
     public GoogleCloudMessaging(ComponentContainer container) {
         super(container.$form());
-        
+
         // Set up listeners
         mainUIThreadActivity = container.$context();
-//        sharedPreferences = container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,
-//                Context.MODE_PRIVATE);
-        
+        handler = new Handler();
+        // sharedPreferences =
+        // container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,
+        // Context.MODE_PRIVATE);
+
         // start GCMIntentService
         Intent i = new Intent(mainUIThreadActivity, GCMIntentService.class);
         i.setAction(INIT_INTENTSERVICE_ACTION);
-        GCMBaseIntentService.runIntentInService(mainUIThreadActivity, i, 
-                GCMBroadcastReceiver.getDefaultIntentServiceClassName(mainUIThreadActivity));
+        GCMBaseIntentService
+                .runIntentInService(
+                        mainUIThreadActivity,
+                        i,
+                        GCMBroadcastReceiver
+                                .getDefaultIntentServiceClassName(mainUIThreadActivity));
         doBindService();
     }
-    
+
     @Override
     public void onDestroy() {
-      // remember to unbind
-      doUnbindService();
+        // remember to unbind
+        doUnbindService();
     }
 
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
@@ -144,6 +154,55 @@ implements Component,OnDestroyListener{
         return SENDER_ID;
     }
 
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public String ReturnMessage() {
+        return gcmMessage;
+    }
+
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public boolean ServerRegistration() {
+        return serverRegistration;
+    }
+
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public boolean GCMRegistration() {
+        return GCMRegistration;
+    }
+
+    /**
+     * Indicates when the server registration has been successful.
+     */
+    @SimpleEvent()
+    public void IsRegisteredOnServer() {
+        Log.i(TAG, "Waiting to receive info from the server.");
+        if (enabled) {
+            mainUIThreadActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Log.i(TAG, "IsRegisteredOnServer() is called");
+                    EventDispatcher.dispatchEvent(GoogleCloudMessaging.this,
+                            "IsRegisteredOnServer");
+                }
+            });
+        }
+    }
+
+    /**
+     * Indicates when the GCM registration has been successful.
+     */
+    @SimpleEvent()
+    public void IsRegisteredOnGCM() {
+        Log.i(TAG, "Waiting to receive info from the server.");
+        if (enabled) {
+            mainUIThreadActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Log.i(TAG, "IsRegisteredOnGCM() is called");
+                    EventDispatcher.dispatchEvent(GoogleCloudMessaging.this,
+                            "IsRegisteredOnGCM");
+                }
+            });
+        }
+    }
+
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
     @SimpleProperty
     public void SenderID(String SENDER_ID) {
@@ -153,12 +212,14 @@ implements Component,OnDestroyListener{
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
     @SimpleProperty
     public void Enabled(boolean enabled) {
-        
-//        //save the SENDER ID to sharedPreference for later use
-//        final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit(); 
-//        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID, SENDER_ID);
-//        sharedPrefsEditor.commit();
-        
+
+        // //save the SENDER ID to sharedPreference for later use
+        // final SharedPreferences.Editor sharedPrefsEditor =
+        // sharedPreferences.edit();
+        // sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID,
+        // SENDER_ID);
+        // sharedPrefsEditor.commit();
+
         this.enabled = enabled;
         if (enabled) {
             Register();
@@ -186,19 +247,43 @@ implements Component,OnDestroyListener{
         AsynchUtil.runAsynchronously(new Runnable() {
             public void run() {
                 final String regId = GCMRegistrar.getRegistrationId(form);
-
                 if (regId.equals("")) {
                     Log.i(TAG, "The divice is NOT registered on the server.");
                     GCMRegistrar.register(form, SENDER_ID);
                     Log.i(TAG, "After the registration process.");
                 } else {
                     Log.i(TAG, "The registration id is not empty.");
-                    if (GCMRegistrar.isRegisteredOnServer(form)) {
+                    GCMRegistration = true;
+                    serverRegistration = GCMRegistrar.isRegisteredOnServer(form);
+                    if (serverRegistration) {
                         Log.i(TAG, "It is registered on the server.");
-                        GCMInfoReceived();
-                        return;
+                    }else{
+                        serverRegistration = GCMServerUtilities.register(form, SENDER_ID);
+                        // At this point all attempts to register with the app
+                        // server failed, so we need to unregister the device
+                        // from GCM - the app will try to register again when
+                        // it is restarted. Note that GCM will send an
+                        // unregistered callback upon completion, but
+                        // GCMIntentService.onUnregistered() will ignore it.
+                        if (!serverRegistration) {
+                            GCMRegistrar.unregister(form);
+                            GCMRegistration = false;
+                            Log.i(TAG, "Registering on the server failed, unregister itself from the GCM.");
+                        } 
                     }
                 }
+                
+                if(serverRegistration){
+                    IsRegisteredOnServer();
+                }
+                
+                if(GCMRegistration){
+                    IsRegisteredOnGCM();
+                }
+                
+                if (serverRegistration && GCMRegistration){
+                    return;
+                }   
             }
         });
     }
@@ -210,6 +295,9 @@ implements Component,OnDestroyListener{
     public void UnRegister() {
         synchronized (gcmLock) {
             GCMRegistrar.unregister(form);
+            GCMRegistration = false;
+            GCMServerUtilities.unregister(form, SENDER_ID);
+            serverRegistration = false;
         }
     }
 
@@ -268,13 +356,13 @@ implements Component,OnDestroyListener{
 
     void doUnbindService() {
         if (mIsBound) {
-            Log.i(TAG,"unbinding the attached service");
+            Log.i(TAG, "unbinding the attached service");
             // Detach our existing connection.
             mainUIThreadActivity.unbindService(mConnection);
             mIsBound = false;
         }
     }
-    
+
     final Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -288,83 +376,93 @@ implements Component,OnDestroyListener{
     GCMEventListener listener = new GCMEventListener() {
         @Override
         public void onMessageReceived(String msg) {
-          // through the event handler
-          Log.i(TAG, "Received one message from the listener");
-          Message message = myHandler.obtainMessage();
-          if (msg ==null){
-              msg = "This is a dummy message.";
-          }
-          message.obj = msg;
-          myHandler.sendMessage(message);
+            // through the event handler
+            Log.i(TAG, "Received one message from the listener");
+            Message message = myHandler.obtainMessage();
+            if (msg == null) {
+                msg = "This is a dummy message.";
+            }
+            message.obj = msg;
+            myHandler.sendMessage(message);
         }
     };
 
     public void registerGCMEvent() {
         this.mBoundGCMIntentService.requestGCMMessage(listener);
-    }  
-    
+    }
+
     /*
-     * Add notification with some message and the app (actually it's app.Screen1) it wants to activate
-     * @param title 
-     * @param text
-     * @param enabledSound
-     * @param enabledVibrate
-     * @param appName
-     * @param extraKey 
-     * @param extraVal 
+     * Add notification with some message and the app (actually it's
+     * app.Screen1) it wants to activate
      * 
+     * @param title
+     * 
+     * @param text
+     * 
+     * @param enabledSound
+     * 
+     * @param enabledVibrate
+     * 
+     * @param appName
+     * 
+     * @param extraKey
+     * 
+     * @param extraVal
      */
-    
-    @SimpleFunction(description = "Create a notication with message to wake up " +
-        "another activity when tap on the notification")
-    public void CreateNotification(String title, String text, boolean enabledSound, 
-        boolean enabledVibrate, String packageName, String className, String extraKey, String extraVal) 
-        throws ClassNotFoundException {
 
-      Intent activityToLaunch = new Intent(Intent.ACTION_MAIN);
+    @SimpleFunction(description = "Create a notication with message to wake up "
+            + "another activity when tap on the notification")
+    public void CreateNotification(String title, String text,
+            boolean enabledSound, boolean enabledVibrate, String packageName,
+            String className, String extraKey, String extraVal)
+            throws ClassNotFoundException {
 
-      Log.i(TAG, "packageName: " + packageName);
-      Log.i(TAG, "className: " + className);
+        Intent activityToLaunch = new Intent(Intent.ACTION_MAIN);
 
-      // for local AI instance, all classes are under the package
-      // "appinventor.ai_test"
-      // but for those runs on Google AppSpot(AppEngine), the package name will be
-      // "appinventor.ai_GoogleAccountUserName"
-      // e.g. pakageName = appinventor.ai_HomerSimpson.HelloPurr
-      // && className = appinventor.ai_HomerSimpson.HelloPurr.Screen1
+        Log.i(TAG, "packageName: " + packageName);
+        Log.i(TAG, "className: " + className);
 
-      ComponentName component = new ComponentName(packageName, className);
-      activityToLaunch.setComponent(component);
-      activityToLaunch.putExtra(extraKey, extraVal);
+        // for local AI instance, all classes are under the package
+        // "appinventor.ai_test"
+        // but for those runs on Google AppSpot(AppEngine), the package name
+        // will be
+        // "appinventor.ai_GoogleAccountUserName"
+        // e.g. pakageName = appinventor.ai_HomerSimpson.HelloPurr
+        // && className = appinventor.ai_HomerSimpson.HelloPurr.Screen1
 
-      
-      Log.i(TAG, "we found the class for intent to send into notificaiton");
+        ComponentName component = new ComponentName(packageName, className);
+        activityToLaunch.setComponent(component);
+        activityToLaunch.putExtra(extraKey, extraVal);
 
-      activityToLaunch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Log.i(TAG, "we found the class for intent to send into notificaiton");
 
-      mContentIntent = PendingIntent.getActivity(mainUIThreadActivity, 0, activityToLaunch, 0);
+        activityToLaunch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-      Long currentTimeMillis = System.currentTimeMillis();
-      notification = new Notification(R.drawable.stat_notify_chat,
-          "Activate Notification!", currentTimeMillis);
+        mContentIntent = PendingIntent.getActivity(mainUIThreadActivity, 0,
+                activityToLaunch, 0);
 
-      Log.i(TAG, "After creating notification");
-      notification.contentIntent = mContentIntent;
-      notification.flags = Notification.FLAG_AUTO_CANCEL;
+        Long currentTimeMillis = System.currentTimeMillis();
+        notification = new Notification(R.drawable.stat_notify_chat,
+                "Activate Notification!", currentTimeMillis);
 
-      // reset the notification
-      notification.defaults = 0;
-      
-      if(enabledSound)
-        notification.defaults |= Notification.DEFAULT_SOUND;
-      
-      if(enabledVibrate)
-        notification.defaults |= Notification.DEFAULT_VIBRATE;
-      
-      notification.setLatestEventInfo(mainUIThreadActivity, (CharSequence)title, 
-                        (CharSequence)text, mContentIntent);
-      Log.i(TAG, "after updated notification contents");
-      mNM.notify(PROBE_NOTIFICATION_ID, notification);
-      Log.i(TAG, "notified");
+        Log.i(TAG, "After creating notification");
+        notification.contentIntent = mContentIntent;
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
+
+        // reset the notification
+        notification.defaults = 0;
+
+        if (enabledSound)
+            notification.defaults |= Notification.DEFAULT_SOUND;
+
+        if (enabledVibrate)
+            notification.defaults |= Notification.DEFAULT_VIBRATE;
+
+        notification.setLatestEventInfo(mainUIThreadActivity,
+                (CharSequence) title, (CharSequence) text, mContentIntent);
+        Log.i(TAG, "after updated notification contents");
+        mNM.notify(PROBE_NOTIFICATION_ID, notification);
+        Log.i(TAG, "notified");
     }
 }
