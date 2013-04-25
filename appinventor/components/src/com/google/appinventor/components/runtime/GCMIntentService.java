@@ -4,9 +4,11 @@ import java.util.HashSet;
 import java.util.Random;
 
 import com.google.appinventor.components.runtime.GCMRegistrar;
+import com.google.appinventor.components.runtime.util.DropboxUtil;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -21,10 +23,9 @@ public class GCMIntentService extends GCMBaseIntentService {
     final HashSet<GCMEventListener> GCMEventListeners = new HashSet<GCMEventListener>();
 
     public GCMIntentService() {
-        super("895146158148");
-        Log.i(TAG, "GCMIntentService start");
+        super();        
     }
-   
+       
     @Override
     protected void onMessage(Context context, Intent intent) {
         Log.i(TAG, "Received message");
@@ -89,5 +90,9 @@ public class GCMIntentService extends GCMBaseIntentService {
     public void requestGCMMessage(GCMEventListener listener){
         //add the listener to the list of listerners
         GCMEventListeners.add(listener);
+    }
+    
+    public void setSenderID(String sender_id){
+        setSenderIds(sender_id);
     }
 }

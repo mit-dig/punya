@@ -32,6 +32,7 @@ import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
@@ -61,7 +62,7 @@ public abstract class GCMBaseIntentService extends IntentService {
     // Java lock used to synchronize access to sWakelock
     private static final Object LOCK = GCMBaseIntentService.class;
 
-    private final String[] mSenderIds;
+    private String[] mSenderIds;
 
     // instance counter
     private static int sCounter = 0;
@@ -87,6 +88,7 @@ public abstract class GCMBaseIntentService extends IntentService {
      */
     protected GCMBaseIntentService() {
         this(getName("DynamicSenderIds"), null);
+        Log.v(TAG, "GCMBaseIntentService()");
     }
 
     /**
@@ -94,10 +96,20 @@ public abstract class GCMBaseIntentService extends IntentService {
      */
     protected GCMBaseIntentService(String... senderIds) {
         this(getName(senderIds), senderIds);
+        Log.v(TAG, "GCMBaseIntentService(String... senderIds)");
     }
 
+    /**
+     * We need to change this method since we need to change the sender id according to the preference
+     * For the intent service now, we only accept one sender id
+     * 
+     * @param name
+     * @param senderIds 
+     */
     private GCMBaseIntentService(String name, String[] senderIds) {
         super(name);  // name is used as base name for threads, etc.
+        
+        Log.i(TAG,"within the super constructor");
         mSenderIds = senderIds;
     }
 
@@ -110,6 +122,22 @@ public abstract class GCMBaseIntentService extends IntentService {
     private static String getName(String[] senderIds) {
         String flatSenderIds = GCMRegistrar.getFlatSenderIds(senderIds);
         return getName(flatSenderIds);
+    }
+    
+    /**
+     * Gets the sender ids.
+     *
+     * <p>By default, it returns the sender ids passed in the constructor, but
+     * it could be overridden to provide a dynamic sender id.
+     * @return 
+     *
+     * @throws IllegalStateException if sender id was not set on constructor.
+     */
+    protected void setSenderIds(String... senderIds) {
+        if (senderIds == null) {
+            throw new IllegalStateException("sender id not set on constructor");
+        } 
+        mSenderIds = senderIds;
     }
 
     /**

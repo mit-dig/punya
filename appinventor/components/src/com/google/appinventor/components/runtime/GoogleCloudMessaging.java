@@ -11,6 +11,7 @@ import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
+import com.google.appinventor.components.runtime.util.DropboxUtil;
 
 import android.R;
 import android.app.Activity;
@@ -21,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -76,9 +78,7 @@ description = "", category = ComponentCategory.FUNF, nonVisible = true, iconName
 public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 implements Component,OnDestroyListener{
 
-    /*
-     * Notification
-     */
+    // notification
     private Notification notification;
     private PendingIntent mContentIntent;
     private NotificationManager mNM;
@@ -104,12 +104,16 @@ implements Component,OnDestroyListener{
     
     private String gcmMessage = "";
     
+//    private final SharedPreferences sharedPreferences;
+    
     public GoogleCloudMessaging(ComponentContainer container) {
         super(container.$form());
         
         // Set up listeners
         mainUIThreadActivity = container.$context();
-
+//        sharedPreferences = container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,
+//                Context.MODE_PRIVATE);
+        
         // start GCMIntentService
         Intent i = new Intent(mainUIThreadActivity, GCMIntentService.class);
         i.setAction(INIT_INTENTSERVICE_ACTION);
@@ -149,6 +153,12 @@ implements Component,OnDestroyListener{
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
     @SimpleProperty
     public void Enabled(boolean enabled) {
+        
+//        //save the SENDER ID to sharedPreference for later use
+//        final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit(); 
+//        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID, SENDER_ID);
+//        sharedPrefsEditor.commit();
+        
         this.enabled = enabled;
         if (enabled) {
             Register();
@@ -165,6 +175,14 @@ implements Component,OnDestroyListener{
         Log.i(TAG, "Start the registration process");
         Log.i(TAG, "The sender id is " + SENDER_ID);
         Log.i(TAG, "The server URL is " + SERVER_URL);
+        
+        mBoundGCMIntentService.setSenderID(SENDER_ID);
+        
+//        //save the SENDER ID to sharedPreference for later use
+//        final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit(); 
+//        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID, SENDER_ID);
+//        sharedPrefsEditor.commit();
+              
         AsynchUtil.runAsynchronously(new Runnable() {
             public void run() {
                 final String regId = GCMRegistrar.getRegistrationId(form);

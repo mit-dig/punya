@@ -20,7 +20,17 @@ package com.google.appinventor.components.runtime;
  * Constants used by the GCM library.
  */
 public final class GCMConstants {
+    
+    /**
+     * Preference for the saved Sender ID
+     */
+    public static final String PREFS_GOOGLECLOUDMESSAGING = "googlecloudmessagingPrefs";
 
+    /**
+     * Identification for the saved Sender ID
+     */
+    public static final String PREFS_GCM_SENDER_ID = "__GCM_SENDER_ID__";
+    
     /**
      * Intent sent to GCM to register the application.
      */
