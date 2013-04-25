@@ -238,6 +238,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         Log.i(TAG, "The server URL is " + SERVER_URL);
         
         mBoundGCMIntentService.setSenderID(SENDER_ID);
+        mBoundGCMIntentService.setServerURL(SERVER_URL);
         
 //        //save the SENDER ID to sharedPreference for later use
 //        final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit(); 
@@ -258,7 +259,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                     if (serverRegistration) {
                         Log.i(TAG, "It is registered on the server.");
                     }else{
-                        serverRegistration = GCMServerUtilities.register(form, SENDER_ID);
+                        serverRegistration = GCMServerUtilities.register(form, SENDER_ID,SERVER_URL);
                         // At this point all attempts to register with the app
                         // server failed, so we need to unregister the device
                         // from GCM - the app will try to register again when
@@ -296,7 +297,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         synchronized (gcmLock) {
             GCMRegistrar.unregister(form);
             GCMRegistration = false;
-            GCMServerUtilities.unregister(form, SENDER_ID);
+            GCMServerUtilities.unregister(form, SENDER_ID,SERVER_URL);
             serverRegistration = false;
         }
     }

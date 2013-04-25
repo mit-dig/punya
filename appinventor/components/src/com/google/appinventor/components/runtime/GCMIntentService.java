@@ -19,6 +19,9 @@ import android.util.Log;
 public class GCMIntentService extends GCMBaseIntentService {
 
     private static final String TAG = "GCMIntentService";
+    
+    private String SERVER_URL = "";
+    
     // Set of listeners for any changes of the form
     final HashSet<GCMEventListener> GCMEventListeners = new HashSet<GCMEventListener>();
 
@@ -41,7 +44,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     protected void onRegistered(Context context, String registrationId) {
         Log.i(TAG, "Device registered: regId = " + registrationId);
         //displayMessage(context, getString(R.string.gcm_registered));
-        GCMServerUtilities.register(context, registrationId);
+        GCMServerUtilities.register(context, registrationId,SERVER_URL);
     }
 
     @Override
@@ -49,7 +52,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "Device unregistered");
         //displayMessage(context, getString(R.string.gcm_unregistered));
         if (GCMRegistrar.isRegisteredOnServer(context)) {
-            GCMServerUtilities.unregister(context, registrationId);
+            GCMServerUtilities.unregister(context, registrationId,SERVER_URL);
         } else {
             // This callback results from the call to unregister made on
             // ServerUtilities when the registration to the server failed.
@@ -95,5 +98,9 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     public void setSenderID(String sender_id){
         setSenderIds(sender_id);
+    }
+    
+    public void setServerURL(String url){
+        SERVER_URL = url;
     }
 }

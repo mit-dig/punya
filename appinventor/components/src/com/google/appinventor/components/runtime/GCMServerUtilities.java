@@ -43,7 +43,8 @@ public final class GCMServerUtilities {
     
     private static final String TAG = "ServerUtilities";
     
-    static String SERVER_URL = "http://18.189.6.103:8080";
+    //This need to be dynamically assigne.
+    //static String SERVER_URL = "";
    
 
     /**
@@ -51,7 +52,7 @@ public final class GCMServerUtilities {
      *
      * @return whether the registration succeeded or not.
      */
-    static boolean register(final Context context, final String regId) {
+    static boolean register(final Context context, final String regId, String SERVER_URL) {
         Log.i(TAG, "registering device (regId = " + regId + ")");
         String serverUrl = SERVER_URL + "/register";
         Map<String, String> params = new HashMap<String, String>();
@@ -100,7 +101,7 @@ public final class GCMServerUtilities {
     /**
      * Unregister this account/device pair within the server.
      */
-    static void unregister(final Context context, final String regId) {
+    static void unregister(final Context context, final String regId, String SERVER_URL) {
         Log.i(TAG, "unregistering device (regId = " + regId + ")");
         String serverUrl = SERVER_URL + "/unregister";
         Map<String, String> params = new HashMap<String, String>();
