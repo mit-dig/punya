@@ -261,8 +261,8 @@ OnDestroyListener, Pipeline{
 
   private void unregisterPipelineActions() {
     // TODO Auto-generated method stub
-    mBoundFunfManager.unregisterPipelineAction(this, ProbeBase.ACTION_ARCHIVE_DATA);
-    mBoundFunfManager.unregisterPipelineAction(this, ProbeBase.ACTION_UPLOAD_DATA);
+    mBoundFunfManager.unregisterPipelineAction(this, ACTION_ARCHIVE_DATA);
+    mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);
   }
 
   @Override

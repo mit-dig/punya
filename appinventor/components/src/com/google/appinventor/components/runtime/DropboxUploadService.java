@@ -237,6 +237,9 @@ public class DropboxUploadService extends UploadService {
       } catch (Exception e) {
         // something happen that we can't successfully upload the file to
         // dropbox, and we will tell the UI component
+        for (DropboxExceptionListener lis : allListeners){
+          lis.onExceptionReceived(e);
+        }
       }
  
       if (successUpload) {

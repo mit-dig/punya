@@ -285,7 +285,7 @@ public class Dropbox extends AndroidNonvisibleComponent
   
   public void unregisterPipelineActions() {
     // TODO Auto-generated method stub
-     mBoundFunfManager.unregisterPipelineAction(this, ProbeBase.ACTION_UPLOAD_DATA);   
+     mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);   
     
   }
   
@@ -724,7 +724,8 @@ public class Dropbox extends AndroidNonvisibleComponent
    * 
    */
   @SimpleFunction(description = "Enable to upload the specified db file to remote " +
-  		"storage place for backup. Will first archive the database.")
+  		"storage place for backup. Will first archive the database. By default, if it's database name for" +
+  		"sensor compoent, it should be \"SensorData\"")
   public void UploadDB(String dbName){
     uploadDB(dbName);
     
