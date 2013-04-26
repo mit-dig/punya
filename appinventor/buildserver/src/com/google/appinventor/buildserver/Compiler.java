@@ -366,26 +366,27 @@ public final class Compiler {
       out.write("    </activity>\n");
 
 	  // Add the FUNF probe services
-       
-      out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
-	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
-	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
-	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
+//      out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
+//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
+//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
+//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
 
 	  // new version of configurations to include in the manifest.xml. Now need not include each probe individually, 
 	  // but just include the FunfManager service
-	  out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+    // Broadcast receiver for all funf related component  
+	  if(librariesNeeded.contains("funf.jar")){
+	    out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
       out.write(" </service>\n");  
-	  out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
-	  out.write("    <intent-filter>\n");
-	  out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
-	  out.write("    </intent-filter>\n");
-	  out.write("</receiver>\n");
-	  
+	    out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
+	    out.write("    <intent-filter>\n");
+	    out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
+	    out.write("    </intent-filter>\n");
+	    out.write("</receiver>\n");
+	  }
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
 	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.HttpsUploadService\"></service> \n");
@@ -393,19 +394,20 @@ public final class Compiler {
 	  
 	  
 	  // try the same thing here for TimerManager (Disabled for now)
-	  
-	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.TimerManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+	  // BroadcastReceiver for TimerManager
+	  if(componentTypes.contains("Timer")){
+	    out.write("<service android:name=\"com.google.appinventor.components.runtime.util.TimerManager\" android:enabled=\"true\" android:exported=\"false\">\n");
       out.write(" </service>\n");  
-	  out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\">\n");
-	  out.write("    <intent-filter>\n");
-	  out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
-	  out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
-	  out.write("    </intent-filter>\n");
-	  out.write("</receiver>");
-	  
+      out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\">\n");
+      out.write("    <intent-filter>\n");
+      out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
+      out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
+      out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
+      out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
+      out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
+      out.write("    </intent-filter>\n");
+      out.write("</receiver>");
+	  }
       // BroadcastReceiver for Texting Component
       if (componentTypes.contains("Texting")) {
         System.out.println("Android Manifest: including <receiver> tag");

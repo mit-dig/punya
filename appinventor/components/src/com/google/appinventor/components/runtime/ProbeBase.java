@@ -97,8 +97,8 @@ import edu.mit.media.funf.time.DecimalTimeUnit;
   + "android.permission.INTERNET")
 @UsesLibraries(libraries = "funf.jar")
 public abstract class ProbeBase extends AndroidNonvisibleComponent implements
-SensorComponent, OnDestroyListener, Pipeline{
-
+//SensorComponent, OnDestroyListener, Pipeline{
+SensorComponent, OnDestroyListener{
   protected boolean enabled = false; // run once
   protected boolean enabledSchedule = false; // run periodically
   
@@ -127,73 +127,14 @@ SensorComponent, OnDestroyListener, Pipeline{
   private static final int PROBE_NOTIFICATION_MIN_ID = 8888;
   private static int probeCounter = 0;
   private final int PROBE_NOTIFICATION_ID;
-  
-  // for system operations: archive and upload
-//  urls with 8002 and 8001 ports on air machine for testing previous version server are obsolete 
-//  private static final String UPLOAD_URL = "http://air.csail.mit.edu:8002/connectors/set_funf_data";
-//  private static final String SET_KEY_URL = "http://air.csail.mit.edu:8002/connectors/set_funf_key";
-  
-  //for testing version MITv0.3
-// TODO: move all these configuration to runtime.components.commons
-  
-  private String base_url = "";
-  private String port = "";
-  private static final String UPLOAD_POSTFIX = "/connectors/funf/set_funf_data";
-  private static final String SETKEY_POSTFIX = "/connectors/funf/set_funf_key";
 
-  //The default server URL should be wherever the trustframework server is deployed, else it won't work
-  private static final String UPLOAD_URL = "http://128.30.16.224:8031/connectors/funf/set_funf_data";
-  private static final String SET_KEY_URL = "http://128.30.16.224:8031/connectors/funf/set_funf_key";
-  
-  
-  private int archiveCounter = 0;
-  private static final long UPLOAD_PERIOD = 7200;
-  private static final long ARCHIVE_PERIOD = 3600;
-  private static final String ACCESS_TOKEN_KEY = "accessToken";
-  private static String accessToken;
-  private final SharedPreferences sharedPreferences;
-  private final Handler handler;
-  protected boolean enabledUpload = false;
-  protected boolean enabledArchive = false;
-  protected long archive_period;
-  protected long upload_period;
-  
-  protected static final String ACTION_ARCHIVE_DATA = "ARCHIVE_DATA";
-  protected static final String ACTION_UPLOAD_DATA = "UPLOAD_DATA";
-  private static final boolean DEFAULT_DATA_UPLOAD_ON_WIFI_ONLY = true;
-  
-  // OAuth stuff 
-  
-  private volatile String clientID = null;
-  private volatile String clientSecret = null;
-  
-
-//  final String TOKEN_URL = "http://air.csail.mit.edu:8001/oauth2/token/";
-  private static final String TOKEN_POSTFIX = "/oauth2/token/";
-  final String TOKEN_URL = "http://128.30.16.224:8031/oauth2/token/";
-  
-  
-  final String SCOPE = "funf_write";
-// The below keys/secrets only make sense for MIT internal testing on air 
-  
-//  Fuming's app client info (for Trustframework internal testing)
-//  final String CLIENT_ID = "062044d6b51e39e6eb8066a4516a4a";
-//  final String CLIENT_SECRET = "330c8fa32eb184dea65b6e69f39a16";
-//  Jeff's app client info (for Trustframework internal testing)
-//  final String CLIENT_ID = "a2e864bedc79a3018d1e7fb0bfaadb";
-//  final String CLIENT_SECRET = "38682bffe775dd794404724bd880e4";
-  
-  //for testing purpose for trustframework v0.3
-
-  final String CLIENT_ID = "4bf895513f6dab94f845156ae9fa23";
-  final String CLIENT_SECRET = "293dd97aafda0d2531fb1c61438919";
   
   public static final String PASSWORD_KEY = "PASSWORD";
   
   // save to db
   protected boolean enabledSaveToDB = false; //local for each probe
   
-  private boolean logToFile = true;
+//  private boolean logToFile = true;
   
   
   private Calendar calendar = Calendar.getInstance(Locale.getDefault());
@@ -213,7 +154,7 @@ SensorComponent, OnDestroyListener, Pipeline{
       mBoundFunfManager = ((FunfManager.LocalBinder) service)
           .getManager();
       
-      registerSelfToFunfManager(); 
+//      registerSelfToFunfManager(); 
 
       Log.i(TAG, "Bound to FunfManager");
 
@@ -241,16 +182,12 @@ SensorComponent, OnDestroyListener, Pipeline{
     super(container.$form());
     // TODO Auto-generated constructor stub
 
-    // collectLog();
 
     // Set up listeners
     form.registerForOnDestroy(this);
-    handler = new Handler();
+
     mainUIThreadActivity = container.$context();
 
-    // set upload and archive periods
-    archive_period = ARCHIVE_PERIOD;
-    upload_period = UPLOAD_PERIOD;
 
     // start FunfManger
     Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
@@ -260,10 +197,6 @@ SensorComponent, OnDestroyListener, Pipeline{
     // schedule)
     doBindService();
 
-    // for storing probe config and system configurations
-    sharedPreferences = getSystemPrefs(mainUIThreadActivity);
-
-    accessToken = sharedPreferences.getString(ACCESS_TOKEN_KEY, "");
 
     // assign an unique notification id for each probe to use
     PROBE_NOTIFICATION_ID = getNotificationID();
@@ -294,32 +227,14 @@ SensorComponent, OnDestroyListener, Pipeline{
       // first unrequestData
       unregisterDataRequest();
       // then unregister Pipeline action 
-      unregisterPipelineActions();
+//      unregisterPipelineActions();
       // Detach our existing connection.
       mainUIThreadActivity.unbindService(mConnection);
       mIsBound = false;
     }
   }
 
-  private String getUpLoadURL(){
-    
-    String upLoadURL = (base_url == "")? UPLOAD_URL:base_url + ":" + port + UPLOAD_POSTFIX;
-    
-    return upLoadURL;
-  }
-  
-  private String getSetKeyURL(){
-    String setKeyURL = (base_url == "")? SET_KEY_URL:base_url + ":" + port + SETKEY_POSTFIX;
-    
-    return setKeyURL; 
-    
-  }
-  
-  private String getTokenURL(){
-    
-    String getTokenURL = (base_url == "")? TOKEN_URL:base_url + ":" + port + TOKEN_POSTFIX;
-    return getTokenURL;
-  }
+
   
   protected JsonElement getDataRequest(int interval, int duration, String probeName) {
     // This will set the schedule to FunfManger for this probe
@@ -410,17 +325,6 @@ SensorComponent, OnDestroyListener, Pipeline{
     doUnbindService();
   }
   
-  // below are functions for saving to DB and httpArchive
-  
-  public void archiveData() {
-
-    Intent i = new Intent(mainUIThreadActivity, NameValueDatabaseService.class);
-    Log.i(TAG, "archiving data....archive count:" + archiveCounter++);
-    i.setAction(DatabaseService.ACTION_ARCHIVE);
-    i.putExtra(DatabaseService.DATABASE_NAME_KEY, PROBE_BASE_NAME);
-    mainUIThreadActivity.startService(i);
-
-  }
   
   
   public static final String PROBE_BASE_NAME = "SensorData";
@@ -429,19 +333,6 @@ SensorComponent, OnDestroyListener, Pipeline{
     return HttpsUploadService.class;
   }
   
-  public void uploadData(boolean wifiOnly) {
-    archiveData();
-    String archiveName = PROBE_BASE_NAME;
-//    String uploadUrl = UPLOAD_URL;
-    String uploadUrl = getUpLoadURL();
-    Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
-    i.putExtra(UploadService.ARCHIVE_ID, archiveName);
-    i.putExtra(UploadService.REMOTE_ARCHIVE_ID, uploadUrl);
-    i.putExtra(UploadService.NETWORK,
-        (wifiOnly) ? UploadService.NETWORK_WIFI_ONLY
-            : UploadService.NETWORK_ANY);
-    mainUIThreadActivity.startService(i);
-  }
   
   public static SharedPreferences getSystemPrefs(Context context) {
     // TODO Auto-generated method stub
@@ -449,276 +340,6 @@ SensorComponent, OnDestroyListener, Pipeline{
         + "_system", android.content.Context.MODE_PRIVATE);
   }
   
-  /**
-   * Indicates when the login for uploading data has been successful.
-   */
-  @SimpleEvent(description =
-               "This event is raised after the program calls " +
-               "<code>Authorize</code> if the authorization was successful.  " +
-               "After this event has been raised, enableUpload() can be called. " +
-               "Another way to check if upload action is authorized, is to check " +
-               "whether the token exists with <code>HasAuthorizedToken()</code>")
-               
-  public void UploadIsAuthorized() {
-    Log.i(TAG, "UploadIsAuthorized");
-    mainUIThreadActivity.runOnUiThread(new Runnable() {
-      public void run() {
-        Log.i(TAG, "UploadIsAuthorized() is called");
-        EventDispatcher.dispatchEvent(ProbeBase.this,
-            "UploadIsAuthorized");
-      }
-    });
-
-  }
-  
-//  
-//    /**
-//     * Authenticate to TrustFramework using OAuth
-//     */
-//    @SimpleFunction(
-//        description = "Redirects user to login to Trust Framework via the Http and " +
-//                      "obtain the accessToken if we don't already have authorization.")
-//  public void Authorize(String username, String password) {
-//    // if success, write access_token = prefs.getString("accessToken", "");
-//    // as true into SharedPreference,
-//      final String myUsername = username;
-//      final String myPassword = password;
-//      
-//      final String _clientId = (clientID == null)? CLIENT_ID:clientID;
-//      final String _clientSecret = (clientSecret == null)? CLIENT_SECRET:clientSecret;
-//      
-//      final String authHeader = Base64Coder.encodeString(_clientId + ":" + _clientSecret);
-//      final String _uploadURL = this.getUpLoadURL();
-//      
-//      Log.i(TAG, "_clientId:" + _clientId);
-//      Log.i(TAG, "_clientSecret:" + _clientSecret);
-//      Log.i(TAG, "authHeader:" + authHeader);
-//      
-//    AsynchUtil.runAsynchronously(new Runnable() {
-//      public void run() {
-//
-//        try {
-//          HttpClient httpclient = new DefaultHttpClient();
-//          HttpPost httppost = new HttpPost(getTokenURL());
-//          List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
-//              2);
-//
-//          nameValuePairs.add(new BasicNameValuePair("grant_type",
-//              "password"));
-//
-//          nameValuePairs.add(new BasicNameValuePair("scope", SCOPE));
-//          nameValuePairs.add(new BasicNameValuePair("username",
-//              myUsername));
-//          nameValuePairs.add(new BasicNameValuePair("password",
-//              myPassword));
-//          
-//          nameValuePairs.add(new BasicNameValuePair("client_id",
-//              _clientId));
-//          nameValuePairs.add(new BasicNameValuePair("client_secret",
-//              _clientSecret));
-//          httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-//          
-//          httppost.addHeader(
-//              "AUTHORIZATION",
-//              "basic "
-//                  + authHeader);
-//
-//          
-//          Log.i(TAG, "URI:" + httppost.getURI());
-//          Log.i(TAG, "Before sending http request for accessToken");
-//          
-//          HttpResponse response = httpclient.execute(httppost);
-//          
-//          if (response == null) {
-//            throw new Exception("Http respone is null");
-//
-//          }
-//          JsonObject json = getResponseJSON(response)
-//              .getAsJsonObject();
-//          Log.i(TAG, "return json:" + json);
-//
-//          //String error = json.get("error").getAsString();
-// 
-//          JsonElement error = json.get("error");
-//          Log.i(TAG, "Never here1, something broke before");
-//          String access_token = json.get("access_token")
-//                .getAsString();
-//          Log.i(TAG, "Never here2, something broke before");
-//          String refresh_token = json.get("refresh_token")
-//                .getAsString();
-//          Log.i(TAG, "Never here3, something broke before");
-//          Long expire_in = json.get("expires_in").getAsLong();
-// 
-//          Log.i(TAG, "Never here4, something broke before");
-//          
-//          if (json == null) {
-//            Log.e(TAG, "Could not parse http response into json");
-//            throw new Exception(
-//                "Http rsponse could not be parsed into json");
-//          }
-//          // else if(json.containsKey("error"))
-//          else if (error != null) {
-//            Log.e(TAG,
-//                "Http rsponse to token request contained an error");
-//            throw new Exception(
-//                "Http rsponse to token request contained an error");
-//          } else if (access_token != null & refresh_token != null
-//              & expire_in != null) {
-//            // validate the oauth response with included access and
-//            // refresh
-//            // token
-//            Log.i(TAG, "Obtained Token" + access_token);
-//            Editor editor = sharedPreferences.edit();
-//            editor.putString(ACCESS_TOKEN_KEY, access_token);
-//            editor.putString("refreshToken", refresh_token);
-//            editor.putString("expiresIn", String.valueOf(expire_in));
-//            editor.putString("uploadURL", _uploadURL);
-//            editor.commit();
-//
-//          } else// the token was invalid
-//          {
-//            Log.e(TAG, "Unexpected error in getting token response");
-//            throw new Exception(
-//                "Unexpected error in getting token response");
-//          }
-//
-//          if (true) {
-//            if (!sharedPreferences.contains("PASSWORD")) {
-//              try {
-//                getDataPassword(sharedPreferences);
-//                List<NameValuePair> funfnameValuePairs = new ArrayList<NameValuePair>(1);
-//
-//                funfnameValuePairs.add(new BasicNameValuePair(
-//                    "funf_key", sharedPreferences
-//                        .getString("PASSWORD", "")));
-//                funfnameValuePairs.add(new BasicNameValuePair("overwrite", "true"));
-//
-//                sendAuthorizedGetRequest(funfnameValuePairs, getSetKeyURL(), 
-//                    sharedPreferences);
-//                 
-//                //tell App Inventor now everything is all set!
-//                handler.post(new Runnable() {
-//                  @Override
-//                  public void run() {
-//                    UploadIsAuthorized();
-//                  }
-//                });
-//
-//              } catch (Exception e) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
-//              }
-//
-//            }
-//
-//          } else {
-//
-//            Log.e(TAG, "Server returned an invlid access token.");
-//            throw new Exception(
-//                "Server returned an invlid access token.");
-//          }
-//
-//        } catch (NetworkErrorException e) {
-//          //need to have more different type of exception here. Look at Twitter component
-//          Log.e(TAG, "exception:", e);
-//        }
-//        catch (Exception e){
-//                form.dispatchErrorOccurredEvent(ProbeBase.this, "Authorize",
-//                        ErrorMessages.ERROR_WEB_UNABLE_TO_GET, e.getMessage());
-//        }
-//      }
-//    });
-//
-//  }
-//    
-//  /**
-//   * Indicates whether the app has the access token or not
-//   *  
-//   */
-//   @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-//    public boolean HasAuthorizedToken() {
-//      String token = getSystemPrefs(mainUIThreadActivity).getString(this.ACCESS_TOKEN_KEY, "");
-//      return (token=="")? false:true;
-//    }
-//  
-// 
-//    
-//    public JsonElement getResponseJSON(HttpResponse response) throws Exception {
-//        try {
-//          HttpEntity ht = response.getEntity();
-//          BufferedHttpEntity buf = new BufferedHttpEntity(ht);
-//          InputStream is = buf.getContent();
-//          BufferedReader r = new BufferedReader(new InputStreamReader(is));
-//
-//          StringBuilder total = new StringBuilder();
-//          String line;
-//          while ((line = r.readLine()) != null) {
-//            total.append(line);
-//          }
-//          JsonParser jsonParser = new JsonParser();
-//          //JSONParser parser = new JSONParser();
-//          JsonElement json = jsonParser.parse(total.toString());
-//            if(json == null)
-//            {
-//              Log.e(TAG, "Could not parse http response into json");
-//              throw new Exception("Http rsponse could not be parsed into json");
-//            }
-//
-//          return json;
-//        } catch(IOException ex) {
-//          Log.e("GetAccessToken", "IOException " +ex.getMessage());
-//          return null;
-//        } catch(JsonParseException ex) {
-//          Log.e("GetAccessToken", "ParseException " +ex.getMessage());
-//          return null;
-//        }
-//      }
-//
-//    
-//  public String getDataPassword(SharedPreferences prefs) {
-//
-//    if (prefs.contains(PASSWORD_KEY))
-//      return prefs.getString(PASSWORD_KEY, null);
-//    String password = prefs.getString(PASSWORD_KEY, null);
-//    if (password == null) {
-//      // Set the password in the pipeline the first time it is created
-//      // password = randomPassword().substring(0, 8);//our service only
-//      // supports 8 chars...there might be a better way to do this.
-//      password = "changeme"; 
-//      prefs.edit().putString(PASSWORD_KEY, password).commit();
-//
-//      // TODO: queue UUID, password to be sent to server
-//    }
-//    // password = "changeme";
-//    Log.i(TAG, "Password set to: " + password);
-//    return password;
-//  }   
-  
-//  
-//    public static HttpResponse sendAuthorizedGetRequest(List<NameValuePair> nameValuePairs, String url, SharedPreferences prefs) throws Exception {
-//      HttpResponse response = null;
-//      try {
-//        HttpClient httpclient = new DefaultHttpClient();
-//        String access = prefs.getString("accessToken", "");
-//        BasicNameValuePair pair = new BasicNameValuePair("bearer_token", access);
-//        if (nameValuePairs == null) {
-//          nameValuePairs = new ArrayList<NameValuePair>(1);
-//        }
-//        nameValuePairs.add(pair);
-//      String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
-//        url += "?" + paramString; 
-//        HttpGet httpget = new HttpGet(url);
-//        httpget.setHeader("Authorization", "Bearer "+prefs.getString("accessToken", null));
-//        response = httpclient.execute(httpget);
-//      } 
-//      catch (IOException ex) {
-//      
-//
-//
-//      }
-//      return response;
-//
-//    }
   
     
   protected void saveToDB(IJsonObject completeProbeUri, IJsonObject data){
@@ -745,37 +366,7 @@ SensorComponent, OnDestroyListener, Pipeline{
 
   }
   
-  
-  /**
-   * Indicates whether the phone will periodically upload all sensed data in the DB to the 
-   * remote server (trust framework server)
-   * 
-   * @param enabledUpload
-   *            if true, will upload data from DB periodically according to
-   *            upload_period
-   */
 
-  @SimpleFunction(description = "Upload all sensed data in DB to remote server")
-  public void EnabledUpload(boolean enabledUpload) {
-
-    if (this.enabledUpload != enabledUpload)
-      this.enabledUpload = enabledUpload;
-    
-    
-    Schedule uploadPeriod = new Schedule.BasicSchedule(
-        BigDecimal.valueOf(upload_period), BigDecimal.ZERO, false,
-        false);
-
-    if (enabledUpload) {
-
-      mBoundFunfManager.registerPipelineAction(this,
-          ProbeBase.ACTION_UPLOAD_DATA, uploadPeriod);
-    } else {
-      
-      mBoundFunfManager.unregisterPipelineAction(this, ProbeBase.ACTION_UPLOAD_DATA);
-    } 
-
-  }
   
   
   /**
@@ -788,191 +379,6 @@ SensorComponent, OnDestroyListener, Pipeline{
     
   }
   
-//  
-//    /**
-//     * OAuth2 ClientID property getter method.
-//     */
-//    @SimpleProperty(
-//        category = PropertyCategory.BEHAVIOR)
-//    public String ClientID() {
-//      return clientID;
-//    }
-//  
-//    /**
-//     * OAuth2 ClientID property setter method: sets the consumer key to be used
-//     * when authorizing with TrustFramework via OAuth.
-//     *
-//     * @param consumerKey the key for use in Twitter OAuth
-//     */
-//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-//        defaultValue = "")
-//    @SimpleProperty
-//    public void ClientID(String clientID) {
-//      this.clientID = clientID;
-//    }  
-//    
-//    /**
-//     * OAuth2 ClientSecret property getter method.
-//     */
-//    @SimpleProperty(
-//        category = PropertyCategory.BEHAVIOR)
-//    public String ClientSecret() {
-//      return clientSecret;
-//    }
-//    
-//
-//    /**
-//     * OAuth2 ClientSecret setter method: sets the client secret to be used
-//     * when authorizing with Trustframework via OAuth2.
-//     *
-//     * @param consumerSecret the secret for use in Twitter OAuth
-//     */
-//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-//        defaultValue = "")
-//    @SimpleProperty
-//    public void ClientSecret(String clientSecret) {
-//      this.clientSecret = clientSecret;
-//    }
-//    
-//    
-//    /**
-//     * Return storage server URL.
-//     */
-//    @SimpleProperty(
-//        category = PropertyCategory.BEHAVIOR)
-//    public String StorageServerURL() {
-//      return this.base_url;
-//    }
-//  
-//    /**
-//     * Set the URL of the remote data storage server
-//     *
-//     * @param consumerKey the key for use in Twitter OAuth
-//     */
-//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-//        defaultValue = "http://some.server.addr")
-//    @SimpleProperty
-//    public void StorageServerURL(String serverURL) {
-//      this.base_url = serverURL;
-//    }  
-//    
-//    /**
-//     * Return storage server port.
-//     */
-//    @SimpleProperty(
-//        category = PropertyCategory.BEHAVIOR)
-//    public String StorageServerPort() {
-//      return this.port;
-//    }
-//  
-//    /**
-//     * Set the network connection port for the remote data storage server
-//     *
-//     * @param consumerKey the key for use in Twitter OAuth
-//     */
-//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-//        defaultValue = "8031")
-//    @SimpleProperty
-//    public void StorageServerPort(String port) {
-//      this.port = port;
-//    }  
-//    
-
-  
-  /**
-   * Indicates whether the phone will periodically upload all sensed data in the 
-   * DB to the remote server (trust framework server)
-   * 
-   * @param enabledArchive
-   *            if true, will archive DB periodically according to archive_period
-   *             
-   */
-  
-  
-  @SimpleFunction(description = "Upload all sensed data in DB to remote server")
-  public void EnabledArchive(boolean enabledArchive) {
-
-    if (this.enabledArchive != enabledArchive)
-      this.enabledArchive = enabledArchive;
-    
-    
-    Schedule archivePeriod = new Schedule.BasicSchedule(
-        BigDecimal.valueOf(archive_period), BigDecimal.ZERO, false,
-        false);
-
-    if (enabledArchive) {
-      Log.i(TAG, "enable archive! :" + archivePeriod);
-      mBoundFunfManager.registerPipelineAction(this,
-          ProbeBase.ACTION_ARCHIVE_DATA, archivePeriod);
-    } else {
-      Log.i(TAG, "disable archive! :" + archivePeriod);
-      mBoundFunfManager.unregisterPipelineAction(this, ProbeBase.ACTION_ARCHIVE_DATA);
-    } 
-
-  }
-  
-  /**
-   * Indicates the duration of the interval for a re-occurring archive activity for DB
-   */
-  @SimpleFunction(description = "Set the schedule for Archiving service")
-  public void SetScheduleArchive(int newArchivePeriod) {
-
-    this.archive_period = newArchivePeriod;
-
-  }
-  
-  /**
-   * Indicates the duration of the interval for a re-occurring upload activity for DB to remote server
-   */
-  @SimpleFunction(description = "Set the schedule for Archiving service")
-  public void SetScheduleUpload(int newUploadPeriod) {
-
-    this.upload_period = newUploadPeriod;
-
-  }
-  
-  
-  
-  @Override
-  public void onCreate(FunfManager manager) {
-    // This function will run once whenever FunfManager.registerPipeline() is called
-    
-    //do nothing for now
-  }
-  @Override
-  public void onRun(String action, JsonElement config){
-    if (ACTION_ARCHIVE_DATA.equals(action)) {
-      Log.i(TAG, "Run pipe's action archive data");
-      archiveData();
-
-    }
-    if (ACTION_UPLOAD_DATA.equals(action)) {
-      // Do something else
-      Log.i(TAG, "Run pipe's action UPLOAD_DATA");
-      uploadData(DEFAULT_DATA_UPLOAD_ON_WIFI_ONLY);
-
-    }   
-    
-  }
-  
-  /*
-   * After we bind to FunfManger, we have to register self to Funf as a Pipeline. 
-   * This is for later to be wakened up and do pipe actions like archiving and uploading 
-   */
-  private void registerSelfToFunfManager(){
-    Log.i(TAG, "register self(probeBase) as a Pipeline to FunfManger");
-    mBoundFunfManager.registerPipeline(PROBE_BASE_NAME, this);
-    
-  }
-  
-
-  public void unregisterPipelineActions() {
-    // TODO Auto-generated method stub
-     mBoundFunfManager.unregisterPipelineAction(this, ProbeBase.ACTION_ARCHIVE_DATA);
-     mBoundFunfManager.unregisterPipelineAction(this, ProbeBase.ACTION_UPLOAD_DATA);
-      
-    
-  }
   
   
   /**
