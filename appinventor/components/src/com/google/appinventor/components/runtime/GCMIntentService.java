@@ -24,6 +24,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     // Set of listeners for any changes of the form
     final HashSet<GCMEventListener> GCMEventListeners = new HashSet<GCMEventListener>();
+    final HashSet<GCMEventListener> GCMRegEventListeners = new HashSet<GCMEventListener>();
 
     public GCMIntentService() {
 //        super("895146158148"); 
@@ -43,8 +44,13 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, String registrationId) {
         Log.i(TAG, "Device registered: regId = " + registrationId);
-        //displayMessage(context, getString(R.string.gcm_registered));
-        GCMServerUtilities.register(context, registrationId,SERVER_URL);
+        boolean success = GCMServerUtilities.register(context, registrationId,SERVER_URL);
+        if(success){
+            for (GCMEventListener listener : GCMRegEventListeners) {
+                listener.onMessageReceived("success");
+                Log.i(TAG, "Listener:" + listener.toString());
+              }    
+        }      
     }
 
     @Override
@@ -91,9 +97,15 @@ public class GCMIntentService extends GCMBaseIntentService {
       return mGenerator.nextInt(100);
     }
     
-    public void requestGCMMessage(GCMEventListener listener){
+    // This is a method for App Inventor's component to receive two types of messages from Google GCM
+    // 1. general GCM message 2. registeration finished message
+    public void requestGCMMessage(GCMEventListener listener, String type){
         //add the listener to the list of listerners
-        GCMEventListeners.add(listener);
+        if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
+            GCMEventListeners.add(listener);
+        else{//for registeration type of messages
+            GCMRegEventListeners.add(listener);
+        }
     }
     
     public void setSenderID(String sender_id){

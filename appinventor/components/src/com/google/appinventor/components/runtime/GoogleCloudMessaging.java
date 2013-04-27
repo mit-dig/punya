@@ -11,7 +11,6 @@ import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
-import com.google.appinventor.components.runtime.util.DropboxUtil;
 
 import android.R;
 import android.app.Activity;
@@ -86,12 +85,10 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     protected boolean mIsBound = false;
     protected GCMIntentService mBoundGCMIntentService = null;
     private final String TAG = "GoogleCloudMessaging";
-    public static final String INIT_INTENTSERVICE_ACTION = "bind_init"; // do
-                                                                        // nothing
-
-    // gcmLock synchronizes uses of any/all gcm objects
-    // in this class. As far as I can tell, these objects are not thread-safe
-    private final Object gcmLock = new Object();
+    public static final String INIT_INTENTSERVICE_ACTION = "bind_init"; 
+    
+    protected static final String REG_GCM_TYPE = "reg";
+    protected static final String MESSAGE_GCM_TYPE = "message";
 
     // the following fields should only be accessed from the UI thread
     private volatile String SERVER_URL = "";
@@ -103,10 +100,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     protected Activity mainUIThreadActivity;
 
     private String gcmMessage = "";
-    private boolean serverRegistration = false;
+    private boolean ServerRegistration = false;
     private boolean GCMRegistration = false;
     
-    private final Handler handler;
+    private String regId="";
+    private static final String REG_ID_TAG = "RegistrationId";
+    private final SharedPreferences sharedPreferences;
 
     // private final SharedPreferences sharedPreferences;
 
@@ -115,22 +114,38 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
         // Set up listeners
         mainUIThreadActivity = container.$context();
-        handler = new Handler();
-        // sharedPreferences =
-        // container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,
-        // Context.MODE_PRIVATE);
-
+        sharedPreferences = container.$context().getSharedPreferences("GoogleCloudMessaging",Context.MODE_PRIVATE);
+        regId = retrieveRegId();
+        
+        // get Notification Manager
+        String ns = Context.NOTIFICATION_SERVICE;
+        mNM = (NotificationManager) mainUIThreadActivity.getSystemService(ns);
+        
         // start GCMIntentService
         Intent i = new Intent(mainUIThreadActivity, GCMIntentService.class);
         i.setAction(INIT_INTENTSERVICE_ACTION);
-        GCMBaseIntentService
-                .runIntentInService(
-                        mainUIThreadActivity,
-                        i,
-                        GCMBroadcastReceiver
-                                .getDefaultIntentServiceClassName(mainUIThreadActivity));
+        GCMBaseIntentService.runIntentInService(mainUIThreadActivity,i,
+                GCMBroadcastReceiver.getDefaultIntentServiceClassName(mainUIThreadActivity));
         doBindService();
     }
+    
+    private String retrieveRegId() {
+        String reg_id = sharedPreferences.getString(REG_ID_TAG, "");
+        if (reg_id.length() == 0 ) {
+          return "";
+        }
+        return reg_id;
+      }
+    
+    private void saveRegId(String reg_id) {
+        final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+        if (regId == null) {
+          sharedPrefsEditor.remove(REG_ID_TAG);
+        } else {
+          sharedPrefsEditor.putString(REG_ID_TAG, reg_id);
+        }
+        sharedPrefsEditor.commit();
+      }
 
     @Override
     public void onDestroy() {
@@ -161,46 +176,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
     public boolean ServerRegistration() {
-        return serverRegistration;
+        return ServerRegistration;
     }
 
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
     public boolean GCMRegistration() {
         return GCMRegistration;
-    }
-
-    /**
-     * Indicates when the server registration has been successful.
-     */
-    @SimpleEvent()
-    public void IsRegisteredOnServer() {
-        Log.i(TAG, "Waiting to receive info from the server.");
-        if (enabled) {
-            mainUIThreadActivity.runOnUiThread(new Runnable() {
-                public void run() {
-                    Log.i(TAG, "IsRegisteredOnServer() is called");
-                    EventDispatcher.dispatchEvent(GoogleCloudMessaging.this,
-                            "IsRegisteredOnServer");
-                }
-            });
-        }
-    }
-
-    /**
-     * Indicates when the GCM registration has been successful.
-     */
-    @SimpleEvent()
-    public void IsRegisteredOnGCM() {
-        Log.i(TAG, "Waiting to receive info from the server.");
-        if (enabled) {
-            mainUIThreadActivity.runOnUiThread(new Runnable() {
-                public void run() {
-                    Log.i(TAG, "IsRegisteredOnGCM() is called");
-                    EventDispatcher.dispatchEvent(GoogleCloudMessaging.this,
-                            "IsRegisteredOnGCM");
-                }
-            });
-        }
     }
 
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
@@ -227,7 +208,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             UnRegister();
         }
     }
-
+    
+    @SimpleFunction()
+    public boolean isRegistered(){
+        return GCMRegistrar.isRegisteredOnServer(form);
+    }
+    
     /**
      * Authenticate to Google Cloud Messaging
      */
@@ -236,70 +222,61 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         Log.i(TAG, "Start the registration process");
         Log.i(TAG, "The sender id is " + SENDER_ID);
         Log.i(TAG, "The server URL is " + SERVER_URL);
-        
+
         mBoundGCMIntentService.setSenderID(SENDER_ID);
         mBoundGCMIntentService.setServerURL(SERVER_URL);
-        
-//        //save the SENDER ID to sharedPreference for later use
-//        final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit(); 
-//        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID, SENDER_ID);
-//        sharedPrefsEditor.commit();
-              
+
         AsynchUtil.runAsynchronously(new Runnable() {
             public void run() {
-                final String regId = GCMRegistrar.getRegistrationId(form);
-                if (regId.equals("")) {
-                    Log.i(TAG, "The divice is NOT registered on the server.");
-                    GCMRegistrar.register(form, SENDER_ID);
-                    Log.i(TAG, "After the registration process.");
-                } else {
-                    Log.i(TAG, "The registration id is not empty.");
-                    GCMRegistration = true;
-                    serverRegistration = GCMRegistrar.isRegisteredOnServer(form);
-                    if (serverRegistration) {
-                        Log.i(TAG, "It is registered on the server.");
-                    }else{
-                        serverRegistration = GCMServerUtilities.register(form, SENDER_ID,SERVER_URL);
-                        // At this point all attempts to register with the app
-                        // server failed, so we need to unregister the device
-                        // from GCM - the app will try to register again when
-                        // it is restarted. Note that GCM will send an
-                        // unregistered callback upon completion, but
-                        // GCMIntentService.onUnregistered() will ignore it.
-                        if (!serverRegistration) {
-                            GCMRegistrar.unregister(form);
-                            GCMRegistration = false;
-                            Log.i(TAG, "Registering on the server failed, unregister itself from the GCM.");
-                        } 
+                try {
+                    final String regId = GCMRegistrar.getRegistrationId(form);                    
+                    if (regId.equals("")) {
+                        // Automatically registers application
+                        GCMRegistrar.register(form, SENDER_ID);
+                    } else {
+                        // Device is already registered on GCM, check server.
+                        if (GCMRegistrar.isRegisteredOnServer(form)) {
+                            // Skips registration.
+                        } else {
+                            // Try to register again, but not in the UI thread.
+                            // It's also necessary to cancel the thread onDestroy(),
+                            // hence the use of AsyncTask instead of a raw thread.
+
+                            ServerRegistration = GCMServerUtilities.register(form, regId,SERVER_URL);
+                            // At this point all attempts to register with the app
+                            // server failed, so we need to unregister the device
+                            // from GCM - the app will try to register again when
+                            // it is restarted. Note that GCM will send an
+                            // unregistered callback upon completion, but
+                            // GCMIntentService.onUnregistered() will ignore it.
+                            if (!ServerRegistration) {
+                                GCMRegistrar.unregister(form);
+                            }
+                        }
                     }
+                    
+                    if (ServerRegistration && GCMRegistration) {
+                        Log.i(TAG, "stop the runnable");
+                        return;
+                    }
+                } catch (Exception e) {
+                    Log.i(TAG, "within the exception");
+                    UnRegister();
                 }
-                
-                if(serverRegistration){
-                    IsRegisteredOnServer();
-                }
-                
-                if(GCMRegistration){
-                    IsRegisteredOnGCM();
-                }
-                
-                if (serverRegistration && GCMRegistration){
-                    return;
-                }   
             }
         });
     }
-
+    
     /**
      * Remove authentication for this app instance
      */
     @SimpleFunction(description = "Removes the GCM authorization from this running app instance")
     public void UnRegister() {
-        synchronized (gcmLock) {
-            GCMRegistrar.unregister(form);
-            GCMRegistration = false;
-            GCMServerUtilities.unregister(form, SENDER_ID,SERVER_URL);
-            serverRegistration = false;
-        }
+        saveRegId(null);
+        GCMServerUtilities.unregister(form, SENDER_ID, SERVER_URL);
+        GCMRegistrar.unregister(form);
+        ServerRegistration = false;
+        GCMRegistration = false;
     }
 
     /**
@@ -318,6 +295,25 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             });
         }
     }
+    
+    /**
+     * Indicates when the server registration has been successful.
+     */
+    @SimpleEvent()
+    public void RegInfoReceived() {
+        GCMRegistration = true;
+        ServerRegistration = true;
+        Log.i(TAG, "Waiting to receive GCM Registration info from the GCM Service.");
+        if (enabled) {
+            mainUIThreadActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Log.i(TAG, "RegInfoReceived() is called");
+                    EventDispatcher.dispatchEvent(GoogleCloudMessaging.this,
+                            "RegInfoReceived");
+                }
+            });
+        }
+    }
 
     // try local binding to FunfManager
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -330,7 +326,9 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             mBoundGCMIntentService = ((GCMIntentService.LocalBinder) service)
                     .getService();
             Log.i(TAG, "Bound to GCMIntentService");
-            registerGCMEvent();
+            registerGCMEvent(regListener, REG_GCM_TYPE);
+            registerGCMEvent(msgListener, MESSAGE_GCM_TYPE);
+            
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -364,7 +362,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         }
     }
 
-    final Handler myHandler = new Handler() {
+    final Handler msgHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             gcmMessage = msg.obj.toString();
@@ -374,24 +372,50 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         }
     };
 
-    GCMEventListener listener = new GCMEventListener() {
+    GCMEventListener msgListener = new GCMEventListener() {
         @Override
         public void onMessageReceived(String msg) {
             // through the event handler
             Log.i(TAG, "Received one message from the listener");
-            Message message = myHandler.obtainMessage();
+            Message message = msgHandler.obtainMessage();
             if (msg == null) {
                 msg = "This is a dummy message.";
             }
             message.obj = msg;
-            myHandler.sendMessage(message);
+            msgHandler.sendMessage(message);
         }
     };
+    
 
-    public void registerGCMEvent() {
-        this.mBoundGCMIntentService.requestGCMMessage(listener);
+    final Handler regHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            gcmMessage = msg.obj.toString();
+            Log.i(TAG, " before call RegInfoReceived()");
+            RegInfoReceived();
+            Log.i(TAG, " after call RegInfoReceived()");
+        }
+    };
+    
+    GCMEventListener regListener = new GCMEventListener() {
+        @Override
+        public void onMessageReceived(String msg) {
+            // through the event handler
+            Log.i(TAG, "Received one message from the listener");
+            Message message = regHandler.obtainMessage();
+            if (msg == null) {
+                msg = "This is a dummy message.";
+            }
+            message.obj = msg;
+            regHandler.sendMessage(message);
+        }
+    };
+    
+
+    public void registerGCMEvent(GCMEventListener listener, String eventType) {
+        this.mBoundGCMIntentService.requestGCMMessage(listener, eventType);
     }
-
+    
     /*
      * Add notification with some message and the app (actually it's
      * app.Screen1) it wants to activate
