@@ -252,6 +252,7 @@ public class YaVersion {
   // - The Dropbox component was added
   // For YOUNG_ANDROLD_VERSION 90;
   // - The LinkedDataViz component was added
+  // TODO: NEED TO FIX THE TOTAL VERSION 
     
  
   public static final int YOUNG_ANDROID_VERSION = 90;
@@ -675,4 +676,6 @@ public class YaVersion {
   public static final int SEMANTIC_WEB_COMPONENT_VERSION = 1;
   
   public static final int LINKED_DATA_COMPONENT_VERSION = 1;
+  
+  public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
 }
