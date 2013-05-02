@@ -180,8 +180,8 @@ public class Dropbox extends AndroidNonvisibleComponent
 
       mBoundDropboxService = ((DropboxUploadService.LocalBinder) service)
           .getService();
-      
-      registerSelfToFunfManager(); 
+      //Note: remove it by Fuming (should not cause any problem)
+      //registerSelfToFunfManager(); 
       registerExceptionListener();
       Log.i(TAG, "Bound to DropboxUploadService");
 
