@@ -1,9 +1,8 @@
 package com.google.appinventor.components.runtime;
 
-import java.io.Serializable;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,17 +13,20 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.dropbox.client2.session.AccessTokenPair;
 import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.DropboxUtil;
 import com.google.appinventor.components.runtime.util.OAuth2Helper;
 import com.google.gson.JsonElement;
 
 import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.pipeline.Pipeline;
+import edu.mit.media.funf.storage.UploadService;
 
 
 @DesignerComponent(version = YaVersion.GOOGLE_DRIVE_COMPONENT_VERSION,
@@ -60,9 +62,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   public static final String AUTH_TOKEN_TYPE_GOOGLEDRIVE = "oauth2:https://www.googleapis.com/auth/drive";
 
   private String authTokenType = AUTH_TOKEN_TYPE_GOOGLEDRIVE;
-  private AccessToken accessToken;
+  private AccessToken accessTokenPair;
   
   private long upload_period;
+  private boolean wifiOnly = false;
 
   // try local binding to FunfManager
   private ServiceConnection mConnection = new ServiceConnection() {
@@ -118,9 +121,8 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     this.container = container;
 
     handler = new Handler();
-    sharedPreferences = container.$context().getSharedPreferences(GoogleDrive.PREFS_GOOGLEDRIVE,
-        Context.MODE_PRIVATE);
-    accessToken = retrieveAccessToken();
+    sharedPreferences = container.$context().getPreferences(Context.MODE_PRIVATE);
+    accessTokenPair = retrieveAccessToken();
     mainUIThreadActivity = container.$context();
     // start a FunfManager Service
     Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
@@ -222,6 +224,31 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   };
   
   /**
+   * Indicates whether the user has specified that the component could only 
+   * use Wifi to upload file(s). If this value is set to False, the GoogleDrive
+   * uploader will use either Wifi or 3G/4G dataservice, whichever is available.
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
+  @SimpleProperty(description = "If this value is set to False, the GoogleDrive " +
+  		"uploader will use either Wifi or 3G/4G dataservice, whichever is available")
+  public void WifiOnly(boolean wifiOnly) {
+
+    if (this.wifiOnly != wifiOnly)
+      this.wifiOnly = wifiOnly;
+
+  }
+  
+  /**
+   * Indicates whether the user has specified that the GoogleDrive component could only 
+   * use Wifi to upload data
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR, description = "uploader will" +
+  		" use either Wifi or 3G/4G dataservice, whichever is available")
+  public boolean WifiOnly() {
+    return wifiOnly;
+  }
+  
+  /**
    * Start OAuth2 Authentication to ask for user's permission for using Google Drive
    */
   @SimpleFunction(
@@ -232,8 +259,47 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // we will call OAuth2Helper.getrefreshToken once here
     // This will help us getting the main Google Account name, and auth token for the first time
     // we will persist these two in sharedPreference
-    GoogleDriveAuthTask(this)
+  	new GoogleDriveAuthTask(mainUIThreadActivity).execute();
     
+  }
+  
+  /**
+   * Check whether we already have already the Google Drive access token
+   */
+  @SimpleFunction(
+      description = "Checks whether we already have access token already, " +
+      		"if so, return True")
+  public boolean CheckAuthorized() {
+    String accountName =  accessTokenPair.accountName;
+    String token =  accessTokenPair.accountName;
+    if (accountName.length() == 0 || token.length() == 0) {
+      return false;
+    }
+    else
+      return true;
+
+  } 
+  
+  /**
+   * Remove authentication for this app instance
+   */
+  @SimpleFunction(
+      description = "Removes Google Drive authorization from this running app instance")
+  public void DeAuthorize() {
+    accessTokenPair = null;
+    saveAccessToken(accessTokenPair);
+  } 
+  
+  private void saveAccessToken(AccessToken accessToken) {
+    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    if (accessToken == null) {
+      sharedPrefsEditor.remove(OAuth2Helper.PREF_ACCOUNT_NAME);
+      sharedPrefsEditor.remove(OAuth2Helper.PREF_AUTH_TOKEN);
+    } else {
+      sharedPrefsEditor.putString(OAuth2Helper.PREF_ACCOUNT_NAME, accessToken.accountName);
+      sharedPrefsEditor.putString(OAuth2Helper.PREF_AUTH_TOKEN, accessToken.accessToken);
+    }
+    sharedPrefsEditor.commit();
   }
   
   
@@ -266,7 +332,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
      */
     @Override
     protected String doInBackground(String... params) {
-      Log.i(TAG, "Starting doInBackground " + params[0]);
+      Log.i(TAG, "Starting doInBackground ");
       
       // Get a fresh access token
       OAuth2Helper oauthHelper = new OAuth2Helper();
@@ -300,14 +366,40 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     }
 }
   private AccessToken retrieveAccessToken() {
-    String accountName = sharedPreferences.getString(DropboxUtil.PREF_DROPBOX_ACCESSTOKEN_KEY, "");
-    String accessToken = sharedPreferences.getString(DropboxUtil.PREF_DROPBOX_ACCESSTOKEN_SECRET, "");
+    String accountName = sharedPreferences.getString(OAuth2Helper.PREF_ACCOUNT_NAME, "");
+    String accessToken = sharedPreferences.getString(OAuth2Helper.PREF_AUTH_TOKEN, "");
     if (accountName.length() == 0 || accessToken.length() == 0) {
-      return null;
+      return new AccessToken("",""); // returning an accessToken with both params empty
     }
     return new AccessToken(accountName, accessToken);
   }
   
+  
+  public Class<? extends UploadService> getUploadServiceClass() {
+    return GoogleDriveUploadService.class;
+  }
+  
+  /*
+   * Upload a file to Google Drive
+   */
+  @SimpleFunction(description = "This function uploads the file " +
+      "(as specified with its filepath) to Google Drive folder. ")
+      
+  public void UploadData(String filename) {
+    //TODO: use MediaUtil.java to know about the file type and how to deal with it
+    // this will be the archive file name 
+    //This method uploads the specified file directly to Dropbox 
+    String archiveName = filename;
+
+    Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
+    i.putExtra(UploadService.ARCHIVE_ID, archiveName);
+    i.putExtra(GoogleDriveUploadService.FILE_TYPE, GoogleDriveUploadService.REGULAR_FILE);
+    i.putExtra(UploadService.REMOTE_ARCHIVE_ID, GoogleDriveArchive.GOOGLEDRIVE_ID);
+    i.putExtra(UploadService.NETWORK,(this.wifiOnly) ? UploadService.NETWORK_WIFI_ONLY
+          : UploadService.NETWORK_ANY);
+    mainUIThreadActivity.startService(i);
+
+  }
 
   
 }

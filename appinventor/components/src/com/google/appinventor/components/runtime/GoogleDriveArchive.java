@@ -5,8 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.services.GoogleKeyInitializer;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.appinventor.components.runtime.GoogleDrive.AccessToken;
 import com.google.appinventor.components.runtime.util.DropboxUtil;
 import com.google.appinventor.components.runtime.util.GoogleDriveUtil;
 
@@ -53,13 +60,33 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     return null;
   }
   
+  private void openGoogleDrive(AccessToken token){
+  	
+  	
+    final HttpTransport transport = AndroidHttp.newCompatibleTransport();
+    final JsonFactory jsonFactory = new AndroidJsonFactory();
+    GoogleCredential credential =
+            new GoogleCredential.Builder()
+                    .setClientSecrets("4457986954","4457986954").build();
+
+    credential.setAccessToken(token.accessToken);
+    final Drive drive = new Drive.Builder(transport, jsonFactory, credential)
+            .setApplicationName("OneTouchGDrive")
+            .setJsonHttpRequestInitializer(new GoogleKeyInitializer(""))
+            .build();
+
+  }
+  
+  
+  
+  
   private static boolean uploadSingleFile(Context context, File file) throws Exception {
     //this method actually does the uploading, only successful upload will return true, else will be exception throws to
     //the caller methods
     String dataPath = file.getAbsolutePath();
     FileInputStream is = null;
     String googleFolder = "";
-    SharedPreferences pref = context.getSharedPreferences(PREFS_GOOGLEDRIVE, Activity.MODE_PRIVATE);
+    
 
     
     try {
