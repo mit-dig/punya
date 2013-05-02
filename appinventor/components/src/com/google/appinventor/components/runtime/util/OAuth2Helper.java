@@ -156,6 +156,7 @@ public class OAuth2Helper {
     // another one using the refresh token.
 
     accountManager.invalidateAuthToken(credential.getAccessToken());
+
     AccountManager.get(activity).invalidateAuthToken(authTokenType, null);
 
     // Try to get the user's account by account name. Might return null
