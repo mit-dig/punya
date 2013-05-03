@@ -39,7 +39,7 @@ public class GoogleDriveUploadService extends UploadService {
   final HashSet<GoogleDriveExceptionListener> allListeners = new HashSet<GoogleDriveExceptionListener>();
   public static final String FILE_TYPE = "filetype";
   
-  private static final int
+  public static final int
   REGULAR_FILE = 0,
   DATABASE_FILE = 1;
   
@@ -54,10 +54,11 @@ public class GoogleDriveUploadService extends UploadService {
   private Thread dbUploadThread;
   private Thread regularUploadThread;
   private WakeLock lock;
+  private String GoogleDriveFolderPath; //specify which folder in Google Drive 	
   
   @Override
   protected RemoteFileArchive getRemoteArchive(String id) {
-    return new GoogleDriveArchive(getApplicationContext() );
+    return new GoogleDriveArchive(getApplicationContext(), GoogleDriveFolderPath);
   }
   
   
@@ -120,7 +121,9 @@ public class GoogleDriveUploadService extends UploadService {
     //add one more extra in the intent that passes to DropboxUploadService
     int fileType = intent.getIntExtra(FILE_TYPE, REGULAR_FILE);
     Log.i(TAG, "fileType:" + fileType);
-
+    GoogleDriveFolderPath = (intent.getStringExtra(GoogleDrive.GD_FOLDER) == null)
+    		? GoogleDrive.DEFAULT_GD_FOLDER:intent.getStringExtra(GoogleDrive.GD_FOLDER) ;
+    
     if (isOnline(network)) {
 
       if (fileType == REGULAR_FILE) {

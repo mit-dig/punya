@@ -1,6 +1,7 @@
 package com.google.appinventor.components.runtime;
 
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 
 import android.content.ComponentName;
@@ -13,14 +14,21 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
+import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.OAuth2Helper;
 import com.google.gson.JsonElement;
 
@@ -46,9 +54,14 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   private final ComponentContainer container;
   private final Handler handler;
   private final SharedPreferences sharedPreferences;
-  public static final String PREFS_GOOGLEDRIVE = "googledrive";
+  public static final String PREFS_GOOGLEDRIVE = "googledrive_pref";
+  public static final String PREF_ACCOUNT_NAME = "gd_account";
+  public static final String PREF_AUTH_TOKEN = "gd_authtoken";
+  public static final String GD_FOLDER = "gd_folder";
+  public static final String DEFAULT_GD_FOLDER = "gd_default_folder";
   
   protected static Activity mainUIThreadActivity;
+  private final int requestCode; 
   
   //binding to GoogleDriveUploadService and FunfManager Service
   
@@ -57,15 +70,15 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   protected static final String ACTION_UPLOAD_DATA = "UPLOAD_DATA";
   
   private static final long SCHEDULE_UPLOAD_PERIOD = 7200; //default period for uploading task 
-  
-  //for Google Drive OAuth2 
-  public static final String AUTH_TOKEN_TYPE_GOOGLEDRIVE = "oauth2:https://www.googleapis.com/auth/drive";
+   
 
-  private String authTokenType = AUTH_TOKEN_TYPE_GOOGLEDRIVE;
   private AccessToken accessTokenPair;
   
   private long upload_period;
   private boolean wifiOnly = false;
+  
+  private static Drive service;
+  private GoogleAccountCredential credential;
 
   // try local binding to FunfManager
   private ServiceConnection mConnection = new ServiceConnection() {
@@ -121,7 +134,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     this.container = container;
 
     handler = new Handler();
-    sharedPreferences = container.$context().getPreferences(Context.MODE_PRIVATE);
+    sharedPreferences = container.$context().getSharedPreferences(PREFS_GOOGLEDRIVE, Context.MODE_PRIVATE);
     accessTokenPair = retrieveAccessToken();
     mainUIThreadActivity = container.$context();
     // start a FunfManager Service
@@ -132,7 +145,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // schedule)
     doBindService();
     this.upload_period = GoogleDrive.SCHEDULE_UPLOAD_PERIOD;
-
+    requestCode = form.registerForActivityResult(this);
     
     
   }
@@ -193,13 +206,53 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   @Override
   public void onRun(String arg0, JsonElement arg1) {
     // TODO Auto-generated method stub
-    
+  	
   }
 
   @Override
   public void resultReturned(int requestCode, int resultCode, Intent data) {
-    // TODO Auto-generated method stub
+    // When the authentication from Google chooseAccount is back
+    Log.i(TAG, "After authorized.... " + resultCode);
+    String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+    String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
     
+    saveAccessToken(new AccessToken(accountName, accessToken));
+    //now we can do Google Drive operation!
+    AsynchUtil.runAsynchronously(new Runnable() {
+      public void run() {
+        AccessTokenPair myAccessTokenPair = null;
+
+        try {
+
+          handler.post(new Runnable() {
+            @Override
+            public void run() {
+              IsAuthorized();
+            }
+          });
+
+        } catch (Exception e) {
+          // TODO Auto-generated catch block
+          System.err.println("Could not retrieve WebAccessTokens. " + e);
+          e.printStackTrace();
+        }
+
+      }
+    });
+    
+  }
+  
+  /**
+   * Indicates when the authorization has been successful.
+   */
+  @SimpleEvent(description =
+               "This event is raised after the program calls " +
+               "<code>Authorize</code> if the authorization was successful.  " +
+               "Only after this event has been raised or CheckAuthorize() returns True," +
+               " any other method for this " +
+               "component can be called.")
+  public void IsAuthorized() {
+    EventDispatcher.dispatchEvent(this, "IsAuthorized");
   }
   
   private void registerExceptionListener() {
@@ -256,10 +309,11 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       		"his or her Google Drive. Need to do it at least once, before using the " +
       		"Google Drive APIs")
   public void Authorize() {
-    // we will call OAuth2Helper.getrefreshToken once here
+    // we will not use OAuth2Helper here, the newest version of Google-api has taken care the flow for us
     // This will help us getting the main Google Account name, and auth token for the first time
     // we will persist these two in sharedPreference
-  	new GoogleDriveAuthTask(mainUIThreadActivity).execute();
+  	credential = GoogleAccountCredential.usingOAuth2(mainUIThreadActivity, DriveScopes.DRIVE);
+  	mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), requestCode);
     
   }
   
@@ -293,69 +347,16 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   private void saveAccessToken(AccessToken accessToken) {
     final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
     if (accessToken == null) {
-      sharedPrefsEditor.remove(OAuth2Helper.PREF_ACCOUNT_NAME);
-      sharedPrefsEditor.remove(OAuth2Helper.PREF_AUTH_TOKEN);
+      sharedPrefsEditor.remove(PREF_ACCOUNT_NAME);
+      sharedPrefsEditor.remove(PREF_AUTH_TOKEN);
     } else {
-      sharedPrefsEditor.putString(OAuth2Helper.PREF_ACCOUNT_NAME, accessToken.accountName);
-      sharedPrefsEditor.putString(OAuth2Helper.PREF_AUTH_TOKEN, accessToken.accessToken);
+      sharedPrefsEditor.putString(PREF_ACCOUNT_NAME, accessToken.accountName);
+      sharedPrefsEditor.putString(PREF_AUTH_TOKEN, accessToken.accessToken);
     }
     sharedPrefsEditor.commit();
   }
   
   
-  
-  /**
-   * First uses OAuth2Helper to acquire an access token and then sends the
-   */
-  private class GoogleDriveAuthTask extends AsyncTask<String, Void, String> {
-    private static final String TAG = "GoogleDriveAuth";
-
-    private final Activity activity; // The main list activity
-//    private final ProgressDialog dialog;
-
-    /**
-     * @param activity, needed to create a progress dialog
-     */
-    GoogleDriveAuthTask(Activity activity) {
-      Log.i(TAG, "Creating AsyncFusiontablesQuery");
-      this.activity = activity;
-//      dialog = new ProgressDialog(activity);
-    }
-
-    @Override
-    protected void onPreExecute() {
-      //Do nothing
-    }
-
-    /**
-     * The Oauth handshake and the API request are both handled here.
-     */
-    @Override
-    protected String doInBackground(String... params) {
-      Log.i(TAG, "Starting doInBackground ");
-      
-      // Get a fresh access token
-      OAuth2Helper oauthHelper = new OAuth2Helper();
-      String authToken = oauthHelper.getRefreshedAuthToken(activity, authTokenType);
-
-      if (authToken != null) {
- 
-        return authToken;
-        
-      } else {
-        return OAuth2Helper.getErrorMessage();
-      }
-    }
-
-    /**
-     * Fires the AppInventor GotResult() method
-     */
-    @Override
-    protected void onPostExecute(String authToken) {
-      Log.i(TAG, "Query result " + authToken);
- 
-   }
-  }
   public class AccessToken  {
     public final String accessToken;
     public final String accountName;

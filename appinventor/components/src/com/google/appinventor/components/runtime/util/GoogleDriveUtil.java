@@ -18,8 +18,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+//import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+//import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
@@ -40,23 +40,23 @@ public class GoogleDriveUtil {
 
   private static final String DEFAULT_SCOPE = DriveScopes.DRIVE;
   private static Drive gdService;
-  private GoogleAccountCredential credential;
-  
-  public static Drive getDriveService(GoogleAccountCredential credential) {
-    
-    if (gdService == null) {
-      //first time created gdService, needs to also use GoogleCredential and select the Google account
-      
-      credential = GoogleAccountCredential.usingOAuth2(this, DriveScopes.DRIVE);
-      startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
-      
-      
-      gdService =  new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), credential)
-          .build();
-
-    }
-    return gdService;
-  }
+//  private GoogleAccountCredential credential;
+//  
+//  public static Drive getDriveService(GoogleAccountCredential credential) {
+//    
+//    if (gdService == null) {
+//      //first time created gdService, needs to also use GoogleCredential and select the Google account
+//      
+//      credential = GoogleAccountCredential.usingOAuth2(this, DriveScopes.DRIVE);
+//      startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+//      
+//      
+//      gdService =  new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), credential)
+//          .build();
+//
+//    }
+//    return gdService;
+//  }
   
   
   private static boolean uploadSingleFile(Context context, File file) throws Exception {
@@ -71,7 +71,7 @@ public class GoogleDriveUtil {
     try {
       is = new FileInputStream(file);
       Log.i(TAG, "file:" + file.toString()); 
-      Drive service = getDriveService();
+//      Drive service = getDriveService();
       
       // We like to have a fixed folder path at Google Drive for db backup
       // Need documentation
