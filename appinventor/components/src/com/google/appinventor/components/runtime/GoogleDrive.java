@@ -9,13 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
+
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.AccessTokenPair;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
@@ -25,6 +23,8 @@ import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
+import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -36,12 +36,22 @@ import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.pipeline.Pipeline;
 import edu.mit.media.funf.storage.UploadService;
 
-
+//TODO: rename this component and the dropbox component to GoogleDriveUploader
 @DesignerComponent(version = YaVersion.GOOGLE_DRIVE_COMPONENT_VERSION,
-    description = "Uploading component for Google Drive. TO be finished",
+    description = "This component can upload file(s) to Google Drive.",
     category = ComponentCategory.FUNF,
     nonVisible = true,
     iconName = "images/googledrive.png")
+@UsesPermissions(permissionNames = "android.permission.GET_ACCOUNTS," +
+    "android.permission.INTERNET")
+@UsesLibraries(libraries =
+   "google-api-services-drive-v2.jar," +
+   "google-api-client-beta.jar," +
+   "google-api-client-android-beta.jar," +
+   "google-http-client-beta.jar," +
+   "google-http-client-android-beta.jar," +
+   "google-play-services.jar," +
+   "google-oauth-client-beta.jar")
 public class GoogleDrive extends AndroidNonvisibleComponent
 implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   
@@ -50,18 +60,18 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   protected boolean mIsBound = false;
   public static final String GOOGLEDRIVE_PIPE_NAME = "googledrive";
   
-  
   private final ComponentContainer container;
   private final Handler handler;
   private final SharedPreferences sharedPreferences;
   public static final String PREFS_GOOGLEDRIVE = "googledrive_pref";
   public static final String PREF_ACCOUNT_NAME = "gd_account";
   public static final String PREF_AUTH_TOKEN = "gd_authtoken";
-  public static final String GD_FOLDER = "gd_folder";
-  public static final String DEFAULT_GD_FOLDER = "gd_default_folder";
+  public final static String GD_FOLDER = "gd_folder";
+  public static final String DEFAULT_GD_FOLDER = "gd_root";
   
   protected static Activity mainUIThreadActivity;
   private final int requestCode; 
+  private String gdFolder;
   
   //binding to GoogleDriveUploadService and FunfManager Service
   
@@ -146,6 +156,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     doBindService();
     this.upload_period = GoogleDrive.SCHEDULE_UPLOAD_PERIOD;
     requestCode = form.registerForActivityResult(this);
+    this.gdFolder = GoogleDrive.DEFAULT_GD_FOLDER;
     
     
   }
@@ -220,7 +231,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     //now we can do Google Drive operation!
     AsynchUtil.runAsynchronously(new Runnable() {
       public void run() {
-        AccessTokenPair myAccessTokenPair = null;
 
         try {
 
@@ -312,6 +322,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // we will not use OAuth2Helper here, the newest version of Google-api has taken care the flow for us
     // This will help us getting the main Google Account name, and auth token for the first time
     // we will persist these two in sharedPreference
+    Log.i(TAG, "Start Authorization");
   	credential = GoogleAccountCredential.usingOAuth2(mainUIThreadActivity, DriveScopes.DRIVE);
   	mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), requestCode);
     
@@ -352,6 +363,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     } else {
       sharedPrefsEditor.putString(PREF_ACCOUNT_NAME, accessToken.accountName);
       sharedPrefsEditor.putString(PREF_AUTH_TOKEN, accessToken.accessToken);
+      Log.i(TAG, "Save Google Access Token and Account" + accessToken.accountName + ", " + accessToken.accessToken);
     }
     sharedPrefsEditor.commit();
   }
@@ -375,6 +387,35 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     return new AccessToken(accountName, accessToken);
   }
   
+  /*
+   * Set the Google Drive folder to which the file(s) will be uploaded 
+   */
+  
+  @SimpleProperty(description = "Set up the Google Drive" +
+      "folder in which the uploaded file(s) will be placed. If not set, " +
+      "default will be the root of Google Drive" +
+      "", category = PropertyCategory.BEHAVIOR )
+    public void GoogleDriveFolder(String folderName){
+    
+    this.gdFolder = folderName;    
+    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();   
+    sharedPrefsEditor.putString(GoogleDrive.GD_FOLDER , this.gdFolder);
+    sharedPrefsEditor.commit();
+  }
+  
+  /*
+   * Indicate the folder(directory) to where the uploaded file(s) will be placed
+   */
+
+  @SimpleProperty(description = "Return the Google Drive folder(directory) to where the uploaded" +
+      "file(s) will be placed", category = PropertyCategory.BEHAVIOR )
+  public String GoogleDriveFolder(){
+    return this.gdFolder;
+    
+  }
+  
+  
+  
   
   public Class<? extends UploadService> getUploadServiceClass() {
     return GoogleDriveUploadService.class;
@@ -391,9 +432,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // this will be the archive file name 
     //This method uploads the specified file directly to Dropbox 
     String archiveName = filename;
-
+    Log.i(TAG, "Start uploadService...");
     Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
     i.putExtra(UploadService.ARCHIVE_ID, archiveName);
+    i.putExtra(GoogleDrive.GD_FOLDER, this.gdFolder);
     i.putExtra(GoogleDriveUploadService.FILE_TYPE, GoogleDriveUploadService.REGULAR_FILE);
     i.putExtra(UploadService.REMOTE_ARCHIVE_ID, GoogleDriveArchive.GOOGLEDRIVE_ID);
     i.putExtra(UploadService.NETWORK,(this.wifiOnly) ? UploadService.NETWORK_WIFI_ONLY

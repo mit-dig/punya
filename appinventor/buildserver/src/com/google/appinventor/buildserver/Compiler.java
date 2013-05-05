@@ -390,9 +390,12 @@ public final class Compiler {
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
 	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.HttpsUploadService\"></service> \n");
-	  out.write("<service android:name=\"com.google.appinventor.components.runtime.DropboxUploadService\"></service> \n");
-	  
-	  
+	  if(componentTypes.contains("Dropbox")){
+	    out.write("<service android:name=\"com.google.appinventor.components.runtime.DropboxUploadService\"></service> \n");	    
+	  }
+	  if(componentTypes.contains("GoogleDrive")){
+	    out.write("<service android:name=\"com.google.appinventor.components.runtime.GoogleDriveUploadService\"></service> \n");
+	  }
 	  // try the same thing here for TimerManager (Disabled for now)
 	  // BroadcastReceiver for TimerManager
 	  if(componentTypes.contains("Timer")){

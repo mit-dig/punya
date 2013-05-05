@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.google.appinventor.components.runtime.DropboxUploadService.RegularArchiveFile;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -58,6 +56,7 @@ public class GoogleDriveUploadService extends UploadService {
   
   @Override
   protected RemoteFileArchive getRemoteArchive(String id) {
+    Log.i(TAG, "Drivefolder: " + GoogleDriveFolderPath);
     return new GoogleDriveArchive(getApplicationContext(), GoogleDriveFolderPath);
   }
   
@@ -81,7 +80,7 @@ public class GoogleDriveUploadService extends UploadService {
         while(Thread.currentThread().equals(dbUploadThread) && !dbFilesToUpload.isEmpty()) {
             ArchiveFile archiveFile = dbFilesToUpload.poll();
             Log.i(TAG, "now poll the archiveFile(db) from the queue");
-            //runArchive method deals with uploading db archived file to dropbox
+            //runArchive method deals with uploading db archived file to Google Drive
             runArchive(archiveFile.archive, archiveFile.remoteArchive, archiveFile.file, archiveFile.network);
             Log.i(TAG, "after runArchive");
         }
@@ -100,7 +99,7 @@ public class GoogleDriveUploadService extends UploadService {
           Log.i(TAG, "in thread");
           RegularArchiveFile archiveFile = filesToUpload.poll();
           Log.i(TAG, "now poll the archiveFile from the queue");
-          //runUpload method deals with uploading regular files to dropbox
+          //runUpload method deals with uploading regular files to google drive
           runUpload(archiveFile.remoteArchive, archiveFile.file, archiveFile.network);
         }
         regularUploadThread = null;
@@ -112,13 +111,10 @@ public class GoogleDriveUploadService extends UploadService {
     
   }
   
-
-  
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    Log.i(TAG, "Starting DropboxUploadService...");
+    Log.i(TAG, "Starting GoogleDriveUploadService...");
     int network = intent.getIntExtra(NETWORK, NETWORK_ANY);
-    //add one more extra in the intent that passes to DropboxUploadService
     int fileType = intent.getIntExtra(FILE_TYPE, REGULAR_FILE);
     Log.i(TAG, "fileType:" + fileType);
     GoogleDriveFolderPath = (intent.getStringExtra(GoogleDrive.GD_FOLDER) == null)
@@ -139,8 +135,7 @@ public class GoogleDriveUploadService extends UploadService {
             regularArchive(remoteArchive, file,network);
           }
         }
-        
-        
+
         // Start upload thread if necessary, even if no files to ensure stop
         if (regularUploadThread != null && !regularUploadThread.isAlive()) {
           Log.i(TAG, "start a new uploading thread....");
@@ -224,7 +219,8 @@ public class GoogleDriveUploadService extends UploadService {
         successUpload = remoteArchive.add(file);
       } catch (Exception e) {
         // something happen that we can't successfully upload the file to
-        // dropbox, and we will tell the UI component
+        // google drive , and we will tell the UI component
+        Log.i(TAG, "exception happened, ready to call back to the AI component");
         for (GoogleDriveExceptionListener lis : allListeners){
           lis.onExceptionReceived(e);
         }
@@ -255,9 +251,7 @@ public class GoogleDriveUploadService extends UploadService {
 
   }
   
-  
-  
-  
+
   private void runUpload(RemoteFileArchive remoteArchive, File file, int network){
     // this part of code is copied and modified from UploadService.java in funf library
     // only uses when fileType == REGULAR_FILE, else we will use UploadService.java$runArchive()
@@ -268,18 +262,18 @@ public class GoogleDriveUploadService extends UploadService {
     boolean successUpload = false;
  
     if (numRemoteFailures < MAX_GOOGLEDRIVE_RETRIES && isOnline(network)) {
-      Log.i(TAG, "uploading to dropbox..." + file.getName());
+      Log.i(TAG, "uploading to google drive..." + file.getName());
       try{
         successUpload = remoteArchive.add(file);
       }catch(Exception e){
-        // something happen that we can't successfully upload the file to dropbox
+        // something happen that we can't successfully upload the file to Google drive
         for (GoogleDriveExceptionListener lis : allListeners){
           lis.onExceptionReceived(e);
         }
       }
  
       if(successUpload) {
-        Log.i(TAG, "successful upload file to dropbox");
+        Log.i(TAG, "successful upload file to google drive");
         //do nothing
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
