@@ -87,7 +87,7 @@
         <fileset dir="buildserver/lib" includes="**/*.jar"/>
         <!-- oauth libs (replaced by newer version in /lib/googledrive)-->
 <!--    <pathelement location="lib/oauth/google-api-client-1.10.3-beta.jar" /> -->
-<!--    <pathelement location="lib/oauth/google-api-client-android2-1.10.3-beta.jar" /> -->
+	    <pathelement location="lib/oauth/google-api-client-android2-1.10.3-beta.jar" />
 <!--    <pathelement location="lib/oauth/google-http-client-1.10.3-beta.jar" /> -->
 <!--    <pathelement location="lib/oauth/google-http-client-android2-1.10.3-beta.jar" />
         <pathelement location="lib/oauth/google-http-client-android3-1.10.3-beta.jar" /> -->

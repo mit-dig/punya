@@ -128,6 +128,9 @@ import java.util.ArrayList;
     "google-oauth-client-beta.jar," + 
     "google-api-client-android-beta-14.jar," +
     "google-http-client-android-beta-14.jar," +
+    "google-api-client-android2-beta.jar," +
+    "google-http-client-android2-beta.jar," +
+    "google-http-client-android3-beta.jar," + 
     "guava-11.0.1.jar")
 
 public class FusiontablesControl extends AndroidNonvisibleComponent implements Component, ActivityResultListener {

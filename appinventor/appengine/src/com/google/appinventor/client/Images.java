@@ -258,11 +258,18 @@ public interface Images extends Resources {
   ImageResource ldchartbig();
   
   /**
-   * Designer item: Linked Data Chart component in designer
+   * Designer item: Dropbox component in designer
    * 
    */
   @Source("com/google/appinventor/images/dropbox.png")
   ImageResource dropbox();
+  
+  /**
+   * Designer item: Dropbox component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/googledrive.png")
+  ImageResource googledrive();
   
   /**
    * Designer palette item: player component
@@ -499,4 +506,6 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/web.png")
   ImageResource web();
+  
+
 }
