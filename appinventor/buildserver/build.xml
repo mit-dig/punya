@@ -137,25 +137,27 @@
     <copy toFile="${classes.files.dir}/json-simple.jar" file="${lib.dir}/dropbox/json_simple-1.1.jar" />    
     <copy toFile="${classes.files.dir}/acra-4.4.0.jar" file="${lib.dir}/acra/acra-4.4.0.jar" />
     <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-android-2.2.6.jar" />        
-    <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables.jar" />
-    <!-- We replace some of the older versions of google-api-client and http-client -->
-    <!--   
-    <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-oauth-client-beta.jar" file="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" />
-    -->
+    <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
+    <!-- We might replace some of the older versions of google-api-client and http-client -->
+
+<!-- <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" /> -->
+<!-- <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
+    <copy toFile="${classes.files.dir}/google-oauth-client-beta.jar" file="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" /> --> 
+        
     <!-- above might be able to removed in the future (not tested) -->
-    <copy toFile="${classes.files.dir}/google-api-client-android2-beta.jar" file="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
+<!-- <copy toFile="${classes.files.dir}/google-api-client-android2-beta.jar" file="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android2-beta.jar" file="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
+    <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />  -->
 	<!-- below are libraries used in Google Drive component -->
+	
+	<copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/googledrive/google-http-client-1.14.1-beta.jar" />
     <copy toFile="${classes.files.dir}/google-oauth-client-beta.jar" file="${lib.dir}/googledrive/google-oauth-client-1.14.1-beta.jar" />    
     <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/googledrive/google-api-client-1.14.1-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-api-client-android-beta.jar" file="${lib.dir}/googledrive/google-api-client-android-1.14.1-beta.jar" />    
-    <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/googledrive/google-http-client-1.14.1-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-android-beta.jar" file="${lib.dir}/googledrive/google-http-client-android-1.14.1-beta.jar" />    
+    <copy toFile="${classes.files.dir}/google-api-client-android-beta-14.jar" file="${lib.dir}/googledrive/google-api-client-android-1.14.1-beta.jar" />    
+    <copy toFile="${classes.files.dir}/google-http-client-android-beta-14.jar" file="${lib.dir}/googledrive/google-http-client-android-1.14.1-beta.jar" />    
     <copy toFile="${classes.files.dir}/google-api-services-drive-v2.jar" file="${lib.dir}/googledrive/google-api-services-drive-v2-rev73-1.14.2-beta.jar" />
     <copy toFile="${classes.files.dir}/google-play-services.jar" file="${lib.dir}/googledrive/google-play-services.jar" />
+    
     <!-- below are included in the Google Drive example, not sure about the dependecies for now -->
     <!-- 
     <copy toFile="${classes.files.dir}/google-http-client-gson.jar" file="${lib.dir}/googledrive/google-http-client-gson-1.14.1-beta.jar" />

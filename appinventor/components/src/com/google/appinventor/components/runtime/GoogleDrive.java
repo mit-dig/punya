@@ -45,13 +45,13 @@ import edu.mit.media.funf.storage.UploadService;
 @UsesPermissions(permissionNames = "android.permission.GET_ACCOUNTS," +
     "android.permission.INTERNET")
 @UsesLibraries(libraries =
+   "google-http-client-beta.jar," +
+   "google-oauth-client-beta.jar," +
    "google-api-services-drive-v2.jar," +
    "google-api-client-beta.jar," +
-   "google-api-client-android-beta.jar," +
-   "google-http-client-beta.jar," +
-   "google-http-client-android-beta.jar," +
-   "google-play-services.jar," +
-   "google-oauth-client-beta.jar")
+   "google-api-client-android-beta-14.jar," +
+   "google-http-client-android-beta-14.jar," +
+   "google-play-services.jar")
 public class GoogleDrive extends AndroidNonvisibleComponent
 implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   
@@ -142,7 +142,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // TODO Auto-generated constructor stub
     super(container.$form());
     this.container = container;
-
     handler = new Handler();
     sharedPreferences = container.$context().getSharedPreferences(PREFS_GOOGLEDRIVE, Context.MODE_PRIVATE);
     accessTokenPair = retrieveAccessToken();
