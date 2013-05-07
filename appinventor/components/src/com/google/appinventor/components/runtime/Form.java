@@ -8,7 +8,9 @@ package com.google.appinventor.components.runtime;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,6 +121,9 @@ public class Form extends Activity
   // Layout
   private LinearLayout viewLayout;
 
+  // List of components used to support Iterator interface
+  private List<AndroidViewComponent> components;
+
   // translates App Inventor alignment codes to Android gravity
   private AlignmentUtil alignmentSetter;
 
@@ -182,6 +187,7 @@ private String startupValueForSurvey = "";
     Log.i(LOG_TAG, "activeForm is now " + activeForm.formName);
 
     viewLayout = new LinearLayout(this, ComponentConstants.LAYOUT_ORIENTATION_VERTICAL);
+    components = new ArrayList<AndroidViewComponent>();
     alignmentSetter = new AlignmentUtil(viewLayout);
 
     defaultPropertyValues();
@@ -1099,6 +1105,7 @@ private String startupValueForSurvey = "";
   @Override
   public void $add(AndroidViewComponent component) {
     viewLayout.add(component);
+    components.add(component);
   }
 
   @Override
@@ -1425,4 +1432,9 @@ private String startupValueForSurvey = "";
   }
   
   
+
+  @Override
+  public Iterator<AndroidViewComponent> iterator() {
+    return components.iterator();
+  }
 }

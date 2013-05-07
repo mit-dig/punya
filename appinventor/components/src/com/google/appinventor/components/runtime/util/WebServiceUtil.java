@@ -12,6 +12,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -165,6 +166,48 @@ public class WebServiceUtil {
     } catch (UnsupportedEncodingException e) {
       Log.w(LOG_TAG, e);
       callback.onFailure("Failed to encode params for web service call.");
+    } catch (ClientProtocolException e) {
+      Log.w(LOG_TAG, e);
+      callback.onFailure("Communication with the web service encountered a protocol exception.");
+    } catch (IOException e) {
+      Log.w(LOG_TAG, e);
+      callback.onFailure("Communication with the web service timed out.");
+    }
+  }
+  
+  public void getCommand(final String serviceURL, final String commandName,
+      List<NameValuePair> params, AsyncCallbackPair<String> callback) {
+    Log.d(LOG_TAG, "Getting " + (commandName != null ? commandName + " from " : "") +
+        serviceURL + " with arguments " + params);
+    
+    if (serviceURL == null || serviceURL.equals("")) {
+      callback.onFailure("No service url to get.");
+    }
+    String url = serviceURL;
+    if (commandName != null) {
+      url += "/" + commandName;
+    }
+    if (params == null) {
+      params = new ArrayList<NameValuePair>();
+    }
+    if (params.size() > 0) {
+      try {
+        url += "?"+new UrlEncodedFormEntity(params, HTTP.UTF_8);
+      } catch (UnsupportedEncodingException e) {
+        Log.w(LOG_TAG, e);
+        callback.onFailure("Failed to encode params for web service call.");
+        return;
+      }
+    }
+    final HttpGet httpGet = new HttpGet(url);
+    
+    try {
+      String httpResponseString;
+      ResponseHandler<String> responseHandler = new BasicResponseHandler();
+      httpGet.setHeader("Accept", "application/json");
+      httpGet.addHeader("Accept", "text/plain");
+      httpResponseString = httpClient.execute(httpGet, responseHandler);
+      callback.onSuccess(httpResponseString);
     } catch (ClientProtocolException e) {
       Log.w(LOG_TAG, e);
       callback.onFailure("Communication with the web service encountered a protocol exception.");

@@ -76,12 +76,27 @@
         <pathelement location="lib/guava/guava-11.0.1.jar" />
         <pathelement location="lib/gwt_dragdrop/gwt-dnd-r1057.jar" />
         <pathelement location="lib/gwt_incubator/gwt-incubator-20101117-r1766.jar" />
+        <pathelement location="lib/gwt_jquery/gwt-jquery1.1.jar" />
         <pathelement location="lib/json/json.jar" />
         <pathelement location="lib/kawa/kawa-1.11-modified.jar" />
         <pathelement location="lib/keyczar/keyczar-0.66-080111-java-1.6.jar" />
         <pathelement location="lib/objectify-3.0/objectify-3.0.jar" />
         <pathelement location="lib/tablelayout/TableLayout-jdk1.5-2007-04-21.jar" />
         <pathelement location="lib/twitter/twitter4j-core-android-2.2.6.jar" />
+        <pathelement location="lib/jena/jena-core-2.10.0.jar" />
+        <pathelement location="lib/jena/jena-arq-2.10.0.jar" />
+        <pathelement location="lib/jena/jena-iri-0.9.5.jar" />
+        <pathelement location="lib/jena/jena-larq-1.0.1-SNAPSHOT.jar" />
+        <pathelement location="lib/lucene/lucene-core-3.6.2.jar" />
+        <pathelement location="lib/httpclient/httpclient-4.2.3.jar" />
+        <pathelement location="lib/httpclient/httpcore-4.2.4.jar" />
+<!--        <pathelement location="lib/jena/xercesImpl-2.10.0.jar" />-->
+        <pathelement location="lib/jena/xercesLite.jar" />
+<!--        <pathelement location="lib/jena/jcl-over-slf4j-1.6.4.jar" />-->
+<!--        <pathelement location="lib/jena/slf4j-api-1.6.4.jar" />-->
+<!--        <pathelement location="lib/jena/slf4j-log4j12-1.6.4.jar" />-->
+<!--        <pathelement location="lib/jena/slf4j-nop-1.6.4.jar" />-->
+        <pathelement location="lib/jena/slf4j-android-1.6.1-RC1.jar" />
         <pathelement location="lib/QRGenerator/core.jar" />
         <pathelement location="lib/QRGenerator/javase.jar" />
         <fileset dir="buildserver/lib" includes="**/*.jar"/>

@@ -27,6 +27,8 @@ import com.google.appinventor.client.editor.simple.components.MockNonVisibleComp
 import com.google.appinventor.client.editor.simple.components.MockPasswordTextBox;
 import com.google.appinventor.client.editor.simple.components.MockPhoneNumberPicker;
 import com.google.appinventor.client.editor.simple.components.MockRadioButton;
+import com.google.appinventor.client.editor.simple.components.MockSWListPicker;
+import com.google.appinventor.client.editor.simple.components.MockSemanticForm;
 import com.google.appinventor.client.editor.simple.components.MockSurvey;
 import com.google.appinventor.client.editor.simple.components.MockTableArrangement;
 import com.google.appinventor.client.editor.simple.components.MockTextBox;
@@ -127,6 +129,7 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/chart.png", images.ldchart());
     bundledImages.put("images/voting.png", images.voting());
     bundledImages.put("images/web.png", images.web());
+    bundledImages.put("images/semanticWeb.png", images.semanticWeb());
     imagesInitialized = true;
   }
 
@@ -308,8 +311,11 @@ public final class SimpleComponentDescriptor {
       return new MockSurvey(editor);
     } else if (name.equals(MockLDVisualization.TYPE)){
       return new MockLDVisualization(editor);
-    }
-      else {
+    } else if (name.equals(MockSemanticForm.TYPE)) {
+      return new MockSemanticForm(editor);
+    } else if (name.equals(MockSWListPicker.TYPE)) {
+      return new MockSWListPicker(editor);
+    } else {
       // TODO(user): add 3rd party mock component proxy here
       throw new UnsupportedOperationException("unknown component: " + name);
     }
