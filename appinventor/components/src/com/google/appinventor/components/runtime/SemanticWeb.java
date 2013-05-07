@@ -1,5 +1,6 @@
 package com.google.appinventor.components.runtime;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,6 +26,9 @@ import com.google.appinventor.components.runtime.util.RdfUtil.Solution;
 import com.google.appinventor.components.runtime.util.WebServiceUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -55,6 +59,9 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   private static final String RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
   private static final String RDFS_NS = "http://www.w3.org/2000/01/rdf-schema#";
   private static final String OWL_NS = "http://www.w3.org/2002/07/owl#";
+  private static final String SIOC_NS = "http://rdfs.org/sioc/ns#";
+  private static final String GEO_NS = "http://www.w3.org/2003/01/geo/wgs84_pos#";
+  private static final String SKOS_NS = "http://www.w3.org/2004/02/skos/core#";
 
   private final Model model;
 
@@ -72,6 +79,9 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
     model.setNsPrefix("rdf", RDF_NS);
     model.setNsPrefix("rdfs", RDFS_NS);
     model.setNsPrefix("owl", OWL_NS);
+    model.setNsPrefix("sioc", SIOC_NS);
+    model.setNsPrefix("geo", GEO_NS);
+    model.setNsPrefix("skos", SKOS_NS);
   }
 
   /**
@@ -198,7 +208,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
 
   private void executeQuery(String queryText) {
     try {
-      final ResultSet results = RdfUtil.executeSELECT( endpointURL, queryText );
+      ResultSet results = RdfUtil.executeSELECT( endpointURL, queryText, model );
       if ( results == null ) {
         form.runOnUiThread(new Runnable() {
           public void run() {
@@ -207,6 +217,16 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
         });
         return;
       }
+      results = ResultSetFactory.copyResults( results );
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ResultSetFormatter.outputAsJSON( baos, results );
+      final String jsonResults = baos.toString();
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          RetrievedRawResults("SELECT", jsonResults);
+        }
+      });
+      ((ResultSetRewindable)results).reset();
       final Collection<Solution> solutions = RdfUtil.resultSetAsCollection( results );
       form.runOnUiThread(new Runnable() {
         public void run() {
@@ -216,6 +236,19 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
     } catch ( Exception e ) {
       Log.w(LOG_TAG, e);
     }
+  }
+
+  /**
+   * This event is raised after a SPARQL engine finishes processing a query
+   * and the client has received the results, but before those results have
+   * been processed into objects so that they may be used in conjunction with
+   * other semantic web-enabled components.
+   * @param type
+   * @param contents
+   */
+  @SimpleEvent
+  public void RetrievedRawResults(String type, String contents) {
+    EventDispatcher.dispatchEvent(this, "RetrievedRawResults", type, contents);
   }
 
   /**

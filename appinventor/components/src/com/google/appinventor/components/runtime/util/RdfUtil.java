@@ -33,11 +33,14 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.sparql.core.Prologue;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.XSD;
@@ -220,14 +223,7 @@ public final class RdfUtil {
     }
   }
 
-  /**
-   * Executes a SPARQL SELECT query on the specified endpoint.
-   * @param endpoint
-   * @param queryText
-   * @return
-   */
-  public static ResultSet executeSELECT(String endpoint, String queryText) {
-    Query query = QueryFactory.create(queryText);
+  private static ResultSet executeSELECTQuery(String endpoint, Query query) {
     QueryEngineHTTP qe = QueryExecutionFactory.createServiceRequest(endpoint, query);
     qe.setSelectContentType("application/sparql-results+json");
     if(!query.isSelectType()) {
@@ -236,6 +232,24 @@ public final class RdfUtil {
     }
     Log.d(LOG_TAG, "Executing SPARQL select query");
     return qe.execSelect();
+  }
+
+  /**
+   * Executes a SPARQL SELECT query on the specified endpoint.
+   * @param endpoint
+   * @param queryText
+   * @return
+   */
+  public static ResultSet executeSELECT(String endpoint, String queryText) {
+    Query query = QueryFactory.create(queryText);
+    return executeSELECTQuery(endpoint, query);
+  }
+
+  public static ResultSet executeSELECT(String endpoint, String queryText,
+      PrefixMapping prefixes) {
+    Query query = QueryFactory.parse(new Query(new Prologue(prefixes)),
+        queryText, "", Syntax.syntaxSPARQL_11);
+    return executeSELECTQuery(endpoint, query);
   }
 
   /**
