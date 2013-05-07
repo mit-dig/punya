@@ -5,6 +5,10 @@
 
 package com.google.appinventor.components.runtime;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.SimpleObject;
@@ -33,6 +37,7 @@ public class TableArrangement extends AndroidViewComponent
 
   // Layout
   private final TableLayout viewLayout;
+  private final List<AndroidViewComponent> components;
 
   /**
    * Creates a new TableArrangement component.
@@ -44,6 +49,7 @@ public class TableArrangement extends AndroidViewComponent
     context = container.$context();
 
     viewLayout = new TableLayout(context, 2, 2);
+    components = new ArrayList<AndroidViewComponent>();
 
     container.$add(this);
   }
@@ -107,6 +113,7 @@ public class TableArrangement extends AndroidViewComponent
   @Override
   public void $add(AndroidViewComponent component) {
     viewLayout.add(component);
+    components.add(component);
   }
 
   @Override
@@ -117,6 +124,11 @@ public class TableArrangement extends AndroidViewComponent
   @Override
   public void setChildHeight(AndroidViewComponent component, int height) {
     ViewUtil.setChildHeightForTableLayout(component.getView(), height);
+  }
+
+  @Override
+  public Iterator<AndroidViewComponent> iterator() {
+    return components.iterator();
   }
 
   // AndroidViewComponent implementation

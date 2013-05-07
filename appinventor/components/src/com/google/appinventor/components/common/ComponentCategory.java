@@ -20,6 +20,7 @@ public enum ComponentCategory {
   SENSORS("Sensors"),
   ARRANGEMENTS("Screen Arrangement"),
   LEGOMINDSTORMS("LEGO\u00AE MINDSTORMS\u00AE"),
+  SEMANTICWEB("Semantic Web"),
   MISC("Other stuff"),
   EXPERIMENTAL("Not ready for prime time"),
   //OBSOLETE("Old stuff"),// removed to remove old stuff from the menu
@@ -39,6 +40,7 @@ public enum ComponentCategory {
     DOC_MAP.put("Sensors", "sensors");
     DOC_MAP.put("Screen Arrangement", "screenarrangement");
     DOC_MAP.put("LEGO\u00AE MINDSTORMS\u00AE", "legomindstorms");
+    DOC_MAP.put("Semantic Web", "semanticweb");
     DOC_MAP.put("Other stuff", "other");
     DOC_MAP.put("Not ready for prime time", "notready");
   }

@@ -1175,4 +1175,11 @@ public interface OdeMessages extends Messages {
   @Description("Text messages are always received, and a notification is shown if the App is in the background.")
   String textReceivingChoiceAlways();
 
+  // Used in
+  // editor/youngandroid/properties/BaseUriPropertyEditor.java
+
+  @DefaultMessage("The URI {0} does not end in a # or /")
+  @Description("Exception message used when a URI entered by the user does not end in an appropriate character.")
+  String notABaseUri(String uri);
+
 }

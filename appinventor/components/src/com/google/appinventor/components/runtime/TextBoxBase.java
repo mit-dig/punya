@@ -30,7 +30,7 @@ import android.widget.EditText;
 
 @SimpleObject
 public abstract class TextBoxBase extends AndroidViewComponent
-    implements OnFocusChangeListener {
+    implements OnFocusChangeListener, LDComponent {
 
   protected final EditText view;
 
@@ -54,6 +54,9 @@ public abstract class TextBoxBase extends AndroidViewComponent
 
   // Backing for text color
   private int textColor;
+
+  // If true, then text box is used for generating a subject uri.
+  private boolean isSubject;
 
   // This is our handle on Android's nice 3-d default textbox.
   private Drawable defaultTextBoxDrawable;
@@ -378,7 +381,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
     view.invalidate();
   }
 
-
+  private String conceptUri = "";
   /**
    * ConceptURI getter method.
    *
@@ -388,7 +391,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
       category = PropertyCategory.APPEARANCE,
       description = "Resource URI that identifies the concept being entered for this field")
   public String ConceptURI() {
-    return hint;
+    return conceptUri;
   }
 
   /**
@@ -396,13 +399,11 @@ public abstract class TextBoxBase extends AndroidViewComponent
    *
    * @param concept uri
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
       defaultValue = "")
   @SimpleProperty
-  public void ConceptURI(String hint) {
-    this.hint = hint;
-    view.setHint(hint);
-    view.invalidate();
+  public void ConceptURI(String uri) {
+    this.conceptUri = uri;
   }
 
   /**
@@ -480,4 +481,42 @@ public abstract class TextBoxBase extends AndroidViewComponent
       LostFocus();
     }
   }
+
+  private String propertyUri;
+  /**
+   * 
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI,
+      defaultValue = "")
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public void PropertyURI(String uri) {
+    this.propertyUri = uri;
+  }
+
+  /**
+   * 
+   */
+  @SimpleProperty
+  public String PropertyURI() {
+    return propertyUri;
+  }
+
+  public Object Value() {
+    return Text();
+  }
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+      defaultValue = "False")
+  @SimpleProperty
+  public void SubjectIdentifier(boolean isSubject) {
+    this.isSubject = isSubject;
+  }
+
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "")
+  @Override
+  public boolean SubjectIdentifier() {
+    return isSubject;
+  }
+
 }
