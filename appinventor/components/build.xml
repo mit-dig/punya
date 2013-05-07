@@ -140,7 +140,11 @@
         <pathelement location="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
         <pathelement location="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" />
         <pathelement location="${lib.dir}/guava/guava-11.0.1.jar" />
-      </classpath>
+        <pathelement location="${lib.dir}/funf/funf.jar" />
+        <pathelement location="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
+        <pathelement location="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
+        <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />        
+       </classpath>
     </ai.javac>
 
     <jar basedir="${AndroidRuntime-class.dir}"
@@ -248,6 +252,10 @@
           <pathelement location="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
           <pathelement location="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" />
           <pathelement location="${lib.dir}/guava/guava-11.0.1.jar" />
+          <pathelement location="${lib.dir}/funf/funf.jar" />
+          <pathelement location="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
+          <pathelement location="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
+          <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />        
         </classpath>
         <compilerarg line="-processorpath ${local.build.dir}/AnnotationProcessors.jar"/>
         <compilerarg line="-processor @{apt-processor}" />
@@ -354,10 +362,11 @@
   <!-- =====================================================================
        ComponentList: create simple_components.txt,
                       simple_components_permissions.json,
-                      and simple_components_libraries.json
+                      simple_components_libraries.json,
+                      and simple_components_templates.json                    
        ===================================================================== -->
   <target name="ComponentList"
-          description="Make simple_components.txt, simple_components_permissions.json, and simple_components_libraries.json."
+          description="Make simple_components.txt, simple_components_permissions.json, simple_components_libraries.json, and simple_components_templates.json."
           depends="AnnotationProcessors,AndroidRuntime,HtmlEntities,CommonConstants">
     <property name="ComponentList-class.dir" location="${class.dir}/ComponentList" />
     <mkdir dir="${ComponentList-class.dir}" />
@@ -372,6 +381,9 @@
           todir="${public.build.dir}"/>
     <copy file="${ComponentList-class.dir}/simple_components_libraries.json"
           todir="${public.build.dir}"/>
+    <copy file="${ComponentList-class.dir}/simple_components_templates.json"
+          todir="${public.build.dir}"/>
+  	
   </target>
 
   <!-- =====================================================================

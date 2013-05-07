@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Categories for grouping components in the palette within the Designer.
  */
-public enum ComponentCategory {
+public enum ComponentCategory{
   // TODO(user): i18n category names
   BASIC("Basic"),
   MEDIA("Media"),
@@ -20,6 +20,7 @@ public enum ComponentCategory {
   SENSORS("Sensors"),
   ARRANGEMENTS("Screen Arrangement"),
   LEGOMINDSTORMS("LEGO\u00AE MINDSTORMS\u00AE"),
+  FUNF("Funf"),
   SEMANTICWEB("Semantic Web"),
   MISC("Other stuff"),
   EXPERIMENTAL("Not ready for prime time"),
@@ -40,6 +41,7 @@ public enum ComponentCategory {
     DOC_MAP.put("Sensors", "sensors");
     DOC_MAP.put("Screen Arrangement", "screenarrangement");
     DOC_MAP.put("LEGO\u00AE MINDSTORMS\u00AE", "legomindstorms");
+    DOC_MAP.put("Funf", "funf");
     DOC_MAP.put("Semantic Web", "semanticweb");
     DOC_MAP.put("Other stuff", "other");
     DOC_MAP.put("Not ready for prime time", "notready");
@@ -47,7 +49,7 @@ public enum ComponentCategory {
 
   private String name;
 
-  private ComponentCategory(String categoryName) {
+  ComponentCategory(String categoryName) {
     name = categoryName;
   }
 

@@ -20,6 +20,7 @@ import com.google.appinventor.client.editor.simple.components.MockHorizontalArra
 import com.google.appinventor.client.editor.simple.components.MockImage;
 import com.google.appinventor.client.editor.simple.components.MockImagePicker;
 import com.google.appinventor.client.editor.simple.components.MockImageSprite;
+import com.google.appinventor.client.editor.simple.components.MockLDVisualization;
 import com.google.appinventor.client.editor.simple.components.MockLabel;
 import com.google.appinventor.client.editor.simple.components.MockListPicker;
 import com.google.appinventor.client.editor.simple.components.MockNonVisibleComponent;
@@ -28,6 +29,7 @@ import com.google.appinventor.client.editor.simple.components.MockPhoneNumberPic
 import com.google.appinventor.client.editor.simple.components.MockRadioButton;
 import com.google.appinventor.client.editor.simple.components.MockSWListPicker;
 import com.google.appinventor.client.editor.simple.components.MockSemanticForm;
+import com.google.appinventor.client.editor.simple.components.MockSurvey;
 import com.google.appinventor.client.editor.simple.components.MockTableArrangement;
 import com.google.appinventor.client.editor.simple.components.MockTextBox;
 import com.google.appinventor.client.editor.simple.components.MockVerticalArrangement;
@@ -99,6 +101,22 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/phoneip.png", images.phonestatusComponent());
     bundledImages.put("images/phoneCall.png", images.phonecall());
     bundledImages.put("images/player.png", images.player());
+    bundledImages.put("images/proximity.png", images.proximitysensor());
+    bundledImages.put("images/socialProximitysensor.png", images.socialProximitysensor());
+    bundledImages.put("images/timer.png", images.timer());
+    bundledImages.put("images/wifiProbe.png", images.wifiSensor());
+    bundledImages.put("images/locationProbe.png", images.locationProbeSensor());
+    bundledImages.put("images/cellTowerProbe.png", images.cellTowerProbeSensor());
+    bundledImages.put("images/activityProbe.png", images.activityProbeSensor());
+    bundledImages.put("images/runningAppsProbe.png", images.runningApps());
+    bundledImages.put("images/screenProbe.png", images.screenStatus());    
+    bundledImages.put("images/lightsensorProbe.png", images.lightSensor());
+    bundledImages.put("images/calllogProbe.png", images.calllogHistory());
+    bundledImages.put("images/smsProbe.png", images.smsHistory());
+    bundledImages.put("images/batterySensor.png", images.batterySensor());
+    bundledImages.put("images/pedometerSensor.png", images.pedometerSensor());
+    bundledImages.put("images/survey.png", images.survey());
+    bundledImages.put("images/info.png", images.telephonyInfo());
     bundledImages.put("images/soundEffect.png", images.soundeffect());
     bundledImages.put("images/soundRecorder.png", images.soundRecorder());
     bundledImages.put("images/speechRecognizer.png", images.speechRecognizer());
@@ -107,6 +125,8 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/tinyDB.png", images.tinyDB());
     bundledImages.put("images/tinyWebDB.png", images.tinyWebDB());
     bundledImages.put("images/twitter.png", images.twitterComponent());
+    bundledImages.put("images/dropbox.png", images.dropbox());
+    bundledImages.put("images/chart.png", images.ldchart());
     bundledImages.put("images/voting.png", images.voting());
     bundledImages.put("images/web.png", images.web());
     bundledImages.put("images/semanticWeb.png", images.semanticWeb());
@@ -287,6 +307,10 @@ public final class SimpleComponentDescriptor {
       return new MockVideoPlayer(editor);
     } else if (name.equals(MockWebViewer.TYPE)) {
       return new MockWebViewer(editor);
+    } else if (name.equals(MockSurvey.TYPE)){
+      return new MockSurvey(editor);
+    } else if (name.equals(MockLDVisualization.TYPE)){
+      return new MockLDVisualization(editor);
     } else if (name.equals(MockSemanticForm.TYPE)) {
       return new MockSemanticForm(editor);
     } else if (name.equals(MockSWListPicker.TYPE)) {

@@ -14,6 +14,7 @@ import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.UsesTemplates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -424,6 +425,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     protected final Set<String> libraries;
     
     /**
+     * Templates required by this component.
+     */
+    protected final Set<String> templates;
+    
+    /**
      * Properties of this component that are visible in the Designer.
      * @see DesignerProperty
      */
@@ -477,6 +483,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       displayName = getDisplayNameForComponentType(name);
       permissions = Sets.newHashSet();
       libraries = Sets.newHashSet();
+      templates = Sets.newHashSet();
       designerProperties = Maps.newTreeMap();
       properties = Maps.newTreeMap();
       methods = Maps.newTreeMap();
@@ -753,6 +760,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       for (String library : ulib.libraries().split(",")) {
         componentInfo.libraries.add(library.trim());
       }
+    }
+    
+    // Gather template names.
+    UsesTemplates utemp = element.getAnnotation(UsesTemplates.class);
+    if (utemp != null) {
+    	for (String template : utemp.templateNames().split(",")){
+    		componentInfo.templates.add(template.trim());
+    	}
+    	
     }
     
     // Build up event information.

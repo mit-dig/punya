@@ -116,8 +116,9 @@ public final class ErrorMessages {
   // Contact picker (and PhoneNumberPicker) errors
   public static final int ERROR_PHONE_UNSUPPORTED_CONTACT_PICKER = 1107;
   public static final int ERROR_PHONE_UNSUPPORTED_SEARCH_IN_CONTACT_PICKING = 1108;
-  // Camcorder errors
+  //Camcorder errors
   public static final int ERROR_CAMCORDER_NO_CLIP_RETURNED = 1201;
+    
   // VideoPlayer errors
   public static final int ERROR_VIDEOPLAYER_FULLSCREEN_UNAVAILBLE = 1301;
   public static final int ERROR_VIDEOPLAYER_FULLSCREEN_CANT_EXIT = 1302;
@@ -134,7 +135,19 @@ public final class ErrorMessages {
   public static final int ERROR_BAD_VALUE_FOR_TEXT_RECEIVING = 1701;
   
   // Please start the next group of error numbers at 1801.
+  public static final int ERROR_DATE_FORMAT = 1801;
+  // Dropbox errors 
+  public static final int ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET = 1810;
+  public static final int ERROR_DROPBOX_EXCEPTION = 1811;
+  public static final int ERROR_DROPBOX_UNLINKED = 1812;
+  public static final int ERROR_DROPBOX_FILESIZE = 1813;
+  public static final int ERROR_DROPBOX_PARTIALFILE = 1814;
+  public static final int ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE = 1815;
+  public static final int ERROR_DROPBOX_IO = 1816;
+  public static final int ERROR_DROPBOX_FILENOTFOUND = 1817;
+  public static final int ERROR_DROPBOX_NO_TWO_RUNNING_TASKS = 1818;
 
+  
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
   static {
@@ -329,9 +342,11 @@ public final class ErrorMessages {
         "The software used in this app cannot extract contacts from this type of phone.");
     errorMessages.put(ERROR_PHONE_UNSUPPORTED_SEARCH_IN_CONTACT_PICKING,
         "To pick contacts, pick them directly, without using search.");
+      
     // Camcorder errors
     errorMessages.put(ERROR_CAMCORDER_NO_CLIP_RETURNED,
-        "The camcorder did not return a clip.");
+    	"The camcorder did not return a clip.");
+
     // VideoPlayer errors
     errorMessages.put(ERROR_VIDEOPLAYER_FULLSCREEN_UNAVAILBLE,
         "Cannot start fullscreen mode.");
@@ -354,7 +369,35 @@ public final class ErrorMessages {
         "Unable to copy selected media: %s");
     // Texting errors
     errorMessages.put(ERROR_BAD_VALUE_FOR_TEXT_RECEIVING,
-      "Text Receiving should be either 1, 2 or 3.");
+      "Text Receiving should be either 1, 2 or 3.");    
+    
+    // CallLogs history errors
+    errorMessages.put(ERROR_DATE_FORMAT,
+      "The date string has wrong format, please refer to the documentation of the setting method again.");
+    
+    errorMessages.put(ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET, 
+        "The AppKey and AppSecret properties must be set in order to authorize access " +
+        "for Dropbox. Please obtain a App Key and App Secret specific to your app from " +
+        "https://www.dropbox.com/developers/apps");
+    
+    errorMessages.put(ERROR_DROPBOX_EXCEPTION,
+    "Dropbox error: %s");
+    
+    errorMessages.put(ERROR_DROPBOX_FILESIZE, "This file is too big to upload, at most " +
+        "150 MB.");
+    errorMessages.put(ERROR_DROPBOX_UNLINKED , "This app wasn't authenticated properly");
+    errorMessages.put(ERROR_DROPBOX_IO, "Network error while uploading the file.");
+    
+    errorMessages.put(ERROR_DROPBOX_PARTIALFILE, "The operation was canceled by Dropbox");
+    
+    errorMessages.put(ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE, "Your dropbox usage is over quota.");
+    
+    errorMessages.put(ERROR_DROPBOX_FILENOTFOUND, "The file to upload was not found.");
+    errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
+        "by calling stop.");
+    
+    
+    
   }
 
   private ErrorMessages() {
