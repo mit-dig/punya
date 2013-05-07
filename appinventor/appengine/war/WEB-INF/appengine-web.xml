@@ -57,6 +57,8 @@
 
     <property name="wifi.enabled" value="true" />
 
+
+
   </system-properties>
 
   <!-- Enable concurrency in the app engine server -->

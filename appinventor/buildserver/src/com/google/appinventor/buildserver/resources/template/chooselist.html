@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-Type" content="text/html; charset=utf-8">
+        <title>
+        </title>
+        <link rel="stylesheet" href="jquery.mobile.min.css" />
+        <style>
+            /* App custom styles */
+        </style>
+        <script src="jquery.min.js">
+        </script>
+        <script src="jquery.mobile.min.js">
+        </script>
+        <script>
+            function formSubmit()
+                {   
+                    var response = "";
+                    $("select option:selected").each(function () {
+                        response += $(this).text();
+                    });
+                    saveSurvey.saveResponse(response);
+                    saveSurvey.closeApp();
+                }
+        </script>
+    </head>
+    <body>
+        <!-- Home -->
+        <div data-role="page" id="page1">
+            <!-- <div data-theme="a" data-role="header">
+                <h2>
+                    Answer Question
+                </h2>
+            </div> -->
+            <div data-role="content">
+                <h1 id="_txt_qt">
+                    Question_content
+                </h1>
+                <div data-role="fieldcontain">
+                    <label for="selectmenu2">
+                        Choose:
+                    </label>
+                    <select name="">
+                        <option value="option1">
+                            Option A
+                        </option>
+                        <option value="value">
+                            Option B
+                        </option>
+                        <option value="value">
+                            Option C
+                        </option>
+                        <option value="value">
+                            Option D
+                        </option>
+                    </select>
+                </div>
+                <input id="_btn_submit" onclick="formSubmit()" value="Submit" type="submit" />
+            </div>
+        </div>
+        <script>
+            //App custom javascript
+        </script>
+    </body>
+</html>

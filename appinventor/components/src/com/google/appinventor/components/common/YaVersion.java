@@ -158,7 +158,7 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 50:
   // - TEXTBOX_COMPONENT_VERSION was incremented to 4:
   // For YOUNG_ANDROID_VERSION 51:
-  // - CANVAS_COMPONENT_VERSION was incremented to 5.
+  // - CANVAS_VERSION was incremented to 5.
   // - BLOCKS_LANGUAGE_VERSION was incremented to 16.
   // For YOUNG_ANDROID_VERSION 52:
   // - BLOCKS_LANGUAGE_VERSION was incremented to 17.
@@ -215,8 +215,46 @@ public class YaVersion {
   // - NOTIFIER_COMPONENT_VERSION was incremented to 2.
   // For YOUNG_ANDROID_VERSION 72:
   // - WEBVIEWER_COMPONENT_VERSION was incremented to 3
-
-  public static final int YOUNG_ANDROID_VERSION = 72;
+  // For YOUNG_ANDROID_VERSION 73:
+  // - SEMANTIC_WEB_COMPONENT_VERSION was added.
+  ////////////////// funf sensor, survey, timer, remote-storage ////
+  // For YOUNG_ANDROID_VERSION 74:
+  // - The proximity sensor component was added.
+  // For YOUNG_ANDORID_VESION 75:
+  // - The socialProximity sensor component was added 
+  // For YOUNG_ANDORID_VERSION 76:
+  // - The timer component was added
+  // FOR YOUNG_ANDROID_VERSION 77;
+  // - The wifiSensor component was added
+  // For YOUNG_ANDROID_VERSION 78:
+  // - The locationprobesensor component was added
+  // For YOUNG_ANDROID_VERSION 79; 
+  // - The cellTowerProbeSensor component was added 
+  // For YOUNG_ANDROID_VERSION 80;
+  // - The runningApplicaitons component was added
+  // For YOUNG_ANDROID_VERSION 81;
+  // - The screenStatus component was added
+  // For YOUNG_ANDROID_VERSION 82;
+  // - The callLogHistory component was added
+  // For YOUNG_ANDROID_VERSION 83;
+  // - The Timer component was added
+  // For YOUNG_ANDROID_VERSION 84;
+  // - The BatterSensor component was added
+  // For YOUNG_ANDROID_VERSION 85;
+  // - The BatterSensor component was added
+  // For YOUNG_ANDROID_VERSION 86;
+  // - The PedomenterSensor component was added
+  // For YOUNG_ANDROID_VERSION 87;
+  // - The Survey component was added
+  // For YOUNG_ANDROID_VERSION 88;
+  // - The Telephony component was added
+  // For YOUNG_ANDROID_VERSION 89;
+  // - The Dropbox component was added
+  // For YOUNG_ANDROLD_VERSION 90;
+  // - The LinkedDataViz component was added
+    
+ 
+  public static final int YOUNG_ANDROID_VERSION = 90;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -224,7 +262,7 @@ public class YaVersion {
   // 1. Increment YOUNG_ANDROID_VERSION above.
   // 2. Increment BLOCKS_LANGUAGE_VERSION here
   // 3. Add code in yacodeblocks.BlockSaveFile#upgradeLanguage to upgrade the .blk file contents
-  // 4. Add code in YoungAndroidFormUpgrader to upgrade the source file
+  // See also
 
   // For BLOCKS_LANGUAGE_VERSION 2:
   // - Allow arguments of different procedures and events to have the same names.
@@ -260,14 +298,14 @@ public class YaVersion {
   // For BLOCKS_LANGUAGE_VERSION 16:
   // - Added make-color and split-color to Color drawer.
   // For BLOCKS_LANGUAGE_VERSION 17:
-  // - Changed open-screen to open-another-screen
-  // - Changed open-screen-with-start-text to open-another-screen-with-start-value
-  // - Marked get-startup-text as a bad block
-  // - Added get-start-value
-  // - Added get-plain-start-text
-  // - Marked close-screen-with-result as a bad block
-  // - Added close-screen-with-value
-  // - Added close-screen-with-plain-text
+  // Changed open-screen to open-another-screen
+  // Changed open-screen-with-start-text to open-another-screen-with-start-value
+  // Marked get-startup-text as a bad block
+  // Added get-start-value
+  // Added get-plain-start-text
+  // Marked close-screen-with-result as a bad block
+  // Added close-screen-with-value
+  // Added close-screen-with-plain-text
   public static final int BLOCKS_LANGUAGE_VERSION = 17;
 
   // ................................. Component Version Numbers ..................................
@@ -304,7 +342,7 @@ public class YaVersion {
 
   // For BALL_COMPONENT_VERSION 2:
   // - The PointTowards method was added (for all sprites)
-  // - The heading property was changed from int to double (for all sprites)
+  // - The heading property was changed from int to double (for all sprites
   // For BALL_COMPONENT_VERSION 3:
   // - The Z property was added (also for ImageSprite)
   // For BALL_COMPONENT_VERSION 4:
@@ -342,7 +380,7 @@ public class YaVersion {
   // For BUTTON_COMPONENT_VERSION 4:
   // - The Shape property was added.
   public static final int BUTTON_COMPONENT_VERSION = 4;
-
+    
   public static final int CAMCORDER_COMPONENT_VERSION = 1;
 
   public static final int CAMERA_COMPONENT_VERSION = 1;
@@ -402,7 +440,7 @@ public class YaVersion {
   // - The OpenScreenAnimation property was added
   // - The CloseScreenAnimation property was added
   // For FORM_COMPONENT_VERSION 10:
-  // - The BackPressed event was added.
+  // - The getSurveyStartValues method was added and onBackPressed method was added
   public static final int FORM_COMPONENT_VERSION = 10;
 
   // For FUSIONTABLESCONTROL_COMPONENT_VERSION 2:
@@ -487,6 +525,32 @@ public class YaVersion {
   // - The yaw parameter to OrientationChanged was renamed to azimuth.
   public static final int ORIENTATIONSENSOR_COMPONENT_VERSION = 2;
 
+  public static final int PROXIMITYSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int SOCIALPROXIMITYSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int WIFISENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int LOCATIONPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int CELLTOWERPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int ACTIVITYPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int RUNNINGAPPLICATIONS_COMPONENT_VERSION = 1;
+  
+  public static final int SCREENSTATUS_COMPONENT_VERSION = 1;
+  
+  public static final int LIGHTSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int CALLLOGHISTORY_COMPONENT_VERSION = 1;
+  
+  public static final int TIMER_COMPONENT_VERSION = 1;
+  
+  public static final int BATTERYSENSOR_COMPONENT_VERSION = 1;
+  public static final int PEDOMETERSENSOR_COMPONENT_VERSION = 1;
+  public static final int SURVEY_COMPONENT_VERSION = 1;
+  public static final int TELEPHONY_COMPONENT_VERSION = 1;
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
   public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 2;
@@ -605,5 +669,10 @@ public class YaVersion {
   // For WEBVIEWER_COMPONENT_VERSION 3:
   // - Add UsesLocation property to set location permissions
   public static final int WEBVIEWER_COMPONENT_VERSION = 3;
+  
+  public static final int DROPBOX_COMPONENT_VERSION = 1;
 
+  public static final int SEMANTIC_WEB_COMPONENT_VERSION = 1;
+  
+  public static final int LINKED_DATA_COMPONENT_VERSION = 1;
 }

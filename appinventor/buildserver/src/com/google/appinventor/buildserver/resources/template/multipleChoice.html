@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>
+        </title>
+        <link rel="stylesheet" href="jquery.mobile.min.css" />
+        <style>
+            /* App custom styles */
+        </style>
+        <script src="jquery.min.js">
+        </script>
+        <script src="jquery.mobile.min.js">
+        </script>
+        <script>
+            function formSubmit()
+                {
+                    var response = $('input:radio[name=ans]:checked').val();
+                    saveSurvey.saveResponse(response);
+                    saveSurvey.closeApp();
+
+                }
+        </script>
+    </head>
+    <body>
+        <!-- Home -->
+        <div data-role="page" id="page1">
+            <div data-role="content">
+                <h1 id="_txt_qt">
+                    Question_content
+                </h1>
+                <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup" data-type="vertical">
+                        <legend>
+                            Choose:
+                        </legend>
+                        <input id="radio6" name="ans" value="Stressful" type="radio" />
+                        <label for="radio6"> 
+                            Stressful
+                        </label>
+                        <input id="radio8" name="ans" value="Nervous" type="radio" />
+                        <label for="radio8">
+                            Nervous
+                        </label>
+                        <input id="radio9" name="ans" value="Anxious" type="radio" />
+                        <label for="radio9">
+                            Anxious
+                        </label>
+                        <input id="radio10" name="ans" value="Calm" type="radio" />
+                        <label for="radio10">
+                            Calm
+                        </label>
+                        <input id="radio11" name="ans" value="Happy" type="radio" />
+                        <label for="radio11">
+                            Happy
+                        </label>
+                    </fieldset>
+                </div>
+                <input id="_btn_submit" onclick="formSubmit()" value="Submit" type="submit" />
+            </div>
+        </div>
+        <script>
+            //App custom javascript
+        </script>
+    </body>
+</html>

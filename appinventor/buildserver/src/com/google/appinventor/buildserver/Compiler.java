@@ -5,6 +5,7 @@
 
 package com.google.appinventor.buildserver;
 
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
@@ -77,6 +78,12 @@ public final class Compiler {
 
   private static final String COMPONENT_LIBRARIES =
     RUNTIME_FILES_DIR + "simple_components_libraries.json";
+  
+  private static final String COMPONENT_TMEPLATES =
+    RUNTIME_FILES_DIR + "simple_components_templates.json";
+  
+  private static final String TEMPLATE_DIR = RUNTIME_FILES_DIR + "template/";
+
 
   /*
    * Resource paths to yail runtime, runtime library files and sdk tools.
@@ -99,6 +106,7 @@ public final class Compiler {
   private static final String DX_JAR =
       RUNTIME_FILES_DIR + "dx.jar";
 
+
   @VisibleForTesting
   static final String YAIL_RUNTIME =
       RUNTIME_FILES_DIR + "runtime.scm";
@@ -116,6 +124,9 @@ public final class Compiler {
       new ConcurrentHashMap<String, Set<String>>();
 
   private final ConcurrentMap<String, Set<String>> componentLibraries =
+    new ConcurrentHashMap<String, Set<String>>();
+  
+  private final ConcurrentMap<String, Set<String>> componentTemplates = 
     new ConcurrentHashMap<String, Set<String>>();
 
   /**
@@ -148,6 +159,7 @@ public final class Compiler {
   // Maximum ram that can be used by a child processes, in MB.
   private final int childProcessRamMb;
   private Set<String> librariesNeeded; // Set of component libraries
+  private Set<String> templatesNeeded; // Set of component templates
 
 
   /*
@@ -204,6 +216,30 @@ public final class Compiler {
       librariesNeeded.addAll(componentLibraries.get(componentType));
     }
     System.out.println("Libraries needed, n= " + librariesNeeded.size());
+  }
+  
+  /*
+   * Generate the set of Android templates needd by this project.
+   */
+  @VisibleForTesting
+  void generateTemplateNames() {
+	    // Before we can use componentLibraries, we have to call loadComponentLibraries().
+	try {
+	  loadComponentTemplateNames();
+	} catch (IOException e) {
+	  // This is fatal.
+	  e.printStackTrace();
+	  userErrors.print(String.format(ERROR_IN_STAGE, "Templates"));
+	} catch (JSONException e) {
+	  // This is fatal, but shouldn't actually ever happen.
+	  e.printStackTrace();
+	  userErrors.print(String.format(ERROR_IN_STAGE, "Templates"));
+	}
+	templatesNeeded = Sets.newHashSet();
+	for (String componentType : componentTypes) {
+	  templatesNeeded.addAll(componentTemplates.get(componentType));
+	}
+	System.out.println("Templates needed, n= " + templatesNeeded.size());	  
   }
 
 
@@ -329,6 +365,49 @@ public final class Compiler {
       out.write("      </intent-filter>\n");
       out.write("    </activity>\n");
 
+	  // Add the FUNF probe services
+//      out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
+//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
+//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
+//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
+
+	  // new version of configurations to include in the manifest.xml. Now need not include each probe individually, 
+	  // but just include the FunfManager service
+    // Broadcast receiver for all funf related component  
+	  if(librariesNeeded.contains("funf.jar")){
+	    out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+      out.write(" </service>\n");  
+	    out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
+	    out.write("    <intent-filter>\n");
+	    out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
+	    out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
+	    out.write("    </intent-filter>\n");
+	    out.write("</receiver>\n");
+	  }
+	  //add UploadServices and DataBaseService
+	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.HttpsUploadService\"></service> \n");
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.DropboxUploadService\"></service> \n");
+	  
+	  
+	  // try the same thing here for TimerManager (Disabled for now)
+	  // BroadcastReceiver for TimerManager
+	  if(componentTypes.contains("Timer")){
+	    out.write("<service android:name=\"com.google.appinventor.components.runtime.util.TimerManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+      out.write(" </service>\n");  
+      out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\">\n");
+      out.write("    <intent-filter>\n");
+      out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
+      out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
+      out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
+      out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
+      out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
+      out.write("    </intent-filter>\n");
+      out.write("</receiver>");
+	  }
       // BroadcastReceiver for Texting Component
       if (componentTypes.contains("Texting")) {
         System.out.println("Android Manifest: including <receiver> tag");
@@ -346,6 +425,7 @@ public final class Compiler {
         "</receiver> \n");
       }
 
+	  // Close the application tag
       out.write("  </application>\n");
       out.write("</manifest>\n");
       out.close();
@@ -378,12 +458,18 @@ public final class Compiler {
                                 boolean isForRepl, boolean isForWireless, String keystoreFilePath, int childProcessRam) throws IOException, JSONException {
     long start = System.currentTimeMillis();
 
-
     // Create a new compiler instance for the compilation
     Compiler compiler = new Compiler(project, componentTypes, out, err, userErrors, isForRepl, isForWireless,
                                      childProcessRam);
 
     compiler.generateLibraryNames();
+    
+    // TODO: code for copying all neededTemplates from AppEngine's /WEBINF/template to Android asset folder
+    // Move needed templates files to project's asset folder
+     
+    compiler.generateTemplateNames(); //after this we have all templateNames used by the components in templatesNeeded
+    compiler.copyTemplatesToAssets();
+    
 
     // Create build directory.
     File buildDir = createDirectory(project.getBuildDirectory());
@@ -484,7 +570,65 @@ public final class Compiler {
 
     return true;
   }
+  
+  /*
+   * Create asset files and copy all needed templates used by the components in this project
+   */
 
+  private boolean copyTemplatesToAssets(){
+	// checkout implementation in IdMap.java and Whiltelist.java
+	// 
+	  
+	LOG.info("The asset dir: " + project.getAssetsDirectory());
+ 
+	createDirectory(project.getAssetsDirectory()); //make sure we have asset folder created
+
+	// checkout the files can be read in from the resource 
+	// icon = ImageIO.read(Compiler.class.getResource(DEFAULT_ICON));
+//    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(resourcePath)),
+//            file);
+
+	try {
+
+	  File assetFolder = project.getAssetsDirectory();
+	  
+	  for (String templateName : templatesNeeded) {
+		String target = assetFolder.getAbsolutePath() + "/" + templateName;
+		String source = TEMPLATE_DIR + templateName;
+		
+		out.println("(DEBUG) Copying " + source + 
+				" to " + assetFolder.getAbsolutePath() + "/" + templateName);
+	    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(source)),
+	    		  new File(target));
+		
+//		String source = templateFolder + templateName;
+//		String target = assetFolder.getAbsolutePath() + "/" + templateName;
+//
+//
+//	    FileInputStream fileInputStream = new FileInputStream(source);
+//	    FileOutputStream fileOutputStream = new FileOutputStream(target);
+//	    
+//        int bufferSize;
+//        byte[] bufffer = new byte[512];
+//        
+//        while ((bufferSize = fileInputStream.read(bufffer)) > 0) {
+//          fileOutputStream.write(bufffer, 0, bufferSize);
+//        }
+//        fileInputStream.close();
+//        fileOutputStream.close();
+
+	  }
+
+	  
+	} catch (IOException e) {
+	    e.printStackTrace();
+	    return false;
+	}
+
+	return true;
+
+  }
+  
   /*
    * Creates all the animation xml files.
    */
@@ -711,10 +855,6 @@ public final class Compiler {
       // This works when a JDK is installed with the JRE.
       jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
           File.separator + "jarsigner");
-      if (System.getProperty("os.name").startsWith("Windows")){
-        jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
-            File.separator + "jarsigner.exe");
-      }
       if (!jarsignerFile.exists()) {
         LOG.warning("YAIL compiler - could not find jarsigner.");
         err.println("YAIL compiler - could not find jarsigner.");
@@ -999,8 +1139,9 @@ public final class Compiler {
     }
   }
 
+  
   /**
-   * Loads the names of library jars for each component and stores them in
+   * Loads the names of template jars for each component and stores them in
    * componentLibraries.
    *
    * @throws IOException
@@ -1031,6 +1172,40 @@ public final class Compiler {
       }
     }
   }
+  
+  /**
+   * Loads the names of template files for each component and stores them in
+   * componentTemplates.
+   *
+   * @throws IOException
+   * @throws JSONException
+   */
+  private void loadComponentTemplateNames() throws IOException, JSONException {
+    synchronized (componentTemplates) {
+      if (componentTemplates.isEmpty()) {
+        String templatesJson = Resources.toString(
+            Compiler.class.getResource(COMPONENT_TMEPLATES), Charsets.UTF_8);
+
+        JSONArray componentsArray = new JSONArray(templatesJson);
+        int componentslength = componentsArray.length();
+        for (int componentsIndex = 0; componentsIndex < componentslength; componentsIndex++) {
+          JSONObject componentObject = componentsArray.getJSONObject(componentsIndex);
+          String name = componentObject.getString("name");
+
+          Set<String> templatesForThisComponent = Sets.newHashSet();
+
+          JSONArray templatesArray = componentObject.getJSONArray("templates");
+          int templatesLength = templatesArray.length();
+          for (int templatesIndex = 0; templatesIndex < templatesLength; templatesIndex++) {
+            String templateName = templatesArray.getString(templatesIndex);
+            templatesForThisComponent.add(templateName);
+          }
+          componentTemplates.put(name, templatesForThisComponent);
+        }
+      }
+    }
+  }
+
 
   /**
    * Copy one file to another. If destination file does not exist, it is created.

@@ -20,7 +20,6 @@
 
   <target name="tests"
           depends="BuildServerTests,YailGeneratorTests">
-
   </target>
 
   <!-- =====================================================================
@@ -125,10 +124,17 @@
     <copy todir="${classes.files.dir}" flatten="true">
       <fileset dir="${src.dir}/${buildserver.pkg}/resources" includes="*"/>
       <fileset dir="${build.dir}/components"
-               includes="AndroidRuntime.jar,simple_components.txt,simple_components_permissions.json,simple_components_libraries.json"/>
+               includes="AndroidRuntime.jar,simple_components.txt,simple_components_permissions.json,simple_components_libraries.json,simple_components_templates.json"/>
     </copy>
+  	<copy todir="${classes.files.dir}/template" flatten="true">
+  	 	  <fileset dir="${src.dir}/${buildserver.pkg}/resources/template" includes="*"/>
+  	</copy>	
     <copy toFile="${classes.files.dir}/YailGenerator.jar" file="${local.build.dir}/YailGenerator.jar" />
     <copy toFile="${classes.files.dir}/kawa.jar" file="${lib.dir}/kawa/kawa-1.11-modified.jar" />
+    <copy toFile="${classes.files.dir}/funf.jar" file="${lib.dir}/funf/funf.jar" />
+    <copy toFile="${classes.files.dir}/dropbox.jar" file="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
+    <copy toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar" file="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
+    <copy toFile="${classes.files.dir}/json-simple.jar" file="${lib.dir}/dropbox/json_simple-1.1.jar" />    
     <copy toFile="${classes.files.dir}/acra-4.4.0.jar" file="${lib.dir}/acra/acra-4.4.0.jar" />
     <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-android-2.2.6.jar" />
     <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables.jar" />

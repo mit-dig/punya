@@ -11,6 +11,8 @@ import java.util.Map;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 
+import com.sun.tools.javac.util.JCDiagnostic.DiagnosticType;
+
 /**
  * Tool to generate a list of the simple component types, and the permissions
  * required for each component.
@@ -24,7 +26,9 @@ public final class ComponentListGenerator extends ComponentProcessor {
       "simple_components_permissions.json";
   private static final String COMPONENT_LIBRARIES_OUTPUT_FILE_NAME =
     "simple_components_libraries.json";
-
+  private static final String COMPONENT_TEMPLATES_OUTPUT_FILE_NAME = 
+	"simple_components_templates.json";
+  
   @Override
   protected void outputResults() throws IOException {
     // Build the component list and the permissions simulataneously.
@@ -33,6 +37,8 @@ public final class ComponentListGenerator extends ComponentProcessor {
     componentPermissions.append("[\n");
     StringBuilder componentLibraries = new StringBuilder();
     componentLibraries.append("[\n");
+    StringBuilder componentTemplates = new StringBuilder();
+    componentTemplates.append("[\n");
    
 
     // Components are already sorted.
@@ -50,12 +56,16 @@ public final class ComponentListGenerator extends ComponentProcessor {
       componentLibraries.append(jsonSeparator);
       outputComponentLibraries(component, componentLibraries);
       
+      componentTemplates.append(jsonSeparator);
+      outputComponentTemplates(component, componentTemplates);
+      
       jsonSeparator = ",\n";
      
     }
 
     componentPermissions.append("\n]");
     componentLibraries.append("\n]");
+    componentTemplates.append("\n]");
 
     FileObject src = createOutputFileObject(COMPONENT_LIST_OUTPUT_FILE_NAME);
     Writer writer = src.openWriter();
@@ -87,6 +97,15 @@ public final class ComponentListGenerator extends ComponentProcessor {
     }
     messager.printMessage(Diagnostic.Kind.NOTE, "Wrote file " + src.toUri());
     
+    src = createOutputFileObject(COMPONENT_TEMPLATES_OUTPUT_FILE_NAME);
+    writer = src.openWriter();
+    try {
+    	writer.write(componentTemplates.toString());
+    	writer.flush();	
+    } finally {
+      writer.close();
+    }
+    messager.printMessage(Diagnostic.Kind.NOTE, "Wrote file " + src.toUri());
   }
 
   private static void outputComponentPermissions(ComponentInfo component, StringBuilder sb) {
@@ -111,5 +130,17 @@ public final class ComponentListGenerator extends ComponentProcessor {
       separator = ", ";
     }
     sb.append("]}");
+  }
+  
+  private static void outputComponentTemplates(ComponentInfo component, StringBuilder sb){
+	sb.append("{\"name\": \"");
+	sb.append(component.name);
+	sb.append("\", \"templates\": [");
+	String separator = "";
+	for (String template : component.templates) {
+	  sb.append(separator).append("\"").append(template).append("\"");
+	  separator = ", ";
+	}
+	sb.append("]}");  
   }
 }

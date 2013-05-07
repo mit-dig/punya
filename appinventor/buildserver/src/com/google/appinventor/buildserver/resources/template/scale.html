@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>
+        </title>
+        <link rel="stylesheet" href="jquery.mobile.min.css" />
+        <style>
+            /* App custom styles */
+        </style>
+        <script src="jquery.min.js">
+        </script>
+        <script src="jquery.mobile.min.js">
+        </script>
+        </script>
+        <script>
+            function formSubmit()
+                {
+                    var response = $('#slider').val();
+                    saveSurvey.saveResponse(response.toString());
+                    saveSurvey.closeApp();
+
+                }
+        </script>
+    </head>
+    <body>
+        <!-- Home -->
+        <div data-role="page" id="page1">
+            <!--<div data-theme="a" data-role="header">
+                <h2>
+                    Answer Question
+                </h2>
+            </div>-->
+            <div data-role="content">
+                <h1 id="_txt_qt">
+                    Question_content
+                </h1>
+                <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup">
+                        <label for="slider1">
+                            Give a score:
+                        </label>
+                        <input name="slider" value="5" min="1" max="10" data-highlight="false" data-theme="" data-track-theme="" id="slider" type="range" />
+                    </fieldset>
+                </div>
+                <input id="_btn_submit" onclick="formSubmit()" value="Submit" type="submit" />
+            </div>
+        </div>
+        <script>
+            //App custom javascript
+        </script>
+    </body>
+</html>
