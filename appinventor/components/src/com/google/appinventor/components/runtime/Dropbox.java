@@ -277,7 +277,7 @@ public class Dropbox extends AndroidNonvisibleComponent
     if (mIsBound) {
       // unregister Pipeline action 
       unregisterPipelineActions();
-      // Detach our existing connection.
+      // Detach our existing connections.
       mainUIThreadActivity.unbindService(mConnection);
       mIsBound = false;
     }

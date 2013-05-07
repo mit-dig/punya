@@ -1,6 +1,11 @@
 package com.google.appinventor.components.runtime;
 
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import android.accounts.AccountManager;
 import android.app.Activity;
 
@@ -10,13 +15,24 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.http.FileContent;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -43,7 +59,11 @@ import edu.mit.media.funf.storage.UploadService;
     nonVisible = true,
     iconName = "images/googledrive.png")
 @UsesPermissions(permissionNames = "android.permission.GET_ACCOUNTS," +
-    "android.permission.INTERNET")
+    "android.permission.INTERNET," +
+    "android.permission.WAKE_LOCK, " +
+    "android.permission.WRITE_EXTERNAL_STORAGE, " +
+    "android.permission.READ_LOGS, " + 
+    "android.permission.ACCESS_NETWORK_STATE")
 @UsesLibraries(libraries =
    "google-http-client-beta.jar," +
    "google-oauth-client-beta.jar," +
@@ -51,7 +71,9 @@ import edu.mit.media.funf.storage.UploadService;
    "google-api-client-beta.jar," +
    "google-api-client-android-beta-14.jar," +
    "google-http-client-android-beta-14.jar," +
-   "google-play-services.jar")
+   "google-http-client-gson-beta-14.jar, " +
+   "google-play-services.jar," +
+   "funf.jar")
 public class GoogleDrive extends AndroidNonvisibleComponent
 implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   
@@ -68,9 +90,12 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   public static final String PREF_AUTH_TOKEN = "gd_authtoken";
   public final static String GD_FOLDER = "gd_folder";
   public static final String DEFAULT_GD_FOLDER = "gd_root";
+
   
   protected static Activity mainUIThreadActivity;
-  private final int requestCode; 
+  private final int REQUEST_CHOOSE_ACCOUNT; 
+  private final int REQUEST_AUTHORIZE;
+  private final int REQUEST_CAPTURE;
   private String gdFolder;
   
   //binding to GoogleDriveUploadService and FunfManager Service
@@ -80,7 +105,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   protected static final String ACTION_UPLOAD_DATA = "UPLOAD_DATA";
   
   private static final long SCHEDULE_UPLOAD_PERIOD = 7200; //default period for uploading task 
-   
+
 
   private AccessToken accessTokenPair;
   
@@ -146,6 +171,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     sharedPreferences = container.$context().getSharedPreferences(PREFS_GOOGLEDRIVE, Context.MODE_PRIVATE);
     accessTokenPair = retrieveAccessToken();
     mainUIThreadActivity = container.$context();
+    Log.i(TAG, "Package name:" + mainUIThreadActivity.getApplicationContext().getPackageName());
     // start a FunfManager Service
     Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
     mainUIThreadActivity.startService(i);
@@ -154,8 +180,13 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // schedule)
     doBindService();
     this.upload_period = GoogleDrive.SCHEDULE_UPLOAD_PERIOD;
-    requestCode = form.registerForActivityResult(this);
+    REQUEST_CHOOSE_ACCOUNT = form.registerForActivityResult(this);
+    REQUEST_AUTHORIZE = form.registerForActivityResult(this);
+    REQUEST_CAPTURE =  form.registerForActivityResult(this);
     this.gdFolder = GoogleDrive.DEFAULT_GD_FOLDER;
+    //try to use getApplicationContext for authorizing the credential, because when Service is running, it's using
+    //getApplicationContext
+    credential = GoogleAccountCredential.usingOAuth2(mainUIThreadActivity, DriveScopes.DRIVE);
     
     
   }
@@ -181,7 +212,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       // unregister Pipeline action 
       unregisterPipelineActions();
       // Detach our existing connection.
-      mainUIThreadActivity.unbindService(mConnectionGD);
+      mainUIThreadActivity.unbindService(mConnection);
       mIsBound = false;
     }
   }
@@ -210,7 +241,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   @Override
   public void onDestroy() {
     // TODO Auto-generated method stub
-    
+    doUnbindService();
   }
 
   @Override
@@ -222,33 +253,106 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   @Override
   public void resultReturned(int requestCode, int resultCode, Intent data) {
     // When the authentication from Google chooseAccount is back
-    Log.i(TAG, "After authorized.... " + resultCode);
-    String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-    String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+    Log.i(TAG, "resultReturned.... " + resultCode);
+    final Intent returnData = data;
+    // if it's returning from choose account
+    if (requestCode == REQUEST_CHOOSE_ACCOUNT) {
+      if (resultCode == Activity.RESULT_OK && data != null
+          && data.getExtras() != null) {
+        
+        setUpDriveService(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+               
+      } else {
+        // TODO: Should not happen
+      }
+
+    }// Below happens when after UserRecoverableAuthException 
+    if (requestCode == REQUEST_AUTHORIZE) {
+      if (resultCode == Activity.RESULT_OK) {
+
+        String accountName = data
+            .getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+
+        String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+        saveAccessToken(new AccessToken(accountName, accessToken));
+        /////// TESTING ////// only ////////
+        // startCameraIntent();
+        ////// Remove when done testing /////
+        
+      } else {
+        mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), REQUEST_CHOOSE_ACCOUNT);
+      }
+
+      
+    }
+    if(requestCode == REQUEST_CAPTURE){
+      if (resultCode == Activity.RESULT_OK){
+        saveFileToDrive();
+
+      }
+    }
     
-    saveAccessToken(new AccessToken(accountName, accessToken));
+//    String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+//
+//    
+//    
+//    String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+//    saveAccessToken(new AccessToken(accountName, accessToken));
     //now we can do Google Drive operation!
+
+    
+  }
+  
+/*
+ * This should only be done once in the main UI. Once we have authorized the app, the 
+ * GoogleAccountCredential will automatically refresh token with Google Play service if it expires
+ */
+  private void setUpDriveService(String accountName) {
+
+    final String mAccountName = accountName;
     AsynchUtil.runAsynchronously(new Runnable() {
       public void run() {
-
+        String token = "";
+        credential.setSelectedAccountName(mAccountName);
         try {
-
-          handler.post(new Runnable() {
-            @Override
-            public void run() {
-              IsAuthorized();
-            }
-          });
-
-        } catch (Exception e) {
+          Log.i(TAG, "before getToken()... ");
+          token = credential.getToken();
+        } catch (UserRecoverableAuthException e) {
+          // if the user has not yet authorized
+          Log.i(TAG, "in userRecoverableAuthExp... ");
+          UserRecoverableAuthException exception = (UserRecoverableAuthException) e;
+          Intent authorizationIntent = exception.getIntent();
+          mainUIThreadActivity.startActivityForResult(authorizationIntent,
+              REQUEST_AUTHORIZE);
+        } catch (IOException e) {
           // TODO Auto-generated catch block
-          System.err.println("Could not retrieve WebAccessTokens. " + e);
+          e.printStackTrace();
+        } catch (GoogleAuthException e) {
+          // TODO Auto-generated catch block
           e.printStackTrace();
         }
+        Log.i(TAG, "before build drive service... ");
+        saveAccessToken(new AccessToken(mAccountName, token));
+        service = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
+            new GsonFactory(), credential).build();
+        Log.i(TAG, "after drive service... ");
+        // tell the mainUI that we are done
+        AsynchUtil.runAsynchronously(new Runnable() {
+          public void run() {
+
+            handler.post(new Runnable() {
+              @Override
+              public void run() {
+                IsAuthorized();
+              }
+            });
+
+          }
+        });
 
       }
     });
-    
+
   }
   
   /**
@@ -261,6 +365,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
                " any other method for this " +
                "component can be called.")
   public void IsAuthorized() {
+    Log.i(TAG, "call isAuthorized");
     EventDispatcher.dispatchEvent(this, "IsAuthorized");
   }
   
@@ -322,8 +427,15 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // This will help us getting the main Google Account name, and auth token for the first time
     // we will persist these two in sharedPreference
     Log.i(TAG, "Start Authorization");
-  	credential = GoogleAccountCredential.usingOAuth2(mainUIThreadActivity, DriveScopes.DRIVE);
-  	mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), requestCode);
+
+  	// check if we have choose the account already
+  	String accountName = sharedPreferences.getString(PREF_ACCOUNT_NAME, "");
+  	if(accountName.length() == 0){
+  	  mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), REQUEST_CHOOSE_ACCOUNT);
+  	}
+  	else{
+  	  setUpDriveService(accountName);
+  	}
     
   }
   
@@ -429,7 +541,8 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   public void UploadData(String filename) {
     //TODO: use MediaUtil.java to know about the file type and how to deal with it
     // this will be the archive file name 
-    //This method uploads the specified file directly to Dropbox 
+    //This method uploads the specified file directly to GoogleDrive
+    
     String archiveName = filename;
     Log.i(TAG, "Start uploadService...");
     Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
@@ -442,6 +555,62 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     mainUIThreadActivity.startService(i);
 
   }
+  // below is the code to test if we can at least upload one photo?
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  private static Uri fileUri;
+
+
+  private void startCameraIntent() {
+    String mediaStorageDir = Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_PICTURES).getPath();
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+    fileUri = Uri.fromFile(new java.io.File(mediaStorageDir + java.io.File.separator + "IMG_"
+        + timeStamp + ".jpg"));
+
+    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+    mainUIThreadActivity.startActivityForResult(cameraIntent, REQUEST_CAPTURE);
+  }
+
+  private void saveFileToDrive() {
+    Thread t = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // File's binary content
+          java.io.File fileContent = new java.io.File(fileUri.getPath());
+          FileContent mediaContent = new FileContent("image/jpeg", fileContent);
+
+          // File's metadata.
+          File body = new File();
+          body.setTitle(fileContent.getName());
+          body.setMimeType("image/jpeg");
+
+          File file = service.files().insert(body, mediaContent).execute();
+          if (file != null) {
+            showToast("Photo uploaded: " + file.getTitle());
+            //startCameraIntent();
+          }
+        } catch (UserRecoverableAuthIOException e) {
+          Log.i(TAG, "Are we ever here? saveFileToDrive@GoogleDrive");
+          mainUIThreadActivity.startActivityForResult(e.getIntent(), REQUEST_AUTHORIZE);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    t.start();
+  }
+  
+  public void showToast(final String toast) {
+    mainUIThreadActivity.runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        Toast.makeText(mainUIThreadActivity.getApplicationContext(), toast, Toast.LENGTH_SHORT).show();
+      }
+    });
+  }
+
 
   
 }

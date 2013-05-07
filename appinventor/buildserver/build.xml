@@ -154,7 +154,9 @@
     <copy toFile="${classes.files.dir}/google-oauth-client-beta.jar" file="${lib.dir}/googledrive/google-oauth-client-1.14.1-beta.jar" />    
     <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/googledrive/google-api-client-1.14.1-beta.jar" />
     <copy toFile="${classes.files.dir}/google-api-client-android-beta-14.jar" file="${lib.dir}/googledrive/google-api-client-android-1.14.1-beta.jar" />    
-    <copy toFile="${classes.files.dir}/google-http-client-android-beta-14.jar" file="${lib.dir}/googledrive/google-http-client-android-1.14.1-beta.jar" />    
+    <copy toFile="${classes.files.dir}/google-http-client-android-beta-14.jar" file="${lib.dir}/googledrive/google-http-client-android-1.14.1-beta.jar" /> 
+    <copy toFile="${classes.files.dir}/google-http-client-gson-beta-14.jar" file="${lib.dir}/googledrive/google-http-client-gson-1.14.1-beta.jar" /> 
+
     <copy toFile="${classes.files.dir}/google-api-services-drive-v2.jar" file="${lib.dir}/googledrive/google-api-services-drive-v2-rev73-1.14.2-beta.jar" />
     <copy toFile="${classes.files.dir}/google-play-services.jar" file="${lib.dir}/googledrive/google-play-services.jar" />
     
