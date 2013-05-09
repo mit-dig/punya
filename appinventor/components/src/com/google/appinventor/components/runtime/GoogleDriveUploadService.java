@@ -264,8 +264,12 @@ public class GoogleDriveUploadService extends UploadService {
     if (numRemoteFailures < MAX_GOOGLEDRIVE_RETRIES && isOnline(network)) {
       Log.i(TAG, "uploading to google drive..." + file.getName());
       try{
+        
         successUpload = remoteArchive.add(file);
+        Log.i(TAG, "success?:" + successUpload);
       }catch(Exception e){
+        Log.i(TAG, "something wrong in GoogleDriveArchive:" + e.toString());
+        e.printStackTrace();
         // something happen that we can't successfully upload the file to Google drive
         for (GoogleDriveExceptionListener lis : allListeners){
           lis.onExceptionReceived(e);

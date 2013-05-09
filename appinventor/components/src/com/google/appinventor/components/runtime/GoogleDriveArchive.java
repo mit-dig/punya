@@ -64,38 +64,48 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     Log.i(TAG, "mAccount:" + this.mAccount);
 
     this.googleDriveFolderName = GoogleDriveFolderName;
+
     
     
   }
   
-  private com.google.api.services.drive.model.File getGoogleDriveFolder(){
+  private com.google.api.services.drive.model.File getGoogleDriveFolder() {
 
     com.google.api.services.drive.model.File folder = null;
     Log.i(TAG, "in getGoogleDriveFolder");
-    if(this.googleDriveFolderName == GoogleDrive.DEFAULT_GD_FOLDER){
+    Log.i(TAG, "Drive folder name:" + googleDriveFolderName);
+
+    if (this.googleDriveFolderName.equals(GoogleDrive.DEFAULT_GD_FOLDER)) {
       try {
+        Log.i(TAG, "we upload directly to root folder");
         folder = mService.files().get("root").execute();
-      } catch (IOException e) {
+      } catch (Exception e) {
         Log.e(TAG, "exception!");
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-      return folder;
+
+    } else { // if the user has set some GD_folder that he likes to upload the files to
+      String query = "mimeType = 'application/vnd.google-apps.folder' and title = '"
+          + googleDriveFolderName + "' and 'root' in parents";
+      // query if the specify folder exists or not, if not we will creat one
+      FileList files = ExcuteQuery(query);
+      
+      if (files.getItems().isEmpty()) {
+        Log.i(TAG, "is empty");
+        folder = createGoogleFolder();
+      }
+
+      else {
+        Log.i(TAG, "is not empty");
+        Log.i(TAG, files.getItems().toString());
+        folder = files.getItems().get(0);// if the folder exists, it should be
+                                         // the only one
+      }
     }
-    
-    String query = "mimeType = 'application/vnd.google-apps.folder' and title = '" 
-      + googleDriveFolderName + "' and 'root' in parents" ;
-    //query if the specify folder exists or not, if not we will creat one
-    FileList files = ExcuteQuery(query);
-    
-    if (files == null)
-      folder = createGoogleFolder();
-      //File file : files.getItems()
-    else {
-      folder =  files.getItems().get(0);//if the folder exists, it should be the only one
-    }
+
     return folder;
-    
+
   }
   
   @Override
@@ -116,6 +126,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   private FileList ExcuteQuery(String query){
   	//this is to search a folder name that is passed in by the caller
   	//https://developers.google.com/drive/search-parameters
+    Log.i(TAG, "Query: " + query);
   	FileList files = null;
       try {
       	
@@ -138,7 +149,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     try {
     	Log.i(TAG, "Before processGDFile");
 //    	processGDFile(Drive service, String parentId, File localFile)
-    	processGDFile(mService, gdFolder.getId(), file);
+    	com.google.api.services.drive.model.File processedFile = processGDFile(mService, gdFolder.getId(), file);
  
       Log.i(TAG, "Return From Google Drive Drive sending the file...");
    
@@ -153,19 +164,18 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   }
   
   private com.google.api.services.drive.model.File createGoogleFolder()  {
-  	
+  	Log.i(TAG, "in createGoogleFolder......");
   	//go to the root, and create a folder and return the handle
   	com.google.api.services.drive.model.File body = new com.google.api.services.drive.model.File();
     body.setTitle(this.googleDriveFolderName);
     body.setMimeType("application/vnd.google-apps.folder");
     body.setParents(Arrays.asList(new ParentReference().setId("root")));
-    
-    
+ 
     com.google.api.services.drive.model.File file = null;
     try {
       file = mService.files().insert(body).execute();
       
-    } catch (IOException e) {
+    } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -176,7 +186,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   
   
   private com.google.api.services.drive.model.File processGDFile(Drive service,
-      String parentId, File localFile) throws IOException {
+      String parentId, File localFile) throws Exception {
     Log.i(TAG,"We are in processGDFile");
     boolean existed = false;
     com.google.api.services.drive.model.File processedFile;
@@ -186,15 +196,16 @@ public class GoogleDriveArchive implements RemoteFileArchive {
 
     FileContent mediaContent = new FileContent("", localFile);
     
-    com.google.api.services.drive.model.File gdFile = ExcuteQuery(q).getItems()
-        .get(0);
+    FileList resultFileList = ExcuteQuery(q);
+//    com.google.api.services.drive.model.File gdFile = ExcuteQuery(q).getItems()
+//        .get(0);
     // File's content.
     try {
 
-      if (gdFile != null) { // if this file already exists in GD
+      if (!resultFileList.getItems().isEmpty()) { // if this file already exists in GD
         Log.i(TAG, "the file exists, use update....");
         existed = true;
-
+        com.google.api.services.drive.model.File gdFile = resultFileList.getItems().get(0);
         processedFile = service.files()
             .update(gdFile.getId(), gdFile, mediaContent).execute();
         // Uncomment the following line to print the File ID.
@@ -210,12 +221,13 @@ public class GoogleDriveArchive implements RemoteFileArchive {
         if (parentId != null && parentId.length() > 0) {
           body.setParents(Arrays.asList(new ParentReference().setId(parentId)));
         }
+        Log.i(TAG, " before insert body");
         processedFile = service.files().insert(body, mediaContent).execute();
         // Uncomment the following line to print the File ID.
         Log.i(TAG, "Processed File ID: %s" + processedFile.getId());
 
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw e;
     }
     return processedFile;
@@ -232,11 +244,11 @@ public class GoogleDriveArchive implements RemoteFileArchive {
    * @throws Exception 
    */
   private void getDriveService() {
-
-    final String mAccountName = this.mAccount;
-
-    AsynchUtil.runAsynchronously(new Runnable() {
-      public void run() {
+    String mAccountName = this.mAccount;
+    //final String mAccountName = this.mAccount;
+    
+//    AsynchUtil.runAsynchronously(new Runnable() {
+//      public void run() {
         //we should be authorized already, so when rebuilding the GoogleAccountCredential, 
         //we don't have to test it again.
         GoogleAccountCredential credential = 
@@ -253,12 +265,16 @@ public class GoogleDriveArchive implements RemoteFileArchive {
           e.printStackTrace();
         }
         Log.i(TAG, "before build drive service... ");
+        // set up Drive service
         mService = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
             new GsonFactory(), credential).build();
+        //now we have the service, we can get Google Drive folder
+        gdFolder = getGoogleDriveFolder();
+        
         Log.i(TAG, "after drive service... ");
 
-      }
-    });
+//      }
+//    });
 
   }
 
@@ -282,20 +298,18 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   
   public boolean uploadDataFile(Context context, File file) throws Exception {
     Log.i(TAG, "before getDriveService");
-    getDriveService(); //re-init the Drive service
+    getDriveService(); // re-init the Drive service
     Log.i(TAG, "after getDriveService");
-    this.gdFolder = getGoogleDriveFolder(); //now we have mService, we can get gd folder
-    Log.i(TAG, "after getGoogleDriveFolder");
-    if (file.isDirectory()){
+    if (file.isDirectory()) {
 
       return uploadFolderFiles(context, file);
-      
-    }else{
+
+    } else {
+
       return uploadSingleFile(context, file);
-      
+
     }
-    
-   
+
   }
   
   

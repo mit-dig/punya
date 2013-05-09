@@ -95,7 +95,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   protected static Activity mainUIThreadActivity;
   private final int REQUEST_CHOOSE_ACCOUNT; 
   private final int REQUEST_AUTHORIZE;
+  //for testing purpose
   private final int REQUEST_CAPTURE;
+  private boolean firstime = true;
+  ////////////////
   private String gdFolder;
   
   //binding to GoogleDriveUploadService and FunfManager Service
@@ -276,7 +279,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
         String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
         saveAccessToken(new AccessToken(accountName, accessToken));
         /////// TESTING ////// only ////////
-        // startCameraIntent();
+        startCameraIntent();
         ////// Remove when done testing /////
         
       } else {
@@ -354,6 +357,40 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     });
 
   }
+  
+  
+  private Drive setUpDriveService2(String accountName) {
+    String mAccountName = accountName;
+    Drive service;
+
+    String token = "";
+    GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
+        mainUIThreadActivity, DriveScopes.DRIVE);
+    credential.setSelectedAccountName(mAccountName);
+    try {
+      Log.i(TAG, "before getToken()... ");
+      token = credential.getToken();
+    } catch (UserRecoverableAuthException e) {
+      // if the user has not yet authorized
+      Log.i(TAG, "should not be here userRecoverableAuthExp... ");
+
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (GoogleAuthException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    Log.i(TAG, "2nd time for build drive service... ");
+    saveAccessToken(new AccessToken(mAccountName, token));
+    service = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
+        new GsonFactory(), credential).build();
+    Log.i(TAG, "2nd time after drive service... ");
+    // tell the mainUI that we are done
+    return service;
+
+  }
+  
   
   /**
    * Indicates when the authorization has been successful.
@@ -587,9 +624,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
           body.setMimeType("image/jpeg");
 
           File file = service.files().insert(body, mediaContent).execute();
+ 
+          
           if (file != null) {
             showToast("Photo uploaded: " + file.getTitle());
-            //startCameraIntent();
           }
         } catch (UserRecoverableAuthIOException e) {
           Log.i(TAG, "Are we ever here? saveFileToDrive@GoogleDrive");
@@ -610,7 +648,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       }
     });
   }
-
-
+  @SimpleFunction
+  public void TestUploadPhoto(){
+    startCameraIntent();
+    
+  }
   
 }
