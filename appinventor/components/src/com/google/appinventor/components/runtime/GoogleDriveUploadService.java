@@ -41,7 +41,7 @@ public class GoogleDriveUploadService extends UploadService {
   REGULAR_FILE = 0,
   DATABASE_FILE = 1;
   
-  private static final int MAX_GOOGLEDRIVE_RETRIES = 3;
+  private static final int MAX_GOOGLEDRIVE_RETRIES = 6;
   private static final String TAG = "GoogleDriveUploadService";
   
   private ConnectivityManager connectivityManager;
@@ -86,7 +86,8 @@ public class GoogleDriveUploadService extends UploadService {
         }
         dbUploadThread = null;
         stopSelf();
-        
+
+
       }
     });
     
@@ -102,9 +103,10 @@ public class GoogleDriveUploadService extends UploadService {
           //runUpload method deals with uploading regular files to google drive
           runUpload(archiveFile.remoteArchive, archiveFile.file, archiveFile.network);
         }
-        regularUploadThread = null;
+        regularUploadThread = null;        
         stopSelf();
         Log.i(TAG, "I have killed myself, so next thread can be called to run.");
+       
       }
     });
     
@@ -239,6 +241,7 @@ public class GoogleDriveUploadService extends UploadService {
           dbFilesToUpload.offer(new ArchiveFile(archive, remoteArchive, file,
               network));
         } else {
+
           Log.i(LogUtil.TAG, "Failed to upload '" + file.getAbsolutePath()
               + "' after 3 attempts.");
         }

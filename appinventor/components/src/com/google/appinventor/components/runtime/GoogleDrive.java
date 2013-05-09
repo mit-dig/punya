@@ -139,27 +139,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     }
   };
   
-  // try local binding to GoogleDriveUploadService
-  private ServiceConnection mConnectionGD = new ServiceConnection() {
-    public void onServiceConnected(ComponentName className, IBinder service) {
-
-      mBoundGDService = ((GoogleDriveUploadService.LocalBinder) service)
-          .getService();
-      
-      registerExceptionListener();
-      Log.i(TAG, "Bound to GoogleDriveUploadService");
-
-    }
-
-    public void onServiceDisconnected(ComponentName className) {
-      mBoundGDService = null;
-
-      Log.i(TAG, "Unbind GoogleDriveUploadService");
-
-    }
-  };
-  
-  
   /*
    * GoogleDrive component, similar the dropbox component, will be bound to two services 
    * 1. FunfManager service(for scheduling repeating tasks)
@@ -201,12 +180,12 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     Log.i(TAG,
         "FunfManager is bound, and now we could have register dataRequests");
     
-    mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
-        GoogleDriveUploadService.class), mConnectionGD, Context.BIND_AUTO_CREATE);
-    
-    Log.i(TAG,
-
-    "GoogleDriveUploadService is bound, and now we could register for GoogleDriveException Listener");
+//    mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
+//        GoogleDriveUploadService.class), mConnectionGD, Context.BIND_AUTO_CREATE);
+//    
+//    Log.i(TAG,
+//
+//    "GoogleDriveUploadService is bound, and now we could register for GoogleDriveException Listener");
 
   }
   
@@ -278,15 +257,12 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
 
         String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
         saveAccessToken(new AccessToken(accountName, accessToken));
-        /////// TESTING ////// only ////////
-        startCameraIntent();
-        ////// Remove when done testing /////
-        
+
       } else {
         mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), REQUEST_CHOOSE_ACCOUNT);
       }
 
-      
+     /// testing code///
     }
     if(requestCode == REQUEST_CAPTURE){
       if (resultCode == Activity.RESULT_OK){
@@ -295,14 +271,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       }
     }
     
-//    String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-//
-//    
-//    
-//    String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
-//    saveAccessToken(new AccessToken(accountName, accessToken));
-    //now we can do Google Drive operation!
-
     
   }
   
@@ -323,6 +291,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
         } catch (UserRecoverableAuthException e) {
           // if the user has not yet authorized
           Log.i(TAG, "in userRecoverableAuthExp... ");
+          // this means that the user has never grant permission to this app before
           UserRecoverableAuthException exception = (UserRecoverableAuthException) e;
           Intent authorizationIntent = exception.getIntent();
           mainUIThreadActivity.startActivityForResult(authorizationIntent,
@@ -352,45 +321,9 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
 
           }
         });
-
       }
     });
-
-  }
-  
-  
-  private Drive setUpDriveService2(String accountName) {
-    String mAccountName = accountName;
-    Drive service;
-
-    String token = "";
-    GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
-        mainUIThreadActivity, DriveScopes.DRIVE);
-    credential.setSelectedAccountName(mAccountName);
-    try {
-      Log.i(TAG, "before getToken()... ");
-      token = credential.getToken();
-    } catch (UserRecoverableAuthException e) {
-      // if the user has not yet authorized
-      Log.i(TAG, "should not be here userRecoverableAuthExp... ");
-
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (GoogleAuthException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    Log.i(TAG, "2nd time for build drive service... ");
-    saveAccessToken(new AccessToken(mAccountName, token));
-    service = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
-        new GsonFactory(), credential).build();
-    Log.i(TAG, "2nd time after drive service... ");
-    // tell the mainUI that we are done
-    return service;
-
-  }
-  
+  } 
   
   /**
    * Indicates when the authorization has been successful.
@@ -406,10 +339,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     EventDispatcher.dispatchEvent(this, "IsAuthorized");
   }
   
-  private void registerExceptionListener() {
-    
-    this.mBoundGDService.registerException(listener);
-  }
+//  private void registerExceptionListener() {
+//    
+//    this.mBoundGDService.registerException(listener);
+//  }
   
   /*
    * After we bind to FunfManger, we have to register self to Funf as a Pipeline. 
@@ -561,10 +494,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     return this.gdFolder;
     
   }
-  
-  
-  
-  
+
   public Class<? extends UploadService> getUploadServiceClass() {
     return GoogleDriveUploadService.class;
   }
