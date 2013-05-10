@@ -1,21 +1,25 @@
 package com.google.appinventor.components.runtime;
 
 
+
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
-
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,6 +29,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.android.gms.internal.ay;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
@@ -44,7 +49,9 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+
 import com.google.appinventor.components.runtime.util.AsynchUtil;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.OAuth2Helper;
 import com.google.gson.JsonElement;
 
@@ -97,7 +104,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   private final int REQUEST_AUTHORIZE;
   //for testing purpose
   private final int REQUEST_CAPTURE;
-  private boolean firstime = true;
+
   ////////////////
   private String gdFolder;
   
@@ -140,7 +147,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   };
   
   /*
-   * GoogleDrive component, similar the dropbox component, will be bound to two services 
+   * GoogleDrive component, similar to the dropbox component, will be bound to two services 
    * 1. FunfManager service(for scheduling repeating tasks)
    * 2. GoogleUploadService (for uploading the data to Google Drive)
    */
@@ -179,13 +186,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     mIsBound = true;
     Log.i(TAG,
         "FunfManager is bound, and now we could have register dataRequests");
-    
-//    mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
-//        GoogleDriveUploadService.class), mConnectionGD, Context.BIND_AUTO_CREATE);
-//    
-//    Log.i(TAG,
-//
-//    "GoogleDriveUploadService is bound, and now we could register for GoogleDriveException Listener");
+
 
   }
   
@@ -248,7 +249,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
         // TODO: Should not happen
       }
 
-    }// Below happens when after UserRecoverableAuthException 
+    }// Below happens in setUpDriveService after UserRecoverableAuthException 
     if (requestCode == REQUEST_AUTHORIZE) {
       if (resultCode == Activity.RESULT_OK) {
 
@@ -262,16 +263,14 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
         mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), REQUEST_CHOOSE_ACCOUNT);
       }
 
-     /// testing code///
-    }
-    if(requestCode == REQUEST_CAPTURE){
-      if (resultCode == Activity.RESULT_OK){
-        saveFileToDrive();
-
-      }
-    }
-    
-    
+     
+    }/// testing code///
+//    if(requestCode == REQUEST_CAPTURE){
+//      if (resultCode == Activity.RESULT_OK){
+//        saveFileToDrive();
+//
+//      }
+//    }
   }
   
 /*
@@ -309,16 +308,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
             new GsonFactory(), credential).build();
         Log.i(TAG, "after drive service... ");
         // tell the mainUI that we are done
-        AsynchUtil.runAsynchronously(new Runnable() {
+        handler.post(new Runnable() {
+          @Override
           public void run() {
-
-            handler.post(new Runnable() {
-              @Override
-              public void run() {
-                IsAuthorized();
-              }
-            });
-
+            IsAuthorized();
           }
         });
       }
@@ -395,12 +388,12 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   public void Authorize() {
     // we will not use OAuth2Helper here, the newest version of Google-api has taken care the flow for us
     // This will help us getting the main Google Account name, and auth token for the first time
-    // we will persist these two in sharedPreference
+    // we will persist these two in sharedPreference. 
     Log.i(TAG, "Start Authorization");
 
   	// check if we have choose the account already
   	String accountName = sharedPreferences.getString(PREF_ACCOUNT_NAME, "");
-  	if(accountName.length() == 0){
+  	if(accountName.isEmpty()){
   	  mainUIThreadActivity.startActivityForResult(credential.newChooseAccountIntent(), REQUEST_CHOOSE_ACCOUNT);
   	}
   	else{
@@ -417,8 +410,8 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       		"if so, return True")
   public boolean CheckAuthorized() {
     String accountName =  accessTokenPair.accountName;
-    String token =  accessTokenPair.accountName;
-    if (accountName.length() == 0 || token.length() == 0) {
+    String token =  accessTokenPair.accessToken;
+    if (accountName.isEmpty() || token.isEmpty()) {
       return false;
     }
     else
@@ -447,6 +440,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       Log.i(TAG, "Save Google Access Token and Account" + accessToken.accountName + ", " + accessToken.accessToken);
     }
     sharedPrefsEditor.commit();
+    this.accessTokenPair = accessToken; //update reference to local accessTokenPair
   }
   
   
@@ -499,18 +493,103 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     return GoogleDriveUploadService.class;
   }
   
+  
   /*
-   * Upload a file to Google Drive
+   * Upload a file to Google Drive, using AsyncTask
    */
-  @SimpleFunction(description = "This function uploads the file " +
-      "(as specified with its filepath) to Google Drive folder. ")
-      
-  public void UploadData(String filename) {
-    //TODO: use MediaUtil.java to know about the file type and how to deal with it
-    // this will be the archive file name 
-    //This method uploads the specified file directly to GoogleDrive
+  
+//  new QueryProcessorV1(activity).execute(query);
+  
+  /*
+   * Use AsyncTask to do the uploading task (using GoogleDriveArchive class)
+   * (this will not support doing schedule task in the background)
+   * Before performing the upload task, the program needs to get authorized by the author
+   */
+  private class AsyncUploader extends AsyncTask<String, Void, Boolean>{
+    private static final String TAG = "AysncUploader";
+    private final Activity activity; // The main list activity
+    private final ProgressDialog dialog;
     
-    String archiveName = filename;
+    AsyncUploader(Activity activity) {
+      this.activity = activity;
+      dialog = new ProgressDialog(activity);
+      
+    }
+    @Override
+    protected void onPreExecute() {
+      dialog.setMessage("Uploading file...");
+      dialog.show();
+    }
+
+    @Override
+    protected Boolean doInBackground(String... params) {
+      // TODO Auto-generated method stub
+      Log.i(TAG, "Starting doInBackground " + params[0]);
+      String filepath = params[0];
+      boolean uploadResult = false;
+      
+      java.io.File uploadFile = new java.io.File(filepath);
+
+      GoogleDriveArchive gdArchive = new GoogleDriveArchive(activity, gdFolder);
+      try {
+        uploadResult = gdArchive.uploadDataFile(uploadFile);
+      } catch (Exception e) {
+        //TODO Read out types of the exception and call UI method to display
+        //Could be IOException, GoogleAuthException.... 
+        e.printStackTrace();
+        displayErrorMessage(e);
+
+        return false;
+      }
+
+      return uploadResult;
+    }
+    
+    /**
+     * Fires the AppInventor uploadDone() method
+     */
+    @Override
+    protected void onPostExecute(Boolean resultSuccessful) {
+      // if no exception happened during the Google Drive uploading event, then
+      // just call
+      // uploadDone event, else throw exception
+        dialog.dismiss();
+        UploadDone(resultSuccessful);
+    } 
+  }
+  
+  // this is the helper function called within the Uploader AsyncTask
+  private void displayErrorMessage(Exception e){
+   
+    try{
+      throw e;
+    } catch (IOException exception){
+      form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
+          ErrorMessages.ERROR_GOOGLEDRIVE_IO_EXCEPTION,
+          e.getMessage());
+
+    } catch (Exception exceptfinal) {
+      // TODO Auto-generated catch block
+      form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
+          ErrorMessages.ERROR_GOOGLEDRIVE_EXCEPTION,
+          e.getMessage());
+    }
+
+  }
+
+  /**
+   * Indicates when the upload task has been successful done.
+   */
+  @SimpleEvent(description =
+               "This event is raised after the program calls " +
+               "<code>UploadData</code> if the upload task was done.")
+  public void UploadDone(boolean successful) {
+    Log.i(TAG, "uploadDone");
+    EventDispatcher.dispatchEvent(this, "UploadDone", successful);
+  }
+  
+  // this function will be used for schedule task
+  private void uploadService(String archiveName){
     Log.i(TAG, "Start uploadService...");
     Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
     i.putExtra(UploadService.ARCHIVE_ID, archiveName);
@@ -522,8 +601,41 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     mainUIThreadActivity.startService(i);
 
   }
-  // below is the code to test if we can at least upload one photo?
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  
+  
+  /*
+   * Upload a file to Google Drive
+   */
+  @SimpleFunction(description = "Uploads the file(s)" +
+      "(as specified with its filepath) to Google Drive folder. ")
+      
+  public void UploadData(String filepath) throws IOException {
+
+    String filePath = "";
+    if(filepath.startsWith("file:")){
+      try { //convert URL string to URI and to real path : file:///sdcard --> /sdcard 
+        filePath = new java.io.File(new URL(filepath).toURI()).getAbsolutePath();
+      }catch (IllegalArgumentException e) {
+        throw new IOException("Unable to determine file path of file url " + filepath);
+      } catch (URISyntaxException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    else {
+      filePath = filepath;
+    }
+    
+    //try using AsyncTask
+    
+    new AsyncUploader(mainUIThreadActivity).execute(filePath);
+
+  }
+  
+
+  // below is the code to test if we can at least upload one photo? //////////////
+  ///////////////////////////////////////////////////////////////////////////////// 
   private static Uri fileUri;
 
 
@@ -538,7 +650,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
     mainUIThreadActivity.startActivityForResult(cameraIntent, REQUEST_CAPTURE);
   }
+  
 
+  //for testing purpose only;
+  //TODO: remove after full test
   private void saveFileToDrive() {
     Thread t = new Thread(new Runnable() {
       @Override
@@ -569,8 +684,8 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     });
     t.start();
   }
-  
-  public void showToast(final String toast) {
+  //for testing purpose 
+  private void showToast(final String toast) {
     mainUIThreadActivity.runOnUiThread(new Runnable() {
       @Override
       public void run() {
@@ -583,5 +698,5 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     startCameraIntent();
     
   }
-  
+  ////////////////////////// end of the testing code ////////////////////////////////////
 }

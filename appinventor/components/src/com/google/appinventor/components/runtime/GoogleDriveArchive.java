@@ -112,7 +112,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   public boolean add(File file) throws Exception {
     // TODO Auto-generated method stub
     
-    return uploadDataFile(mContext, file);
+    return uploadDataFile(file);
  
   }
 
@@ -138,7 +138,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
       return files;
   }
 
-  private boolean uploadSingleFile(Context context, File file) throws Exception {
+  private boolean uploadSingleFile(File file) throws Exception {
     //this method actually does the uploading, only successful upload will return true, else will be exception throws to
     //the caller methods
     String dataPath = file.getAbsolutePath();
@@ -278,14 +278,14 @@ public class GoogleDriveArchive implements RemoteFileArchive {
 
   }
 
-  private boolean uploadFolderFiles(Context context, File file) throws Exception {
+  private boolean uploadFolderFiles(File file) throws Exception {
     // In case when the specified File path is a directory
     // Note that we don't do nested looping through a folder to get all the folders and files
 
     if(file.isDirectory()){
        File[] listOfFiles = file.listFiles();
        for (File f: listOfFiles) {
-         if (uploadSingleFile(context, f))
+         if (uploadSingleFile(f))
            ; //if successful, do nothing, else return false
          else
            return false;
@@ -296,17 +296,17 @@ public class GoogleDriveArchive implements RemoteFileArchive {
 
   }
   
-  public boolean uploadDataFile(Context context, File file) throws Exception {
+  public boolean uploadDataFile(File file) throws Exception {
     Log.i(TAG, "before getDriveService");
     getDriveService(); // re-init the Drive service
     Log.i(TAG, "after getDriveService");
     if (file.isDirectory()) {
 
-      return uploadFolderFiles(context, file);
+      return uploadFolderFiles(file);
 
     } else {
 
-      return uploadSingleFile(context, file);
+      return uploadSingleFile(file);
 
     }
 

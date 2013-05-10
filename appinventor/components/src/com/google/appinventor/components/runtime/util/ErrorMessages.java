@@ -134,7 +134,7 @@ public final class ErrorMessages {
   // Texting errors
   public static final int ERROR_BAD_VALUE_FOR_TEXT_RECEIVING = 1701;
   
-  // Please start the next group of error numbers at 1801.
+
   public static final int ERROR_DATE_FORMAT = 1801;
   // Dropbox errors 
   public static final int ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET = 1810;
@@ -146,6 +146,10 @@ public final class ErrorMessages {
   public static final int ERROR_DROPBOX_IO = 1816;
   public static final int ERROR_DROPBOX_FILENOTFOUND = 1817;
   public static final int ERROR_DROPBOX_NO_TWO_RUNNING_TASKS = 1818;
+  // Please start the next group of error numbers at 1901.
+  public static final int ERROR_GOOGLEDRIVE_EXCEPTION = 1901;
+  public static final int ERROR_GOOGLEDRIVE_IO_EXCEPTION = 1902;
+  
 
   
   // Mapping of error numbers to error message format strings.
@@ -394,7 +398,10 @@ public final class ErrorMessages {
     
     errorMessages.put(ERROR_DROPBOX_FILENOTFOUND, "The file to upload was not found.");
     errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
-        "by calling stop.");
+        "by calling <code>StopScheduleUpload</code>.");
+    
+    errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "The file to upload was not found");
+    errorMessages.put(ERROR_GOOGLEDRIVE_EXCEPTION, "Something wrong with Google Drive");
     
     
     

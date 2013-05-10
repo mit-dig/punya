@@ -6,11 +6,13 @@ package com.google.appinventor.components.runtime;
 
 
 import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.fusiontables.Fusiontables;
 import com.google.api.services.fusiontables.Fusiontables.Query.Sql;
 import com.google.appinventor.components.annotations.DesignerComponent;
@@ -25,6 +27,7 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.GoogleDrive.AccessToken;
 import com.google.appinventor.components.runtime.util.ClientLoginHelper;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.IClientLoginHelper;
@@ -158,7 +161,8 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
    */
   private String apiKey;
   private static final String TAG = "FusiontablesControl";
-  private final int requestCode; 
+  private final int REQUEST_CHOOSE_ACCOUNT; 
+  private final int REQUEST_AUTHORIZE;
 
   /**
    * The query to send to the Fusiontables service.
@@ -190,8 +194,9 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
           "This application must exit.",
           "Rats!");
     }
-    requestCode = form.registerForActivityResult(this);
-    credential = null;
+    REQUEST_CHOOSE_ACCOUNT = form.registerForActivityResult(this);
+    REQUEST_AUTHORIZE = form.registerForActivityResult(this);
+    credential = GoogleAccountCredential.usingOAuth2(activity, AUTH_TOKEN_TYPE_FUSIONTABLES);
     // comment: The above code was originally
     //    Toast.makeText(activity,
     //        "Sorry. The Fusiontables component is not compatible with your phone. Exiting.",
@@ -272,7 +277,7 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
     // ask the user to go throug the OAuth flow
     AccessToken accessToken = retrieveAccessToken();
     if(accessToken.accountName.length() == 0){
-      activity.startActivityForResult(credential.newChooseAccountIntent(), requestCode);
+      activity.startActivityForResult(credential.newChooseAccountIntent(), REQUEST_CHOOSE_ACCOUNT);
     }
     // if authorized 
     new QueryProcessorV1(activity).execute(query);
@@ -719,17 +724,26 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
    }
   }
   
-  private GoogleAccountCredential getGoogleAccountCredential(
-      Activity activity, String scope) throws IOException {
+  private GoogleAccountCredential setUpGoogleCredential(String scope, String accountName){
     //get accountName from SharedPreference
-    SharedPreferences settings = activity.getPreferences(Activity.MODE_PRIVATE);
-    String accountName = settings.getString(OAuth2Helper.PREF_ACCOUNT_NAME, "");
-    
-    GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(activity, scope);
+
+    credential = GoogleAccountCredential.usingOAuth2(activity, scope);
     credential.setSelectedAccountName(accountName);
     try {
       credential.getToken();
-    } catch (GoogleAuthException e) {
+      
+    } catch (UserRecoverableAuthException e) {
+        // if the user has not yet authorized
+        Log.i(TAG, "in userRecoverableAuthExp... ");
+        // this means that the user has never grant permission to this app with this scope before
+        UserRecoverableAuthException exception = (UserRecoverableAuthException) e;
+        Intent authorizationIntent = exception.getIntent();
+        activity.startActivityForResult(authorizationIntent,
+            REQUEST_AUTHORIZE);
+    }catch (IOException e) {
+      e.printStackTrace();
+    }   
+      catch (GoogleAuthException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -737,19 +751,10 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
 
   }
   
-  
   private String getRefreshedAuthToken(Activity activity, String authTokenType){
     String authToken = null;
     AccessToken accessToken = retrieveAccessToken();
-//    if (accessToken.accountName.length() == 0){
-//      //this means that we need to start a new intent to ask for user's permission using OAuth2
-//      activity.startActivityForResult(credential.newChooseAccountIntent(), requestCode);
-//      
-//    }
-//    else {
       
-      this.credential = GoogleAccountCredential.usingOAuth2(activity, authTokenType);
-
       credential.setSelectedAccountName(accessToken.accountName);
       try {
         authToken = credential.getToken();
@@ -759,8 +764,6 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
       } catch (GoogleAuthException e) {
         e.printStackTrace();
       }
-//
-//    }
     
     return authToken;
     
@@ -771,10 +774,25 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
   public void resultReturned(int requestCode, int resultCode, Intent data) {
     // When the authentication from Google chooseAccount is back
 
-    String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-    String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
-    saveAccessToken(new AccessToken(accountName, accessToken));
-    
+    if (requestCode == REQUEST_CHOOSE_ACCOUNT) {
+      if (resultCode == Activity.RESULT_OK && data != null
+          && data.getExtras() != null) {
+        //authorize after choosing the account
+        setUpGoogleCredential(AUTH_TOKEN_TYPE_FUSIONTABLES,data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+      }
+   } 
+    if (requestCode == REQUEST_AUTHORIZE) {
+     if (resultCode == Activity.RESULT_OK) {
+
+       String accountName = data
+           .getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+
+       String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+       saveAccessToken(new AccessToken(accountName, accessToken));
+
+     }
+    }
+
     
   }
   

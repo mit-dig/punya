@@ -5,21 +5,24 @@
 
 package com.google.appinventor.components.runtime;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
+
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
 import com.dropbox.client2.DropboxAPI;
@@ -175,25 +178,25 @@ public class Dropbox extends AndroidNonvisibleComponent
   };
   
   // try local binding to DropboxUploadService
-  private ServiceConnection mConnectionDropBox = new ServiceConnection() {
-    public void onServiceConnected(ComponentName className, IBinder service) {
-
-      mBoundDropboxService = ((DropboxUploadService.LocalBinder) service)
-          .getService();
-      //Note: remove it by Fuming (should not cause any problem)
-      //registerSelfToFunfManager(); 
-      registerExceptionListener();
-      Log.i(TAG, "Bound to DropboxUploadService");
-
-    }
-
-    public void onServiceDisconnected(ComponentName className) {
-      mBoundDropboxService = null;
-
-      Log.i(TAG, "Unbind DropboxUploadService");
-
-    }
-  };
+//  private ServiceConnection mConnectionDropBox = new ServiceConnection() {
+//    public void onServiceConnected(ComponentName className, IBinder service) {
+//
+//      mBoundDropboxService = ((DropboxUploadService.LocalBinder) service)
+//          .getService();
+//      //Note: remove it by Fuming (should not cause any problem)
+//      //registerSelfToFunfManager(); 
+//      registerExceptionListener();
+//      Log.i(TAG, "Bound to DropboxUploadService");
+//
+//    }
+//
+//    public void onServiceDisconnected(ComponentName className) {
+//      mBoundDropboxService = null;
+//
+//      Log.i(TAG, "Unbind DropboxUploadService");
+//
+//    }
+//  };
   
 
 
@@ -242,10 +245,10 @@ public class Dropbox extends AndroidNonvisibleComponent
 
 
 
-  private void registerExceptionListener() {
-    
-    this.mBoundDropboxService.registerException(listener);
-  }
+//  private void registerExceptionListener() {
+//    
+//    this.mBoundDropboxService.registerException(listener);
+//  }
   
   /*
    * After we bind to FunfManger, we have to register self to Funf as a Pipeline. 
@@ -265,11 +268,11 @@ public class Dropbox extends AndroidNonvisibleComponent
     Log.i(TAG,
         "FunfManager is bound, and now we could have register dataRequests");
     
-    mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
-        DropboxUploadService.class), mConnectionDropBox, Context.BIND_AUTO_CREATE);
-    
-    Log.i(TAG,
-    "DropboxUploadService is bound, and now we could have register for DropBoxException Listener");
+//    mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
+//        DropboxUploadService.class), mConnectionDropBox, Context.BIND_AUTO_CREATE);
+//    
+//    Log.i(TAG,
+//    "DropboxUploadService is bound, and now we could have register for DropBoxException Listener");
 
   }
   
@@ -580,16 +583,9 @@ public class Dropbox extends AndroidNonvisibleComponent
         
       }
       else{
-        String archiveName = uploadTarget;
+        
+        uploadFile(uploadTarget);
 
-        Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
-        i.putExtra(UploadService.ARCHIVE_ID, archiveName);
-        i.putExtra(DropboxUploadService.FILE_TYPE, DropboxUploadService.REGULAR_FILE);
-        i.putExtra(UploadService.REMOTE_ARCHIVE_ID, DropboxArchive.DROPBOX_ID);
-        i.putExtra(UploadService.NETWORK,(this.wifiOnly) ? UploadService.NETWORK_WIFI_ONLY
-              : UploadService.NETWORK_ANY);
-        mainUIThreadActivity.startService(i);
- 
       }
         
     }
@@ -636,21 +632,31 @@ public class Dropbox extends AndroidNonvisibleComponent
   @SimpleFunction(description = "This function uploads the file " +
       "(as specified with its filepath) to dropbox folder. ")
       
-  public void UploadData(String filename) {
+  public void UploadData(String filepath) throws IOException {
     //TODO: use MediaUtil.java to know about the file type and how to deal with it
     // this will be the archive file name 
     //This method uploads the specified file directly to Dropbox 
-    String archiveName = filename;
-
-    Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
-    i.putExtra(UploadService.ARCHIVE_ID, archiveName);
-    i.putExtra(DropboxUploadService.FILE_TYPE, DropboxUploadService.REGULAR_FILE);
-    i.putExtra(UploadService.REMOTE_ARCHIVE_ID, DropboxArchive.DROPBOX_ID);
-    i.putExtra(UploadService.NETWORK,(this.wifiOnly) ? UploadService.NETWORK_WIFI_ONLY
-          : UploadService.NETWORK_ANY);
-    mainUIThreadActivity.startService(i);
+    
+    String filePath = "";
+    if(filepath.startsWith("file:")){
+      try { //convert URL string to URI and to real path : file:///sdcard --> /sdcard 
+        filePath = new java.io.File(new URL(filepath).toURI()).getAbsolutePath();
+      }catch (IllegalArgumentException e) {
+        throw new IOException("Unable to determine file path of file url " + filepath);
+      } catch (URISyntaxException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+    else {
+      filePath = filepath;
+    }
+    
+    new AsyncUploader(mainUIThreadActivity).execute(filePath);
 
   }
+  
+
   /*
    * Set the full Dropbox path where to put the file, just the directories
    */
@@ -701,7 +707,20 @@ public class Dropbox extends AndroidNonvisibleComponent
     sharedPrefsEditor.commit();
     
   }
-   
+  //private method that will create an Upload Service, only use for schedule task 
+  private void uploadFile(String fileName){
+    
+    String archiveName = uploadTarget;
+
+    Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
+    i.putExtra(UploadService.ARCHIVE_ID, archiveName);
+    i.putExtra(DropboxUploadService.FILE_TYPE, DropboxUploadService.REGULAR_FILE);
+    i.putExtra(UploadService.REMOTE_ARCHIVE_ID, DropboxArchive.DROPBOX_ID);
+    i.putExtra(UploadService.NETWORK,(this.wifiOnly) ? UploadService.NETWORK_WIFI_ONLY
+          : UploadService.NETWORK_ANY);
+    mainUIThreadActivity.startService(i);
+  }
+  
   private void uploadDB(String dbName){
     // we need to savd DB name in the sharedPreference for DropboxUtil to pick it up
     saveDBName(dbName); 
@@ -818,6 +837,108 @@ public class Dropbox extends AndroidNonvisibleComponent
     // TODO Auto-generated method stub
     
   }
+  
+  /**
+   * Indicates when the authorization has been successful.
+   */
+  @SimpleEvent(description =
+               "This event is raised after the program calls " +
+               "<code>UploadData</code> if the upload task was done.")
+  public void UploadDone(boolean successful) {
+    Log.i(TAG, "uploadDone");
+    EventDispatcher.dispatchEvent(this, "UploadDone", successful);
+  }
+  
+  //TODO: remove the DropboxExceptionListener at L203 after testing the code
+  private void displayErrorMessage(Exception e){
+    try {
+      throw e;
+    } catch (DropboxUnlinkedException exp) {
+      // TODO Auto-generated catch block
+      form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
+          ErrorMessages.ERROR_TWITTER_EXCEPTION);
+    } catch (DropboxFileSizeException exp){
+      form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
+          ErrorMessages.ERROR_DROPBOX_FILESIZE);
+    } catch (DropboxPartialFileException exp){
+      form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
+          ErrorMessages.ERROR_DROPBOX_PARTIALFILE);
+    } catch (DropboxServerException exp){
+      if(exp.error == DropboxServerException._507_INSUFFICIENT_STORAGE){
+        form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
+            ErrorMessages.ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE);
+      }
+
+    } catch (DropboxIOException exp){
+      form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
+          ErrorMessages.ERROR_DROPBOX_IO);
+      
+    } catch (FileNotFoundException exp){
+      form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
+          ErrorMessages.ERROR_DROPBOX_FILENOTFOUND);
+      
+    } catch (Exception exp) {
+      //something bad just happened
+      form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
+          ErrorMessages.ERROR_DROPBOX_EXCEPTION);
+    }
+        
+  }
+  
+  
+  private class AsyncUploader extends AsyncTask<String, Void, Boolean>{
+
+    private static final String TAG = "DropBoxAysncUploader";
+    private final Activity activity; // The main list activity
+    private final ProgressDialog dialog;
+    
+    AsyncUploader(Activity activity) {
+      this.activity = activity;
+      dialog = new ProgressDialog(activity);
+      
+    }
+    @Override
+    protected void onPreExecute() {
+      dialog.setMessage("Uploading file...");
+      dialog.show();
+    }
+    
+    @Override
+    protected Boolean doInBackground(String... params) {
+      // Called DropboxUtil to upload the file
+      Log.i(TAG, "Starting doInBackground " + params[0]);
+      String filepath = params[0];
+      java.io.File uploadFile = new java.io.File(filepath);
+      boolean uploadResult = false;
+      try {
+        uploadResult = DropboxUtil.uploadDataFile(mainUIThreadActivity, uploadFile);
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+        displayErrorMessage(e);
+
+        return false;
+      }
+      
+      return uploadResult;
+
+    }
+    
+    /**
+     * Fires the AppInventor uploadDone() method
+     */
+    @Override
+    protected void onPostExecute(Boolean resultSuccessful) {
+      // if no exception happened during the Google Drive uploading event, then
+      // just call
+      // uploadDone event, else throw exception
+        dialog.dismiss();
+        UploadDone(resultSuccessful);
+    }  
+
+       
+  }
+  
   
  
 }
