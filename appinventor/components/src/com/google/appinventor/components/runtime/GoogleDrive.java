@@ -3,12 +3,11 @@ package com.google.appinventor.components.runtime;
 
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.math.BigDecimal;
+
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+
 
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -18,26 +17,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.net.Uri;
+
 import android.os.AsyncTask;
-import android.os.Environment;
+
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.MediaStore;
+
 import android.util.Log;
-import android.widget.Toast;
+
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
-import com.google.android.gms.internal.ay;
+
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.http.FileContent;
+
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.File;
+
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -56,6 +54,7 @@ import com.google.appinventor.components.runtime.util.OAuth2Helper;
 import com.google.gson.JsonElement;
 
 import edu.mit.media.funf.FunfManager;
+import edu.mit.media.funf.Schedule;
 import edu.mit.media.funf.pipeline.Pipeline;
 import edu.mit.media.funf.storage.UploadService;
 
@@ -115,6 +114,9 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   protected static final String ACTION_UPLOAD_DATA = "UPLOAD_DATA";
   
   private static final long SCHEDULE_UPLOAD_PERIOD = 7200; //default period for uploading task 
+  // for periodic upload
+  private boolean enablePeriodicUploadFolder = false;
+  private String uploadTarget = null;
 
 
   private AccessToken accessTokenPair;
@@ -173,8 +175,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     REQUEST_AUTHORIZE = form.registerForActivityResult(this);
     REQUEST_CAPTURE =  form.registerForActivityResult(this);
     this.gdFolder = GoogleDrive.DEFAULT_GD_FOLDER;
-    //try to use getApplicationContext for authorizing the credential, because when Service is running, it's using
-    //getApplicationContext
+
     credential = GoogleAccountCredential.usingOAuth2(mainUIThreadActivity, DriveScopes.DRIVE);
     
     
@@ -228,8 +229,16 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   }
 
   @Override
-  public void onRun(String arg0, JsonElement arg1) {
+  public void onRun(String action, JsonElement config) {
     // TODO Auto-generated method stub
+    if (ACTION_UPLOAD_DATA.equals(action)) {
+      // Do something else
+      if (uploadTarget != null){
+        uploadService(uploadTarget);
+      }
+      Log.i(TAG, "Run pipe's action UPLOAD_DATA at:" + System.currentTimeMillis());
+
+    }   
   	
   }
 
@@ -633,70 +642,48 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
 
   }
   
+  
+  /*
+   * Start and set interval for a re-occurring upload activity for uploading
+   * file in a folder to Google Drive
+   */
+  @SimpleFunction(description = "Enable upload scheduled task based on specified filepath "
+      + "of a folder locally in parameter <code>folderPath</code>. " 
+      + "One use case is to upload all the save photos"
+      + "in some SD folder periodically. The parameter <code>period</code> is in second.")
+  public void ScheduleUpload(String folderPath, long period) {
 
-  // below is the code to test if we can at least upload one photo? //////////////
-  ///////////////////////////////////////////////////////////////////////////////// 
-  private static Uri fileUri;
+    // will throw an exception if try to startPeriodUpload when there's one
+    // on-going schedule Task
+ 
+      this.enablePeriodicUploadFolder = true;
+      this.upload_period = period;
+      this.uploadTarget = folderPath;
 
+      Schedule uploadPeriod = new Schedule.BasicSchedule(
+          BigDecimal.valueOf(this.upload_period), BigDecimal.ZERO, false, false);
 
-  private void startCameraIntent() {
-    String mediaStorageDir = Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_PICTURES).getPath();
-    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-    fileUri = Uri.fromFile(new java.io.File(mediaStorageDir + java.io.File.separator + "IMG_"
-        + timeStamp + ".jpg"));
+      mBoundFunfManager.registerPipelineAction(this, ACTION_UPLOAD_DATA,
+          uploadPeriod);
 
-    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-    mainUIThreadActivity.startActivityForResult(cameraIntent, REQUEST_CAPTURE);
   }
   
-
-  //for testing purpose only;
-  //TODO: remove after full test
-  private void saveFileToDrive() {
-    Thread t = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          // File's binary content
-          java.io.File fileContent = new java.io.File(fileUri.getPath());
-          FileContent mediaContent = new FileContent("image/jpeg", fileContent);
-
-          // File's metadata.
-          File body = new File();
-          body.setTitle(fileContent.getName());
-          body.setMimeType("image/jpeg");
-
-          File file = service.files().insert(body, mediaContent).execute();
- 
-          
-          if (file != null) {
-            showToast("Photo uploaded: " + file.getTitle());
-          }
-        } catch (UserRecoverableAuthIOException e) {
-          Log.i(TAG, "Are we ever here? saveFileToDrive@GoogleDrive");
-          mainUIThreadActivity.startActivityForResult(e.getIntent(), REQUEST_AUTHORIZE);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    });
-    t.start();
+  
+  @SimpleProperty (description = "Indicates whether there exists any schedule upload task")
+  public boolean ScheduleUploadEnabled(){
+    return this.enablePeriodicUploadFolder;
   }
-  //for testing purpose 
-  private void showToast(final String toast) {
-    mainUIThreadActivity.runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        Toast.makeText(mainUIThreadActivity.getApplicationContext(), toast, Toast.LENGTH_SHORT).show();
-      }
-    });
+  
+  
+  /*
+   * Stop the current running schedule task. 
+   */
+  @SimpleFunction(description = "Stop the schedule upload task")
+  public void StopScheduleUpload(){
+    this.enablePeriodicUploadFolder = false;
+
+    mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);
+     
   }
-  @SimpleFunction
-  public void TestUploadPhoto(){
-    startCameraIntent();
-    
-  }
-  ////////////////////////// end of the testing code ////////////////////////////////////
+  
 }

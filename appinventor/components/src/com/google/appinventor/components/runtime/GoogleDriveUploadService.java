@@ -274,9 +274,9 @@ public class GoogleDriveUploadService extends UploadService {
         Log.i(TAG, "something wrong in GoogleDriveArchive:" + e.toString());
         e.printStackTrace();
         // something happen that we can't successfully upload the file to Google drive
-        for (GoogleDriveExceptionListener lis : allListeners){
-          lis.onExceptionReceived(e);
-        }
+//        for (GoogleDriveExceptionListener lis : allListeners){
+//          lis.onExceptionReceived(e);
+//        }
       }
  
       if(successUpload) {

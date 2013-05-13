@@ -139,28 +139,30 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   }
 
   private boolean uploadSingleFile(File file) throws Exception {
-    //this method actually does the uploading, only successful upload will return true, else will be exception throws to
-    //the caller methods
+    // this method actually does the uploading, only successful upload will
+    // return true, else will be exception throws to
+    // the caller methods
     String dataPath = file.getAbsolutePath();
 
-    //Need to get Google Drive folder information if an app specifies the folder to upload to
+    // Need to get Google Drive folder information if an app specifies the
+    // folder to upload to
     // 1. get or create folder if not exist\
 
     try {
-    	Log.i(TAG, "Before processGDFile");
-//    	processGDFile(Drive service, String parentId, File localFile)
-    	com.google.api.services.drive.model.File processedFile = processGDFile(mService, gdFolder.getId(), file);
- 
+      Log.i(TAG, "Before processGDFile");
+      // processGDFile(Drive service, String parentId, File localFile)
+      com.google.api.services.drive.model.File processedFile = processGDFile(
+          mService, gdFolder.getId(), file);
+
       Log.i(TAG, "Return From Google Drive Drive sending the file...");
-   
+
       return true;
-      
+
     } catch (FileNotFoundException e) {
       Log.w(TAG, "File not found: " + dataPath);
       throw e;
-    } 
+    }
 
-    
   }
   
   private com.google.api.services.drive.model.File createGoogleFolder()  {
@@ -187,25 +189,24 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   
   private com.google.api.services.drive.model.File processGDFile(Drive service,
       String parentId, File localFile) throws Exception {
-    Log.i(TAG,"We are in processGDFile");
+    Log.i(TAG, "We are in processGDFile");
     boolean existed = false;
     com.google.api.services.drive.model.File processedFile;
-    //Determine whether the file exists in this folder or not.
+    // Determine whether the file exists in this folder or not.
     String q = "'" + parentId + "' in parents and" + "title = " + "'"
         + localFile.getName() + "'";
 
     FileContent mediaContent = new FileContent("", localFile);
-    
-    FileList resultFileList = ExcuteQuery(q);
-//    com.google.api.services.drive.model.File gdFile = ExcuteQuery(q).getItems()
-//        .get(0);
-    // File's content.
-    try {
 
-      if (!resultFileList.getItems().isEmpty()) { // if this file already exists in GD
+    FileList resultFileList = ExcuteQuery(q);
+ 
+    try {
+      // if this file already exists in GD, we do update
+      if (!resultFileList.getItems().isEmpty()) { 
         Log.i(TAG, "the file exists, use update....");
         existed = true;
-        com.google.api.services.drive.model.File gdFile = resultFileList.getItems().get(0);
+        com.google.api.services.drive.model.File gdFile = resultFileList
+            .getItems().get(0);
         processedFile = service.files()
             .update(gdFile.getId(), gdFile, mediaContent).execute();
         // Uncomment the following line to print the File ID.
@@ -223,7 +224,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
         }
         Log.i(TAG, " before insert body");
         processedFile = service.files().insert(body, mediaContent).execute();
-        // Uncomment the following line to print the File ID.
+ 
         Log.i(TAG, "Processed File ID: %s" + processedFile.getId());
 
       }
@@ -245,54 +246,49 @@ public class GoogleDriveArchive implements RemoteFileArchive {
    */
   private void getDriveService() {
     String mAccountName = this.mAccount;
-    //final String mAccountName = this.mAccount;
-    
-//    AsynchUtil.runAsynchronously(new Runnable() {
-//      public void run() {
-        //we should be authorized already, so when rebuilding the GoogleAccountCredential, 
-        //we don't have to test it again.
-        GoogleAccountCredential credential = 
-          GoogleAccountCredential.usingOAuth2(mContext, DriveScopes.DRIVE);
-        Log.i(TAG, "before set selectedAccountName:" + mAccountName);
-        credential.setSelectedAccountName(mAccountName);
-        try {
-          credential.getToken();
-        } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (GoogleAuthException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-        Log.i(TAG, "before build drive service... ");
-        // set up Drive service
-        mService = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
-            new GsonFactory(), credential).build();
-        //now we have the service, we can get Google Drive folder
-        gdFolder = getGoogleDriveFolder();
-        
-        Log.i(TAG, "after drive service... ");
 
-//      }
-//    });
+    GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
+        mContext, DriveScopes.DRIVE);
+    Log.i(TAG, "before set selectedAccountName:" + mAccountName);
+    credential.setSelectedAccountName(mAccountName);
+    try {
+      credential.getToken();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (GoogleAuthException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    Log.i(TAG, "before build drive service... ");
+    // set up Drive service
+    mService = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
+        new GsonFactory(), credential).build();
+    // now we have the service, we can get Google Drive folder
+    gdFolder = getGoogleDriveFolder();
+
+    Log.i(TAG, "after drive service... ");
 
   }
 
   private boolean uploadFolderFiles(File file) throws Exception {
     // In case when the specified File path is a directory
-    // Note that we don't do nested looping through a folder to get all the folders and files
+    // Note that we don't do nested looping through a folder to get all the
+    // folders and files
+ 
+    File[] listOfFiles = file.listFiles();
+    for (File f : listOfFiles) {
+      if (f.isFile()) {
+        if (uploadSingleFile(f))
+          ; // if successful, do nothing, else return false
+        else
+          return false;
+      }
+    }
 
-    if(file.isDirectory()){
-       File[] listOfFiles = file.listFiles();
-       for (File f: listOfFiles) {
-         if (uploadSingleFile(f))
-           ; //if successful, do nothing, else return false
-         else
-           return false;
-       }
-
-    }//only return true if all files in the folder has been succesfully uploaded
-    return true;  
+    // only return true if all files in the folder has been succesfully
+    // uploaded
+    return true;
 
   }
   
