@@ -6,6 +6,7 @@
 package com.google.appinventor.components.runtime;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,6 +14,13 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxFileSizeException;
+import com.dropbox.client2.exception.DropboxIOException;
+import com.dropbox.client2.exception.DropboxPartialFileException;
+import com.dropbox.client2.exception.DropboxServerException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
+import com.google.appinventor.components.runtime.util.DropboxUtil;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
 
 import android.app.Service;
 import android.content.Context;
@@ -74,13 +82,20 @@ public class DropboxUploadService extends UploadService {
   private Thread dbUploadThread;
   private Thread regularUploadThread;
   private WakeLock lock;
+  
+  //App Inventor specific method for communicating error message to component
+  private boolean status = true;
+  private String error_message = "";
+  
+  // use sharedPreference to write out the result of each uploading task
   private SharedPreferences sharedPreferences;
   
   @Override
   public void onCreate() {
     super.onCreate();
+    sharedPreferences =  getApplicationContext().getSharedPreferences(DropboxUtil.PREFS_DROPBOX,
+        Context.MODE_PRIVATE);
     Log.i(TAG, "Creating...");
-
     connectivityManager =(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     lock = LockUtil.getWakeLock(this);
     fileFailures = new HashMap<String, Integer>();
@@ -236,14 +251,15 @@ public class DropboxUploadService extends UploadService {
         successUpload = remoteArchive.add(file);
       } catch (Exception e) {
         // something happen that we can't successfully upload the file to
-        // dropbox, and we will tell the UI component
-        for (DropboxExceptionListener lis : allListeners){
-          lis.onExceptionReceived(e);
-        }
+        // dropbox. Write status logs and error messages to sharedpreference  
+        status = successUpload;
+        error_message = getErrorMessage(e);
+        
       }
  
       if (successUpload) {
         archive.remove(file);
+        saveStatusLog(true, "success");
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
         numFileFailures = (numFileFailures == null) ? 1 : numFileFailures + 1;
@@ -257,17 +273,27 @@ public class DropboxUploadService extends UploadService {
         } else {
           Log.i(LogUtil.TAG, "Failed to upload '" + file.getAbsolutePath()
               + "' after 3 attempts.");
+          saveStatusLog(status, error_message);
         }
       }
     } else {
       Log.i(LogUtil.TAG,
           "Canceling upload.  Remote archive '" + remoteArchive.getId()
               + "' is not currently available.");
+      saveStatusLog(status, error_message);
     }
 
   }
   
-  
+  private void saveStatusLog(boolean status, String message){
+    //save to sharedPreference the latest status 
+    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    
+    sharedPrefsEditor.putBoolean(Dropbox.DROPBOX_LASTUPLOAD_STATUS, status);
+    sharedPrefsEditor.putString(Dropbox.DROPBOX_LASTUPLOAD_REPORT, message);
+    sharedPrefsEditor.commit();        
+    
+  }
   
   
   private void runUpload(RemoteFileArchive remoteArchive, File file, int network){
@@ -285,13 +311,13 @@ public class DropboxUploadService extends UploadService {
         successUpload = remoteArchive.add(file);
       }catch(Exception e){
         // something happen that we can't successfully upload the file to dropbox
-        for (DropboxExceptionListener lis : allListeners){
-          lis.onExceptionReceived(e);
-        }
+        status = successUpload;
+        error_message = getErrorMessage(e);
       }
  
       if(successUpload) {
         Log.i(TAG, "successful upload file to dropbox");
+        saveStatusLog(true, "success");
         //do nothing
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
@@ -304,11 +330,12 @@ public class DropboxUploadService extends UploadService {
           filesToUpload.offer(new RegularArchiveFile(remoteArchive, file, network));
         } else {
           Log.i(TAG, "Failed to upload '" + file.getAbsolutePath() + "' after 3 attempts.");
+          saveStatusLog(status, error_message);
         }
       }
      }else {
       Log.i(TAG, "Canceling upload.  Remote archive '" + remoteArchive.getId() + "' is not currently available.");
-
+      saveStatusLog(status, error_message);
     } 
   }
 
@@ -391,5 +418,40 @@ public class DropboxUploadService extends UploadService {
   public IBinder onBind(Intent intent) {
     return mBinder;
   }
+  
+
+  private String getErrorMessage(Exception e){
+    String errorMsg = "";
+    
+    try {
+      throw e;
+    } catch (DropboxUnlinkedException exp) {
+      // TODO Auto-generated catch block
+      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_TWITTER_EXCEPTION, null); 
+    } catch (DropboxFileSizeException exp){
+      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_FILESIZE, null);
+
+    } catch (DropboxPartialFileException exp){
+      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_PARTIALFILE, null);
+    } catch (DropboxServerException exp){
+      if(exp.error == DropboxServerException._507_INSUFFICIENT_STORAGE){
+        errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE, null);
+      }
+
+    } catch (DropboxIOException exp){
+      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_IO, null);
+      
+    } catch (FileNotFoundException exp){
+      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_FILENOTFOUND, null);
+      
+    } catch (Exception exp) {
+      //something bad just happened
+      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_EXCEPTION, null);
+    }
+        
+    return errorMsg;
+  }
+  
+  
   
 }

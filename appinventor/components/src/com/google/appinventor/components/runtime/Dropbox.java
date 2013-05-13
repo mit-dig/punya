@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -91,6 +92,7 @@ import edu.mit.media.funf.storage.UploadService;
  @UsesLibraries(libraries =
     "dropbox.jar," +
     "apache-httpcomponent-httpmime.jar," +
+    "funf.jar," +
     "json-simple.jar")
 public class Dropbox extends AndroidNonvisibleComponent
   implements ActivityResultListener, Component, Pipeline, OnResumeListener{
@@ -120,7 +122,7 @@ public class Dropbox extends AndroidNonvisibleComponent
   private static final boolean DEFAULT_DATA_UPLOAD_ON_WIFI_ONLY = true;
   public static final String PIPE_NAME = "Dropbox"; 
   private boolean wifiOnly = false;
-   
+  
 
   ///
   protected static Activity mainUIThreadActivity;
@@ -145,7 +147,14 @@ public class Dropbox extends AndroidNonvisibleComponent
   private static WebAuthSession session;
  
   private String dropboxFolder =""; 
-  
+  /*
+   * Because we run the upload service on the background periodically, we need a way to understand if there's 
+   * anything wrong with the background work (e.g. network problem, quota exceed,..etc) and decide to terminate
+   * the and remove the schedule task or not. Using lastupload_status to report if successful or not, 
+   * if not successful, the error message will placed in the lastupload_report
+   */
+  public static final String DROPBOX_LASTUPLOAD_REPORT = "dropbox_lastupload_report";
+  public static final String DROPBOX_LASTUPLOAD_STATUS = "dropbox_lastupload_status";   
 
   // lock protects fields requestToken, accessToken. 
   // This follows the practice in Twitter.java
@@ -176,80 +185,9 @@ public class Dropbox extends AndroidNonvisibleComponent
 
     }
   };
-  
-  // try local binding to DropboxUploadService
-//  private ServiceConnection mConnectionDropBox = new ServiceConnection() {
-//    public void onServiceConnected(ComponentName className, IBinder service) {
-//
-//      mBoundDropboxService = ((DropboxUploadService.LocalBinder) service)
-//          .getService();
-//      //Note: remove it by Fuming (should not cause any problem)
-//      //registerSelfToFunfManager(); 
-//      registerExceptionListener();
-//      Log.i(TAG, "Bound to DropboxUploadService");
-//
-//    }
-//
-//    public void onServiceDisconnected(ComponentName className) {
-//      mBoundDropboxService = null;
-//
-//      Log.i(TAG, "Unbind DropboxUploadService");
-//
-//    }
-//  };
-  
-
-
-  // This listener will used to pass in all the exceptions that happened and are capture
-  // in DropboxUploadService
-  DropboxExceptionListener listener = new DropboxExceptionListener() {
-
-    @Override
-    public void onExceptionReceived(Exception e) {
-      //Could be different exception
-      try {
-        throw e;
-      } catch (DropboxUnlinkedException exp) {
-        // TODO Auto-generated catch block
-        form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
-            ErrorMessages.ERROR_TWITTER_EXCEPTION);
-      } catch (DropboxFileSizeException exp){
-        form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
-            ErrorMessages.ERROR_DROPBOX_FILESIZE);
-      } catch (DropboxPartialFileException exp){
-        form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
-            ErrorMessages.ERROR_DROPBOX_PARTIALFILE);
-      } catch (DropboxServerException exp){
-        if(exp.error == DropboxServerException._507_INSUFFICIENT_STORAGE){
-          form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
-              ErrorMessages.ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE);
-        }
-
-      } catch (DropboxIOException exp){
-        form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
-            ErrorMessages.ERROR_DROPBOX_IO);
-        
-      } catch (FileNotFoundException exp){
-        form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
-            ErrorMessages.ERROR_DROPBOX_FILENOTFOUND);
-        
-      } catch (Exception exp) {
-        //something bad just happened
-        form.dispatchErrorOccurredEvent(Dropbox.this, "UploadData/UploadDB",
-            ErrorMessages.ERROR_DROPBOX_EXCEPTION);
-      }
- 
-      
-    }
-  };
 
 
 
-//  private void registerExceptionListener() {
-//    
-//    this.mBoundDropboxService.registerException(listener);
-//  }
-  
   /*
    * After we bind to FunfManger, we have to register self to Funf as a Pipeline. 
    * This is for later to be wakened up and do pipe actions like archiving and uploading 
@@ -267,12 +205,6 @@ public class Dropbox extends AndroidNonvisibleComponent
     mIsBound = true;
     Log.i(TAG,
         "FunfManager is bound, and now we could have register dataRequests");
-    
-//    mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
-//        DropboxUploadService.class), mConnectionDropBox, Context.BIND_AUTO_CREATE);
-//    
-//    Log.i(TAG,
-//    "DropboxUploadService is bound, and now we could have register for DropBoxException Listener");
 
   }
   
@@ -292,12 +224,29 @@ public class Dropbox extends AndroidNonvisibleComponent
     
   }
   
+  OnSharedPreferenceChangeListener bgServiceStatuslistener = new OnSharedPreferenceChangeListener() {
+    public void onSharedPreferenceChanged(SharedPreferences prefs,
+        String key) {
+      if(key.equals(Dropbox.DROPBOX_LASTUPLOAD_STATUS)){
+       //do call event
+        boolean status = sharedPreferences.getBoolean(Dropbox.DROPBOX_LASTUPLOAD_STATUS, true);
+        String log = sharedPreferences.getString(Dropbox.DROPBOX_LASTUPLOAD_REPORT, "");
+
+        ServiceStatusChanged(status, log);
+        
+      }
+    }
+  };
+  
   public Dropbox(ComponentContainer container) {
     super(container.$form());
     this.container = container;
     handler = new Handler();
     sharedPreferences = container.$context().getSharedPreferences(DropboxUtil.PREFS_DROPBOX,
         Context.MODE_PRIVATE);
+    //try 
+    sharedPreferences.registerOnSharedPreferenceChangeListener(bgServiceStatuslistener);
+    //
     accessTokenPair = retrieveAccessToken();
     mainUIThreadActivity = container.$context();
     
@@ -313,6 +262,8 @@ public class Dropbox extends AndroidNonvisibleComponent
     upload_period = Dropbox.SCHEDULE_UPLOAD_PERIOD;
 
  }
+  
+
   
 
  
@@ -336,11 +287,7 @@ public class Dropbox extends AndroidNonvisibleComponent
     Log.i(TAG, "APP Secret:" + appSecret);
     
     //save the app key to sharedPreference for later use
-    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
-    
-    sharedPrefsEditor.putString(DropboxUtil.PREF_DROPBOX_APP_KEY, appKey);
-    sharedPrefsEditor.putString(DropboxUtil.PREF_DROPBOX_APP_SECRET, appSecret);
-    sharedPrefsEditor.commit();
+    saveAppToken(appKey, appSecret);
     
     AppKeyPair appKeys = new AppKeyPair(myAppKey, myAppSecret);
     session = new WebAuthSession(appKeys, AccessType.APP_FOLDER);
@@ -399,7 +346,6 @@ public class Dropbox extends AndroidNonvisibleComponent
         try {
 
           // now retrieve the access token to this web session
-
           String userId = session.retrieveWebAccessToken(requestTokenPair);
 
           // we should get the access token by now
@@ -565,38 +511,40 @@ public class Dropbox extends AndroidNonvisibleComponent
 
     if (ACTION_UPLOAD_DATA.equals(action)) {
       // Do something else
-      Log.i(TAG, "Run pipe's action UPLOAD_DATA");
+
+      Log.i(TAG,
+          "Run pipe's action UPLOAD_DATA at:" + System.currentTimeMillis());
       upload();
 
-    }   
-    
+    }
+
   }
   
 
   /*
    * Internal use for periodical uploading task
    */
-  private void upload(){
-    if (uploadTarget != null){//either folder or db
-      if (this.enablePeriodicUploadDB){
+  private void upload() {
+    if (uploadTarget != null) {// either folder or db
+      if (this.enablePeriodicUploadDB) {
         uploadDB(uploadTarget);
-        
-      }
-      else{
-        
+
+      } else {
+
         uploadFile(uploadTarget);
 
       }
-        
+
     }
   }
-
+ 
 
   @Override
   public void onDestroy() {
     // TODO Auto-generated method stub
-    doUnbindService();
-
+    doUnbindService(); //unbind the funfManager service
+    StopScheduleUpload(); //stop the schedule task
+    
   }
   
   public Class<? extends UploadService> getUploadServiceClass() {
@@ -691,7 +639,7 @@ public class Dropbox extends AndroidNonvisibleComponent
   /**
    * Indicates the interval for a re-occurring upload activity for uploading file to dropbox
    */
-  @SimpleProperty
+  @SimpleProperty(description = "Return the upload period of the current schedule uploading task")
   public float UploadPeriod() {
 
     return this.upload_period;
@@ -766,8 +714,9 @@ public class Dropbox extends AndroidNonvisibleComponent
    * Current we can either do uploading folder or uploading archived db
    */
   @SimpleFunction(description = "Enable upload scheduled task based on specified filepath "
-      + "of a folder locally. One use case is to upload all the save photos"
-      + "in some SD folder periodically")
+      + "of a folder locally in parameter <code>folderPath</code>. " 
+      + "One use case is to upload all the save photos"
+      + "in some SD folder periodically. The parameter <code>period</code> is in second.")
   public void ScheduleUpload(String folderPath, long period) {
 
     // will throw an exception if try to startPeriodUpload when there's one
@@ -824,11 +773,18 @@ public class Dropbox extends AndroidNonvisibleComponent
   /*
    * Stop the current running schedule task. 
    */
+  @SimpleFunction(description = "Stop the schedule uploading task")
   public void StopScheduleUpload(){
     this.enablePeriodicUploadFolder = false;
     this.enablePeriodicUploadDB = false;
-    mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);
+    mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);//stop periodic schedule task
      
+  }
+  
+  
+  @SimpleProperty (description = "Indicates whether there exists any schedule upload task")
+  public boolean ScheduleUploadEnabled(){
+    return this.enablePeriodicUploadFolder || this.enablePeriodicUploadDB;
   }
   
 
@@ -848,8 +804,7 @@ public class Dropbox extends AndroidNonvisibleComponent
     Log.i(TAG, "uploadDone");
     EventDispatcher.dispatchEvent(this, "UploadDone", successful);
   }
-  
-  //TODO: remove the DropboxExceptionListener at L203 after testing the code
+
   private void displayErrorMessage(Exception e){
     try {
       throw e;
@@ -939,6 +894,27 @@ public class Dropbox extends AndroidNonvisibleComponent
        
   }
   
+  @SimpleFunction(description = "Get the status of the status of the most recent schedule upload task")
+  public boolean GetScheduleTaskStatus() {
+    return sharedPreferences.getBoolean(Dropbox.DROPBOX_LASTUPLOAD_STATUS, true);
+    
+  }
+  
+  @SimpleFunction(description = "Get the message log of the most recent schedule upload task")
+  public String GetScheduleTaskLog(){
+    return sharedPreferences.getString(DROPBOX_LASTUPLOAD_REPORT, "");
+    
+  }
+
+  /*
+   * Give the component an event listener that gives the recent status and log of the background service
+   */
+  @SimpleEvent(description = "This event is raised when upload service status has changed")
+
+  public void ServiceStatusChanged(boolean successful, String log) {
+    Log.i(TAG, "ServiceStatusChanged:" + successful + ", " + log);
+    EventDispatcher.dispatchEvent(this, "ServiceStatusChanged", successful, log);
+  }
   
  
 }
