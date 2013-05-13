@@ -6,9 +6,11 @@
 package com.google.appinventor.components.runtime;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
@@ -16,6 +18,7 @@ import com.google.appinventor.components.runtime.util.ErrorMessages;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -46,6 +49,7 @@ public class Camera extends AndroidNonvisibleComponent
   private static final String CAMERA_OUTPUT = "output";
   private final ComponentContainer container;
   private Uri imageFile;
+  private String localStorageFolder;
 
   /* Used to identify the call to startActivityForResult. Will be passed back
   into the resultReturned() callback method. */
@@ -59,6 +63,8 @@ public class Camera extends AndroidNonvisibleComponent
   public Camera(ComponentContainer container) {
     super(container.$form());
     this.container = container;
+    this.localStorageFolder = Environment.getExternalStorageDirectory() + "/Pictures/";
+ 
   }
 
   /**
@@ -71,7 +77,8 @@ public class Camera extends AndroidNonvisibleComponent
 
     if (Environment.MEDIA_MOUNTED.equals(state)) {
       Log.i("CameraComponent", "External storage is available and writable");
-
+      
+      
       imageFile = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
         "/Pictures/app_inventor_" + date.getTime()
         + ".jpg"));
@@ -149,4 +156,19 @@ public class Camera extends AndroidNonvisibleComponent
   public void AfterPicture(String image) {
     EventDispatcher.dispatchEvent(this, "AfterPicture", image);
   }
+  
+  
+  /*
+   * Indicate the folder(directory) in which the photo is stored locally
+   */
+
+  @SimpleProperty(description = "Return the folder(directory) in which we store the photos locally"
+    , category = PropertyCategory.BEHAVIOR )
+  public String LocalStorageFolder(){
+    return this.localStorageFolder;
+    
+  }
+  
+  
+  
 }
