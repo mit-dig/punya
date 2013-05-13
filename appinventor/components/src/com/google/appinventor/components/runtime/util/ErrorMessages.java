@@ -149,6 +149,11 @@ public final class ErrorMessages {
   // Please start the next group of error numbers at 1901.
   public static final int ERROR_GOOGLEDRIVE_EXCEPTION = 1901;
   public static final int ERROR_GOOGLEDRIVE_IO_EXCEPTION = 1902;
+  public static final int ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS = 1903;
+  public static final int ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION = 1904;
+  public static final int ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR = 1905;
+  public static final int ERROR_GOOGLEDRIVE_APP_BLACKLIST = 1906;
+  public static final int ERROR_GOOGLEDRIVE_HTTP_RESPONSE = 1907;
   
 
   
@@ -400,7 +405,8 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
         "by calling <code>StopScheduleUpload</code>.");
     
-    errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "The file to upload was not found");
+
+    errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "Error happened with connection or file I/O");
     errorMessages.put(ERROR_GOOGLEDRIVE_EXCEPTION, "Something wrong with Google Drive");
     
     

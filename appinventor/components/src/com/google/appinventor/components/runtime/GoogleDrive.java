@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 import android.accounts.AccountManager;
@@ -17,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
 import android.os.AsyncTask;
 
@@ -31,6 +34,8 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
@@ -101,8 +106,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   protected static Activity mainUIThreadActivity;
   private final int REQUEST_CHOOSE_ACCOUNT; 
   private final int REQUEST_AUTHORIZE;
-  //for testing purpose
-  private final int REQUEST_CAPTURE;
 
   ////////////////
   private String gdFolder;
@@ -126,6 +129,32 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   
   private static Drive service;
   private GoogleAccountCredential credential;
+  
+  /*
+   * Because we run the upload service on the background periodically, we need a way to understand if there's 
+   * anything wrong with the background work (e.g. network problem, quota exceed,..etc) and decide to terminate
+   * the and remove the schedule task or not. Using lastupload_status to report if successful or not, 
+   * if not successful, the error message will placed in the lastupload_report
+   */
+  public static final String GOOGLEDRIVE_LASTUPLOAD_REPORT = "gd_lastupload_report";
+  public static final String GOOGLEDRIVE_LASTUPLOAD_STATUS = "gd_lastupload_status";   
+  public static final String GOOGLEDRIVE_LASTUPLOAD_TIME = "gd_lastupload_time";
+  
+  OnSharedPreferenceChangeListener bgServiceStatuslistener = new OnSharedPreferenceChangeListener() {
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+      // TODO Auto-generated method stub
+      if(key.equals(GOOGLEDRIVE_LASTUPLOAD_STATUS)){
+        boolean status = sharedPreferences.getBoolean(GOOGLEDRIVE_LASTUPLOAD_STATUS, true);
+        String log = sharedPreferences.getString(GOOGLEDRIVE_LASTUPLOAD_REPORT, "");
+
+        ServiceStatusChanged(status, log);
+      }
+      
+    }
+    
+  };
 
   // try local binding to FunfManager
   private ServiceConnection mConnection = new ServiceConnection() {
@@ -173,7 +202,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     this.upload_period = GoogleDrive.SCHEDULE_UPLOAD_PERIOD;
     REQUEST_CHOOSE_ACCOUNT = form.registerForActivityResult(this);
     REQUEST_AUTHORIZE = form.registerForActivityResult(this);
-    REQUEST_CAPTURE =  form.registerForActivityResult(this);
+
     this.gdFolder = GoogleDrive.DEFAULT_GD_FOLDER;
 
     credential = GoogleAccountCredential.usingOAuth2(mainUIThreadActivity, DriveScopes.DRIVE);
@@ -226,6 +255,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   public void onDestroy() {
     // TODO Auto-generated method stub
     doUnbindService();
+    StopScheduleUpload(); //stop the schedule task
   }
 
   @Override
@@ -236,7 +266,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       if (uploadTarget != null){
         uploadService(uploadTarget);
       }
-      Log.i(TAG, "Run pipe's action UPLOAD_DATA at:" + System.currentTimeMillis());
+      SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd HH:mm:ss");
+      Date date = new Date();
+      String currentDatetime = dateFormat.format(date);
+      Log.i(TAG, "Run pipe's action UPLOAD_DATA at:" + System.currentTimeMillis() + "," + currentDatetime);
 
     }   
   	
@@ -340,11 +373,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     Log.i(TAG, "call isAuthorized");
     EventDispatcher.dispatchEvent(this, "IsAuthorized");
   }
-  
-//  private void registerExceptionListener() {
-//    
-//    this.mBoundGDService.registerException(listener);
-//  }
   
   /*
    * After we bind to FunfManger, we have to register self to Funf as a Pipeline. 
@@ -572,16 +600,41 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
    
     try{
       throw e;
-    } catch (IOException exception){
+    } catch (GoogleJsonResponseException e1) {
+      GoogleJsonError error = e1.getDetails();
+
+      Log.e(TAG, "Error code: " + error.getCode());
+      Log.e(TAG, "Error message: " + error.getMessage());
+      if(error.getCode() == 401){
+        form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
+            ErrorMessages.ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS);
+        
+      }
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appAccess"))){
+        form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
+            ErrorMessages.ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION);
+      }
+      
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appNotConfigured"))){
+        form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
+            ErrorMessages.ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR);
+        
+      }
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appBlacklisted"))){
+        form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
+            ErrorMessages.ERROR_GOOGLEDRIVE_APP_BLACKLIST);        
+      }
+
+      // More error information can be retrieved with error.getErrors().
+    }
+      catch (IOException exception){
       form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
-          ErrorMessages.ERROR_GOOGLEDRIVE_IO_EXCEPTION,
-          e.getMessage());
+          ErrorMessages.ERROR_GOOGLEDRIVE_IO_EXCEPTION);
 
     } catch (Exception exceptfinal) {
       // TODO Auto-generated catch block
       form.dispatchErrorOccurredEvent(GoogleDrive.this, "UploadData",
-          ErrorMessages.ERROR_GOOGLEDRIVE_EXCEPTION,
-          e.getMessage());
+          ErrorMessages.ERROR_GOOGLEDRIVE_EXCEPTION);
     }
 
   }
@@ -685,5 +738,35 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);
      
   }
+  
+  /*
+   * Give the component an event listener that gives the recent status and log of the background service
+   */
+  @SimpleEvent(description = "This event is raised when upload service status has changed." +
+  		" If successful, <code>successful</code> will return true, else it returns false" +
+  		" and <code>log</code> returns the error messages")
+
+  public void ServiceStatusChanged(boolean successful, String log) {
+    Log.i(TAG, "ServiceStatusChanged:" + successful + ", " + log);
+    EventDispatcher.dispatchEvent(this, "ServiceStatusChanged", successful, log);
+  }
+  
+  @SimpleFunction(description = "Get the status of the status of the most recent schedule upload task")
+  public boolean GetScheduleTaskStatus() {
+    return sharedPreferences.getBoolean(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, true);
+    
+  }
+  
+  @SimpleFunction(description = "Get the message log of the most recent schedule upload task")
+  public String GetScheduleTaskLog(){
+    return sharedPreferences.getString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS , "");
+    
+  }
+  
+  @SimpleFunction(description = "Get the finished datetime of the last uploading task")
+  public String GetScheduleTaskTime(){
+    return sharedPreferences.getString(GOOGLEDRIVE_LASTUPLOAD_TIME, "");
+  }
+
   
 }

@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -155,6 +157,7 @@ public class Dropbox extends AndroidNonvisibleComponent
    */
   public static final String DROPBOX_LASTUPLOAD_REPORT = "dropbox_lastupload_report";
   public static final String DROPBOX_LASTUPLOAD_STATUS = "dropbox_lastupload_status";   
+  public static final String DROPBOX_LASTUPLOAD_TIME = "dropbox_lastupload_time";
 
   // lock protects fields requestToken, accessToken. 
   // This follows the practice in Twitter.java
@@ -400,6 +403,7 @@ public class Dropbox extends AndroidNonvisibleComponent
     
   }
   
+  
   private void saveAccessToken(AccessTokenPair accessToken) {
     final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
     if (accessToken == null) {
@@ -510,10 +514,12 @@ public class Dropbox extends AndroidNonvisibleComponent
     // TODO Auto-generated method stub
 
     if (ACTION_UPLOAD_DATA.equals(action)) {
-      // Do something else
-
-      Log.i(TAG,
-          "Run pipe's action UPLOAD_DATA at:" + System.currentTimeMillis());
+      // Do something else //debug
+      SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd HH:mm:ss");
+      Date date = new Date();
+      String currentDatetime = dateFormat.format(date);
+      Log.i(TAG, "Run pipe's action UPLOAD_DATA at:" + System.currentTimeMillis() + "," + currentDatetime);
+           
       upload();
 
     }
@@ -544,6 +550,18 @@ public class Dropbox extends AndroidNonvisibleComponent
     // TODO Auto-generated method stub
     doUnbindService(); //unbind the funfManager service
     StopScheduleUpload(); //stop the schedule task
+    
+    //write something to the shared preference (for debug purpose)
+    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    sharedPrefsEditor.putBoolean(DROPBOX_LASTUPLOAD_STATUS, false);
+    sharedPrefsEditor.putString(DROPBOX_LASTUPLOAD_REPORT, "Activity Got Killed");
+    
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    Date date = new Date();
+    String currentDatetime = dateFormat.format(date);
+    sharedPrefsEditor.putString(DROPBOX_LASTUPLOAD_TIME, currentDatetime);
+    sharedPrefsEditor.commit();
+    
     
   }
   
@@ -905,6 +923,11 @@ public class Dropbox extends AndroidNonvisibleComponent
     return sharedPreferences.getString(DROPBOX_LASTUPLOAD_REPORT, "");
     
   }
+  
+  @SimpleFunction(description = "Get the finshed datetime of last upload service task")
+  public String GetScheduleTaskLogTime(){
+    return sharedPreferences.getString(DROPBOX_LASTUPLOAD_TIME, "");
+  }
 
   /*
    * Give the component an event listener that gives the recent status and log of the background service
@@ -912,6 +935,9 @@ public class Dropbox extends AndroidNonvisibleComponent
   @SimpleEvent(description = "This event is raised when upload service status has changed")
 
   public void ServiceStatusChanged(boolean successful, String log) {
+    
+    
+    
     Log.i(TAG, "ServiceStatusChanged:" + successful + ", " + log);
     EventDispatcher.dispatchEvent(this, "ServiceStatusChanged", successful, log);
   }

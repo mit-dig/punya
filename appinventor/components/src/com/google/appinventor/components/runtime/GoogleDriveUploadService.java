@@ -1,15 +1,22 @@
 package com.google.appinventor.components.runtime;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
@@ -34,7 +41,6 @@ import edu.mit.media.funf.util.LogUtil;
  */
 public class GoogleDriveUploadService extends UploadService {
 
-  final HashSet<GoogleDriveExceptionListener> allListeners = new HashSet<GoogleDriveExceptionListener>();
   public static final String FILE_TYPE = "filetype";
   
   public static final int
@@ -54,6 +60,13 @@ public class GoogleDriveUploadService extends UploadService {
   private WakeLock lock;
   private String GoogleDriveFolderPath; //specify which folder in Google Drive 	
   
+  //App Inventor specific methods for communicating error message to component
+  private boolean status = true;
+  private String error_message = "";
+  
+  // use sharedPreference to write out the result of each uploading task
+  private SharedPreferences sharedPreferences;
+  
   @Override
   protected RemoteFileArchive getRemoteArchive(String id) {
     Log.i(TAG, "Drivefolder: " + GoogleDriveFolderPath);
@@ -65,7 +78,7 @@ public class GoogleDriveUploadService extends UploadService {
   public void onCreate() {
     super.onCreate();
     Log.i(TAG, "Creating...");
-
+    sharedPreferences =  getApplicationContext().getSharedPreferences(GoogleDrive.PREFS_GOOGLEDRIVE, Context.MODE_PRIVATE);
     connectivityManager =(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     lock = LockUtil.getWakeLock(this);
     fileFailures = new HashMap<String, Integer>();
@@ -223,13 +236,13 @@ public class GoogleDriveUploadService extends UploadService {
         // something happen that we can't successfully upload the file to
         // google drive , and we will tell the UI component
         Log.i(TAG, "exception happened, ready to call back to the AI component");
-        for (GoogleDriveExceptionListener lis : allListeners){
-          lis.onExceptionReceived(e);
-        }
+        status = successUpload;
+        error_message = getErrorMessage(e);
       }
  
       if (successUpload) {
         archive.remove(file);
+        saveStatusLog(true, "success");
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
         numFileFailures = (numFileFailures == null) ? 1 : numFileFailures + 1;
@@ -244,12 +257,14 @@ public class GoogleDriveUploadService extends UploadService {
 
           Log.i(LogUtil.TAG, "Failed to upload '" + file.getAbsolutePath()
               + "' after 3 attempts.");
+          saveStatusLog(status, error_message);
         }
       }
     } else {
       Log.i(LogUtil.TAG,
           "Canceling upload.  Remote archive '" + remoteArchive.getId()
               + "' is not currently available.");
+      saveStatusLog(status, error_message);
     }
 
   }
@@ -274,13 +289,14 @@ public class GoogleDriveUploadService extends UploadService {
         Log.i(TAG, "something wrong in GoogleDriveArchive:" + e.toString());
         e.printStackTrace();
         // something happen that we can't successfully upload the file to Google drive
-//        for (GoogleDriveExceptionListener lis : allListeners){
-//          lis.onExceptionReceived(e);
-//        }
+        status = successUpload;
+        error_message = getErrorMessage(e);
+      
       }
  
       if(successUpload) {
         Log.i(TAG, "successful upload file to google drive");
+        saveStatusLog(true, "success");
         //do nothing
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
@@ -293,10 +309,12 @@ public class GoogleDriveUploadService extends UploadService {
           filesToUpload.offer(new RegularArchiveFile(remoteArchive, file, network));
         } else {
           Log.i(TAG, "Failed to upload '" + file.getAbsolutePath() + "' after 3 attempts.");
+          saveStatusLog(status, error_message);
         }
       }
      }else {
       Log.i(TAG, "Canceling upload.  Remote archive '" + remoteArchive.getId() + "' is not currently available.");
+      saveStatusLog(status, error_message);
 
     } 
   }
@@ -373,15 +391,68 @@ public class GoogleDriveUploadService extends UploadService {
     return mBinder;
   }
   
-  
-  /*
-   * for activity (bound AI component) to register for exception
-   */
-  public void registerException(GoogleDriveExceptionListener listener) {
-    // TODO Auto-generated method stub
-    allListeners.add(listener);
+  private String getErrorMessage(Exception e){
+    String errorMsg = "";
     
+    try{
+      throw e;
+    } catch (GoogleJsonResponseException e1) {
+      GoogleJsonError error = e1.getDetails();
+
+      Log.e(TAG, "Error code: " + error.getCode());
+      Log.e(TAG, "Error message: " + error.getMessage());
+      if(error.getCode() == 401){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS, null);
+      }
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appAccess"))){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION, null);
+      }
+      
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appNotConfigured"))){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR, null);
+        
+      }
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appBlacklisted"))){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_APP_BLACKLIST, null);        
+      }
+
+      // More error information can be retrieved with error.getErrors().
+    }
+      catch (IOException exception){
+        errorMsg = ErrorMessages.formatMessage(
+          ErrorMessages.ERROR_GOOGLEDRIVE_IO_EXCEPTION, null);
+ 
+
+    } catch (Exception exceptfinal) {
+      // TODO Auto-generated catch block
+      errorMsg = ErrorMessages.formatMessage(
+          ErrorMessages.ERROR_GOOGLEDRIVE_EXCEPTION, null);
+    }
     
+    return errorMsg;
+
   }
+  
+  private void saveStatusLog(boolean status, String message){
+    //save to sharedPreference the latest status 
+    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    Date date = new Date();
+    String currentDatetime = dateFormat.format(date);
+    
+    sharedPrefsEditor.putBoolean(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, status);
+    sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, message);
+    sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_TIME, currentDatetime);
+    
+    sharedPrefsEditor.commit();        
+    
+  }  
+  
+  
 
 }

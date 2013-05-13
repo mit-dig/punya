@@ -7,6 +7,8 @@ package com.google.appinventor.components.runtime;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,6 +34,7 @@ import android.net.NetworkInfo.State;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager.WakeLock;
+import android.text.format.DateFormat;
 import android.util.Log;
 import edu.mit.media.funf.storage.FileArchive;
 import edu.mit.media.funf.storage.RemoteFileArchive;
@@ -289,8 +292,14 @@ public class DropboxUploadService extends UploadService {
     //save to sharedPreference the latest status 
     final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
     
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    Date date = new Date();
+    String currentDatetime = dateFormat.format(date);
+    
+    sharedPrefsEditor.putString(Dropbox.DROPBOX_LASTUPLOAD_TIME, currentDatetime);
     sharedPrefsEditor.putBoolean(Dropbox.DROPBOX_LASTUPLOAD_STATUS, status);
     sharedPrefsEditor.putString(Dropbox.DROPBOX_LASTUPLOAD_REPORT, message);
+
     sharedPrefsEditor.commit();        
     
   }
