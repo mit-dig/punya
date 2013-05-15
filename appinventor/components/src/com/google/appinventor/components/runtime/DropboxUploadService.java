@@ -69,10 +69,7 @@ public class DropboxUploadService extends UploadService {
     return new DropboxArchive(getApplicationContext());
   }
   private static final String TAG = "DropboxUploadService";
-  // should only come from one Dropbox component, because we use binding 
-  // so that one component will create listeners and bind to that DropboxUploadService. 
- 
-  final HashSet<DropboxExceptionListener> allListeners = new HashSet<DropboxExceptionListener>();
+
 
 
   private static final int MAX_DROPBOX_RETRIES = 3;
@@ -405,13 +402,7 @@ public class DropboxUploadService extends UploadService {
     }
   }
   
-  /*
-   * for activity (bound AI component) to register for exception
-   */
-  public void registerException(DropboxExceptionListener listener){
-    allListeners.add(listener);
-    
-  }
+
   
   /**
    * Binder interface to the probe

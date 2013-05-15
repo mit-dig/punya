@@ -2,6 +2,10 @@ package com.google.appinventor.components.runtime;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -9,10 +13,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
+import android.os.Environment; 
 import android.os.IBinder;
 import android.util.Log;
+ 
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -23,8 +27,13 @@ import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.DBTrustUtil;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
+import com.google.appinventor.components.runtime.util.SensorDbUtil;
+import com.google.appinventor.components.runtime.util.YailList;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gwt.dev.util.collect.HashMap;
 
 import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.Schedule;
@@ -33,15 +42,19 @@ import edu.mit.media.funf.storage.DatabaseService;
 import edu.mit.media.funf.storage.NameValueDatabaseService;
 
 /* 
- * This is equivalent to the class "DatabaseService" in Funf library excepts we don't 
- * provide recording data explicitly in the App Inventor interface. (Because it should never be done
- * in the UI level to record sensor stream data which will cause performance issues)
- * The component will only provide archive, export, clear backup functions with scheduling. 
- * 1) archive: copy the sqlite db file and moved it to sd card, under /packageName/dbName/archive/ 
- *    (note: this function will delete the sqlite db as well)
- * 2) export: will export the sqlite db with specified format to sd card, under /packageName/export/
- * 3) clear backup: every time when we execute archive function, a copy will be put into /packageName/dbName/backup
- *    as well for backup purpose. A user (developer) may want to clear the backup files after a while.  
+ * This class provide interface for App inventor program to configure an SensorDBPipeline that will execute schedule tasks.
+ * The schedule tasks include sensing , archive, export db, clear backup.
+ * 
+ * This component can be killed by Android but the scheduled task will continue in the background. This introduce a new practice, 
+ * in App Inventor's app that is to query for current states when the app is created. The component provides interface to query
+ * what are the current sensor collection tasks and current pipeline tasks 
+ * 
+ * Also each component (App) will have and control exactly one SensorDBPipeline, however, it's true that two App Inventor apps
+ * are using same FunfManager
+ * 
+ *  
+ * 
+
  */
 @DesignerComponent(version = YaVersion.WIFISENSOR_COMPONENT_VERSION, description = "Non-visible component that provides method      s to backup and upload "
 		+ "sensor db on the phone.", category = ComponentCategory.BASIC, nonVisible = true, iconName = "images/tinyDB.png")
@@ -53,19 +66,22 @@ import edu.mit.media.funf.storage.NameValueDatabaseService;
 		+ "android.permission.INTERNET")
 @UsesLibraries(libraries = "funf.jar")
 public class SensorDB extends AndroidNonvisibleComponent implements
-OnDestroyListener, Pipeline{
+OnDestroyListener{
 	/*
 	 * Binding to FunfMananger service
 	 */
 
   protected FunfManager mBoundFunfManager = null;
   protected boolean mIsBound = false;
+  private SensorDBPipeline mPipeline = null;
+  private JsonParser parser;
+  private Gson gson;
 
 	private final String TAG = "SensorDB";
-	public static final String PIPE_NAME = "SensorDB"; // this is used as the
+//	public static final String PIPE_NAME = "SensorDB"; // this is used as the
 	
-														// dtatbase name
-
+	private final String pipelineName; 
+ 
 	protected static Activity mainUIThreadActivity;
 	private String exportPath;
 	protected static final String ACTION_ARCHIVE_DATA = "ARCHIVE_DATA";
@@ -73,11 +89,40 @@ OnDestroyListener, Pipeline{
   protected static final String ACTION_CLEAR_BACKUP= "CLEAR_BACKUP";
   private static final long ARCHIVE_PERIOD = 3600; // archive database 60*60*24 (archive every 24 hour)
   private static final long EXPORT_PERIOD = 7200;//
+//  public static final String DATABASE_NAME = "SensorData";
   
+  private Map<String, String> sensorMapping = SensorDbUtil.sensorMap;
+
   private boolean scheduleArchiveEnabled;
   private boolean scheduleExportEnabled;
+  private long archive_period;
+  private long export_period;
+  
+  /*
+   *TODO: consider using reflection? 
+   * a list of current possible funf sensors for data collection
+   * unfortunately, we need to update this list if there are new sensors been added
+   * edu.mit.media.funf.probe.builtin.ActivityProbe (ActivitySensor)
+   * edu.mit.media.funf.probe.builtin.BatteryProbe (BatterySensor)
+   * edu.mit.media.funf.probe.builtin.CallLogProbe (CallLogHistory)
+   * edu.mit.media.funf.probe.builtin.CellTowerProbe (CellTowerProbeSensor)
+   * edu.mit.media.funf.probe.builtin.LightSensorProbe (LightSensor)
+   * edu.mit.media.funf.probe.builtin.SimpleLocationProbe (LocationProbeSensor)
+   * edu.mit.media.funf.probe.builtin.PedometerProbe (PedometerSensor)
+   * edu.mit.media.funf.probe.builtin.ProximitySensorProbe (ProximitySensor)
+   * edu.mit.media.funf.probe.builtin.ScreenProbe (ScreenStatus)
+   * edu.mit.media.funf.probe.builtin.SmsProbe (SmsHistory)
+   * edu.mit.media.funf.probe.builtin.BluetoothProbe (SocialProximitySensor.java)
+   * edu.mit.media.funf.probe.builtin.WifiProbe (WifiSensor)
+   * 
+   * 
+  */
+  //Mapping between Funf class and App Inventor sensor name
+  //TODO: move to util class?
 
-  // note if use both archive and export, the period of export needs to be shorter than archive, because when 
+
+
+  // Note that if use both archive and export, the period of export needs to be shorter than archive, because when 
   // archive is called, it will delete the original sqlite db file. 
   // ** Archive should be used together with the upload db function provided by other uploading component, such as 
   //    Dropbox.UploadDB(); 
@@ -86,8 +131,7 @@ OnDestroyListener, Pipeline{
   // We will provide archive folder path after archive
   
   
-  private long archive_period;
-  private long export_period;
+
 	private String exportFormat;
   
 
@@ -103,55 +147,169 @@ OnDestroyListener, Pipeline{
     export_period = EXPORT_PERIOD;
     scheduleArchiveEnabled = false;
     scheduleExportEnabled = false;
-    
+    //we use dbName as pipelineName, each app (package) has their unique dbName, which is packagename + "__SENSOR_DB__"
+    pipelineName = SensorDbUtil.getPipelineName(mainUIThreadActivity);
     
     exportPath =  new File(Environment.getExternalStorageDirectory(), form.getPackageName()) + 
     		File.separator + "export";
     exportFormat = NameValueDatabaseService.EXPORT_CSV; // set the exporting format as csv by default
-    // start local bind service FunfManger
+   
     Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
     mainUIThreadActivity.startService(i);
 
     // bind to FunfManger (in case the user wants to set up the schedule)
     doBindService();
-		
+    
 	}
 	
-  /**
-   * Export the Sensor Database (SensorData as the name for the sqlite db on Android) as
-   * csv file(s) or JSON file(s). Each type of sensor data in the database will be export it as one file. 
-   */
-  @SimpleFunction(description = "Export Sensor Database as CSV files or JSON files. " +
-  		"Input \"csv\" or \"json\" for exporting format")	
-	public void Export(String format){
-		Log.i(TAG, "Exporting DB as CSV files");
-		this.exportFormat = format;
+	
+	
+	
+	/*
+	 * create a pipleline by giving a json configuration to FunfManger, 
+	 * and get back the handle
+	 */
+  private Pipeline getOrCreatePipeline() {
+    // TODO Auto-generated method stub
+    // try to get the pipeline, if not create a pipeline configuration here
+    //<string name="mainPipelineConfig">{"@type":"edu.mit.dig.funftest.MainPipeline"}</string>
+    // try 
+    
+    Pipeline pipeline = mBoundFunfManager.getRegisteredPipeline(pipelineName);
+    
+    if(pipeline == null){
+      String pipeLineStr = "{\"@type\":\"com.google.appinventor.components.runtime.SensorDBPipeline\"}";
+      JsonElement pipelineConfig = parser.parse(pipeLineStr);
+      Pipeline newPipeline = gson.fromJson(pipelineConfig, Pipeline.class);
+      
+      // add to funfManager   
 
-		
-	}
-  
-  private void export(String format){
-
-		Bundle b = new Bundle();
-		b.putString(NameValueDatabaseService.DATABASE_NAME_KEY, "SensorData");
-		b.putString(NameValueDatabaseService.EXPORT_KEY, format);
-		Intent i = new Intent(form, NameValueDatabaseService.class);
-		i.setAction(DatabaseService.ACTION_EXPORT);
-		i.putExtras(b);
-		form.startService(i);
+      mBoundFunfManager.registerPipeline(pipelineName, newPipeline);
+      return mBoundFunfManager.getRegisteredPipeline(pipelineName);
+      
+    }
+ 
+    return pipeline;
+    
   }
   
   
-  @SimpleFunction(description = "Archive Sensor Database to archive folder")	
-	public void Archive(){
-		
-		Intent i = new Intent(form, NameValueDatabaseService.class);
-		Log.i(TAG, "archiving data......");
-		i.setAction(DatabaseService.ACTION_ARCHIVE);
-		i.putExtra(DatabaseService.DATABASE_NAME_KEY, PIPE_NAME);
-		form.startService(i);
+  @SimpleFunction(description = "Return available names of the avaiable sesnors for data collection")
+  public YailList getAvailableSensors(){
+    return null;
+  
+    
+    
+  }
+  
+  @SimpleFunction(description = "")
+  public void AddSensorCollection(String sensorName, Integer period) {
+    // add to the list
 
-	}
+    if (mPipeline != null) {
+      // mapp the sensor to some probe's className
+      if (sensorMapping.containsKey(sensorName)) {
+        mPipeline.addSensorCollection(sensorName, period);
+
+      } else {
+        // TODO: throw an exception, saying the sensor does not exist, please
+        // check the sensorMap
+        form.dispatchErrorOccurredEvent(SensorDB.this, "AddSensorCollection",
+            ErrorMessages.ERROR_SENSORDB_NOTAVAILABLE, sensorName);
+      }
+    } else {
+      Log.v(TAG, "AddSensorCollection, should not be here...");
+      //this should not happen..because we already bind to Funf 
+    }
+
+  }
+
+  @SimpleFunction(description ="")
+  public void UpdateSensorCollection(String sensorName, Integer period){
+    //remove if existed, and add a new one with different configuration
+    
+    if(mPipeline != null){
+      RemoveSensorCollection(sensorName);
+      AddSensorCollection(sensorName, period);
+    } else {
+      Log.v(TAG, "UpdateSensorCollection, should not be here...");
+      //this should not happen..because we already bind to Funf 
+    }
+    
+  }
+  
+  @SimpleFunction(description = "")
+  public void RemoveSensorCollection(String sensorName) {
+    if (mPipeline != null) {
+      if(!sensorMapping.containsKey(sensorName)){
+        form.dispatchErrorOccurredEvent(SensorDB.this, "AddSensorCollection",
+            ErrorMessages.ERROR_SENSORDB_NOTAVAILABLE, sensorName);
+      }
+      
+      if (mPipeline.getActiveSensor().containsKey(sensorName)) {
+        mPipeline.removeSensorCollection(sensorName);
+      } else {
+        // TODO: throw an exception saying the sensor is not active
+        form.dispatchErrorOccurredEvent(SensorDB.this, "AddSensorCollection",
+            ErrorMessages.ERROR_SENSORDB_NOTACTIVE, sensorName);
+      }
+    } else{
+      Log.v(TAG, "RemoveSensorCollection, should not be here...");
+      //this should not happen..because we already bind to Funf 
+    }
+
+  }
+  
+  /**
+   * Returns the active sensors.
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "The active sensor collections, as a list of two-element sublists. The first element " +
+      "of each sublist represents the sensor name. The second element of each " +
+      "sublist represents the schedule period of that sensor")
+  public YailList CurrentActiveSensors(){
+    YailList list = new YailList();
+    for (Entry<String, Integer> entry: mPipeline.getActiveSensor().entrySet()){
+      YailList entryList = new YailList();
+      entryList.add(entry.getKey());
+      entryList.add(entry.getValue());
+      list.add(entryList);
+    }
+    return list; 
+  }
+ 
+  
+  /*
+   * Return available sensors
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR, 
+      description = "Returning available sensor names for sensor data collection, " +
+      		"as a list of string for all sensor names")
+  public YailList AvailableActiveSensors(){
+    return YailList.makeList(SensorDbUtil.sensorMap.keySet());
+    
+  }
+
+
+  /**
+   * Export the Sensor Database (SensorData as the name for the sqlite db on Android) as
+   * csv file(s) or JSON file(s). Each type of sensor data in the database 
+   * will be export it as one file. 
+   * The export path is under SDcard/packageName/export/
+   */
+  @SimpleFunction(description = "Export Sensor Database as CSV files or JSON files. " +
+      "Input \"csv\" or \"json\" for exporting format") 
+  public void Export(String format){
+    Log.i(TAG, "Exporting DB as CSV files");
+    this.exportFormat = format;
+
+    
+  }
+
+  
+  
+  @SimpleFunction(description = "Stop the schedule service for Archiving db")
+  
 	
 	 @SimpleProperty(category = PropertyCategory.BEHAVIOR)
 	public String FolderPath(){
@@ -162,13 +320,14 @@ OnDestroyListener, Pipeline{
 	 
 	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
 	public String DBName(){
-		return PIPE_NAME; 
+		return SensorDbUtil.DB_NAME; 
 		
 	}
 	
 	
 	@SimpleFunction(description = "Enable archive schedule task with specified period")
-	public void ScheduleArchive(long period){
+	public void SetScheduleArchive(int period){
+ 
 		this.scheduleArchiveEnabled = true;
 		this.archive_period = period;
 
@@ -176,15 +335,16 @@ OnDestroyListener, Pipeline{
     	
       Schedule archivePeriod = new Schedule.BasicSchedule(
           BigDecimal.valueOf(this.archive_period), BigDecimal.ZERO, false, false);
+      //because we have the Pipeline handle, so we pass it to the FunfManager
+    	mBoundFunfManager.registerPipelineAction(mPipeline, ACTION_ARCHIVE_DATA, archivePeriod);
 
-    	mBoundFunfManager.registerPipelineAction(this, ACTION_ARCHIVE_DATA, archivePeriod);
 	}
 	
 	@SimpleFunction(description = "Discable archive scheduled task")
 	public void StopScheduleArchive(){
 		
 		this.scheduleArchiveEnabled = false;
-		mBoundFunfManager.unregisterPipelineAction(this, ACTION_ARCHIVE_DATA);
+		mBoundFunfManager.unregisterPipelineAction(mPipeline, ACTION_ARCHIVE_DATA);
 		
 	}
 	
@@ -208,14 +368,14 @@ OnDestroyListener, Pipeline{
       Schedule exportPeriod = new Schedule.BasicSchedule(
           BigDecimal.valueOf(this.export_period), BigDecimal.ZERO, false, false);
 
-    	mBoundFunfManager.registerPipelineAction(this, ACTION_EXPORT_DATA, exportPeriod);
+    	mBoundFunfManager.registerPipelineAction(mPipeline, ACTION_EXPORT_DATA, exportPeriod);
 	}
 	
 	@SimpleFunction(description = "Discable export scheduled task")
 	public void StopExportArchive(){
 		
 		this.scheduleExportEnabled = false;
-		mBoundFunfManager.unregisterPipelineAction(this, ACTION_EXPORT_DATA);
+		mBoundFunfManager.unregisterPipelineAction(mPipeline, ACTION_EXPORT_DATA);
 		
 	}
 	
@@ -226,19 +386,6 @@ OnDestroyListener, Pipeline{
 		
 	}
 	
-	
-	
-	
-	
-	/*
-	 * After we bind to FunfManger, we have to register self to Funf as a
-	 * Pipeline. This is for later relevant
-	 */
-	private void registerSelfToFunfManager() {
-		Log.i(TAG, "register self(probeBase) as a Pipeline to FunfManger");
-		mBoundFunfManager.registerPipeline(PIPE_NAME, this);
-
-	}
 
 	// try local binding to FunfManager
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -246,8 +393,10 @@ OnDestroyListener, Pipeline{
 			mBoundFunfManager = ((FunfManager.LocalBinder) service)
 					.getManager();
 
-			registerSelfToFunfManager();
-
+//			registerSelfToFunfManager();
+			//once we bind to the existing FunfManager service, we will createPipeline
+			mPipeline = (SensorDBPipeline)getOrCreatePipeline();
+		  mIsBound = true;
 			Log.i(TAG, "Bound to FunfManager");
 
 		}
@@ -262,16 +411,7 @@ OnDestroyListener, Pipeline{
 	
 
   
-  /**
-   * Indicates the interval for a re-occurring archive activity for DB
-   */
-  @SimpleFunction(description = "Set the schedule for Archiving service")
-  public void SetScheduleArchive(int newArchivePeriod) {
 
-    this.archive_period = newArchivePeriod;
-
-  }
-	
 	
 
 	void doBindService() {
@@ -281,7 +421,7 @@ OnDestroyListener, Pipeline{
 		// supporting component replacement by other applications).
 		mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
 				FunfManager.class), mConnection, Context.BIND_AUTO_CREATE);
-		mIsBound = true;
+
 		Log.i(TAG,
 				"FunfManager is bound, and now we could have register dataRequests");
 
@@ -289,55 +429,12 @@ OnDestroyListener, Pipeline{
 
 	void doUnbindService() {
 		if (mIsBound) {
-			// then unregister Pipeline action
-			unregisterPipelineActions();
-			// Detach our existing connection.
+ 
 			mainUIThreadActivity.unbindService(mConnection);
 			mIsBound = false;
 		}
 	}
 
-  private void unregisterPipelineActions() {
-    // TODO Auto-generated method stub
-    mBoundFunfManager.unregisterPipelineAction(this, ACTION_ARCHIVE_DATA);
-    mBoundFunfManager.unregisterPipelineAction(this, ACTION_EXPORT_DATA);
-    mBoundFunfManager.unregisterPipelineAction(this, ACTION_CLEAR_BACKUP);
-  }
-
-
-	@Override
-	public void onCreate(FunfManager arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
-	public void onRun(String action, JsonElement config) {
-
-    if (ACTION_ARCHIVE_DATA.equals(action)) {
-      Log.i(TAG, "Run action archive data");
-  		Intent i = new Intent(form, NameValueDatabaseService.class);
-  		Log.i(TAG, "archiving data.");
-  		i.setAction(DatabaseService.ACTION_ARCHIVE);
-  		i.putExtra(DatabaseService.DATABASE_NAME_KEY, PIPE_NAME);
-  		form.startService(i);
-
-//      DBTrustUtil.archiveData(this.mainUIThreadActivity);
-
-    }
-    if (ACTION_EXPORT_DATA.equals(action)) {
-      // Do something else
-      Log.i(TAG, "Run action export_DATA");
-//      DBTrustUtil.uploadData(this.mainUIThreadActivity, DEFAULT_DATA_UPLOAD_ON_WIFI_ONLY);
-
-    }if (ACTION_CLEAR_BACKUP.equals(action)){
-    	
-    }
-    
-    
-	}
 
 
 
@@ -346,5 +443,9 @@ OnDestroyListener, Pipeline{
 		// TODO Auto-generated method stub
     doUnbindService();
 	}
+	
+	
+	
+	
 
 }

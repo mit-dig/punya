@@ -384,12 +384,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     
   }
 
-  GoogleDriveExceptionListener listener = new GoogleDriveExceptionListener() {
-    @Override
-    public void onExceptionReceived(Exception e) {
-    }  
-  };
-  
   /**
    * Indicates whether the user has specified that the component could only 
    * use Wifi to upload file(s). If this value is set to False, the GoogleDrive

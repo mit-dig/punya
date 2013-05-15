@@ -146,7 +146,7 @@ public final class ErrorMessages {
   public static final int ERROR_DROPBOX_IO = 1816;
   public static final int ERROR_DROPBOX_FILENOTFOUND = 1817;
   public static final int ERROR_DROPBOX_NO_TWO_RUNNING_TASKS = 1818;
-  // Please start the next group of error numbers at 1901.
+
   public static final int ERROR_GOOGLEDRIVE_EXCEPTION = 1901;
   public static final int ERROR_GOOGLEDRIVE_IO_EXCEPTION = 1902;
   public static final int ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS = 1903;
@@ -155,6 +155,9 @@ public final class ErrorMessages {
   public static final int ERROR_GOOGLEDRIVE_APP_BLACKLIST = 1906;
   public static final int ERROR_GOOGLEDRIVE_HTTP_RESPONSE = 1907;
   
+  // Please start the next group of error numbers at 2001.
+  public static final int ERROR_SENSORDB_NOTAVAILABLE = 2001;
+  public static final int ERROR_SENSORDB_NOTACTIVE = 2002;
 
   
   // Mapping of error numbers to error message format strings.
@@ -409,7 +412,10 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "Error happened with connection or file I/O");
     errorMessages.put(ERROR_GOOGLEDRIVE_EXCEPTION, "Something wrong with Google Drive");
     
+    errorMessages.put(ERROR_SENSORDB_NOTAVAILABLE,"%s is not available or not the correct name, " +
+    "select one by calling <code>AvailableActiveSensors</code>");
     
+    errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "%s is not cuurently active");
     
   }
 
