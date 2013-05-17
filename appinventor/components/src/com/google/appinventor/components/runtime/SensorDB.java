@@ -2,17 +2,16 @@ package com.google.appinventor.components.runtime;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+
 
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.Environment; 
 import android.os.IBinder;
 import android.util.Log;
@@ -33,12 +32,11 @@ import com.google.appinventor.components.runtime.util.YailList;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gwt.dev.util.collect.HashMap;
+
 
 import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.Schedule;
 import edu.mit.media.funf.pipeline.Pipeline;
-import edu.mit.media.funf.storage.DatabaseService;
 import edu.mit.media.funf.storage.NameValueDatabaseService;
 
 /* 
@@ -49,10 +47,9 @@ import edu.mit.media.funf.storage.NameValueDatabaseService;
  * in App Inventor's app that is to query for current states when the app is created. The component provides interface to query
  * what are the current sensor collection tasks and current pipeline tasks 
  * 
- * Also each component (App) will have and control exactly one SensorDBPipeline, however, it's true that two App Inventor apps
- * are using same FunfManager
+ * Also each component (App) will only have and control exactly one SensorDB (and one SensorDBPipeline), 
+ * however, it's true that two App Inventor apps are using same FunfManager
  * 
- *  
  * 
 
  */
@@ -87,16 +84,17 @@ OnDestroyListener{
 	protected static final String ACTION_ARCHIVE_DATA = "ARCHIVE_DATA";
   protected static final String ACTION_EXPORT_DATA = "EXPORT_DATA";
   protected static final String ACTION_CLEAR_BACKUP= "CLEAR_BACKUP";
-  private static final long ARCHIVE_PERIOD = 3600; // archive database 60*60*24 (archive every 24 hour)
-  private static final long EXPORT_PERIOD = 7200;//
+ 
 //  public static final String DATABASE_NAME = "SensorData";
   
   private Map<String, String> sensorMapping = SensorDbUtil.sensorMap;
 
   private boolean scheduleArchiveEnabled;
   private boolean scheduleExportEnabled;
+  private boolean scheduleClearbackupEnabled;
   private long archive_period;
   private long export_period;
+  private long clearbackup_period;
   
   /*
    *TODO: consider using reflection? 
@@ -110,9 +108,11 @@ OnDestroyListener{
    * edu.mit.media.funf.probe.builtin.SimpleLocationProbe (LocationProbeSensor)
    * edu.mit.media.funf.probe.builtin.PedometerProbe (PedometerSensor)
    * edu.mit.media.funf.probe.builtin.ProximitySensorProbe (ProximitySensor)
+   * edu.mit.media.funf.probe.builtin.RunningApplicationsProbe (RunningApplications)
    * edu.mit.media.funf.probe.builtin.ScreenProbe (ScreenStatus)
    * edu.mit.media.funf.probe.builtin.SmsProbe (SmsHistory)
-   * edu.mit.media.funf.probe.builtin.BluetoothProbe (SocialProximitySensor.java)
+   * edu.mit.media.funf.probe.builtin.BluetoothProbe (SocialProximitySensor)
+   * edu.mit.media.funf.probe.builtin.TelephonyProbe (TelephonyInfo)
    * edu.mit.media.funf.probe.builtin.WifiProbe (WifiSensor)
    * 
    * 
@@ -142,11 +142,7 @@ OnDestroyListener{
 		form.registerForOnDestroy(this);
 		mainUIThreadActivity = container.$context();
 		
-    //set upload and archive periods
-    archive_period = ARCHIVE_PERIOD;
-    export_period = EXPORT_PERIOD;
-    scheduleArchiveEnabled = false;
-    scheduleExportEnabled = false;
+
     //we use dbName as pipelineName, each app (package) has their unique dbName, which is packagename + "__SENSOR_DB__"
     pipelineName = SensorDbUtil.getPipelineName(mainUIThreadActivity);
     
@@ -160,11 +156,19 @@ OnDestroyListener{
     // bind to FunfManger (in case the user wants to set up the schedule)
     doBindService();
     
+    //now we get(bind) to the Pipleline class that exists 
+    //we can set upload and archive periods using the pipeline
+    scheduleArchiveEnabled = mPipeline.getScheduleArchiveEnabled();
+    scheduleExportEnabled = mPipeline.getScheduleExportEnabled();
+    scheduleClearbackupEnabled = mPipeline.getScheduleClearbackupEnabled();
+    // the archive period will either be the default (first time creation) or the values of the latest configuration
+    archive_period = mPipeline.getArchivePeriod();
+    export_period = mPipeline.getExportPeriod();
+    clearbackup_period = mPipeline.getClearBackupPeriod();
+
 	}
 	
-	
-	
-	
+ 
 	/*
 	 * create a pipleline by giving a json configuration to FunfManger, 
 	 * and get back the handle
@@ -202,8 +206,9 @@ OnDestroyListener{
     
   }
   
-  @SimpleFunction(description = "")
-  public void AddSensorCollection(String sensorName, Integer period) {
+  @SimpleFunction(description = "Add sensor colleciton task for a specific sensor with" +
+  		" specified period (in seconds)")
+  public void AddSensorCollection(String sensorName, int period) {
     // add to the list
 
     if (mPipeline != null) {
@@ -224,8 +229,8 @@ OnDestroyListener{
 
   }
 
-  @SimpleFunction(description ="")
-  public void UpdateSensorCollection(String sensorName, Integer period){
+  @SimpleFunction(description ="Update the period of sensor colleciton task of a specific sensor")
+  public void UpdateSensorCollection(String sensorName, int period){
     //remove if existed, and add a new one with different configuration
     
     if(mPipeline != null){
@@ -238,7 +243,7 @@ OnDestroyListener{
     
   }
   
-  @SimpleFunction(description = "")
+  @SimpleFunction(description = "Remove data colleciton task of a specific sensor")
   public void RemoveSensorCollection(String sensorName) {
     if (mPipeline != null) {
       if(!sensorMapping.containsKey(sensorName)){
@@ -302,20 +307,20 @@ OnDestroyListener{
   public void Export(String format){
     Log.i(TAG, "Exporting DB as CSV files");
     this.exportFormat = format;
-
-    
+    mPipeline.export(format);
+    // TODO: need to callback to show that the export finished (by writing to sharedPrefernce), 
+    // or else will have racing condition. If the developer use a button to do export & upload consecutively
   }
 
   
-  
-  @SimpleFunction(description = "Stop the schedule service for Archiving db")
-  
-	
-	 @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-	public String FolderPath(){
+	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
+	public String ExportFolderPath(){
 		return this.exportPath;
-		
-		
+
+	}
+	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
+	public String ExportFormat(){
+	  return this.exportFormat;
 	}
 	 
 	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
@@ -325,94 +330,155 @@ OnDestroyListener{
 	}
 	
 	
-	@SimpleFunction(description = "Enable archive schedule task with specified period")
-	public void SetScheduleArchive(int period){
- 
-		this.scheduleArchiveEnabled = true;
-		this.archive_period = period;
+  /**
+   * 
+   * @param period
+   *          The time interval between each execution of the task
+   */
+  @SimpleFunction(description = "Enable archive schedule task with specified period in seconds")
+  public void ScheduleArchive(int period) {
 
-      // register pipeline action with bound FunfManger
-    	
-      Schedule archivePeriod = new Schedule.BasicSchedule(
-          BigDecimal.valueOf(this.archive_period), BigDecimal.ZERO, false, false);
-      //because we have the Pipeline handle, so we pass it to the FunfManager
-    	mBoundFunfManager.registerPipelineAction(mPipeline, ACTION_ARCHIVE_DATA, archivePeriod);
+    this.scheduleArchiveEnabled = true;
+    this.archive_period = period;
 
-	}
-	
-	@SimpleFunction(description = "Discable archive scheduled task")
-	public void StopScheduleArchive(){
-		
-		this.scheduleArchiveEnabled = false;
-		mBoundFunfManager.unregisterPipelineAction(mPipeline, ACTION_ARCHIVE_DATA);
-		
-	}
-	
-	@SimpleProperty(description = "Indicates whether the schedule archive task is current" +
-			"enabled.", category = PropertyCategory.BEHAVIOR)
-	public boolean ScheduleArchiveEnabled(){
-		return this.scheduleArchiveEnabled; 
-		
-	}
-	
-	// schedule export
-	
-	@SimpleFunction(description = "Enable export db schedule task with specified period")
-	public void ScheduleExport(long period){
-		this.scheduleExportEnabled = true;
-		this.export_period = period;
- 
+    // set Pipeline's variables for scheduleArchiveEnabled and archive_period as
+    // well
 
-      // register pipeline action with bound FunfManger
-    	
-      Schedule exportPeriod = new Schedule.BasicSchedule(
-          BigDecimal.valueOf(this.export_period), BigDecimal.ZERO, false, false);
+    // register pipeline action with bound FunfManger
 
-    	mBoundFunfManager.registerPipelineAction(mPipeline, ACTION_EXPORT_DATA, exportPeriod);
-	}
-	
-	@SimpleFunction(description = "Discable export scheduled task")
-	public void StopExportArchive(){
-		
-		this.scheduleExportEnabled = false;
-		mBoundFunfManager.unregisterPipelineAction(mPipeline, ACTION_EXPORT_DATA);
-		
-	}
-	
-	@SimpleProperty(description = "Indicates whether the scheduled export task is current" +
-			"enabled.", category = PropertyCategory.BEHAVIOR)
-	public boolean ScheduleExportEnabled(){
-		return this.scheduleExportEnabled; 
-		
-	}
-	
+    Schedule archivePeriod = new Schedule.BasicSchedule(
+        BigDecimal.valueOf(this.archive_period), BigDecimal.ZERO, false, false);
+    // because we have the Pipeline handle, so we pass it to the FunfManager
+    mBoundFunfManager.registerPipelineAction(mPipeline, ACTION_ARCHIVE_DATA,
+        archivePeriod);
 
-	// try local binding to FunfManager
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			mBoundFunfManager = ((FunfManager.LocalBinder) service)
-					.getManager();
+    mPipeline.setArchivePeriod(period);
+    mPipeline.setScheduleArchiveEnabled(true);
 
-//			registerSelfToFunfManager();
-			//once we bind to the existing FunfManager service, we will createPipeline
-			mPipeline = (SensorDBPipeline)getOrCreatePipeline();
-		  mIsBound = true;
-			Log.i(TAG, "Bound to FunfManager");
+  }
 
-		}
+  @SimpleFunction(description = "Discable archive scheduled task")
+  public void StopScheduleArchive() {
 
-		public void onServiceDisconnected(ComponentName className) {
-			mBoundFunfManager = null;
+    this.scheduleArchiveEnabled = false;
+    mBoundFunfManager.unregisterPipelineAction(mPipeline, ACTION_ARCHIVE_DATA);
+    mPipeline.setScheduleArchiveEnabled(false);
 
-			Log.i(TAG, "Unbind FunfManager");
+  }
 
-		}
-	};
-	
+  @SimpleProperty(description = "Indicates whether the schedule archive task is current"
+      + "enabled.", category = PropertyCategory.BEHAVIOR)
+  public boolean ScheduleArchiveEnabled() {
+    return this.scheduleArchiveEnabled;
 
+  }
+
+  @SimpleProperty(description = "Current period of the schedule archive task", 
+      category = PropertyCategory.BEHAVIOR)
+  public int ArchivePeriold() {
+    return mPipeline.getArchivePeriod();
+  }
+
+  // schedule export task
+
+  @SimpleFunction(description = "Enable export db schedule task with specified period in seconds")
+  public void ScheduleExport(int period) {
+
+    this.scheduleExportEnabled = true;
+    this.export_period = period;
+
+    // register pipeline action with bound FunfManger
+    Schedule exportPeriod = new Schedule.BasicSchedule(
+        BigDecimal.valueOf(this.export_period), BigDecimal.ZERO, false, false);
+
+    mBoundFunfManager.registerPipelineAction(mPipeline, ACTION_EXPORT_DATA,
+        exportPeriod);
+    mPipeline.setExportPeriod(period);
+    mPipeline.setScheduleExportEnabled(true);
+
+  }
+
+  @SimpleFunction(description = "Discable export scheduled task")
+  public void StopScheduleExport() {
+
+    this.scheduleExportEnabled = false;
+    mBoundFunfManager.unregisterPipelineAction(mPipeline, ACTION_EXPORT_DATA);
+    mPipeline.setScheduleExportEnabled(false);
+
+  }
+
+  @SimpleProperty(description = "Indicates whether the scheduled export task is current"
+      + "enabled.", category = PropertyCategory.BEHAVIOR)
+  public boolean ScheduleExportEnabled() {
+
+    return this.scheduleExportEnabled;
+
+  }
+
+  @SimpleProperty(description = "Current period of the schedule export task", 
+      category = PropertyCategory.BEHAVIOR)
+  public int ScheduleExpoertPeriod() {
+    return this.ScheduleExpoertPeriod();
+  }
+
+  @SimpleFunction(description = "Enable clear db backup schedule task with sepcified period in seconds")
+  public void ScheduleClearBackup(int period) {
+    this.scheduleClearbackupEnabled = true;
+    this.clearbackup_period = period;
+
+    Schedule clearbackupPeriod = new Schedule.BasicSchedule(
+        BigDecimal.valueOf(this.clearbackup_period), BigDecimal.ZERO, false,
+        false);
+    mBoundFunfManager.registerPipelineAction(mPipeline, ACTION_CLEAR_BACKUP,
+        clearbackupPeriod);
+
+    mPipeline.setClearBackPeriod(period);
+    mPipeline.setScheduleClearbackupEnabled(true);
+  }
+
+  @SimpleFunction(description = "Disable clear backup task")
+  public void StopClearDbBackup() {
+    this.scheduleClearbackupEnabled = false;
+    mBoundFunfManager.unregisterPipelineAction(mPipeline, ACTION_CLEAR_BACKUP);
+    mPipeline.setScheduleClearbackupEnabled(false);
+
+  }
+
+  @SimpleProperty(description = "Indicates whether the schedule clear db bacup task " +
+  		"is currently enabled", category = PropertyCategory.BEHAVIOR)
+  public boolean ScheduleClearBackupEnabled() {
+    return this.scheduleClearbackupEnabled;
+  }
+
+  @SimpleProperty(description = "Current period of the schedule clear backup task", 
+      category = PropertyCategory.BEHAVIOR)
+  public int ScheduleClearBackupPeriod() {
+    return this.ScheduleClearBackupPeriod();
+  }
+   
   
 
-	
+  // try local binding to FunfManager
+  private ServiceConnection mConnection = new ServiceConnection() {
+    public void onServiceConnected(ComponentName className, IBinder service) {
+      mBoundFunfManager = ((FunfManager.LocalBinder) service).getManager();
+
+      // registerSelfToFunfManager();
+      // once we bind to the existing FunfManager service, we will
+      // createPipeline
+      mPipeline = (SensorDBPipeline) getOrCreatePipeline();
+      mIsBound = true;
+      Log.i(TAG, "Bound to FunfManager");
+
+    }
+
+    public void onServiceDisconnected(ComponentName className) {
+      mBoundFunfManager = null;
+
+      Log.i(TAG, "Unbind FunfManager");
+
+    }
+  };
 
 	void doBindService() {
 		// Establish a connection with the service. We use an explicit
@@ -436,16 +502,10 @@ OnDestroyListener{
 	}
 
 
-
-
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
     doUnbindService();
 	}
-	
-	
-	
-	
 
 }
