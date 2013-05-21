@@ -2,6 +2,8 @@ package com.google.appinventor.components.runtime;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -57,10 +59,21 @@ import edu.mit.media.funf.storage.NameValueDatabaseService;
 		+ "sensor db on the phone.", category = ComponentCategory.BASIC, nonVisible = true, iconName = "images/tinyDB.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE, "
-		+ "android.permission.ACCESS_NETWORK_STATE, "
-		+ "android.permission.WAKE_LOCK, "
+		+ "android.permission.ACCESS_NETWORK_STATE, " //for funf 
+		+ "android.permission.WAKE_LOCK, " //pedometer sensor
 		+ "android.permission.READ_LOGS, "
-		+ "android.permission.INTERNET")
+		+ "android.permission.INTERNET, " 
+	  + "android.permission.ACCESS_WIFI_STATE, " // for WifiSensor
+    + "android.permission.CHANGE_WIFI_STATE, "   // for WifiSensor
+    + "android.permission.BATTERY_STATS, " // BatterySensor
+    + "android.permission.READ_CONTACTS, " // CallLogHistory
+    + "android.permission.ACCESS_COARSE_LOCATION, " //CellTowerProbeSensor, LocationProbeSensor
+    + "android.permission.ACCESS_FINE_LOCATION, " //LocationProbeSensor
+    + "android.permission.GET_TASKS, " //RunningApplication
+    + "android.permission.READ_SMS, " //SmsHistory
+    + "android.permission.BLUETOOTH, " //socialProximitySensor
+    + "android.permission.BLUETOOTH_ADMIN, " //socialProximitySensor
+    + "android.Manifest.permission.READ_PHONE_STATE") //TelephonyInfo
 @UsesLibraries(libraries = "funf.jar")
 public class SensorDB extends AndroidNonvisibleComponent implements
 OnDestroyListener{
@@ -152,19 +165,13 @@ OnDestroyListener{
    
     Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
     mainUIThreadActivity.startService(i);
-
+    
     // bind to FunfManger (in case the user wants to set up the schedule)
     doBindService();
     
     //now we get(bind) to the Pipleline class that exists 
     //we can set upload and archive periods using the pipeline
-    scheduleArchiveEnabled = mPipeline.getScheduleArchiveEnabled();
-    scheduleExportEnabled = mPipeline.getScheduleExportEnabled();
-    scheduleClearbackupEnabled = mPipeline.getScheduleClearbackupEnabled();
-    // the archive period will either be the default (first time creation) or the values of the latest configuration
-    archive_period = mPipeline.getArchivePeriod();
-    export_period = mPipeline.getExportPeriod();
-    clearbackup_period = mPipeline.getClearBackupPeriod();
+
 
 	}
 	
@@ -178,17 +185,21 @@ OnDestroyListener{
     // try to get the pipeline, if not create a pipeline configuration here
     //<string name="mainPipelineConfig">{"@type":"edu.mit.dig.funftest.MainPipeline"}</string>
     // try 
+    parser = new JsonParser();
     
     Pipeline pipeline = mBoundFunfManager.getRegisteredPipeline(pipelineName);
     
+    if (gson == null) {
+      gson = mBoundFunfManager.getGson();
+    }
+    
     if(pipeline == null){
-      String pipeLineStr = "{\"@type\":\"com.google.appinventor.components.runtime.SensorDBPipeline\"}";
-      JsonElement pipelineConfig = parser.parse(pipeLineStr);
-      Pipeline newPipeline = gson.fromJson(pipelineConfig, Pipeline.class);
-      
-      // add to funfManager   
+      String pipeConfigStr = "{\"@type\":\"com.google.appinventor.components.runtime.SensorDBPipeline\"}";
 
-      mBoundFunfManager.registerPipeline(pipelineName, newPipeline);
+      // add to funfManager by calling this new function, it will create Pipeline and register to FunfManger
+      
+      mBoundFunfManager.createPipeline(pipelineName, pipeConfigStr);
+      Log.i(TAG, "pipelineName:" + pipelineName);
       return mBoundFunfManager.getRegisteredPipeline(pipelineName);
       
     }
@@ -197,13 +208,20 @@ OnDestroyListener{
     
   }
   
-  
+  /*
+   * Return available sensors
+   */
   @SimpleFunction(description = "Return available names of the avaiable sesnors for data collection")
   public YailList getAvailableSensors(){
-    return null;
+    
+    Log.i(TAG, sensorMapping.keySet().toString());
+    
+    YailList sensorList = YailList.makeList(sensorMapping.keySet());
+    
+    
+    return sensorList;
   
-    
-    
+
   }
   
   @SimpleFunction(description = "Add sensor colleciton task for a specific sensor with" +
@@ -274,26 +292,35 @@ OnDestroyListener{
       "sublist represents the schedule period of that sensor")
   public YailList CurrentActiveSensors(){
     YailList list = new YailList();
+    List<Object> arrlist = new ArrayList<Object>();
     for (Entry<String, Integer> entry: mPipeline.getActiveSensor().entrySet()){
-      YailList entryList = new YailList();
-      entryList.add(entry.getKey());
-      entryList.add(entry.getValue());
-      list.add(entryList);
+      
+//      list.clear();
+//      list.add(YailList.makeList(new String[] { "First Name", "Barack" }));
+//      list.add(YailList.makeList(new String[] { "Last Name", "Obama" }));
+//      list.add(YailList.makeList(new String[] { "Title", "President of the United States" }));
+//      list.add(YailList.makeList(new String[] { "This list has too few items" }));
+//      try {
+//        web.buildPostData(YailList.makeList(list));
+      
+      arrlist.add(YailList.makeList(new Object[] {entry.getKey(), entry.getValue()}));
+//      YailList entryList = new YailList();
+//      entryList.add(entry.getKey());
+//      entryList.add(entry.getValue());
+//      list.add(entryList);
     }
-    return list; 
+    return YailList.makeList(arrlist); 
   }
  
   
-  /*
-   * Return available sensors
-   */
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR, 
-      description = "Returning available sensor names for sensor data collection, " +
-      		"as a list of string for all sensor names")
-  public YailList AvailableActiveSensors(){
-    return YailList.makeList(SensorDbUtil.sensorMap.keySet());
-    
-  }
+
+//  @SimpleProperty(category = PropertyCategory.BEHAVIOR, 
+//      description = "Returning available sensor names for sensor data collection, " +
+//      		"as a list of string for all sensor names")
+//  public YailList AvailableActiveSensors(){
+//    return YailList.makeList(SensorDbUtil.sensorMap.keySet());
+//    
+//  }
 
 
   /**
@@ -455,7 +482,23 @@ OnDestroyListener{
   public int ScheduleClearBackupPeriod() {
     return this.ScheduleClearBackupPeriod();
   }
-   
+  
+  
+  private void initValsFromPipeline() {
+    // TODO Auto-generated method stub
+    Log.i(TAG, "after bound to funfManager, and should created pipeline");
+
+    scheduleArchiveEnabled = mPipeline.getScheduleArchiveEnabled();
+    scheduleExportEnabled = mPipeline.getScheduleExportEnabled();
+    scheduleClearbackupEnabled = mPipeline.getScheduleClearbackupEnabled();
+
+    // the archive period will either be the default (first time creation) or
+    // the values of the latest configuration
+    archive_period = mPipeline.getArchivePeriod();
+    export_period = mPipeline.getExportPeriod();
+    clearbackup_period = mPipeline.getClearBackupPeriod();
+
+  }
   
 
   // try local binding to FunfManager
@@ -466,11 +509,15 @@ OnDestroyListener{
       // registerSelfToFunfManager();
       // once we bind to the existing FunfManager service, we will
       // createPipeline
-      mPipeline = (SensorDBPipeline) getOrCreatePipeline();
+      mPipeline = (SensorDBPipeline) getOrCreatePipeline(); 
+
       mIsBound = true;
       Log.i(TAG, "Bound to FunfManager");
-
+      // init variables from existing pipeline
+      initValsFromPipeline();
     }
+
+
 
     public void onServiceDisconnected(ComponentName className) {
       mBoundFunfManager = null;
@@ -488,8 +535,6 @@ OnDestroyListener{
 		mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
 				FunfManager.class), mConnection, Context.BIND_AUTO_CREATE);
 
-		Log.i(TAG,
-				"FunfManager is bound, and now we could have register dataRequests");
 
 	}
 

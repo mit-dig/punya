@@ -225,8 +225,8 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   @Override
   public void onDataReceived(IJsonObject completeProbeUri, IJsonObject data) {
     // TODO Auto-generated method stub
-    Log.v(TAG, "Data received: " + completeProbeUri + ": " + data.toString());
-    Log.i(TAG, "Writing data: " + completeProbeUri + ": " + data.toString());
+    Log.i(TAG, "Data received: " + completeProbeUri + ": " + data.toString());
+
     
     final JsonObject dataObject = data.getAsJsonObject();
     dataObject.add("probe",

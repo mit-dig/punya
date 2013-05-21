@@ -376,6 +376,7 @@ public final class Compiler {
     // Broadcast receiver for all funf related component  
 	  if(librariesNeeded.contains("funf.jar")){
 	    out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+//	    out.write("<meta-data android:name=\"main\" android:value=\"{\"@type\": \"com.google.appinventor.components.runtime.sensorDBPipeline\"}\"/>\n");
       out.write(" </service>\n");  
 	    out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
 	    out.write("    <intent-filter>\n");
