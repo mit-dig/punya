@@ -11,6 +11,7 @@ import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
 
 import android.R;
 import android.app.Activity;
@@ -71,8 +72,11 @@ import android.util.Log;
  */
 @DesignerComponent(version = YaVersion.GOOGLECLOUDMESSAGING_COMPONENT_VERSION, description = "", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/googleCloudMessaging.png")
 @UsesPermissions(permissionNames = "com.google.android.c2dm.permission.RECEIVE, "
-        + "android.permission.INTERNET, android.permission.GET_ACCOUNTS, "
-        + "android.permission.WAKE_LOCK")
+        + "android.permission.INTERNET, "
+        +"android.permission.GET_ACCOUNTS, "
+        +"android.permission.WAKE_LOCK, "
+        +"android.permission.VIBRATE"
+        )
 public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         implements Component, OnDestroyListener {
 
@@ -100,8 +104,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     protected Activity mainUIThreadActivity;
 
     private String gcmMessage = "";
-    private boolean ServerRegistration = false;
-    private boolean GCMRegistration = false;
     
     private String regId="";
     private static final String REG_ID_TAG = "RegistrationId";
@@ -169,30 +171,22 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         return SENDER_ID;
     }
 
-    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-    public String ReturnMessage() {
-        return gcmMessage;
-    }
-
-    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-    public boolean ServerRegistration() {
-        return ServerRegistration;
-    }
-
-    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-    public boolean GCMRegistration() {
-        return GCMRegistration;
-    }
-
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
     @SimpleProperty
     public void SenderID(String SENDER_ID) {
         this.SENDER_ID = SENDER_ID;
     }
+    
 
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public String ReturnMessage() {
+        return gcmMessage;
+    }
+
+    // Add / remove the listeners
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
     @SimpleProperty
-    public void Enabled(boolean enabled) {
+    public void Enabled(boolean enable) {
 
         // //save the SENDER ID to sharedPreference for later use
         // final SharedPreferences.Editor sharedPrefsEditor =
@@ -201,11 +195,13 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         // SENDER_ID);
         // sharedPrefsEditor.commit();
 
-        this.enabled = enabled;
+        enabled = enable;
         if (enabled) {
-            Register();
+            registerGCMEvent(regListener, REG_GCM_TYPE);
+            registerGCMEvent(msgListener, MESSAGE_GCM_TYPE);
         } else {
-            UnRegister();
+            unRegisterGCMEvent(regListener, REG_GCM_TYPE);
+            unRegisterGCMEvent(msgListener, MESSAGE_GCM_TYPE);
         }
     }
     
@@ -242,23 +238,20 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                             // It's also necessary to cancel the thread onDestroy(),
                             // hence the use of AsyncTask instead of a raw thread.
 
-                            ServerRegistration = GCMServerUtilities.register(form, regId,SERVER_URL);
-                            // At this point all attempts to register with the app
-                            // server failed, so we need to unregister the device
-                            // from GCM - the app will try to register again when
-                            // it is restarted. Note that GCM will send an
-                            // unregistered callback upon completion, but
-                            // GCMIntentService.onUnregistered() will ignore it.
-                            if (!ServerRegistration) {
+                            if (!GCMServerUtilities.register(form, regId,SERVER_URL)) {
+                                // At this point all attempts to register with the app
+                                // server failed, so we need to unregister the device
+                                // from GCM - the app will try to register again when
+                                // it is restarted. Note that GCM will send an
+                                // unregistered callback upon completion, but
+                                // GCMIntentService.onUnregistered() will ignore it.
                                 GCMRegistrar.unregister(form);
+                                form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "Register",
+                                        500, "Please check the server/connection.");
                             }
                         }
                     }
-                    
-                    if (ServerRegistration && GCMRegistration) {
-                        Log.i(TAG, "stop the runnable");
-                        return;
-                    }
+                    return;
                 } catch (Exception e) {
                     Log.i(TAG, "within the exception");
                     UnRegister();
@@ -273,10 +266,9 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @SimpleFunction(description = "Removes the GCM authorization from this running app instance")
     public void UnRegister() {
         saveRegId(null);
-        GCMServerUtilities.unregister(form, SENDER_ID, SERVER_URL);
+        GCMServerUtilities.unregister(form, regId, SERVER_URL);
         GCMRegistrar.unregister(form);
-        ServerRegistration = false;
-        GCMRegistration = false;
+        Enabled(false);
     }
 
     /**
@@ -301,8 +293,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
      */
     @SimpleEvent()
     public void RegInfoReceived() {
-        GCMRegistration = true;
-        ServerRegistration = true;
         Log.i(TAG, "Waiting to receive GCM Registration info from the GCM Service.");
         if (enabled) {
             mainUIThreadActivity.runOnUiThread(new Runnable() {
@@ -325,10 +315,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             // cast its IBinder to a concrete class and directly access it.
             mBoundGCMIntentService = ((GCMIntentService.LocalBinder) service)
                     .getService();
-            Log.i(TAG, "Bound to GCMIntentService");
-            registerGCMEvent(regListener, REG_GCM_TYPE);
-            registerGCMEvent(msgListener, MESSAGE_GCM_TYPE);
-            
+            Log.i(TAG, "Bound to GCMIntentService");           
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -413,8 +400,13 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     
 
     public void registerGCMEvent(GCMEventListener listener, String eventType) {
-        this.mBoundGCMIntentService.requestGCMMessage(listener, eventType);
+        mBoundGCMIntentService.requestGCMMessage(listener, eventType);
     }
+    
+    public void unRegisterGCMEvent(GCMEventListener listener, String eventType) {
+        mBoundGCMIntentService.unRequestGCMMessage(listener, eventType);
+    }
+    
     
     /*
      * Add notification with some message and the app (actually it's
@@ -469,7 +461,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
         Long currentTimeMillis = System.currentTimeMillis();
         notification = new Notification(R.drawable.stat_notify_chat,
-                "Activate Notification!", currentTimeMillis);
+                "GCM Notification!", currentTimeMillis);
 
         Log.i(TAG, "After creating notification");
         notification.contentIntent = mContentIntent;

@@ -3,12 +3,16 @@ package com.google.appinventor.components.runtime;
 import java.util.HashSet;
 import java.util.Random;
 
+import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.runtime.GCMRegistrar;
-import com.google.appinventor.components.runtime.util.DropboxUtil;
 
+import android.R;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -19,26 +23,49 @@ import android.util.Log;
 public class GCMIntentService extends GCMBaseIntentService {
 
     private static final String TAG = "GCMIntentService";
+    protected Context mainUIThreadContext;
     
     private String SERVER_URL = "";
+    
+    // notification
+    private Notification notification;
+    private PendingIntent mContentIntent;
+    private NotificationManager mNM;
+    private final int PROBE_NOTIFICATION_ID = 1;
     
     // Set of listeners for any changes of the form
     final HashSet<GCMEventListener> GCMEventListeners = new HashSet<GCMEventListener>();
     final HashSet<GCMEventListener> GCMRegEventListeners = new HashSet<GCMEventListener>();
 
     public GCMIntentService() {
-//        super("895146158148"); 
         super();
+        Log.i(TAG,"Start the GCMIntentServices");
     }
-       
+           
     @Override
     protected void onMessage(Context context, Intent intent) {
-        Log.i(TAG, "Received message");
+        Log.i(TAG, "Received message");        
+        Log.i(TAG, "The context is"+context.toString());
+        mainUIThreadContext = context;
+        // get Notification Manager
+        String ns = mainUIThreadContext.NOTIFICATION_SERVICE;
+        Log.i(TAG, "Before creating the GCMIntentService");
+        mNM = (NotificationManager) mainUIThreadContext.getSystemService(ns);
+        Log.i(TAG, "After creating the GCMIntentService");  
+        
         String newMessage = intent.getExtras().getString("message");
         for (GCMEventListener listener : GCMEventListeners) {
             listener.onMessageReceived(newMessage);
+            try {
+                CreateNotification("You got message.","Please press to open.",true,true,"appinventor.ai_test.GCM",
+                        "appinventor.ai_test.GCM.Screen1",null,null);
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             Log.i(TAG, "Listener:" + listener.toString());
-          }
+          }       
+        Log.i(TAG, "After the onMessage method");         
     }
 
     @Override
@@ -108,6 +135,21 @@ public class GCMIntentService extends GCMBaseIntentService {
         }
     }
     
+    // This is a method for App Inventor's component to receive two types of messages from Google GCM
+    // 1. general GCM message 2. registeration finished message
+    public void unRequestGCMMessage(GCMEventListener listener, String type){
+        //add the listener to the list of listerners
+        if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
+            if (!GCMEventListeners.isEmpty()){
+                GCMEventListeners.remove(listener);
+            }           
+        else{//for registeration type of messages
+            if (!GCMRegEventListeners.isEmpty()){
+                GCMRegEventListeners.remove(listener);
+            }
+        }
+    }
+    
     public void setSenderID(String sender_id){
         setSenderIds(sender_id);
     }
@@ -115,4 +157,85 @@ public class GCMIntentService extends GCMBaseIntentService {
     public void setServerURL(String url){
         SERVER_URL = url;
     }
+    
+    /*
+     * Add notification with some message and the app (actually it's
+     * app.Screen1) it wants to activate
+     * 
+     * @param title
+     * 
+     * @param text
+     * 
+     * @param enabledSound
+     * 
+     * @param enabledVibrate
+     * 
+     * @param appName
+     * 
+     * @param extraKey
+     * 
+     * @param extraVal
+     */
+
+    @SimpleFunction(description = "Create a notication with message to wake up "
+            + "another activity when tap on the notification")
+    public void CreateNotification(String title, String text,
+            boolean enabledSound, boolean enabledVibrate, String packageName,
+            String className, String extraKey, String extraVal)
+            throws ClassNotFoundException {
+
+        Intent activityToLaunch = new Intent(Intent.ACTION_MAIN);
+
+        Log.i(TAG, "packageName: " + packageName);
+        Log.i(TAG, "className: " + className);
+
+        // for local AI instance, all classes are under the package
+        // "appinventor.ai_test"
+        // but for those runs on Google AppSpot(AppEngine), the package name
+        // will be
+        // "appinventor.ai_GoogleAccountUserName"
+        // e.g. pakageName = appinventor.ai_HomerSimpson.HelloPurr
+        // && className = appinventor.ai_HomerSimpson.HelloPurr.Screen1
+
+        ComponentName component = new ComponentName(packageName, className);
+        activityToLaunch.setComponent(component);
+        activityToLaunch.putExtra(extraKey, extraVal);
+
+        Log.i(TAG, "we found the class for intent to send into notificaiton");
+        activityToLaunch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        Log.i(TAG, "after the activityToLaunch");
+        Log.i(TAG,"The mainUImainUIThreadContext is "+mainUIThreadContext.toString()); 
+        Log.i(TAG,"The activityToLaunch is "+activityToLaunch.toString());         
+        mContentIntent = PendingIntent.getActivity(mainUIThreadContext, 0,
+                activityToLaunch, 0);
+
+        Log.i(TAG, "after the PendingIntent.getActivity");
+        Long currentTimeMillis = System.currentTimeMillis();
+        
+        Log.i(TAG, "after the System.currentTimeMillis");
+        notification = new Notification(R.drawable.stat_notify_chat,
+                "GCM Notification!", currentTimeMillis);
+
+        Log.i(TAG, "After creating notification");
+        notification.contentIntent = mContentIntent;
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
+
+        // reset the notification
+        notification.defaults = 0;
+
+        if (enabledSound)
+            notification.defaults |= Notification.DEFAULT_SOUND;
+
+        if (enabledVibrate)
+            notification.defaults |= Notification.DEFAULT_VIBRATE;
+
+        notification.setLatestEventInfo(mainUIThreadContext,
+                (CharSequence) title, (CharSequence) text, mContentIntent);
+        Log.i(TAG, "after updated notification contents");
+        mNM.notify(PROBE_NOTIFICATION_ID, notification);
+        Log.i(TAG, "notified");
+    }
+
 }
