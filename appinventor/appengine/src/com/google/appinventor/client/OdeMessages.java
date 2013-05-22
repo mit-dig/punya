@@ -1182,4 +1182,8 @@ public interface OdeMessages extends Messages {
   @Description("Exception message used when a URI entered by the user does not end in an appropriate character.")
   String notABaseUri(String uri);
 
+  @DefaultMessage("Settings")
+  @Description("Change the project settings")
+  String changeSettingsButton();
+
 }

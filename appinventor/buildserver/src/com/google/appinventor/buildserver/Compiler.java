@@ -433,6 +433,12 @@ public final class Compiler {
         "</receiver> \n");
       }
 
+      // adds the google maps v2 api key
+      if (project.getMapsKey().length() > 0) {
+        System.out.println("Android Manifest: including Google Maps key");
+        out.write("<meta-data android:name=\"com.google.android.maps.v2.API_KEY\" ");
+        out.write("android:value=\""+project.getMapsKey()+"\"/>");
+      }
 	  // Close the application tag
       out.write("  </application>\n");
       out.write("</manifest>\n");
