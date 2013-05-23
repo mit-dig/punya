@@ -71,10 +71,7 @@ public class GCMIntentService extends GCMBaseIntentService {
             optPref = sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "");
         }else{
             optPref = optInOrOut;
-            final SharedPreferences.Editor sharedPrefsEditor =
-            sharedPreferences.edit();
-            sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_MESSAGE,optPref);
-            sharedPrefsEditor.commit();
+            setSharedPreference(context,optPref);
         } 
         Log.i(TAG, "The opt preference is "+optPref);
               
@@ -161,17 +158,7 @@ public class GCMIntentService extends GCMBaseIntentService {
             GCMRegEventListeners.add(listener);
         }
         
-        //save the GCM Message opt in/out preference to sharedPreference for later use
-        //1 => opt in
-        //2 => opt out
-        sharedPreferences = context.getSharedPreferences("GCMIntentService",Context.MODE_PRIVATE);
-        Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
-        
-        final SharedPreferences.Editor sharedPrefsEditor =
-        sharedPreferences.edit();
-        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_MESSAGE,"in");
-        sharedPrefsEditor.commit();
-        optInOrOut = "in";
+        setSharedPreference(context,"in");
     }
     
     // This is a method for App Inventor's component to receive two types of messages from Google GCM
@@ -187,20 +174,22 @@ public class GCMIntentService extends GCMBaseIntentService {
                 GCMRegEventListeners.remove(listener);
             }
         }
-        
+        setSharedPreference(context,"out");
+    }
+    
+    private void setSharedPreference(Context context, String pref){
         //save the GCM Message opt in/out preference to sharedPreference for later use
         //1 => opt in
         //2 => opt out
         
-        //2 => opt out
         sharedPreferences = context.getSharedPreferences("GCMIntentService",Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
         final SharedPreferences.Editor sharedPrefsEditor =
         sharedPreferences.edit();
-        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_MESSAGE,"out");
+        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_MESSAGE,pref);
         sharedPrefsEditor.commit();
-        optInOrOut = "out";
+        optInOrOut = pref; 
     }
     
     public void setSenderID(String sender_id){
