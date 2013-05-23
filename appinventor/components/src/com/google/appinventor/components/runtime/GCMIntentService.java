@@ -3,9 +3,6 @@ package com.google.appinventor.components.runtime;
 import java.util.HashSet;
 import java.util.Random;
 
-import com.google.appinventor.components.annotations.SimpleFunction;
-import com.google.appinventor.components.runtime.GCMRegistrar;
-
 import android.R;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -18,6 +15,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.google.appinventor.components.annotations.SimpleFunction;
+
 /**
  * IntentService responsible for handling GCM messages.
  */
@@ -29,7 +28,6 @@ public class GCMIntentService extends GCMBaseIntentService {
     private String SERVER_URL = "";
     
     private SharedPreferences sharedPreferences;
-    private static final String REG_ID_TAG = "RegistrationId";
     
     // notification
     private Notification notification;
@@ -63,7 +61,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         
         String newMessage = intent.getExtras().getString("message");
                 
-        sharedPreferences = context.getSharedPreferences("GCMIntentService",Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
         String optPref;
@@ -182,7 +180,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         //1 => opt in
         //2 => opt out
         
-        sharedPreferences = context.getSharedPreferences("GCMIntentService",Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
         final SharedPreferences.Editor sharedPrefsEditor =

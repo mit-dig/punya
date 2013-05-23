@@ -22,9 +22,14 @@ package com.google.appinventor.components.runtime;
 public final class GCMConstants {
     
     /**
-     * Preference for the saved Sender ID
+     * Preference for the Google Cloud Messaging
      */
-    public static final String PREFS_GOOGLECLOUDMESSAGING = "googlecloudmessagingPrefs";
+    public static final String PREFS_GOOGLECLOUDMESSAGING = "googleCloudMessagingPrefs";
+    
+    /**
+     * Preference for GCMIntentService
+     */
+    public static final String PREFS_GCMINTENTSERVICE = "GCMIntentServicePrefs";
 
     /**
      * Identification for the saved Sender ID
