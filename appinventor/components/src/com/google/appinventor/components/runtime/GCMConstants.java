@@ -32,6 +32,11 @@ public final class GCMConstants {
     public static final String PREFS_GCM_SENDER_ID = "__GCM_SENDER_ID__";
     
     /**
+     * Identification for the saved GCM opt in/out preference
+     */
+    public static final String PREFS_GCM_MESSAGE = "__GCM_MESSAGE__";
+    
+    /**
      * Intent sent to GCM to register the application.
      */
     public static final String INTENT_TO_GCM_REGISTRATION =

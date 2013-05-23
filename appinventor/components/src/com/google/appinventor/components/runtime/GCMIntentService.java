@@ -13,6 +13,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -27,11 +28,16 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     private String SERVER_URL = "";
     
+    private SharedPreferences sharedPreferences;
+    private static final String REG_ID_TAG = "RegistrationId";
+    
     // notification
     private Notification notification;
     private PendingIntent mContentIntent;
     private NotificationManager mNM;
     private final int PROBE_NOTIFICATION_ID = 1;
+    
+    private String optInOrOut = "";
     
     // Set of listeners for any changes of the form
     final HashSet<GCMEventListener> GCMEventListeners = new HashSet<GCMEventListener>();
@@ -40,6 +46,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     public GCMIntentService() {
         super();
         Log.i(TAG,"Start the GCMIntentServices");
+        sharedPreferences = null;
     }
            
     @Override
@@ -47,6 +54,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "Received message");        
         Log.i(TAG, "The context is"+context.toString());
         mainUIThreadContext = context;
+        
         // get Notification Manager
         String ns = mainUIThreadContext.NOTIFICATION_SERVICE;
         Log.i(TAG, "Before creating the GCMIntentService");
@@ -54,8 +62,23 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "After creating the GCMIntentService");  
         
         String newMessage = intent.getExtras().getString("message");
-        for (GCMEventListener listener : GCMEventListeners) {
-            listener.onMessageReceived(newMessage);
+                
+        sharedPreferences = context.getSharedPreferences("GCMIntentService",Context.MODE_PRIVATE);
+        Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
+        
+        String optPref;
+        if (optInOrOut.equals("")){
+            optPref = sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "");
+        }else{
+            optPref = optInOrOut;
+            final SharedPreferences.Editor sharedPrefsEditor =
+            sharedPreferences.edit();
+            sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_MESSAGE,optPref);
+            sharedPrefsEditor.commit();
+        } 
+        Log.i(TAG, "The opt preference is "+optPref);
+              
+        if (optPref.equals("in")){
             try {
                 CreateNotification("You got message.","Please press to open.",true,true,"appinventor.ai_test.GCM",
                         "appinventor.ai_test.GCM.Screen1",null,null);
@@ -63,6 +86,10 @@ public class GCMIntentService extends GCMBaseIntentService {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+        }
+        
+        for (GCMEventListener listener : GCMEventListeners) {
+            listener.onMessageReceived(newMessage);
             Log.i(TAG, "Listener:" + listener.toString());
           }       
         Log.i(TAG, "After the onMessage method");         
@@ -126,28 +153,54 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     // This is a method for App Inventor's component to receive two types of messages from Google GCM
     // 1. general GCM message 2. registeration finished message
-    public void requestGCMMessage(GCMEventListener listener, String type){
+    public void requestGCMMessage(Context context, GCMEventListener listener, String type){
         //add the listener to the list of listerners
         if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
             GCMEventListeners.add(listener);
         else{//for registeration type of messages
             GCMRegEventListeners.add(listener);
         }
+        
+        //save the GCM Message opt in/out preference to sharedPreference for later use
+        //1 => opt in
+        //2 => opt out
+        sharedPreferences = context.getSharedPreferences("GCMIntentService",Context.MODE_PRIVATE);
+        Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
+        
+        final SharedPreferences.Editor sharedPrefsEditor =
+        sharedPreferences.edit();
+        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_MESSAGE,"in");
+        sharedPrefsEditor.commit();
+        optInOrOut = "in";
     }
     
     // This is a method for App Inventor's component to receive two types of messages from Google GCM
     // 1. general GCM message 2. registeration finished message
-    public void unRequestGCMMessage(GCMEventListener listener, String type){
+    public void unRequestGCMMessage(Context context, GCMEventListener listener, String type){
         //add the listener to the list of listerners
         if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
             if (!GCMEventListeners.isEmpty()){
                 GCMEventListeners.remove(listener);
             }           
-        else{//for registeration type of messages
+        else{//for registeration type of message
             if (!GCMRegEventListeners.isEmpty()){
                 GCMRegEventListeners.remove(listener);
             }
         }
+        
+        //save the GCM Message opt in/out preference to sharedPreference for later use
+        //1 => opt in
+        //2 => opt out
+        
+        //2 => opt out
+        sharedPreferences = context.getSharedPreferences("GCMIntentService",Context.MODE_PRIVATE);
+        Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
+        
+        final SharedPreferences.Editor sharedPrefsEditor =
+        sharedPreferences.edit();
+        sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_MESSAGE,"out");
+        sharedPrefsEditor.commit();
+        optInOrOut = "out";
     }
     
     public void setSenderID(String sender_id){

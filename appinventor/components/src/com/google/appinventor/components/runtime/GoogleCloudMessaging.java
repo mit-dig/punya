@@ -102,6 +102,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     protected boolean enabledSchedule = false; // run periodically
 
     protected Activity mainUIThreadActivity;
+    protected Context context;
 
     private String gcmMessage = "";
     
@@ -115,6 +116,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         super(container.$form());
 
         // Set up listeners
+        context = container.$context();
         mainUIThreadActivity = container.$context();
         sharedPreferences = container.$context().getSharedPreferences("GoogleCloudMessaging",Context.MODE_PRIVATE);
         regId = retrieveRegId();
@@ -188,20 +190,20 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @SimpleProperty
     public void Enabled(boolean enable) {
 
-        // //save the SENDER ID to sharedPreference for later use
-        // final SharedPreferences.Editor sharedPrefsEditor =
-        // sharedPreferences.edit();
-        // sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID,
-        // SENDER_ID);
-        // sharedPrefsEditor.commit();
+//         //save the SENDER ID to sharedPreference for later use
+//         final SharedPreferences.Editor sharedPrefsEditor =
+//         sharedPreferences.edit();
+//         sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID,
+//         SENDER_ID);
+//         sharedPrefsEditor.commit();
 
         enabled = enable;
         if (enabled) {
-            registerGCMEvent(regListener, REG_GCM_TYPE);
-            registerGCMEvent(msgListener, MESSAGE_GCM_TYPE);
+            registerGCMEvent(context, regListener, REG_GCM_TYPE);
+            registerGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
         } else {
-            unRegisterGCMEvent(regListener, REG_GCM_TYPE);
-            unRegisterGCMEvent(msgListener, MESSAGE_GCM_TYPE);
+            unRegisterGCMEvent(context, regListener, REG_GCM_TYPE);
+            unRegisterGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
         }
     }
     
@@ -399,12 +401,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     };
     
 
-    public void registerGCMEvent(GCMEventListener listener, String eventType) {
-        mBoundGCMIntentService.requestGCMMessage(listener, eventType);
+    public void registerGCMEvent(Context context, GCMEventListener listener, String eventType) {
+        mBoundGCMIntentService.requestGCMMessage(context, listener, eventType);
     }
     
-    public void unRegisterGCMEvent(GCMEventListener listener, String eventType) {
-        mBoundGCMIntentService.unRequestGCMMessage(listener, eventType);
+    public void unRegisterGCMEvent(Context context,GCMEventListener listener, String eventType) {
+        mBoundGCMIntentService.unRequestGCMMessage(context, listener, eventType);
     }
     
     
