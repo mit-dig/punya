@@ -29,7 +29,10 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     private SharedPreferences sharedPreferences;
     
+    public static String PACKAGE_NAME;
+    
     // notification
+    private static final String ARGUMENT_GCM = "APP_INVENTOR_GCM";
     private Notification notification;
     private PendingIntent mContentIntent;
     private NotificationManager mNM;
@@ -53,6 +56,9 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "The context is"+context.toString());
         mainUIThreadContext = context;
         
+        PACKAGE_NAME = mainUIThreadContext.getPackageName();
+        Log.i(TAG,"The package name is "+PACKAGE_NAME+".");
+        
         // get Notification Manager
         String ns = mainUIThreadContext.NOTIFICATION_SERVICE;
         Log.i(TAG, "Before creating the GCMIntentService");
@@ -73,10 +79,13 @@ public class GCMIntentService extends GCMBaseIntentService {
         } 
         Log.i(TAG, "The opt preference is "+optPref);
               
-        if (optPref.equals("in")){
+        // When the user opts in to get message, but the listener list is empty. This happens when
+        // the activity is killed, and then GCMIntentService is the new instance just instantiated 
+        // by the GCMBrocastReceiver.
+        if (optPref.equals("in") && GCMEventListeners.isEmpty()){
             try {
-                CreateNotification("You got message.","Please press to open.",true,true,"appinventor.ai_test.GCM",
-                        "appinventor.ai_test.GCM.Screen1",null,null);
+                CreateNotification("You got message.","Press to open.",true,true,PACKAGE_NAME,
+                        PACKAGE_NAME+".Screen1",ARGUMENT_GCM,newMessage);
             } catch (ClassNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -155,14 +164,14 @@ public class GCMIntentService extends GCMBaseIntentService {
         else{//for registeration type of messages
             GCMRegEventListeners.add(listener);
         }
-        
+        //Save the action into the sharedPreference
         setSharedPreference(context,"in");
     }
     
-    // This is a method for App Inventor's component to receive two types of messages from Google GCM
+    // This is a method for App Inventor's component to option out two types of messages from Google GCM
     // 1. general GCM message 2. registeration finished message
     public void unRequestGCMMessage(Context context, GCMEventListener listener, String type){
-        //add the listener to the list of listerners
+        //remove the listener to the list of listerners
         if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
             if (!GCMEventListeners.isEmpty()){
                 GCMEventListeners.remove(listener);
@@ -172,14 +181,20 @@ public class GCMIntentService extends GCMBaseIntentService {
                 GCMRegEventListeners.remove(listener);
             }
         }
+        //Save the action into the sharedPreference
         setSharedPreference(context,"out");
     }
     
+    // The SharedPreference is used to store user's preference for opt in/out the message.
+    // The GCMIntentService binds with the GoogleCloudMessaging components as it starts. Whenever 
+    // the activity got killed, the GCMIntentService will be unbinded. At the background, the 
+    // GCMIntenetService will be killed at anytime, no guarantee here. If it got killed, it should
+    // be able to recall the last preference to opt in/out. FYI, if the GCMIntentService is not binded
+    // with the GoogleCloudMessaging Component, the GCMBroadcastReceiver will instantiate a new instance
+    // of the GCMIntentServices whenever the GCMBroadcastReceiver receive an intent from the remote 
+    // GCM service.
     private void setSharedPreference(Context context, String pref){
         //save the GCM Message opt in/out preference to sharedPreference for later use
-        //1 => opt in
-        //2 => opt out
-        
         sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         

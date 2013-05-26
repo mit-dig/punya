@@ -131,6 +131,11 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         GCMBaseIntentService.runIntentInService(mainUIThreadActivity,i,
                 GCMBroadcastReceiver.getDefaultIntentServiceClassName(mainUIThreadActivity));
         doBindService();
+        
+        //Set the initial value for the GCM message
+        //This is for the relaunching the activity that has been waked up by the GCMIntentService
+        //launch service
+        gcmMessage = container.$form().getGCMStartValues();
     }
     
     private String retrieveRegId() {
@@ -190,13 +195,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @SimpleProperty
     public void Enabled(boolean enable) {
 
-//         //save the SENDER ID to sharedPreference for later use
-//         final SharedPreferences.Editor sharedPrefsEditor =
-//         sharedPreferences.edit();
-//         sharedPrefsEditor.putString(GCMConstants.PREFS_GCM_SENDER_ID,
-//         SENDER_ID);
-//         sharedPrefsEditor.commit();
-
         enabled = enable;
         if (enabled) {
             registerGCMEvent(context, regListener, REG_GCM_TYPE);
@@ -221,6 +219,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         Log.i(TAG, "The sender id is " + SENDER_ID);
         Log.i(TAG, "The server URL is " + SERVER_URL);
 
+        Enabled(true);
         mBoundGCMIntentService.setSenderID(SENDER_ID);
         mBoundGCMIntentService.setServerURL(SERVER_URL);
 
@@ -351,6 +350,10 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         }
     }
 
+    //The GCMIntentService dispatches the intent, and the GoogleCloudMessaging
+    //component receive the intent using the listeners.
+    //There are two types of messages: 1)Registration 2)Regular GCM Message
+    
     final Handler msgHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -400,11 +403,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         }
     };
     
-
+    //Add the listener to the GCMIntentService
     public void registerGCMEvent(Context context, GCMEventListener listener, String eventType) {
         mBoundGCMIntentService.requestGCMMessage(context, listener, eventType);
     }
     
+    //Remove the listener to the GCMIntentService
     public void unRegisterGCMEvent(Context context,GCMEventListener listener, String eventType) {
         mBoundGCMIntentService.unRequestGCMMessage(context, listener, eventType);
     }
