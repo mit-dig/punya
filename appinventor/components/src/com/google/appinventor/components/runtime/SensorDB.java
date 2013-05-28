@@ -7,17 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Environment; 
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
- 
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -32,9 +29,7 @@ import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.SensorDbUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-
 
 import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.Schedule;
@@ -130,8 +125,8 @@ OnDestroyListener{
    * 
    * 
   */
-  //Mapping between Funf class and App Inventor sensor name
-  //TODO: move to util class?
+
+  //TODO add specific addCollection for probes like sms and callLog (after date), simple location (accuracy)
 
 
 
@@ -497,7 +492,11 @@ OnDestroyListener{
     archive_period = mPipeline.getArchivePeriod();
     export_period = mPipeline.getExportPeriod();
     clearbackup_period = mPipeline.getClearBackupPeriod();
-
+    
+    // Fire an event telling the UI that initialization with pipeline has finished. 
+    // Uses of pipeline values before this point will have racing conditions and cause NullPointerException
+    
+  
   }
   
 

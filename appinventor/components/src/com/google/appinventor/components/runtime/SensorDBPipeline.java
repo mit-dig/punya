@@ -248,20 +248,25 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     funfManager.startService(i);
     
   }
+
   /*
-   * add sensor to the activeSensor set, and register itself to 
-   * funfManger for listening to probe events 
+   * add sensor to the activeSensor set, and register itself to funfManger for
+   * listening to probe events. Each sensor only allow one schedule 
    */
-  public void addSensorCollection(String sensorName, int period){
+  public void addSensorCollection(String sensorName, int period) {
 
-    
-    Log.i(TAG, "Registering data requests.");
-    JsonElement dataRequest = getDataRequest(period, sensorMapping.get(sensorName));
-    Log.i(TAG, "Data request: " + dataRequest.toString());
+    // if we already have this sensor, then do nothing.
+    if (activeSensors.containsKey(sensorName)) {
+      ;// do nothing
+    } else {
+      Log.i(TAG, "Registering data requests.");
+      JsonElement dataRequest = getDataRequest(period,
+          sensorMapping.get(sensorName));
+      Log.i(TAG, "Data request: " + dataRequest.toString());
 
-    funfManager.requestData(this, dataRequest);
-    activeSensors.put(sensorName, period);
-    
+      funfManager.requestData(this, dataRequest);
+      activeSensors.put(sensorName, period);
+    }
   }
   
   private JsonElement getDataRequest(int interval, String probeName) {
@@ -282,8 +287,10 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     ((JsonObject) scheduleObject).addProperty("strict", true);
     ((JsonObject) scheduleObject).addProperty("interval", interval);
     ((JsonObject) scheduleObject).addProperty("opportunistic", true);
-
+    ((JsonObject) scheduleObject).addProperty("hideSensitiveData", false); //removed the hashed value
+    //TODO: DO we really need hased values here?
     ((JsonObject) dataRequest).add("@schedule", scheduleObject);
+    
 
     //dataRequests.add(dataRequest);
 
@@ -291,21 +298,26 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   }
   
   /*
-   * We already make sure that the caller(Sensor DB) will only pass in active sensor collection
+   * We already make sure that the caller(Sensor DB) will only pass in active
+   * sensor collection If the sensor is currently not active, then do nothing.
    */
-  public void removeSensorCollection(String sensorName){
+  public void removeSensorCollection(String sensorName) {
 
-    
-    Log.i(TAG, "Un-Registering data requests.");
-    
-    JsonElement dataRequest = getDataRequest(activeSensors.get(sensorName), 
-        sensorMapping.get(sensorName));
-    
-    Log.i(TAG, "Data request: " + dataRequest.toString());
-    
-    funfManager.unrequestData(this, dataRequest);
-    activeSensors.remove(sensorName);
-    
+    if (activeSensors.containsKey(sensorName)) {
+      Log.i(TAG, "Un-Registering data requests.");
+
+      JsonElement dataRequest = getDataRequest(activeSensors.get(sensorName),
+          sensorMapping.get(sensorName));
+
+      Log.i(TAG, "Data request: " + dataRequest.toString());
+
+      funfManager.unrequestData(this, dataRequest);
+      activeSensors.remove(sensorName);
+
+    } else {
+      Log.i(TAG, sensorName + " is not active");
+    }
+
   }
   /*
    * We limit each type of sensor only can be collected by one configured task
