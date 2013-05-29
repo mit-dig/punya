@@ -75,6 +75,8 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   private int archive_period;
   private int export_period;
   private int clear_period;
+  
+  private boolean hideSensitiveData; 
 
 
   
@@ -98,6 +100,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     scheduleArchiveEnabled = false;
     scheduleExportEnabled = false;
     scheduleClearBackupEnabled = false;
+    hideSensitiveData = false;
     
   }
 
@@ -185,6 +188,15 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   public void setScheduleClearbackupEnabled(boolean enabled) {
     this.scheduleClearBackupEnabled = enabled;
   }
+  
+  public boolean getHideSensitiveData(){
+    return this.hideSensitiveData;
+  }
+  
+  public void setHideSensitiveData(boolean newVal){
+    this.hideSensitiveData = newVal;
+  }
+  
   
   private void archive(){
     Intent i = new Intent(funfManager, NameValueDatabaseService.class);
@@ -279,24 +291,55 @@ public class SensorDBPipeline implements Pipeline, DataListener{
      * "opportunistic": true } }
      */
     
+    // fine tuning for SimpleLocationProbe
+    if(probeName.equals("edu.mit.media.funf.probe.builtin.SimpleLocationProbe")){
+      return getLocationRequest(interval, probeName);
+    }
+
     JsonElement dataRequest = new JsonObject();
     ((JsonObject) dataRequest).addProperty("@type",
         probeName);
+    if (probeName.equals("edu.mit.media.funf.probe.builtin.SmsProbe")
+        || probeName.equals("edu.mit.media.funf.probe.builtin.CallLogProbe")) {
+      ((JsonObject) dataRequest).addProperty("hideSensitiveData", hideSensitiveData);
+    }
+        
     //((JsonObject) dataRequest).addProperty("maxScanTime", 40);
     JsonElement scheduleObject = new JsonObject();
     ((JsonObject) scheduleObject).addProperty("strict", true);
     ((JsonObject) scheduleObject).addProperty("interval", interval);
     ((JsonObject) scheduleObject).addProperty("opportunistic", true);
-    ((JsonObject) scheduleObject).addProperty("hideSensitiveData", false); //removed the hashed value
-    //TODO: DO we really need hased values here?
-    ((JsonObject) dataRequest).add("@schedule", scheduleObject);
     
+    if(probeName.equals("edu.mit.media.funf.probe.builtin.LightSensorProbe")){
+      ((JsonObject) scheduleObject).addProperty("duration", 5);
+    }
 
-    //dataRequests.add(dataRequest);
+    ((JsonObject) dataRequest).add("@schedule", scheduleObject);
 
     return dataRequest;
   }
   
+
+  private JsonElement getLocationRequest(int interval, String probeName) {
+ 
+    JsonElement dataRequest = new JsonObject();
+    ((JsonObject) dataRequest).addProperty("@type", probeName);
+
+    // simpleLocationProbe configuration (useGPS = true, useNetwork=true, useCache=false)
+    ((JsonObject) dataRequest).addProperty("useCache", false); // we want to get the new location
+    //TODO: detect whether it's moving or not (indoor or outdoor)
+    
+    //((JsonObject) dataRequest).addProperty("maxScanTime", 40);
+    JsonElement scheduleObject = new JsonObject();
+    ((JsonObject) scheduleObject).addProperty("strict", true);
+    ((JsonObject) scheduleObject).addProperty("interval", interval);
+    ((JsonObject) scheduleObject).addProperty("opportunistic", true);
+
+    ((JsonObject) dataRequest).add("@schedule", scheduleObject);
+
+    return dataRequest;
+  }
+
   /*
    * We already make sure that the caller(Sensor DB) will only pass in active
    * sensor collection If the sensor is currently not active, then do nothing.

@@ -82,6 +82,7 @@ public class LocationProbeSensor extends ProbeBase{
 	private final int GOOD_ENOUGHT_ACCURACY = 80;
 	private boolean useGPS = true;
 	private boolean useNetwork = true;
+	private boolean useCache = false;
 	
 	private int goodEnoughAccurary;
 	 
@@ -258,6 +259,26 @@ public class LocationProbeSensor extends ProbeBase{
 	}
 	
 	/**
+	 * Set whether the location info will use the last known location without acquiring new location from 
+	 * GPS or Network fix
+	 * @param newVal
+	 */
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "false")
+	@SimpleProperty(description = "Set whether the location info will use the last known location without" +
+			" acquring a new location either through GPC or Network fix")
+	public void UseCache(boolean newVal){
+	  if(useCache != newVal) {
+	    this.useCache = newVal;
+	  }
+	}
+	
+	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
+	public boolean UseCache(){
+	  return useCache;
+	}
+	
+	
+	/**
 	 * Set the good-enough accuracy for location sensor
 	 */
 	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "80")
@@ -336,6 +357,7 @@ public class LocationProbeSensor extends ProbeBase{
 		((JsonObject)dataRequest).addProperty("goodEnoughAccurary", goodEnoughAccurary);
 		((JsonObject)dataRequest).addProperty("useGPS", useGPS);
 		((JsonObject)dataRequest).addProperty("useNetwork", useNetwork);
+		((JsonObject)dataRequest).addProperty("useCache", useCache);
 		 
 		Log.i(TAG, "Location Data request: " + dataRequest.toString());
 

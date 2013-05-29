@@ -482,7 +482,11 @@ OnDestroyListener{
     return this.ScheduleClearBackupPeriod();
   }
   
-  
+  /*
+   * This method is called within the onServiceConnected() of ServiceConnection for binding.
+   * Once SensorDB is bound to SensorDbPipeline, then we can retrieve and initialize values for the UI.
+   * Then we fire an FinishedInitServiceValues() event to the UI.
+   */
   private void initValsFromPipeline() {
     // TODO Auto-generated method stub
     Log.i(TAG, "after bound to funfManager, and should created pipeline");
@@ -498,12 +502,11 @@ OnDestroyListener{
     clearbackup_period = mPipeline.getClearBackupPeriod();
     
     // Fire an event telling the UI that initialization with pipeline has finished. 
-    // Uses of pipeline values before this point will have racing conditions and cause NullPointerException
+    // Uses of pipeline values before this point will have racing conditions and 
+    // cause NullPointerException
  
     FinishedInitServiceValues();
  
-    
-  
   }
   
   /**
