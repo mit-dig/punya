@@ -13,11 +13,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.PropertyCategory;
+import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
@@ -104,6 +106,8 @@ OnDestroyListener{
   private long export_period;
   private long clearbackup_period;
   
+  private final Handler handler;
+  
   /*
    *TODO: consider using reflection? 
    * a list of current possible funf sensors for data collection
@@ -149,7 +153,7 @@ OnDestroyListener{
 		// Set up listeners
 		form.registerForOnDestroy(this);
 		mainUIThreadActivity = container.$context();
-		
+		handler = new Handler();
 
     //we use dbName as pipelineName, each app (package) has their unique dbName, which is packagename + "__SENSOR_DB__"
     pipelineName = SensorDbUtil.getPipelineName(mainUIThreadActivity);
@@ -495,9 +499,30 @@ OnDestroyListener{
     
     // Fire an event telling the UI that initialization with pipeline has finished. 
     // Uses of pipeline values before this point will have racing conditions and cause NullPointerException
+ 
+    FinishedInitServiceValues();
+ 
     
   
   }
+  
+  /**
+   * Indicates that SensorDB is bound to SensorDBPipeline and re-initialize values from the pipeline
+   * e.g. archive_period, export_period, clearbackup_period, ..etc. 
+   * App Inventor's user should use this event to update UI that needs values from the background service
+   */
+  @SimpleEvent
+  public void FinishedInitServiceValues() {
+
+    mainUIThreadActivity.runOnUiThread(new Runnable() {
+      public void run() {
+        Log.i(TAG, "FinishedInitServiceValues() is called");
+        EventDispatcher.dispatchEvent(SensorDB.this, "FinishedInitServiceValues");
+      }
+    });
+
+  }
+  
   
 
   // try local binding to FunfManager
