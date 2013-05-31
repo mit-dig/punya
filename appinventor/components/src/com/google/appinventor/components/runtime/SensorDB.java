@@ -34,6 +34,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
 import edu.mit.media.funf.FunfManager;
+import edu.mit.media.funf.Launcher;
 import edu.mit.media.funf.Schedule;
 import edu.mit.media.funf.pipeline.Pipeline;
 import edu.mit.media.funf.storage.NameValueDatabaseService;
@@ -73,7 +74,7 @@ import edu.mit.media.funf.storage.NameValueDatabaseService;
     + "android.Manifest.permission.READ_PHONE_STATE") //TelephonyInfo
 @UsesLibraries(libraries = "funf.jar")
 public class SensorDB extends AndroidNonvisibleComponent implements
-OnDestroyListener{
+OnDestroyListener, OnResumeListener, OnStopListener{
 	/*
 	 * Binding to FunfMananger service
 	 */
@@ -161,10 +162,17 @@ OnDestroyListener{
     exportPath =  new File(Environment.getExternalStorageDirectory(), form.getPackageName()) + 
     		File.separator + "export";
     exportFormat = NameValueDatabaseService.EXPORT_CSV; // set the exporting format as csv by default
-   
-    Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
-    mainUIThreadActivity.startService(i);
     
+   
+//    Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
+//    mainUIThreadActivity.startService(i);
+    
+    
+    if (!Launcher.isLaunched()) {
+      Log.i(TAG, "firstTime launching....");
+      Launcher.launch(mainUIThreadActivity);
+    }
+
     // bind to FunfManger (in case the user wants to set up the schedule)
     doBindService();
     
@@ -185,7 +193,7 @@ OnDestroyListener{
     //<string name="mainPipelineConfig">{"@type":"edu.mit.dig.funftest.MainPipeline"}</string>
     // try 
     parser = new JsonParser();
-    
+    Log.i(TAG, "Try to get pipeline from FunfMananger:" + mBoundFunfManager.toString());
     Pipeline pipeline = mBoundFunfManager.getRegisteredPipeline(pipelineName);
     
     if (gson == null) {
@@ -193,6 +201,7 @@ OnDestroyListener{
     }
     
     if(pipeline == null){
+      Log.i(TAG, "We don't have the pipeline name:" + pipelineName + " ,try to create a new one");
       String pipeConfigStr = "{\"@type\":\"com.google.appinventor.components.runtime.SensorDBPipeline\"}";
 
       // add to funfManager by calling this new function, it will create Pipeline and register to FunfManger
@@ -232,6 +241,13 @@ OnDestroyListener{
       // mapp the sensor to some probe's className
       if (sensorMapping.containsKey(sensorName)) {
         mPipeline.addSensorCollection(sensorName, period);
+        
+        //make the service on the foreground 
+        if (!Launcher.isForeground()){
+          Log.i(TAG, "make funfManager in the foreground....");
+          Launcher.startForeground(mainUIThreadActivity);
+          
+        } 
 
       } else {
         // TODO: throw an exception, saying the sensor does not exist, please
@@ -270,6 +286,14 @@ OnDestroyListener{
       
       if (mPipeline.getActiveSensor().containsKey(sensorName)) {
         mPipeline.removeSensorCollection(sensorName);
+        
+        //if all sensor collection are removed, then stop foreground
+        if (mPipeline.getActiveSensor().size() == 0 && Launcher.isForeground()){
+          Log.i(TAG, "make funfManager stop foreground");
+          Launcher.stopForeground(mainUIThreadActivity);
+          
+        } 
+        
       } else {
         // TODO: throw an exception saying the sensor is not active
         form.dispatchErrorOccurredEvent(SensorDB.this, "AddSensorCollection",
@@ -550,7 +574,7 @@ OnDestroyListener{
       mBoundFunfManager = null;
 
       Log.i(TAG, "Unbind FunfManager");
-
+      mIsBound = false;
     }
   };
 
@@ -565,19 +589,41 @@ OnDestroyListener{
 
 	}
 
-	void doUnbindService() {
-		if (mIsBound) {
- 
-			mainUIThreadActivity.unbindService(mConnection);
-			mIsBound = false;
-		}
-	}
+  void doUnbindService() {
+
+    Log.i(TAG, "un-binding service");
+    mainUIThreadActivity.unbindService(mConnection);
+    mIsBound = false;
+
+  }
 
 
-	@Override
-	public void onDestroy() {
-		// TODO Auto-generated method stub
-    doUnbindService();
-	}
+  @Override
+  public void onDestroy() {
+    // TODO Auto-generated method stub
+    Log.i(TAG, "My form.java got destroyed");
+//    if (mIsBound && mConnection != null) {
+//      doUnbindService();
+//    }
+
+  }
+
+
+  @Override
+  public void onStop() {
+    // TODO Auto-generated method stub
+    Log.i(TAG, "My form: " + mainUIThreadActivity.toString() + " got stopped");
+    if (mIsBound && mConnection != null) {
+      doUnbindService();
+    }
+  }
+
+
+  @Override
+  public void onResume() {
+    // TODO Auto-generated method stub
+    Log.i(TAG, "My form.java got Resumed");
+//    doBindService();
+  }
 
 }

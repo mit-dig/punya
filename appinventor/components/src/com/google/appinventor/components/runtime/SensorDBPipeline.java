@@ -92,7 +92,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   public void onCreate(FunfManager manager) {
     // TODO Auto-generated method stub
     funfManager = manager;
-    Log.v(TAG, "Created main pipeline");
+    Log.i(TAG, "Created main pipeline from funfManager:" + manager.toString() + ",at: " + System.currentTimeMillis());
     
     archive_period = ARCHIVE_PERIOD;
     export_period = EXPORT_PERIOD;

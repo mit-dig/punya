@@ -61,7 +61,7 @@ import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 @UsesLibraries(libraries = "funf.jar")
 public class LocationProbeSensor extends ProbeBase{
 	
-	private final String TAG = "LocationProbe";
+	private final String TAG = "LocationProbeSensor";
 	protected final String SIMPLE_LOCATION_PROBE = "edu.mit.media.funf.probe.builtin.SimpleLocationProbe";
 	public static final int UNKNOWN_VALUE = 0;
 	
@@ -248,12 +248,13 @@ public class LocationProbeSensor extends ProbeBase{
 	/*
 	 * recreate json config 
 	 */
-	private JsonObject createNewConfig(boolean useGPS, boolean useNetwork, int goodEnoughPrivacy){
+	private JsonObject createNewConfig(boolean useGPS, boolean useNetwork, int goodEnoughAccurary){
 		JsonObject config = new JsonObject();
 		
 		config.addProperty("goodEnoughAccuracy", goodEnoughAccurary);
 		config.addProperty("useGPS", useGPS);
 		config.addProperty("useNetwork", useNetwork);
+		config.addProperty("useCache", useCache);
 
 		return config;
 	}
