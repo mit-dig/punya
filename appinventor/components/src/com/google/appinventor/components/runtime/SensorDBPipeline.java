@@ -10,17 +10,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 
+import com.google.appinventor.components.runtime.errors.YailRuntimeError;
+import com.google.appinventor.components.runtime.util.JsonUtil;
 import com.google.appinventor.components.runtime.util.SensorDbUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import edu.mit.media.funf.FunfManager;
+import edu.mit.media.funf.Schedule;
 import edu.mit.media.funf.config.RuntimeTypeAdapterFactory;
 import edu.mit.media.funf.json.IJsonObject;
 import edu.mit.media.funf.pipeline.Pipeline;
@@ -29,6 +34,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.BaseProbeKeys;
 import edu.mit.media.funf.storage.DatabaseService;
 import edu.mit.media.funf.storage.NameValueDatabaseService;
 import edu.mit.media.funf.time.DecimalTimeUnit;
+import org.json.JSONException;
 
 /*
  * This class implements Funf's Pipeline interface. Pipeline is an interface that define functions
@@ -59,10 +65,12 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   protected static final String ACTION_ARCHIVE_DATA = "ARCHIVE_DATA";
   protected static final String ACTION_EXPORT_DATA = "EXPORT_DATA";
   protected static final String ACTION_CLEAR_BACKUP= "CLEAR_BACKUP";
+  protected static final String GLOBAL_ONOFF = "global_onoff";
   private static final int ARCHIVE_PERIOD = 86400; // archive database 60*60*24 (archive every 24 hour)
   private static final int EXPORT_PERIOD = 86400;//
   private static final int CLEAR_BACKUP = 86400;
   private static final String TAG = "SensorDBPipeline";
+  protected static final String ACTIVE_SENSORS = "active.sensors";
 
   
   private Map<String, Integer> activeSensors = new HashMap<String, Integer>();
@@ -76,7 +84,8 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   private int export_period;
   private int clear_period;
   
-  private boolean hideSensitiveData; 
+  private boolean hideSensitiveData;
+  private SharedPreferences sharedPreferences;
 
 
   
@@ -87,26 +96,98 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
   private String format = "csv";
 
-  private FunfManager funfManager;
-  @Override
-  public void onCreate(FunfManager manager) {
-    // TODO Auto-generated method stub
-    funfManager = manager;
-    Log.i(TAG, "Created main pipeline from funfManager:" + manager.toString() + ",at: " + System.currentTimeMillis());
-    
-    archive_period = ARCHIVE_PERIOD;
-    export_period = EXPORT_PERIOD;
-    clear_period = CLEAR_BACKUP;
-    scheduleArchiveEnabled = false;
-    scheduleExportEnabled = false;
-    scheduleClearBackupEnabled = false;
-    hideSensitiveData = false;
-    
+    private FunfManager funfManager;
+    @Override
+    public void onCreate(FunfManager manager) {
+
+      funfManager = manager;
+      Log.i(TAG, "Created main pipeline from funfManager:" + manager.toString() + ",at: " + System.currentTimeMillis());
+
+      archive_period = ARCHIVE_PERIOD;
+      export_period = EXPORT_PERIOD;
+      clear_period = CLEAR_BACKUP;
+      scheduleArchiveEnabled = false;
+      scheduleExportEnabled = false;
+      scheduleClearBackupEnabled = false;
+      hideSensitiveData = false;
+      sharedPreferences = manager.getSharedPreferences("sensorDBPipeline", Context.MODE_PRIVATE);
+
+      initActions();
+
+    }
+
+  private void initActions() {
+    // whenever the pipeline is created or recreated, we will look into the sharedPreference 
+    // for re-init its actions and register probes listeners if needed
+
+    Object archivePref = getPreference(ACTION_ARCHIVE_DATA);
+
+    if (!archivePref.equals("")) {// we have previously set value in here
+      Log.i(TAG, "recreate archive schedule: " + archivePref);
+      Integer archivePeriod = (Integer) archivePref;
+      if (archivePeriod != 0) {
+        Schedule archive_p = new Schedule.BasicSchedule(
+            BigDecimal.valueOf(archivePeriod), BigDecimal.ZERO, false, false);
+        funfManager.registerPipelineAction(this, ACTION_ARCHIVE_DATA, archive_p);
+        scheduleArchiveEnabled = true;
+      }
+    }
+
+    Object clearPref = getPreference(ACTION_CLEAR_BACKUP);
+
+    if (!clearPref.equals("")) {
+      Integer clearPeriod = (Integer) clearPref;
+      Log.i(TAG, "recreate clear schedule:" + clearPeriod);
+      if (clearPeriod != 0) {
+        Schedule clear_p = new Schedule.BasicSchedule(
+            BigDecimal.valueOf(clearPeriod), BigDecimal.ZERO, false, false);
+        funfManager.registerPipelineAction(this, ACTION_CLEAR_BACKUP, clear_p);
+        scheduleClearBackupEnabled = true;
+      }
+    }
+
+    Object exportPref = getPreference(ACTION_EXPORT_DATA);
+
+    if (!exportPref.equals("")) {
+      Integer exportPeriod = (Integer)exportPref;
+      Log.i(TAG, "recreate export schedule:" + exportPeriod);
+      if (exportPeriod != 0) {
+        Schedule export_p = new Schedule.BasicSchedule(
+            BigDecimal.valueOf(exportPeriod), BigDecimal.ZERO, false, false);
+        funfManager.registerPipelineAction(this, ACTION_EXPORT_DATA, export_p);
+        scheduleExportEnabled = true;
+      }
+    }
+
+    String jsonArrayStr = (String)getPreference(ACTIVE_SENSORS);
+    Log.i(TAG, "ACTIVE sensor:" + jsonArrayStr);
+    if (!jsonArrayStr.isEmpty()){
+      try {
+        List<Object> periods = (List<Object>)JsonUtil.getObjectFromJson(jsonArrayStr);
+        // will get a list of lists (key, value)
+        // it could be {"active.sensors" : []}
+        for (int i = 0; i > periods.size(); i++){
+          List keyVal = (List)periods.get(i);
+          String sensor = (String) keyVal.get(0);
+          int period = (Integer) keyVal.get(1);
+          Log.i(TAG, "key(sensor):" + sensor);
+          Log.i(TAG, "value(period):" + period);
+          addSensorCollection(sensor, period);
+        }
+      } catch (JSONException e) {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
+    }
+
+
   }
 
   @Override
   public void onDestroy() {
     // TODO Auto-generated method stub
+    // If for some reason, the service got destroyed
+    // by the system while there are active actions going on, we need to save the state of Global on/off to sharedPreference
+    savePreference(GLOBAL_ONOFF, true);
     
   }
 
@@ -170,7 +251,18 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   }
 
   public void setScheduleArchiveEnabled(boolean enabled) {
-    this.scheduleArchiveEnabled = enabled;
+    if (this.scheduleArchiveEnabled != enabled)
+      this.scheduleArchiveEnabled = enabled;
+
+    if (scheduleArchiveEnabled) {
+      Schedule archivePeriod = new Schedule.BasicSchedule(
+          BigDecimal.valueOf(this.archive_period), BigDecimal.ZERO, false, false);
+
+      funfManager.registerPipelineAction(this, ACTION_ARCHIVE_DATA, archivePeriod);
+    } else {
+      funfManager.unregisterPipelineAction(this, ACTION_ARCHIVE_DATA);
+    }
+
   }
 
   public boolean getScheduleExportEnabled() {
@@ -178,7 +270,16 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   }
 
   public void setScheduleExportEnabled(boolean enabled) {
-    this.scheduleExportEnabled = enabled;
+   if (this.scheduleExportEnabled != enabled)
+     this.scheduleExportEnabled = enabled;
+
+   if (scheduleExportEnabled){
+     Schedule exportPeriod = new Schedule.BasicSchedule(
+         BigDecimal.valueOf(this.export_period), BigDecimal.ZERO, false, false);
+     funfManager.registerPipelineAction(this, ACTION_EXPORT_DATA, exportPeriod);
+   } else {
+     funfManager.unregisterPipelineAction(this, ACTION_EXPORT_DATA);
+   }
   }
 
   public boolean getScheduleClearbackupEnabled() {
@@ -186,7 +287,19 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   }
 
   public void setScheduleClearbackupEnabled(boolean enabled) {
-    this.scheduleClearBackupEnabled = enabled;
+    if (this.scheduleClearBackupEnabled != enabled)
+      this.scheduleClearBackupEnabled = enabled;
+
+    if (scheduleClearBackupEnabled) {
+      Schedule clearPeriod = new Schedule.BasicSchedule(
+          BigDecimal.valueOf(this.clear_period), BigDecimal.ZERO, false, false);
+      funfManager.registerPipelineAction(this, ACTION_CLEAR_BACKUP, clearPeriod);
+    } else {
+      funfManager.unregisterPipelineAction(this, ACTION_CLEAR_BACKUP);
+    }
+
+    savePreference(ACTION_CLEAR_BACKUP, enabled? this.clear_period:0);
+
   }
   
   public boolean getHideSensitiveData(){
@@ -260,6 +373,34 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     funfManager.startService(i);
     
   }
+  /*
+   *  reuse codes from TinyDB
+   */
+  private void savePreference(String tag, Object valueToStore){
+        //every time we add /update/remove sensor, we will also write to the sharedPreference as well.
+        SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+        try {
+          sharedPrefsEditor.putString(tag, JsonUtil.getJsonRepresentation(valueToStore));
+          Log.i(TAG, "What we save:" + JsonUtil.getJsonRepresentation(valueToStore));
+          sharedPrefsEditor.commit();
+    } catch (JSONException e) {
+      throw new YailRuntimeError("Value failed to convert to JSON.", "JSON Creation Error.");
+    }
+
+
+  }
+
+  private Object getPreference(String tag){
+    try {
+      String value = sharedPreferences.getString(tag, "");
+      // If there's no entry with tag as a key then return the empty string.
+      return (value.length() == 0) ? "" : JsonUtil.getObjectFromJson(value);
+    } catch (JSONException e) {
+      throw new YailRuntimeError("Value failed to convert from JSON.", "JSON Creation Error.");
+    }
+  }
+
+
 
   /*
    * add sensor to the activeSensor set, and register itself to funfManger for
@@ -278,6 +419,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
       funfManager.requestData(this, dataRequest);
       activeSensors.put(sensorName, period);
+      savePreference(ACTIVE_SENSORS, activeSensors);
     }
   }
   
@@ -356,6 +498,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
       funfManager.unrequestData(this, dataRequest);
       activeSensors.remove(sensorName);
+      savePreference(ACTIVE_SENSORS, activeSensors);
 
     } else {
       Log.i(TAG, sensorName + " is not active");
