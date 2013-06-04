@@ -6,6 +6,7 @@ import com.google.appinventor.client.settings.Settings;
 import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -23,6 +24,18 @@ public class SettingsEditor extends DialogBox {
     mapsKeyField = new TextBox();
     Label label = new Label("Google Maps API Key:");
     VerticalPanel panel2 = new VerticalPanel();
+    final Label sha1Label = new Label();
+    Ode.getInstance().getUserInfoService().getUserFingerprintSHA1(new AsyncCallback<String>() {
+      @Override
+      public void onSuccess(String arg0) {
+        sha1Label.setText("SHA1: "+arg0);
+      }
+      @Override
+      public void onFailure(Throwable arg0) {
+        sha1Label.setText("Could not retrieve SHA1 fingerprint");
+      }
+    });
+    panel2.add(sha1Label);
     HorizontalPanel panel = new HorizontalPanel();
     panel.add(label);
     panel.add(mapsKeyField);
