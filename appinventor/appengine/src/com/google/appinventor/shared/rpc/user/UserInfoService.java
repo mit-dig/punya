@@ -45,4 +45,9 @@ public interface UserInfoService extends RemoteService {
    * Deletes the user file with the given file name
    */
   void deleteUserFile(String fileName);
+
+  /**
+   * Get the SHA1 fingerprint for the user's keystore
+   */
+  String getUserFingerprintSHA1();
 }
