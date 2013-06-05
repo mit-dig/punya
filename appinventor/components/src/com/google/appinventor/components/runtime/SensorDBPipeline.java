@@ -130,6 +130,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
             BigDecimal.valueOf(archivePeriod), BigDecimal.ZERO, false, false);
         funfManager.registerPipelineAction(this, ACTION_ARCHIVE_DATA, archive_p);
         scheduleArchiveEnabled = true;
+        archive_period = archivePeriod;
       }
     }
 
@@ -143,6 +144,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
             BigDecimal.valueOf(clearPeriod), BigDecimal.ZERO, false, false);
         funfManager.registerPipelineAction(this, ACTION_CLEAR_BACKUP, clear_p);
         scheduleClearBackupEnabled = true;
+        clear_period = clearPeriod;
       }
     }
 
@@ -156,6 +158,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
             BigDecimal.valueOf(exportPeriod), BigDecimal.ZERO, false, false);
         funfManager.registerPipelineAction(this, ACTION_EXPORT_DATA, export_p);
         scheduleExportEnabled = true;
+        export_period = exportPeriod;
       }
     }
 
@@ -185,27 +188,21 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   @Override
   public void onDestroy() {
     // TODO Auto-generated method stub
-    // If for some reason, the service got destroyed
-    // by the system while there are active actions going on, we need to save the state of Global on/off to sharedPreference
-    savePreference(GLOBAL_ONOFF, true);
-    
+    Log.i(TAG, "SesorDBPipeline" + this + "got killed at:" + System.currentTimeMillis());
   }
 
   @Override
   public void onRun(String action, JsonElement config) {
     if (ACTION_ARCHIVE_DATA.equals(action)) {
-      Log.i(TAG, "Run action archive data");
       archive();
 
     }
     if (ACTION_EXPORT_DATA.equals(action)) {
       // Do something else
-      Log.i(TAG, "Run action export_DATA");
       export(format);
 
     }
     if (ACTION_CLEAR_BACKUP.equals(action)) {
-      Log.i(TAG, "Run action clear backup files");
       clearBackup();
     }
 
@@ -262,6 +259,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     } else {
       funfManager.unregisterPipelineAction(this, ACTION_ARCHIVE_DATA);
     }
+    savePreference(ACTION_ARCHIVE_DATA, enabled? this.archive_period : 0);
 
   }
 
@@ -280,6 +278,9 @@ public class SensorDBPipeline implements Pipeline, DataListener{
    } else {
      funfManager.unregisterPipelineAction(this, ACTION_EXPORT_DATA);
    }
+
+   savePreference(ACTION_EXPORT_DATA, enabled? this.export_period : 0);
+
   }
 
   public boolean getScheduleClearbackupEnabled() {
@@ -298,7 +299,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
       funfManager.unregisterPipelineAction(this, ACTION_CLEAR_BACKUP);
     }
 
-    savePreference(ACTION_CLEAR_BACKUP, enabled? this.clear_period:0);
+    savePreference(ACTION_CLEAR_BACKUP, enabled? this.clear_period : 0);
 
   }
   
@@ -334,7 +335,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   
   public void clearBackup(){
     Intent i = new Intent(funfManager, NameValueDatabaseService.class);
-    Log.i(TAG, "archiving data...." +  System.currentTimeMillis()); 
+    Log.i(TAG, "clear data backup....at " +  System.currentTimeMillis());
     i.setAction(DatabaseService.ACTION_CLEAR_BACKUP);
     i.putExtra(DatabaseService.DATABASE_NAME_KEY, SensorDbUtil.DB_NAME);
     funfManager.startService(i);

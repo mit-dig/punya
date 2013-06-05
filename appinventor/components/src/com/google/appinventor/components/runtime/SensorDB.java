@@ -256,7 +256,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
             ErrorMessages.ERROR_SENSORDB_NOTAVAILABLE, sensorName);
       }
     } else {
-      Log.v(TAG, "AddSensorCollection, should not be here...");
+      Log.v(TAG, "AddSensorCollection, pipeline is null, funf is killed by the system.");
       //this should not happen..because we already bind to Funf 
     }
 
@@ -300,7 +300,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
             ErrorMessages.ERROR_SENSORDB_NOTACTIVE, sensorName);
       }
     } else{
-      Log.v(TAG, "RemoveSensorCollection, should not be here...");
+      Log.v(TAG, "Funf was killed by the system. In normal case, should not be here...");
       //this should not happen..because we already bind to Funf 
     }
 
@@ -404,6 +404,22 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
     mPipeline.setArchivePeriod(period);
     mPipeline.setScheduleArchiveEnabled(true);
+
+  }
+
+  // testing purpose
+  private boolean forceKill = false;
+
+  @SimpleFunction(description = "(Testing) force Stop funfManager")
+  public void ForceKill(){
+    //first we need to unbind the service, then stop the service
+    if (mIsBound && mConnection != null) {
+      doUnbindService();
+      forceKill = true;
+
+    }
+
+
 
   }
 
@@ -575,6 +591,12 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
       Log.i(TAG, "Unbind FunfManager");
       mIsBound = false;
+      if (forceKill) {
+        //testing TODO: remove this code after testing
+        Log.i(TAG, "ForceKill is called at" + System.currentTimeMillis() );
+        Intent i = new Intent(mainUIThreadActivity.getApplicationContext(), FunfManager.class);
+        mainUIThreadActivity.getApplicationContext().stopService(i);
+      }
     }
   };
 
