@@ -40,28 +40,28 @@ import org.json.JSONException;
  * This class implements Funf's Pipeline interface. Pipeline is an interface that define functions
  * for periodic task, which means that the class can register itself with FunfManager with specified
  * waking-up period using registerPipelineAction(this, ACTION_TAG, schedule)
- * 
+ *
  * It supports configuration of its action through SensorDB.java class's methods.
- * 
- * This class lives in a long-running service (FunfManager), so it will not directly 
- * communicate with the AI component. It will write out results to SharedPreference and the AI component can 
+ *
+ * This class lives in a long-running service (FunfManager), so it will not directly
+ * communicate with the AI component. It will write out results to SharedPreference and the AI component can
  * learn about the result of the task by:
- * 1) if the component wants to check the result when it is active it can use onTaskResult event 
+ * 1) if the component wants to check the result when it is active it can use onTaskResult event
  *    (implement by onSharePreferenceChanged)
- * 2) or it can check SharedPreference with keywords like (SensorDB.ARCHIVE_RESULT_KEY), and get 
+ * 2) or it can check SharedPreference with keywords like (SensorDB.ARCHIVE_RESULT_KEY), and get
  *    Yail pair values (result and time stamp)
- *    
- *    
+ *
+ *
  * TODO: fix the documentation below
- * 1) archive: copy the sqlite db file and moved it to sd card, under /packageName/dbName/archive/ 
+ * 1) archive: copy the sqlite db file and moved it to sd card, under /packageName/dbName/archive/
  *    (note: this function will delete the sqlite db as well)
  * 2) export: will export the sqlite db with specified format to sd card, under /packageName/export/
  * 3) clear backup: every time when we execute archive function, a copy will be put into /packageName/dbName/backup
- *    as well for backup purpose. A user (developer) may want to clear the backup files after a while.  
+ *    as well for backup purpose. A user (developer) may want to clear the backup files after a while.
  */
 
 public class SensorDBPipeline implements Pipeline, DataListener{
-  
+
   protected static final String ACTION_ARCHIVE_DATA = "ARCHIVE_DATA";
   protected static final String ACTION_EXPORT_DATA = "EXPORT_DATA";
   protected static final String ACTION_CLEAR_BACKUP= "CLEAR_BACKUP";
@@ -71,24 +71,23 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   private static final int CLEAR_BACKUP = 86400;
   private static final String TAG = "SensorDBPipeline";
   protected static final String ACTIVE_SENSORS = "active.sensors";
-
-  
+ 
   private Map<String, Integer> activeSensors = new HashMap<String, Integer>();
   private Map<String, String> sensorMapping = SensorDbUtil.sensorMap;
-  
-  private boolean scheduleArchiveEnabled; 
-  private boolean scheduleExportEnabled; 
-  private boolean scheduleClearBackupEnabled; 
-  
+
+  private boolean scheduleArchiveEnabled;
+  private boolean scheduleExportEnabled;
+  private boolean scheduleClearBackupEnabled;
+
   private int archive_period;
   private int export_period;
   private int clear_period;
-  
+
+
   private boolean hideSensitiveData;
   private SharedPreferences sharedPreferences;
 
 
-  
   private Calendar calendar = Calendar.getInstance(Locale.getDefault());
   private BigDecimal localOffsetSeconds = BigDecimal.valueOf(
       calendar.get(Calendar.ZONE_OFFSET)
@@ -117,7 +116,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     }
 
   private void initActions() {
-    // whenever the pipeline is created or recreated, we will look into the sharedPreference 
+    // whenever the pipeline is created or recreated, we will look into the sharedPreference
     // for re-init its actions and register probes listeners if needed
 
     Object archivePref = getPreference(ACTION_ARCHIVE_DATA);
@@ -302,16 +301,16 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     savePreference(ACTION_CLEAR_BACKUP, enabled? this.clear_period : 0);
 
   }
-  
+
   public boolean getHideSensitiveData(){
     return this.hideSensitiveData;
   }
-  
+
   public void setHideSensitiveData(boolean newVal){
     this.hideSensitiveData = newVal;
   }
-  
-  
+
+
   private void archive(){
     Intent i = new Intent(funfManager, NameValueDatabaseService.class);
     Log.i(TAG, "archiving data...at: " + System.currentTimeMillis());
@@ -322,7 +321,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
   public void export(String format) {
     Log.i(TAG, "exporting data...at: " + System.currentTimeMillis());
-    
+
     Bundle b = new Bundle();
     b.putString(NameValueDatabaseService.DATABASE_NAME_KEY, SensorDbUtil.DB_NAME);
     b.putString(NameValueDatabaseService.EXPORT_KEY, format);
@@ -330,9 +329,9 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     i.setAction(DatabaseService.ACTION_EXPORT);
     i.putExtras(b);
     funfManager.startService(i);
-    
+
   }
-  
+
   public void clearBackup(){
     Intent i = new Intent(funfManager, NameValueDatabaseService.class);
     Log.i(TAG, "clear data backup....at " +  System.currentTimeMillis());
@@ -345,7 +344,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   public void onDataCompleted(IJsonObject completeProbeUri, JsonElement checkpoint) {
     // TODO Auto-generated method stub
     Log.v(TAG, "Data COMPLETE: " + completeProbeUri);
-    
+
   }
 
   @Override
@@ -353,11 +352,11 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     // TODO Auto-generated method stub
     Log.i(TAG, "Data received: " + completeProbeUri + ": " + data.toString());
 
-    
+
     final JsonObject dataObject = data.getAsJsonObject();
     dataObject.add("probe",
         completeProbeUri.get(RuntimeTypeAdapterFactory.TYPE));
-    dataObject.add("timezoneOffset", new JsonPrimitive(localOffsetSeconds)); 
+    dataObject.add("timezoneOffset", new JsonPrimitive(localOffsetSeconds));
 
     final long timestamp = data.get(BaseProbeKeys.TIMESTAMP).getAsLong();
     final String probeName = completeProbeUri.get("@type").getAsString();
@@ -372,7 +371,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     i.setAction(DatabaseService.ACTION_RECORD);
     i.putExtras(b);
     funfManager.startService(i);
-    
+
   }
   /*
    *  reuse codes from TinyDB
@@ -391,6 +390,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
   }
 
+
   private Object getPreference(String tag){
     try {
       String value = sharedPreferences.getString(tag, "");
@@ -405,7 +405,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
   /*
    * add sensor to the activeSensor set, and register itself to funfManger for
-   * listening to probe events. Each sensor only allow one schedule 
+   * listening to probe events. Each sensor only allow one schedule
    */
   public void addSensorCollection(String sensorName, int period) {
 
@@ -423,7 +423,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
       savePreference(ACTIVE_SENSORS, activeSensors);
     }
   }
-  
+
   private JsonElement getDataRequest(int interval, String probeName) {
     // This will set the schedule to FunfManger for this probe
     // List<JsonElement> dataRequests = new ArrayList<JsonElement>();
@@ -433,7 +433,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
      * "@schedule": { "strict": true, "interval": 60, "duration": 30,
      * "opportunistic": true } }
      */
-    
+
     // fine tuning for SimpleLocationProbe
     if(probeName.equals("edu.mit.media.funf.probe.builtin.SimpleLocationProbe")){
       return getLocationRequest(interval, probeName);
@@ -446,13 +446,13 @@ public class SensorDBPipeline implements Pipeline, DataListener{
         || probeName.equals("edu.mit.media.funf.probe.builtin.CallLogProbe")) {
       ((JsonObject) dataRequest).addProperty("hideSensitiveData", hideSensitiveData);
     }
-        
+
     //((JsonObject) dataRequest).addProperty("maxScanTime", 40);
     JsonElement scheduleObject = new JsonObject();
     ((JsonObject) scheduleObject).addProperty("strict", true);
     ((JsonObject) scheduleObject).addProperty("interval", interval);
     ((JsonObject) scheduleObject).addProperty("opportunistic", true);
-    
+
     if(probeName.equals("edu.mit.media.funf.probe.builtin.LightSensorProbe")){
       ((JsonObject) scheduleObject).addProperty("duration", 5);
     }
@@ -461,17 +461,17 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
     return dataRequest;
   }
-  
+
 
   private JsonElement getLocationRequest(int interval, String probeName) {
- 
+
     JsonElement dataRequest = new JsonObject();
     ((JsonObject) dataRequest).addProperty("@type", probeName);
 
     // simpleLocationProbe configuration (useGPS = true, useNetwork=true, useCache=false)
     ((JsonObject) dataRequest).addProperty("useCache", false); // we want to get the new location
     //TODO: detect whether it's moving or not (indoor or outdoor)
-    
+
     //((JsonObject) dataRequest).addProperty("maxScanTime", 40);
     JsonElement scheduleObject = new JsonObject();
     ((JsonObject) scheduleObject).addProperty("strict", true);
