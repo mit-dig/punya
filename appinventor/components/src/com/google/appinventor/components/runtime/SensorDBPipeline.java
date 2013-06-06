@@ -71,8 +71,6 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   private static final int CLEAR_BACKUP = 86400;
   private static final String TAG = "SensorDBPipeline";
   protected static final String ACTIVE_SENSORS = "active.sensors";
-
-
   private Map<String, Integer> activeSensors = new HashMap<String, Integer>();
   private Map<String, String> sensorMapping = SensorDbUtil.sensorMap;
 
@@ -83,11 +81,8 @@ public class SensorDBPipeline implements Pipeline, DataListener{
   private int archive_period;
   private int export_period;
   private int clear_period;
-
   private boolean hideSensitiveData;
   private SharedPreferences sharedPreferences;
-
-
 
   private Calendar calendar = Calendar.getInstance(Locale.getDefault());
   private BigDecimal localOffsetSeconds = BigDecimal.valueOf(
@@ -373,7 +368,9 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     i.putExtras(b);
     funfManager.startService(i);
 
+
   }
+
   /*
    *  reuse codes from TinyDB
    */
@@ -390,6 +387,7 @@ public class SensorDBPipeline implements Pipeline, DataListener{
 
 
   }
+
 
   private Object getPreference(String tag){
     try {

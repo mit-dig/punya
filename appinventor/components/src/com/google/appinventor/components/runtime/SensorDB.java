@@ -232,8 +232,8 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
   }
   
-  @SimpleFunction(description = "Add sensor colleciton task for a specific sensor with" +
-  		" specified period (in seconds)")
+  @SimpleFunction(description = "Add sensor colleciton task for a specific sensor with"
+      + " specified period (in seconds)")
   public void AddSensorCollection(String sensorName, int period) {
     // add to the list
 
@@ -241,13 +241,13 @@ OnDestroyListener, OnResumeListener, OnStopListener{
       // mapp the sensor to some probe's className
       if (sensorMapping.containsKey(sensorName)) {
         mPipeline.addSensorCollection(sensorName, period);
-        
-        //make the service on the foreground 
-        if (!Launcher.isForeground()){
+
+        // make the service on the foreground
+        if (!Launcher.isForeground()) {
           Log.i(TAG, "make funfManager in the foreground....");
           Launcher.startForeground(mainUIThreadActivity);
-          
-        } 
+
+        }
 
       } else {
         // TODO: throw an exception, saying the sensor does not exist, please
@@ -256,8 +256,9 @@ OnDestroyListener, OnResumeListener, OnStopListener{
             ErrorMessages.ERROR_SENSORDB_NOTAVAILABLE, sensorName);
       }
     } else {
-      Log.v(TAG, "AddSensorCollection, pipeline is null, funf is killed by the system.");
-      //this should not happen..because we already bind to Funf
+      Log.v(TAG,
+          "AddSensorCollection, pipeline is null, funf is killed by the system.");
+
     }
 
   }
@@ -301,7 +302,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
       }
     } else{
       Log.v(TAG, "Funf was killed by the system. In normal case, should not be here...");
-      //this should not happen..because we already bind to Funf
+
     }
 
   }

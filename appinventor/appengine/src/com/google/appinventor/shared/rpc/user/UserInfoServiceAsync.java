@@ -39,4 +39,9 @@ public interface UserInfoServiceAsync {
    * @see UserInfoService#deleteUserFile(String)
    */
   void deleteUserFile(String fileName, AsyncCallback<Void> callback);
+
+  /**
+   * @see UserInfoService#getUserFingerprintSHA1()
+   */
+  void getUserFingerprintSHA1(AsyncCallback<String> callback);
 }
