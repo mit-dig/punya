@@ -256,8 +256,8 @@ OnDestroyListener, OnResumeListener, OnStopListener{
             ErrorMessages.ERROR_SENSORDB_NOTAVAILABLE, sensorName);
       }
     } else {
-      Log.v(TAG, "AddSensorCollection, should not be here...");
-      //this should not happen..because we already bind to Funf 
+      Log.v(TAG, "AddSensorCollection, pipeline is null, funf is killed by the system.");
+      //this should not happen..because we already bind to Funf
     }
 
   }
@@ -265,17 +265,17 @@ OnDestroyListener, OnResumeListener, OnStopListener{
   @SimpleFunction(description ="Update the period of sensor colleciton task of a specific sensor")
   public void UpdateSensorCollection(String sensorName, int period){
     //remove if existed, and add a new one with different configuration
-    
+
     if(mPipeline != null){
       RemoveSensorCollection(sensorName);
       AddSensorCollection(sensorName, period);
     } else {
       Log.v(TAG, "UpdateSensorCollection, should not be here...");
-      //this should not happen..because we already bind to Funf 
+      //this should not happen..because we already bind to Funf
     }
-    
+
   }
-  
+
   @SimpleFunction(description = "Remove data colleciton task of a specific sensor")
   public void RemoveSensorCollection(String sensorName) {
     if (mPipeline != null) {
@@ -283,29 +283,29 @@ OnDestroyListener, OnResumeListener, OnStopListener{
         form.dispatchErrorOccurredEvent(SensorDB.this, "AddSensorCollection",
             ErrorMessages.ERROR_SENSORDB_NOTAVAILABLE, sensorName);
       }
-      
+
       if (mPipeline.getActiveSensor().containsKey(sensorName)) {
         mPipeline.removeSensorCollection(sensorName);
-        
+
         //if all sensor collection are removed, then stop foreground
         if (mPipeline.getActiveSensor().size() == 0 && Launcher.isForeground()){
           Log.i(TAG, "make funfManager stop foreground");
           Launcher.stopForeground(mainUIThreadActivity);
-          
-        } 
-        
+
+        }
+
       } else {
         // TODO: throw an exception saying the sensor is not active
         form.dispatchErrorOccurredEvent(SensorDB.this, "AddSensorCollection",
             ErrorMessages.ERROR_SENSORDB_NOTACTIVE, sensorName);
       }
     } else{
-      Log.v(TAG, "RemoveSensorCollection, should not be here...");
-      //this should not happen..because we already bind to Funf 
+      Log.v(TAG, "Funf was killed by the system. In normal case, should not be here...");
+      //this should not happen..because we already bind to Funf
     }
 
   }
-  
+
   /**
    * Returns the active sensors.
    */
@@ -317,7 +317,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
     YailList list = new YailList();
     List<Object> arrlist = new ArrayList<Object>();
     for (Entry<String, Integer> entry: mPipeline.getActiveSensor().entrySet()){
-      
+
 //      list.clear();
 //      list.add(YailList.makeList(new String[] { "First Name", "Barack" }));
 //      list.add(YailList.makeList(new String[] { "Last Name", "Obama" }));
@@ -325,44 +325,44 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 //      list.add(YailList.makeList(new String[] { "This list has too few items" }));
 //      try {
 //        web.buildPostData(YailList.makeList(list));
-      
+
       arrlist.add(YailList.makeList(new Object[] {entry.getKey(), entry.getValue()}));
 //      YailList entryList = new YailList();
 //      entryList.add(entry.getKey());
 //      entryList.add(entry.getValue());
 //      list.add(entryList);
     }
-    return YailList.makeList(arrlist); 
+    return YailList.makeList(arrlist);
   }
- 
-  
 
-//  @SimpleProperty(category = PropertyCategory.BEHAVIOR, 
+
+
+//  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
 //      description = "Returning available sensor names for sensor data collection, " +
 //      		"as a list of string for all sensor names")
 //  public YailList AvailableActiveSensors(){
 //    return YailList.makeList(SensorDbUtil.sensorMap.keySet());
-//    
+//
 //  }
 
 
   /**
    * Export the Sensor Database (SensorData as the name for the sqlite db on Android) as
-   * csv file(s) or JSON file(s). Each type of sensor data in the database 
-   * will be export it as one file. 
+   * csv file(s) or JSON file(s). Each type of sensor data in the database
+   * will be export it as one file.
    * The export path is under SDcard/packageName/export/
    */
   @SimpleFunction(description = "Export Sensor Database as CSV files or JSON files. " +
-      "Input \"csv\" or \"json\" for exporting format") 
+      "Input \"csv\" or \"json\" for exporting format")
   public void Export(String format){
     Log.i(TAG, "Exporting DB as CSV files");
     this.exportFormat = format;
     mPipeline.export(format);
-    // TODO: need to callback to show that the export finished (by writing to sharedPrefernce), 
+    // TODO: need to callback to show that the export finished (by writing to sharedPrefernce),
     // or else will have racing condition. If the developer use a button to do export & upload consecutively
   }
 
-  
+
 	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
 	public String ExportFolderPath(){
 		return this.exportPath;
@@ -372,16 +372,16 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 	public String ExportFormat(){
 	  return this.exportFormat;
 	}
-	 
+
 	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
 	public String DBName(){
-		return SensorDbUtil.DB_NAME; 
-		
+		return SensorDbUtil.DB_NAME;
+
 	}
-	
-	
+
+
   /**
-   * 
+   *
    * @param period
    *          The time interval between each execution of the task
    */
@@ -407,6 +407,22 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
   }
 
+  // testing purpose
+  private boolean forceKill = false;
+
+  @SimpleFunction(description = "(Testing) force Stop funfManager")
+  public void ForceKill(){
+    //first we need to unbind the service, then stop the service
+    if (mIsBound && mConnection != null) {
+      doUnbindService();
+      forceKill = true;
+
+    }
+
+
+
+  }
+
   @SimpleFunction(description = "Discable archive scheduled task")
   public void StopScheduleArchive() {
 
@@ -423,7 +439,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
   }
 
-  @SimpleProperty(description = "Current period of the schedule archive task", 
+  @SimpleProperty(description = "Current period of the schedule archive task",
       category = PropertyCategory.BEHAVIOR)
   public int ArchivePeriold() {
     return mPipeline.getArchivePeriod();
@@ -465,7 +481,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
   }
 
-  @SimpleProperty(description = "Current period of the schedule export task", 
+  @SimpleProperty(description = "Current period of the schedule export task",
       category = PropertyCategory.BEHAVIOR)
   public int ScheduleExpoertPeriod() {
     return this.ScheduleExpoertPeriod();
@@ -500,12 +516,12 @@ OnDestroyListener, OnResumeListener, OnStopListener{
     return this.scheduleClearbackupEnabled;
   }
 
-  @SimpleProperty(description = "Current period of the schedule clear backup task", 
+  @SimpleProperty(description = "Current period of the schedule clear backup task",
       category = PropertyCategory.BEHAVIOR)
   public int ScheduleClearBackupPeriod() {
     return this.ScheduleClearBackupPeriod();
   }
-  
+
   /*
    * This method is called within the onServiceConnected() of ServiceConnection for binding.
    * Once SensorDB is bound to SensorDbPipeline, then we can retrieve and initialize values for the UI.
@@ -524,18 +540,18 @@ OnDestroyListener, OnResumeListener, OnStopListener{
     archive_period = mPipeline.getArchivePeriod();
     export_period = mPipeline.getExportPeriod();
     clearbackup_period = mPipeline.getClearBackupPeriod();
-    
-    // Fire an event telling the UI that initialization with pipeline has finished. 
-    // Uses of pipeline values before this point will have racing conditions and 
+
+    // Fire an event telling the UI that initialization with pipeline has finished.
+    // Uses of pipeline values before this point will have racing conditions and
     // cause NullPointerException
- 
+
     FinishedInitServiceValues();
- 
+
   }
-  
+
   /**
    * Indicates that SensorDB is bound to SensorDBPipeline and re-initialize values from the pipeline
-   * e.g. archive_period, export_period, clearbackup_period, ..etc. 
+   * e.g. archive_period, export_period, clearbackup_period, ..etc.
    * App Inventor's user should use this event to update UI that needs values from the background service
    */
   @SimpleEvent
@@ -549,8 +565,8 @@ OnDestroyListener, OnResumeListener, OnStopListener{
     });
 
   }
-  
-  
+
+
 
   // try local binding to FunfManager
   private ServiceConnection mConnection = new ServiceConnection() {
@@ -560,7 +576,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
       // registerSelfToFunfManager();
       // once we bind to the existing FunfManager service, we will
       // createPipeline
-      mPipeline = (SensorDBPipeline) getOrCreatePipeline(); 
+      mPipeline = (SensorDBPipeline) getOrCreatePipeline();
 
       mIsBound = true;
       Log.i(TAG, "Bound to FunfManager");
@@ -575,6 +591,12 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
       Log.i(TAG, "Unbind FunfManager");
       mIsBound = false;
+      if (forceKill) {
+        //testing TODO: remove this code after testing
+        Log.i(TAG, "ForceKill is called at" + System.currentTimeMillis() );
+        Intent i = new Intent(mainUIThreadActivity.getApplicationContext(), FunfManager.class);
+        mainUIThreadActivity.getApplicationContext().stopService(i);
+      }
     }
   };
 
