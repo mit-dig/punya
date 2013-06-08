@@ -150,11 +150,11 @@ public class Survey extends AndroidViewComponent{
 	 */
 	public Survey(ComponentContainer container) throws IOException {
 		super(container);
-		mainUI = container.$context();
-		JsonParser parse = new JsonParser();
-		webview = new WebView(container.$context());
-		webview.getSettings().setJavaScriptEnabled(true);
-		webview.setFocusable(true);
+    mainUI = container.$context();
+    JsonParser parse = new JsonParser();
+    webview = new WebView(container.$context());
+    webview.getSettings().setJavaScriptEnabled(true);
+    webview.setFocusable(true);
 		webview.setVerticalScrollBarEnabled(true);
  
 		container.$add(this);

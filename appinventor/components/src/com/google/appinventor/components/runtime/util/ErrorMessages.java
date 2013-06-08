@@ -159,6 +159,10 @@ public final class ErrorMessages {
   public static final int ERROR_SENSORDB_NOTAVAILABLE = 2001;
   public static final int ERROR_SENSORDB_NOTACTIVE = 2002;
 
+  // Please start the next group of error numbers at 2010.
+  public static final int ERROR_GOOGLE_MAP_NOTINSTALLED = 2010;
+  public static final int ERROR_GOOGLE_PLAY_NOTINSTALLED = 2011;
+
   
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
@@ -416,6 +420,9 @@ public final class ErrorMessages {
     "select one by calling <code>AvailableActiveSensors</code>");
     
     errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "%s is not cuurently active");
+
+    errorMessages.put(ERROR_GOOGLE_PLAY_NOTINSTALLED, "Google Play is not installed/available on this phone");
+    errorMessages.put(ERROR_GOOGLE_MAP_NOTINSTALLED, "Google Map is not installed on this phone");
     
   }
 

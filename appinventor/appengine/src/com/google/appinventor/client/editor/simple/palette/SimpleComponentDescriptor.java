@@ -9,30 +9,7 @@ import com.google.appinventor.client.Images;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
-import com.google.appinventor.client.editor.simple.components.MockBall;
-import com.google.appinventor.client.editor.simple.components.MockButton;
-import com.google.appinventor.client.editor.simple.components.MockCanvas;
-import com.google.appinventor.client.editor.simple.components.MockCheckBox;
-import com.google.appinventor.client.editor.simple.components.MockComponent;
-import com.google.appinventor.client.editor.simple.components.MockContactPicker;
-import com.google.appinventor.client.editor.simple.components.MockEmailPicker;
-import com.google.appinventor.client.editor.simple.components.MockHorizontalArrangement;
-import com.google.appinventor.client.editor.simple.components.MockImage;
-import com.google.appinventor.client.editor.simple.components.MockImagePicker;
-import com.google.appinventor.client.editor.simple.components.MockImageSprite;
-import com.google.appinventor.client.editor.simple.components.MockLDVisualization;
-import com.google.appinventor.client.editor.simple.components.MockLabel;
-import com.google.appinventor.client.editor.simple.components.MockListPicker;
-import com.google.appinventor.client.editor.simple.components.MockNonVisibleComponent;
-import com.google.appinventor.client.editor.simple.components.MockPasswordTextBox;
-import com.google.appinventor.client.editor.simple.components.MockPhoneNumberPicker;
-import com.google.appinventor.client.editor.simple.components.MockRadioButton;
-import com.google.appinventor.client.editor.simple.components.MockSurvey;
-import com.google.appinventor.client.editor.simple.components.MockTableArrangement;
-import com.google.appinventor.client.editor.simple.components.MockTextBox;
-import com.google.appinventor.client.editor.simple.components.MockVerticalArrangement;
-import com.google.appinventor.client.editor.simple.components.MockVideoPlayer;
-import com.google.appinventor.client.editor.simple.components.MockWebViewer;
+import com.google.appinventor.client.editor.simple.components.*;
 import com.google.common.collect.Maps;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
@@ -126,6 +103,7 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/dropbox.png", images.dropbox());
     bundledImages.put("images/chart.png", images.ldchart());
     bundledImages.put("images/googledrive.png", images.googledrive());    
+    bundledImages.put("images/gmap.png", images.googlemap());
     bundledImages.put("images/voting.png", images.voting());
     bundledImages.put("images/web.png", images.web());
     imagesInitialized = true;
@@ -309,6 +287,8 @@ public final class SimpleComponentDescriptor {
       return new MockSurvey(editor);
     } else if (name.equals(MockLDVisualization.TYPE)){
       return new MockLDVisualization(editor);
+    } else if (name.equals(MockGoogleMap.TYPE)){
+      return new MockGoogleMap(editor);
     }
       else {
       // TODO(user): add 3rd party mock component proxy here

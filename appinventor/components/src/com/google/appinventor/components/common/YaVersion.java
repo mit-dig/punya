@@ -254,6 +254,8 @@ public class YaVersion {
   // - The LinkedDataViz component was added
   // For YOUNG_ANDROID_VERSION 91;
   // - The GoogleDrive component was added
+  // For YOUNG_ANDROID_VERSION 92;
+  // - The Google Map component was added
   // TODO: NEED TO FIX THE TOTAL VERSION 
     
  
@@ -680,4 +682,6 @@ public class YaVersion {
   public static final int LINKED_DATA_COMPONENT_VERSION = 1;
   
   public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
+
+  public static final int GOOGLE_MAP_COMPONENT_VERSION = 1;
 }
