@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-  <application></application>
-  <version>1</version>
+  <application>mit-ai2-punya</application>
+  <version></version>
 
   <!-- Configure serving/caching of GWT files -->
   <static-files>
@@ -65,13 +65,12 @@
     <!-- Gallery Admin Email -->
     <property name="gallery.admin.email" value="" />
 
-
     <!-- set to true if users need to accept a Terms of Service the first time
       they access App Inventor -->
     <property name="require.tos" value="true" />
 
     <!-- host[:port] to use for connecting to the build server -->
-    <property name="build.server.host" value="localhost:9990" />
+    <property name="build.server.host" value="punyabuildserver.appinventor.mit.edu:9990" />
 
     <!-- host[:port] to tell build server the app host url to callback
          when deploy AppInventor on other GAE implementation such as
@@ -87,7 +86,7 @@
     <!-- Set this to false if we should not send the Git build version with build requests.
          This is useful when testing new servers where we don't want to require the
          buildserver to match -->
-    <property name="build.send.git.version" value="true" />
+    <property name="build.send.git.version" value="false" />
 
     <!-- Set this to true to enable the use of Wifi connections from the blocks editor to
          the phone. The phone must have an up-to-date copy of the MIT AICompanion App to

@@ -80,6 +80,9 @@
       <fileset dir="war">
         <exclude name="blocklyframe.html"/>
       </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="closure-library/closure/goog/css/dialog.css"/>
+      </fileset>
       <fileset dir="src/${appinventor.pkg}">
         <!-- canvas is a special case (see MockCanvas.java) -->
         <include name="images/canvas.png" />
@@ -97,11 +100,6 @@
       </filterset>
     </copy>
     <copy file="${build.dir}/blocklyeditor/blockly-all.js" tofile="${build.war.dir}/blockly-${guid1}.js" />
-    <copy todir="${build.war.dir}/">
-      <fileset dir="${lib.dir}">
-        <include name="closure-library/**/*"/>
-      </fileset>
-    </copy>
   </target>
 
   <target name="CopyBlocklyToBuildWar"
@@ -448,7 +446,7 @@
       <jvmarg line="${XstartOnFirstThread}"/>
       <arg line="-war"/>
       <arg value="${build.war.dir}"/>
-      <arg line="-logLevel INFO -style pretty"/>
+      <arg line="-logLevel INFO -localWorkers 4 -optimize 9"/>
       <arg value="com.google.appinventor.YaClient"/>
     </java>
   </target>
