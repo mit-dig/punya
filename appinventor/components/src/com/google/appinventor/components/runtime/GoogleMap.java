@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
@@ -82,7 +83,7 @@ OnMapLongClickListener, OnCameraChangeListener{
   private com.google.android.gms.maps.GoogleMap mMap;
   private SupportMapFragment mMapFragment;
 
-  private HashMap<Integer, Marker> markers = new HashMap<Integer, Marker>();
+  private HashMap<Marker, Integer> markers = new HashMap<Marker, Integer>();
 
   //basic configurations of a map
   private int mapType = com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
@@ -102,12 +103,16 @@ OnMapLongClickListener, OnCameraChangeListener{
   private boolean enableMapLongClickListener = false;
   private boolean enableCameraChangeListener = false;
 
-  // setting up for cicle overlay
-  private List<DraggableCircle> mCircles = new ArrayList<DraggableCircle>(1);
+  // setting up for circle overlay
+
   private static final double DEFAULT_RADIUS = 1000000;
   public static final double RADIUS_OF_EARTH_METERS = 6371009;
+  private static final AtomicInteger snextCircleId = new AtomicInteger(1);
+  private HashMap<Object, Integer> circles = new HashMap<Object, Integer>(); //we are storing references for both circle and draggable circle
+  private List<DraggableCircle> mCircles = new ArrayList<DraggableCircle>(1);
 
-  private float mStrokeWidth = 10; // in pixel, 0 means no outline will be drawn
+  //defaults for circle overlay
+  private float mStrokeWidth = 2; // in pixel, 0 means no outline will be drawn
   private int mStrokeColor = Color.BLACK;  // perimeter default color is black
   private int mColorHue = 0 ; // value ranges from [0, 360]
   private int mAlpha = 20; //min 0, default 127, max 255
@@ -118,6 +123,7 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
   private static final AtomicInteger snextMarkerId = new AtomicInteger(1);
+
 
 
   public GoogleMap(ComponentContainer container) throws IOException {
@@ -418,27 +424,140 @@ OnMapLongClickListener, OnCameraChangeListener{
    * @param radius Radius of the circle
    * @param alpha Alpha value of the color of the circle overlay
    * @param hue Hue value of the color of the circle overaly
+   * @param strokeWidth Width of the perimeter
+   * @param strokeColor Color of the perimeter
    */
-  @SimpleFunction (description = "Create a circle overlay on the map UI with specified center and radius. " +
+  @SimpleFunction (description = "Create a circle overlay on the map UI with specified latitude and longitude for center. " +
+      "\"hue\" (min 0, max 360) and \"alpha\" (min 0, max 255) are used to set color and transparency level of the circle, "  +
+      "\"strokeWidth\" and \"strokeColor\" are for the perimeter of the circle. " +
       "Returning a unique id of the circle for future reference to events raised by moving this circle. If the circle is" +
       "set to be draggable, two default markers will appear on the map: one in the center of the circle, another on the perimeter.")
-  public int AddCircleOverlay(double lat, double lng, double radius, int alpha, float hue, boolean draggable){
+  public int AddCircle(double lat, double lng, double radius, int alpha, float hue, float strokeWidth, int strokeColor, boolean draggable){
+    int uid = generateCircleId();
+    int fillColor =  Color.HSVToColor(alpha, new float[] {hue, 1, 1});
 
+    if (draggable) {
+      //create a draggableCircle
+      DraggableCircle circle = new DraggableCircle(new LatLng(lat, lng), radius, strokeWidth, strokeColor, fillColor);
 
-    return 0;
+      mCircles.add(circle);
+      circles.put(circle,uid);
+
+    }
+    else {
+      Circle plainCircle = mMap.addCircle(new CircleOptions()
+          .center(new LatLng(lat, lng))
+          .radius(radius)
+          .strokeWidth(strokeWidth)
+          .strokeColor(strokeColor)
+          .fillColor(fillColor));
+      circles.put(plainCircle, uid);
+    }
+
+    return uid;
 
   }
 
-  @SimpleEvent(description = "Event been raised after the action of moving a circle overlay is finished. If previously set" +
-      "the circle to be draggable")
-  public void FinishedDraggingCircle() {
 
+  private Object getCircleIfExisted(int circleId){
+    Object circle = getKeyByValue(circles, circleId);
+
+    if(circle.equals(null)){
+      form.dispatchErrorOccurredEvent(this, "getCircleIfExisted",
+          ErrorMessages.ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, Integer.toString(circleId));
+    }
+    return circle;
+  }
+
+  @SimpleFunction(description = "Remove a circle for the map. Returns true if successfully removed, false if the circle " +
+      "does not exist with the specified id")
+  public boolean RemoveCircle(int circleId){
+
+    Object circle = getKeyByValue(circles, circleId);
+    boolean isRemoved = false;
+
+    if (circle == null) {
+      //TODO: do we need another error Message?
+      return isRemoved;
+    } else {
+      if (circle instanceof DraggableCircle){// if it's a draggable circle
+        ((DraggableCircle) circle).removeFromMap(); // remove all it's inner objects from the map
+        mCircles.remove(circle); //need to remove it from the mCircles arraylist
+
+      }
+      if (circle instanceof Circle) { // it's a plain circle, just remove it from the hashmap and the map
+        ((Circle) circle).remove();
+
+      }
+      circles.remove(circle);
+      isRemoved = true;
+    }
+
+   return isRemoved;
+  }
+
+  @SimpleFunction(description = "Set the property of an existing circle. Properties include: " +
+      "\"alpha\"(integer, value ranging from 0~255), \"color\" (integer, hue value ranging 0~360), " +
+      "\"radius\"(float)")
+  public void UpdateCircle(int circleId, String propertyName, Object value){
+
+  float [] hsv = new float[3];
+  Object circle = getCircleIfExisted(circleId);  // if it's null, getCircleIfExisted will show error msg
+  Circle updateCircle = null; // the real circle content that gets updated
+
+  if (circle != null) {
+    if (circle instanceof DraggableCircle) {
+      updateCircle = ((DraggableCircle) circle).getCircle();
+    }
+    if (circle instanceof Circle) {
+      updateCircle = (Circle) circle;
+    }
+    // updating the circle
+    if (propertyName.equals("alpha")) {
+      int color = updateCircle.getFillColor();
+      Color.colorToHSV(color, hsv);
+      //Color.HSVToColor(mAlpha, new float[] {mColorHue, 1, 1});//default to red, medium level hue color
+      int newColor = Color.HSVToColor((Integer)value, hsv);
+      updateCircle.setFillColor(newColor);
+    }
+
+    if (propertyName.equals("color")) {
+      int alpha = Color.alpha(updateCircle.getFillColor());
+
+      int newColor = Color.HSVToColor(alpha, new float[] {(Float)value, 1, 1});
+      updateCircle.setFillColor(newColor);
+    }
 
   }
 
 
+  }
 
+  @SimpleFunction(description = "Get all circles Ids. A short cut to get all the references for the eixisting circles")
+  public YailList GetAllCircleIDs() {
+    return YailList.makeList(circles.values());
 
+  }
+
+  // this event flow comes from  Marker.onMarkerDragStart/onMarkerDragEnd/onMarkerDrag
+  // --> DraggableCircle.onMarkerMove() --> FinishDraggingCircle()
+  // if the user is dragging the circle radius marker, the draggable circle object with re-draw automatically
+  // only when the user finishes dragging the circle will we propagate this event to the UI.
+
+  @SimpleEvent(description = "Event been raised after the action of moving a draggable circle is finished. Possible a user "
+      + "drag the center of the circle or drag the radius marker of the circle")
+  public void FinishedDraggingCircle(final int id, final double centerLat,
+      final double centerLng, final double radius) {
+    // called by moving the marker that's the center of the circle
+    context.runOnUiThread(new Runnable() {
+      public void run() {
+        Log.i(TAG, "a draggable circle:" + id + "finished been dragged");
+        EventDispatcher.dispatchEvent(GoogleMap.this, "FinishedDraggingCircle",
+            id, centerLat, centerLng, radius);
+      }
+    });
+
+  }
 
 
   // AndroidViewComponent implementation
@@ -450,7 +569,8 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   @Override
   public void onResume() {
-    // TODO: http://stackoverflow.com/questions/15001207/android-googlemap-is-null-displays-fine-but-cant-add-markers-polylines
+    // TODO:
+    // http://stackoverflow.com/questions/15001207/android-googlemap-is-null-displays-fine-but-cant-add-markers-polylines
     // only now is it saved to redraw the map...
     Log.i(TAG, "in onResume...Google Map redraw");
     setUpMapIfNeeded();
@@ -604,24 +724,29 @@ OnMapLongClickListener, OnCameraChangeListener{
    * @return
    * TODO: Adding customized icons
    */
-  @SimpleFunction(description = "Adding a list of YailLists for markers. The representation of a maker in the " +
-      "inner YailList is composed of: " +
-      "lat(double) [required], long(double) [required], Color, " +
-      "title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added markers for future references")
-  public YailList AddMarkers(YailList markers){
-    // For color, check out the code in Form.java$BackgroundColor() e.g. if (argb != Component.COLOR_DEFAULT) 
+  @SimpleFunction(description = "Adding a list of YailLists for markers. The representation of a maker in the "
+      + "inner YailList is composed of: "
+      + "lat(double) [required], long(double) [required], Color, "
+      + "title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added " 
+      +  " markers for future references")
+  public YailList AddMarkers(YailList markers) {
+    // For color, check out the code in Form.java$BackgroundColor() e.g. if
+    // (argb != Component.COLOR_DEFAULT)
     // After the color is chosen, it's passed in as int into the method
-    // We can have two ways for supporting color of map markers: 1) pass it in as int in the Yailist, 
+    // We can have two ways for supporting color of map markers: 1) pass it in
+    // as int in the Yailist,
     // 2) if the user omit the value for color, we will use the blue color\
-    // what's a easier way for people to know about the color list? 
-    // App Inventor currently uses RGB (android.graphics.Color), but android map marker uses HUE
-    // http://developer.android.com/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#HUE_YELLOW 
-    // We can use Android.graphics.Color.colorToHSV(int rgbcolor, float[]hsv) to get the hue value in the hsv array
-    float [] hsv = new float[3];
+    // what's a easier way for people to know about the color list?
+    // App Inventor currently uses RGB (android.graphics.Color), but android map
+    // marker uses HUE
+    // http://developer.android.com/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html#HUE_YELLOW
+    // We can use Android.graphics.Color.colorToHSV(int rgbcolor, float[]hsv) to
+    // get the hue value in the hsv array
+    float[] hsv = new float[3];
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     for (Object marker : markers.toArray()) {
       if (marker instanceof YailList) {
-        if (((YailList) marker).size() < 2){
+        if (((YailList) marker).size() < 2) {
           // throw an exception with error messages
           form.dispatchErrorOccurredEvent(this, "AddMarkers",
               ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
@@ -635,26 +760,24 @@ OnMapLongClickListener, OnCameraChangeListener{
         String snippet = "";
         boolean draggable = mMarkerDraggable;
 
-        if (((YailList) marker).size() >= 3){
+        if (((YailList) marker).size() >= 3) {
           color = (Integer) ((YailList) marker).get(3);
         }
-        if (((YailList) marker).size() >= 4){
+        if (((YailList) marker).size() >= 4) {
           title = (String) ((YailList) marker).get(4);
         }
-        if (((YailList) marker).size() >= 5){
-           snippet = (String) ((YailList) marker).get(5);
+        if (((YailList) marker).size() >= 5) {
+          snippet = (String) ((YailList) marker).get(5);
         }
         if (((YailList) marker).size() >= 6) {
           draggable = (Boolean) ((YailList) marker).get(6);
         }
 
-
         Color.colorToHSV(color, hsv);
         int uniqueId = generateMarkerId();
         markerIds.add(uniqueId);
         addMarkerToMap(lat, lng, uniqueId, hsv[0], title, snippet, draggable);
-      }
-      else {
+      } else {
         // fire exception and throw error messages
         form.dispatchErrorOccurredEvent(this, "AddMarkers",
             ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
@@ -662,7 +785,7 @@ OnMapLongClickListener, OnCameraChangeListener{
       }
     }
     return YailList.makeList(markerIds);
-  
+
   }
 
 
@@ -674,6 +797,20 @@ OnMapLongClickListener, OnCameraChangeListener{
     return snextMarkerId.incrementAndGet();
 
   }
+
+  /**
+   * generate unique circle id
+   * @return
+   */
+  private static int generateCircleId(){
+    return snextCircleId.incrementAndGet();
+
+  }
+
+  /**
+   * generate unique circle id
+   * @return
+   */
 
   /**
    * Add a marker on the Google Map
@@ -700,28 +837,28 @@ OnMapLongClickListener, OnCameraChangeListener{
     }
     marker.setDraggable(draggable);
 
-    markers.put(id, marker);
+    markers.put(marker, id);
   }
 
-  @SimpleFunction(description = "Adding a list of markers that are represented as JsonArray. The inner JsonObject represents a marker" +
-      "and is composed of name-value pairs. Name fields for a marker are \"lat\" (type double) [required], \"lng\"(type double) [required], " +
+  @SimpleFunction(description = "Adding a list of markers that are represented as JsonArray. " +
+  		" The inner JsonObject represents a marker" +
+      "and is composed of name-value pairs. Name fields for a marker are: " +
+      "\"lat\" (type double) [required], \"lng\"(type double) [required], " +
       "\"color\"(type int)[in hue value ranging from 0-360], " +
       "\"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
-
-  public YailList AddMarkersFromJson(String jsonString){
+  public YailList AddMarkersFromJson(String jsonString) {
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     JsonParser parser = new JsonParser();
     // parse jsonString into jsonArray
-
     try {
       JsonElement markerList = parser.parse(jsonString);
-      if (markerList.isJsonArray()){
+      if (markerList.isJsonArray()) {
         JsonArray markerArray = markerList.getAsJsonArray();
-        for (JsonElement marker : markerArray){
-          //now we have marker
-          if(marker.isJsonObject()){
+        for (JsonElement marker : markerArray) {
+          // now we have marker
+          if (marker.isJsonObject()) {
             JsonObject markerJson = marker.getAsJsonObject();
-            if (markerJson.get("lat").equals(null) || markerJson.get("lng").equals(null)){
+            if (markerJson.get("lat") == null || markerJson.get("lng") == null) {
               form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
                   ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
               return YailList.makeList(markerIds);
@@ -732,15 +869,17 @@ OnMapLongClickListener, OnCameraChangeListener{
 
               int color = (markerJson.get("color") == null) ? mMarkerColor : markerJson.get("color").getAsInt();
               String title = (markerJson.get("title") == null) ? "" : markerJson.get("title").getAsString();
-              String snippet = (markerJson.get("snippet") == null) ? "" : markerJson.get("snippet").getAsString();;
+              String snippet = (markerJson.get("snippet") == null) ? "" : markerJson.get("snippet").getAsString();
               boolean draggable = (markerJson.get("draggable") == null) ? mMarkerDraggable : markerJson.get("draggable").getAsBoolean();
+              
               int uniqueId = generateMarkerId();
               markerIds.add(uniqueId);
-              addMarkerToMap(latitude, longitude, uniqueId, color, title, snippet, draggable);
+              addMarkerToMap(latitude, longitude, uniqueId, color, title,
+                  snippet, draggable);
 
             }
 
-          } else { //not a JsonObject
+          } else { // not a JsonObject
             form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
                 ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
             return YailList.makeList(markerIds);
@@ -754,17 +893,14 @@ OnMapLongClickListener, OnCameraChangeListener{
         return YailList.makeList(markerIds);
       }
 
-
     } catch (JsonSyntaxException e) {
       form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
           ErrorMessages.ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED, jsonString);
       return YailList.makeList(markerIds);
     }
 
-
     return YailList.makeList(markerIds);
   }
-
 
   /**
    * Add a list of YailList to the map
@@ -819,69 +955,124 @@ OnMapLongClickListener, OnCameraChangeListener{
     
   }
 
-  @SimpleFunction(description = "Set the property of a marker, note that the marker has to be added first or else will " +
-      "throw an exception! Properties include: \"color\"(in type float, hue value ranging from 0-360), \"title\" (in type String), " +
-      "\"snippet\"(in type String), \"draggable\"(in type boolean).")
-  public void UpdateMarker(int markerId, String propertyName, Object value){
-    //we don't support update lat, lng here, one can remove the marker and add a new one
+  @SimpleFunction(description = "Set the property of a marker, note that the marker has to be added first or else will "
+      + "throw an exception! Properties include: \"color\"(in type float, hue value ranging from 0-360), \"title\" (in type String), "
+      + "\"snippet\"(in type String), \"draggable\"(in type boolean).")
+  public void UpdateMarker(int markerId, String propertyName, Object value) {
+    // we don't support update lat, lng here, one can remove the marker and add
+    // a new one
     Marker marker = getMarkerIfExisted(markerId);
 
-    if(propertyName.equals("color")) {
-      marker.setIcon(BitmapDescriptorFactory.defaultMarker((Float)value));
-    }
-    if(propertyName.equals("title")) {
-      marker.setTitle((String)value);
-    }
-    if(propertyName.equals("snippet")) {
-      marker.setSnippet((String)value);
-    }
-    if(propertyName.equals("draggable")) {
-      marker.setDraggable((Boolean)value);
+    if (marker != null) {
+      if (propertyName.equals("color")) {
+        marker.setIcon(BitmapDescriptorFactory.defaultMarker((Float) value));
+      }
+      if (propertyName.equals("title")) {
+        marker.setTitle((String) value);
+      }
+      if (propertyName.equals("snippet")) {
+        marker.setSnippet((String) value);
+      }
+      if (propertyName.equals("draggable")) {
+        marker.setDraggable((Boolean) value);
+      }
     }
 
   }
 
+  @SimpleFunction(description = "Get all the existing markers's Ids" )
+  public YailList GetAllMarkerID(){
+
+    return YailList.makeList(markers.values());
+
+  }
+
   private Marker getMarkerIfExisted(int markerId){
-    Marker marker = markers.get(markerId);
+    Marker marker = getKeyByValue(markers, markerId);
+
     if(marker.equals(null)){
-      form.dispatchErrorOccurredEvent(this, "UpdateMarker",
+      form.dispatchErrorOccurredEvent(this, "getMarkerIfExisted",
           ErrorMessages.ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, Integer.toString(markerId));
     }
     return marker;
   }
 
+
   @SimpleFunction(description = "Remove a marker from the map")
   public void RemoveMarker(int markerId) {
     Marker marker = getMarkerIfExisted(markerId);
-    marker.remove();
+    if (marker != null)
+    {
+      markers.remove(marker); //remove from the Hashmap
+      marker.remove(); // remove from the google map
+    }
+
   }
+
 
 
   @Override
   public void onMarkerDrag(Marker marker) {
     // TODO Auto-generated method stub
-    Integer markerId = getKeyByValue(markers, marker);
-    LatLng latlng = marker.getPosition();
-    OnMarkerDrag(markerId, latlng.latitude, latlng.longitude);
 
-    
+    Integer markerId = markers.get(marker);
+    // if it's a marker for draggable circle then it's not in the hashmap, Ui will not receive this dragging event
+    if (markerId != null) {
+      LatLng latlng = marker.getPosition();
+      OnMarkerDrag(markerId, latlng.latitude, latlng.longitude);
+    }
+    // find if the marker is the center or radius marker of any existing draggable circle,
+    // then call the move or resize this draggable circle
+    for (DraggableCircle dCircle: mCircles){
+      if ((dCircle.getCenterMarker() == marker) || (dCircle.getRadiusMarker() == marker)) {
+        dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
+      }
+    }
+
+
   }
 
   @Override
   public void onMarkerDragEnd(Marker marker) {
     // TODO Auto-generated method stub
-    Integer markerId = getKeyByValue(markers, marker);
-    LatLng latlng = marker.getPosition();
-    OnMarkerDragEnd(markerId, latlng.latitude, latlng.longitude);
-    
+
+    Integer markerId = markers.get(marker);
+    // if it's a marker for draggable circle then it's not in the hashmap, Ui will not receive this dragging event
+    if (markerId != null) {
+      LatLng latlng = marker.getPosition();
+      OnMarkerDragEnd(markerId, latlng.latitude, latlng.longitude);
+    }
+    // find if the marker is the center or radius marker of any existing draggable circle, then call the move or resize
+    // this draggable circle
+    for (DraggableCircle dCircle: mCircles){
+      if ((dCircle.getCenterMarker() == marker) || (dCircle.getRadiusMarker() == marker)) {
+        dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
+        // also fire FinishedDraggingCircle() to UI
+        int uid = circles.get(dCircle);
+        LatLng center = dCircle.getCenterMarker().getPosition();
+        FinishedDraggingCircle(uid, center.latitude, center.longitude, dCircle.getRadius());
+      }
+    }
+
   }
 
   @Override
   public void onMarkerDragStart(Marker marker) {
     // TODO Auto-generated method stub
-    Integer markerId = getKeyByValue(markers, marker);
-    LatLng latLng = marker.getPosition();
-    OnMarkerDragStart(markerId, latLng.latitude, latLng.longitude);
+    // if it's a marker for draggable circle then it's not in the hashmap, Ui will not receive this dragging event
+    Integer markerId = markers.get(marker);
+    if (markerId != null) {
+      LatLng latLng = marker.getPosition();
+      OnMarkerDragStart(markerId, latLng.latitude, latLng.longitude); //fire event to UI
+    }
+    // find if the marker is the center or radius marker of any existing draggable circle, then call the move or resize
+    // this draggable circle
+    for (DraggableCircle dCircle: mCircles){
+      if ((dCircle.getCenterMarker() == marker) || (dCircle.getRadiusMarker() == marker)) {
+        dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
+      }
+    }
+
 
   }
 
@@ -946,7 +1137,8 @@ OnMapLongClickListener, OnCameraChangeListener{
   @Override
   public void onInfoWindowClick(Marker marker) {
     // TODO Auto-generated method stub
-    Integer markerId = getKeyByValue(markers, marker);
+
+    Integer markerId = markers.get(marker);
     InfoWindowClicked(markerId);
 
   }
@@ -954,7 +1146,8 @@ OnMapLongClickListener, OnCameraChangeListener{
   @Override
   public boolean onMarkerClick(Marker marker) {
     // TODO Auto-generated method stub
-    Integer markerId = getKeyByValue(markers, marker);
+
+    Integer markerId = markers.get(marker);
     LatLng latLng = marker.getPosition();
     OnMarkerClick(markerId, latLng.latitude, latLng.longitude);
 
@@ -967,7 +1160,9 @@ OnMapLongClickListener, OnCameraChangeListener{
 
 
   /**
-   * A small util function to get the key-value mapping in a map
+   * A small util function to get the key-value mapping in a map.
+   * We use this to get our marker (key) using unique values
+   * of marker identifiers
    * @param map
    * @param value
    * @param <T>
@@ -1043,13 +1238,27 @@ OnMapLongClickListener, OnCameraChangeListener{
   }
 
 
-  // private class representing the circle overlay. Code copied from Google Example
+  @SimpleFunction(description = "Move the map's camera to the specified position and zoom")
+  public void MoveCamera(double lat, double lng, float zoom){
+    if(mMap != null) {
+      mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
+    }
+
+  }
+
+  // private class representing the circle overlay. Code copied and extended from Google Example
+  // We need to keep a data structure to tie circle and two markers together.
   private class DraggableCircle {
     private final Marker centerMarker;
     private final Marker radiusMarker;
     private final Circle circle;
     private double radius;
-    public DraggableCircle(LatLng center, double radius) {
+//    private float strokeWidth;
+//    private int strokeColor;
+//    private int fillColor;
+
+    // In Draggable circle, AI user will not get reference of the inner objects (circle, markers)
+    public DraggableCircle(LatLng center, double radius, float strokeWidth, int strokeColor, int fillColor) {
       this.radius = radius;
       centerMarker = mMap.addMarker(new MarkerOptions()
           .position(center)
@@ -1062,11 +1271,12 @@ OnMapLongClickListener, OnCameraChangeListener{
       circle = mMap.addCircle(new CircleOptions()
           .center(center)
           .radius(radius)
-          .strokeWidth(mStrokeWidth)
-          .strokeColor(mStrokeColor)
-          .fillColor(mFillColor));
+          .strokeWidth(strokeWidth)
+          .strokeColor(strokeColor)
+          .fillColor(fillColor));
+
     }
-    public DraggableCircle(LatLng center, LatLng radiusLatLng) {
+    public DraggableCircle(LatLng center, LatLng radiusLatLng, float strokeWidth, int strokeColor, int fillColor) {
       this.radius = toRadiusMeters(center, radiusLatLng);
       centerMarker = mMap.addMarker(new MarkerOptions()
           .position(center)
@@ -1079,10 +1289,23 @@ OnMapLongClickListener, OnCameraChangeListener{
       circle = mMap.addCircle(new CircleOptions()
           .center(center)
           .radius(radius)
-          .strokeWidth(mStrokeWidth)
-          .strokeColor(mStrokeColor)
-          .fillColor(mFillColor));
+          .strokeWidth(strokeWidth)
+          .strokeColor(strokeColor)
+          .fillColor(fillColor));
     }
+    // draw a circle between two known marker
+    public DraggableCircle(Marker center, Marker radius, float strokeWidth, int strokeColor, int fillColor){
+      this.radius = toRadiusMeters(center.getPosition(), radius.getPosition());
+      centerMarker = center;
+      radiusMarker = radius;
+      circle = mMap.addCircle(new CircleOptions()
+          .center(center.getPosition())
+          .radius(this.radius)
+          .strokeWidth(strokeWidth)
+          .strokeColor(strokeColor)
+          .fillColor(fillColor));
+    }
+
     public boolean onMarkerMoved(Marker marker) {
       if (marker.equals(centerMarker)) {
         circle.setCenter(marker.getPosition());
@@ -1096,11 +1319,30 @@ OnMapLongClickListener, OnCameraChangeListener{
       }
       return false;
     }
-//    public void onStyleChange() {
-//      circle.setStrokeWidth(mWidthBar.getProgress());
-//      circle.setFillColor(mFillColor);
-//      circle.setStrokeColor(mStrokeColor);
-//    }
+
+    public void removeFromMap(){
+      this.circle.remove();
+      this.centerMarker.remove();
+      this.radiusMarker.remove();
+    }
+    public Marker getCenterMarker(){
+      return this.centerMarker;
+    }
+
+    public Marker getRadiusMarker(){
+      return this.radiusMarker;
+    }
+
+    public Circle getCircle(){
+      return this.circle;
+    }
+
+    public Double getRadius(){
+      return this.radius;
+    }
+
+
+
   }
 
   /** Generate LatLng of radius marker */
@@ -1116,5 +1358,8 @@ OnMapLongClickListener, OnCameraChangeListener{
         radius.latitude, radius.longitude, result);
     return result[0];
   }
+
+
+
 
 }

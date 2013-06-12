@@ -165,6 +165,7 @@ public final class ErrorMessages {
   public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 2012;
   public static final int ERROR_GOOGLE_MAP_MARKER_NOT_EXIST = 2013;
   public static final int ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED = 2014;
+  public static final int ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST = 2015;
 
   
   // Mapping of error numbers to error message format strings.
@@ -430,6 +431,7 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, "Marker with id: %s does not exist");
     errorMessages.put(ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED,
         "Unable to decode the JSON text: %s");
+    errorMessages.put(ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, "Circle with id: %s does not exist");
 
 
   }
