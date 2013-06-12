@@ -162,6 +162,9 @@ public final class ErrorMessages {
   // Please start the next group of error numbers at 2010.
   public static final int ERROR_GOOGLE_MAP_NOTINSTALLED = 2010;
   public static final int ERROR_GOOGLE_PLAY_NOTINSTALLED = 2011;
+  public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 2012;
+  public static final int ERROR_GOOGLE_MAP_MARKER_NOT_EXIST = 2013;
+  public static final int ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED = 2014;
 
   
   // Mapping of error numbers to error message format strings.
@@ -423,7 +426,12 @@ public final class ErrorMessages {
 
     errorMessages.put(ERROR_GOOGLE_PLAY_NOTINSTALLED, "Google Play is not installed/available on this phone");
     errorMessages.put(ERROR_GOOGLE_MAP_NOTINSTALLED, "Google Map is not installed on this phone");
-    
+    errorMessages.put(ERROR_GOOGLE_MAP_INVALID_INPUT, "Invalid input");
+    errorMessages.put(ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, "Marker with id: %s does not exist");
+    errorMessages.put(ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED,
+        "Unable to decode the JSON text: %s");
+
+
   }
 
   private ErrorMessages() {
