@@ -36,13 +36,12 @@ import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
-
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
@@ -1107,12 +1106,14 @@ private String startupValueForSurvey = "";
   @Override
   public void setChildWidth(AndroidViewComponent component, int width) {
     // A form is a vertical layout.
+    Log.i("Form", "Set child view Width:" + component.getView().toString());
     ViewUtil.setChildWidthForVerticalLayout(component.getView(), width);
   }
 
   @Override
   public void setChildHeight(AndroidViewComponent component, int height) {
     // A form is a vertical layout.
+    Log.i("Form", "Set child view height:" + component.getView().toString());
     ViewUtil.setChildHeightForVerticalLayout(component.getView(), height);
   }
 
@@ -1425,6 +1426,10 @@ private String startupValueForSurvey = "";
     }
     super.onBackPressed();
    }
+  }
+  
+  public ViewGroup getView(){
+    return viewLayout.getLayoutManager();
   }
   
   

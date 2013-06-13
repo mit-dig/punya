@@ -5,6 +5,9 @@
 
 package com.google.appinventor.components.runtime;
 
+import android.util.Log;
+import android.widget.*;
+import android.widget.FrameLayout;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.common.ComponentConstants;
 
@@ -105,11 +108,26 @@ public final class LinearLayout implements Layout {
   }
 
   public void add(AndroidViewComponent component) {
-    layoutManager.addView(component.getView(), new android.widget.LinearLayout.LayoutParams(
+    Log.i("LinearLayout", "I am adding: " + component.getView().toString());
+    if (component.getView() instanceof android.widget.FrameLayout) { // if child is a FrameLayout
+      Log.i("LinearLayout", "add framelayout to linearLayout");
+      layoutManager.addView(component.getView(), new android.widget.LinearLayout.LayoutParams(
+          ViewGroup.LayoutParams.MATCH_PARENT,  // width
+          ViewGroup.LayoutParams.MATCH_PARENT,  // height
+          0f));                                 // weight);
+    }
+    else{
+      layoutManager.addView(component.getView(), new android.widget.LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.WRAP_CONTENT,  // width
         ViewGroup.LayoutParams.WRAP_CONTENT,  // height
         0f));                                 // weight
+    }
+
+
+
   }
+
+
 
   public void setHorizontalGravity(int gravity) {
     layoutManager.setHorizontalGravity(gravity);
