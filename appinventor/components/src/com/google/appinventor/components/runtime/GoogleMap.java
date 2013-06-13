@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 
+import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.*;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -69,12 +71,13 @@ OnMapLongClickListener, OnCameraChangeListener{
   private final Activity context;
   private final Form form;
   private static final String TAG = "GoogleMap";
-
+  private final ComponentContainer myContainer;
   // Layout
   // We create thie LinerLayout and add our mapFragment in it.
   //private final com.google.appinventor.components.runtime.LinearLayout viewLayout;
-  private final FrameLayout viewLayout;
-  private ViewGroup viewG;
+//  private final FrameLayout viewLayout;
+  private final android.widget.LinearLayout viewLayout;
+
 
   // translates App Inventor alignment codes to Android gravity
   //private final AlignmentUtil alignmentSetter;
@@ -126,96 +129,88 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
   private static final AtomicInteger snextMarkerId = new AtomicInteger(1);
-
-
+  private final Handler androidUIHandler = new Handler();
+  private boolean addedSelf = false;
 
   public GoogleMap(ComponentContainer container) throws IOException {
     super(container);
     context = container.$context();
     form = container.$form();
+    myContainer = container;
     // try raw mapView with in the fragmment
-    viewLayout = new FrameLayout(context);
-//    viewLayout = new com.google.appinventor.components.runtime.LinearLayout(context,
-//      ComponentConstants.LAYOUT_ORIENTATION_VERTICAL);
-//    alignmentSetter = new AlignmentUtil(viewLayout);
-//
-//    verticalAlignment = ComponentConstants.VERTICAL_ALIGNMENT_DEFAULT;
-//
-//    alignmentSetter.setVerticalAlignment(verticalAlignment);
-    viewG = viewLayout.getLayoutManager();
+    viewLayout = new android.widget.LinearLayout(context);
 
-    viewG.setId(generateViewId());
+    viewLayout.setId(generateViewId());
     
-    container.$add(this);           // add first (will be WRAP_CONTENT)
+
     //add check if the phone has installed Google Map and Google Play Service sdk
 
     checkGooglePlayServiceSDK() ;
     checkGoogleMapInstalled() ;
 
-    mMapFragment = (SupportMapFragment) form.getSupportFragmentManager()
-        .findFragmentByTag(MAP_FRAGMENT_TAG);
+//    mMapFragment = (SupportMapFragment) form.getSupportFragmentManager()
+//        .findFragmentByTag(MAP_FRAGMENT_TAG);
 
 
-    // We only create a fragment if it doesn't already exist.
+//    We only create a fragment if it doesn't already exist.
     if (mMapFragment == null) {
 //      // To programmatically add the map, we first create a SupportMapFragment.
       mMapFragment = SupportMapFragment.newInstance();
 
       //mMapFragment = new SomeFragment();
-      FragmentTransaction fragmentTransaction =
-          form.getSupportFragmentManager().beginTransaction();
-      Log.i(TAG, "here before adding fragment");
-      fragmentTransaction.add(viewG.getId(), mMapFragment, MAP_FRAGMENT_TAG);
-
-    //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
-      fragmentTransaction.commit();
+//      FragmentTransaction fragmentTransaction =
+//          form.getSupportFragmentManager().beginTransaction();
+//      Log.i(TAG, "here before adding fragment");
+//      fragmentTransaction.add(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
+//
+//    //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
+//      fragmentTransaction.commit();
 
 
     }
+    // wait until the mMapFragment is created, then we add to the component
+    androidUIHandler.post(new Runnable() {
+      public void run() {
+        boolean dispatchEventNow = false;
+        if (mMapFragment != null) {
+
+          dispatchEventNow = true;
+
+        }
+        if (dispatchEventNow) {
+          FragmentTransaction fragmentTransaction =
+              form.getSupportFragmentManager().beginTransaction();
+          Log.i(TAG, "here before adding fragment");
+          fragmentTransaction.add(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
+
+          //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
+          fragmentTransaction.commit();
+
+          addSelf();
+          setUpMapIfNeeded();
+        } else {
+          // Try again later.
+          androidUIHandler.post(this);
+        }
+      }
+    });
+
 
     // We can't be guaranteed that the map is available because Google Play services might
+//    container.$add(this);           // add first (will be WRAP_CONTENT)
+
 
     form.registerForOnInitialize(this);
     form.registerForOnResume(this);
 
   }
 
-//  public class SomeFragment extends SupportMapFragment {
-//
-//    MapView mapView;
-//    GoogleMap map;
-//
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//
-//      View v = inflater.inflate(getResources().getIdentifier("basic_map", "layout", form.getPackageName()), container, false);
-//
-//      // Gets the MapView from the XML layout and creates it
-//      mapView = (MapView) v.findViewWithTag("map");
-//      mapView.onCreate(savedInstanceState);
-//
-//      return v;
-//    }
-//
-//    @Override
-//    public void onResume() {
-//      mapView.onResume();
-//      super.onResume();
-//    }
-//
-//    @Override
-//    public void onDestroy() {
-//      super.onDestroy();
-//      mapView.onDestroy();
-//    }
-//
-//    @Override
-//    public void onLowMemory() {
-//      super.onLowMemory();
-//      mapView.onLowMemory();
-//    }
-//
-//  }
+  private void addSelf(){
+    myContainer.$add(this);
+
+  }
+
+
  
 
   /**
@@ -238,23 +233,23 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   
 //  Currently this doesn't work
-//  @Override
-//  @SimpleProperty()
-//  public void Width(int width) {
-//    if (width == LENGTH_PREFERRED) {
-//      width = LENGTH_FILL_PARENT;
-//    }
-//    super.Width(width);
-//  }
-//
-//  @Override
-//  @SimpleProperty()
-//  public void Height(int height) {
-//    if (height == LENGTH_PREFERRED) {
-//      height = LENGTH_FILL_PARENT;
-//    }
-//    super.Height(height);
-//  }
+  @Override
+  @SimpleProperty()
+  public void Width(int width) {
+    if (width == LENGTH_PREFERRED) {
+      width = LENGTH_FILL_PARENT;
+    }
+    super.Width(width);
+  }
+
+  @Override
+  @SimpleProperty()
+  public void Height(int height) {
+    if (height == LENGTH_PREFERRED) {
+      height = LENGTH_FILL_PARENT;
+    }
+    super.Height(height);
+  }
 
   private void setUpMapIfNeeded() {
       // Do a null check to confirm that we have not already instantiated the map.
@@ -557,7 +552,7 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   @Override
   public View getView() {
-    return viewLayout.getLayoutManager();
+    return viewLayout;
   }
 
   @Override
@@ -566,71 +561,20 @@ OnMapLongClickListener, OnCameraChangeListener{
     // http://stackoverflow.com/questions/15001207/android-googlemap-is-null-displays-fine-but-cant-add-markers-polylines
     
     Log.i(TAG, "in onResume...Google Map redraw");
-    
-//    mMapFragment = (SupportMapFragment) form.getSupportFragmentManager()
-//        .findFragmentByTag(MAP_FRAGMENT_TAG);
-//
-//
-//    // We only create a fragment if it doesn't already exist.
-//    if (mMapFragment == null) {
-////      // To programmatically add the map, we first create a SupportMapFragment.
-//      //mMapFragment = SupportMapFragment.newInstance();
-//
-//      mMapFragment = new SomeFragment();
-//      FragmentTransaction fragmentTransaction =
-//          form.getSupportFragmentManager().beginTransaction();
-//      Log.i(TAG, "here before adding fragment");
-//      fragmentTransaction.add(viewG.getId(), mMapFragment, MAP_FRAGMENT_TAG);
-//
-//    //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
-//      fragmentTransaction.commit();
-//      Log.i(TAG, "we are done");
-//
-//    }
+//    prepareFragmentView();
 
     setUpMapIfNeeded();
 
   }
 
+
+
   @Override
   public void onInitialize() {
     // TODO Auto-generated method stub
     // do the initialization here...
-//
-//    mMapFragment = (SupportMapFragment) form.getSupportFragmentManager()
-//        .findFragmentByTag(MAP_FRAGMENT_TAG);
-//
-//
-//    // We only create a fragment if it doesn't already exist.
-//    if (mMapFragment == null) {
-////      // To programmatically add the map, we first create a SupportMapFragment.
-//      //mMapFragment = SupportMapFragment.newInstance();
-//
-//      mMapFragment = new SomeFragment();
-//      FragmentTransaction fragmentTransaction =
-//          form.getSupportFragmentManager().beginTransaction();
-//      Log.i(TAG, "here before adding fragment");
-//      fragmentTransaction.add(viewG.getId(), mMapFragment, MAP_FRAGMENT_TAG);
-//
-//    //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
-//      fragmentTransaction.commit();
-//      Log.i(TAG, "We are done...");
-//
-//    }
-//
-    Log.i(TAG, "All the children of Framelayout....");
-    for (Object obj : viewLayout.getChildren()){
-      Log.i(TAG, obj.toString());
-      Log.i(TAG, "child_height: " + ((View)obj).getLayoutParams().height);
-      Log.i(TAG, "child_width: " + ((View)obj).getLayoutParams().width);
-    }
 
-
-    Log.i(TAG, "try to do after the component is initialized...");
-
-    form.setChildHeight(this, Component.LENGTH_FILL_PARENT );
-    form.setChildWidth(this, Component.LENGTH_FILL_PARENT);
-    form.getView().requestLayout();
+//    prepareFragmentView();
 
     Log.i(TAG, "after reset the form's child view");
     setUpMapIfNeeded();
