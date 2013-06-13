@@ -298,7 +298,7 @@ public final class Compiler {
         out.write(" android:name=\"" + packageName +".permission.MAPS_RECEIVE\" ");
         out.write(" android:protectionLevel=\"signature\" /> \n");
 
-        out.write(" <uses-permission android:name=\"" + packageName + "permission.MAPS_RECEIVE\" />\n");
+        out.write(" <uses-permission android:name=\"" + packageName + ".permission.MAPS_RECEIVE\" />\n");
         out.write(" <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />\n");
       }
 

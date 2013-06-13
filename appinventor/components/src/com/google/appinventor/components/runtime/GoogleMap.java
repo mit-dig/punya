@@ -13,36 +13,46 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.os.Bundle;
-
 import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
-import android.widget.*;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.*;
-import com.google.appinventor.components.annotations.*;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.SimpleEvent;
+import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
+import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
-import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.*;
-import com.google.gson.*;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
+import com.google.appinventor.components.runtime.util.OnInitializeListener;
+import com.google.appinventor.components.runtime.util.YailList;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 
 /** Component for displaying information on Google Map
@@ -76,8 +86,9 @@ OnMapLongClickListener, OnCameraChangeListener{
   // We create thie LinerLayout and add our mapFragment in it.
   //private final com.google.appinventor.components.runtime.LinearLayout viewLayout;
 //  private final FrameLayout viewLayout;
-  private final android.widget.LinearLayout viewLayout;
-
+  // private final android.widget.LinearLayout viewLayout;
+  private LinearLayout viewLayout;
+  private boolean added = false;
 
   // translates App Inventor alignment codes to Android gravity
   //private final AlignmentUtil alignmentSetter;
@@ -138,10 +149,13 @@ OnMapLongClickListener, OnCameraChangeListener{
     form = container.$form();
     myContainer = container;
     // try raw mapView with in the fragmment
-    viewLayout = new android.widget.LinearLayout(context);
-
-    viewLayout.setId(generateViewId());
-    
+    //viewLayout = new android.widget.LinearLayout(context);
+    //    viewLayout.setId(generateViewId());
+    viewLayout = new LinearLayout(context,LAYOUT_ORIENTATION_VERTICAL);
+    viewLayout.getLayoutManager().setId(generateViewId());
+    container.$add(this);
+    Width(LENGTH_FILL_PARENT);
+    Height(LENGTH_FILL_PARENT);
 
     //add check if the phone has installed Google Map and Google Play Service sdk
 
@@ -153,9 +167,9 @@ OnMapLongClickListener, OnCameraChangeListener{
 
 
 //    We only create a fragment if it doesn't already exist.
-    if (mMapFragment == null) {
-//      // To programmatically add the map, we first create a SupportMapFragment.
-      mMapFragment = SupportMapFragment.newInstance();
+//    if (mMapFragment == null) {
+////      // To programmatically add the map, we first create a SupportMapFragment.
+//      mMapFragment = SupportMapFragment.newInstance();
 
       //mMapFragment = new SomeFragment();
 //      FragmentTransaction fragmentTransaction =
@@ -167,33 +181,9 @@ OnMapLongClickListener, OnCameraChangeListener{
 //      fragmentTransaction.commit();
 
 
-    }
+//    }
     // wait until the mMapFragment is created, then we add to the component
-    androidUIHandler.post(new Runnable() {
-      public void run() {
-        boolean dispatchEventNow = false;
-        if (mMapFragment != null) {
 
-          dispatchEventNow = true;
-
-        }
-        if (dispatchEventNow) {
-          FragmentTransaction fragmentTransaction =
-              form.getSupportFragmentManager().beginTransaction();
-          Log.i(TAG, "here before adding fragment");
-          fragmentTransaction.add(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
-
-          //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
-          fragmentTransaction.commit();
-
-          addSelf();
-          setUpMapIfNeeded();
-        } else {
-          // Try again later.
-          androidUIHandler.post(this);
-        }
-      }
-    });
 
 
     // We can't be guaranteed that the map is available because Google Play services might
@@ -206,8 +196,10 @@ OnMapLongClickListener, OnCameraChangeListener{
   }
 
   private void addSelf(){
-    myContainer.$add(this);
-
+    if (!added){
+      myContainer.$add(this);
+      added = true;
+    }
   }
 
 
@@ -382,7 +374,7 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   }
 
-
+  //TODO: check for version update/service disabled as well.
   private void checkGooglePlayServiceSDK() {
     //To change body of created methods use File | Settings | File Templates.
     final int googlePlayServicesAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
@@ -552,19 +544,20 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   @Override
   public View getView() {
-    return viewLayout;
+    return viewLayout.getLayoutManager();
   }
 
   @Override
   public void onResume() {
     // TODO:
-    // http://stackoverflow.com/questions/15001207/android-googlemap-is-null-displays-fine-but-cant-add-markers-polylines
-    
     Log.i(TAG, "in onResume...Google Map redraw");
-//    prepareFragmentView();
-
-    setUpMapIfNeeded();
-
+    // http://stackoverflow.com/questions/15001207/android-googlemap-is-null-displays-fine-but-cant-add-markers-polylines
+    if(mMapFragment == null){
+      prepareFragmentView();
+    }
+    else{
+      setUpMapIfNeeded();
+    }
   }
 
 
@@ -573,16 +566,53 @@ OnMapLongClickListener, OnCameraChangeListener{
   public void onInitialize() {
     // TODO Auto-generated method stub
     // do the initialization here...
-
-//    prepareFragmentView();
-
     Log.i(TAG, "after reset the form's child view");
+    if(mMapFragment == null){
+      prepareFragmentView();
+    }
+    else{
+
     setUpMapIfNeeded();
     // fire an event so that AI user could add markers on initialized 
-
+    }
   }
 
-    @SimpleFunction(description = "Enable or disable my location widget for Google Map")
+  private void prepareFragmentView() {
+
+    mMapFragment = SupportMapFragment.newInstance();
+
+    androidUIHandler.post(new Runnable() {
+      public void run() {
+        boolean dispatchEventNow = false;
+        if (mMapFragment != null) {
+
+          dispatchEventNow = true;
+        }
+        if (dispatchEventNow) {
+
+          // Then we add it using a FragmentTransaction.
+          // add fragment to the view
+          FragmentTransaction fragmentTransaction = form.getSupportFragmentManager()
+              .beginTransaction();
+
+          fragmentTransaction.add(viewLayout.getLayoutManager().getId(),
+              mMapFragment, MAP_FRAGMENT_TAG);
+
+          fragmentTransaction.commit();
+
+          // set up map
+          setUpMapIfNeeded();
+        } else {
+          // Try again later.
+          androidUIHandler.post(this);
+        }
+      }
+    });
+
+ 
+  }
+
+  @SimpleFunction(description = "Enable or disable my location widget for Google Map")
     public void EnableMyLocation(boolean enabled){
       if (this.myLocationEnabled != enabled)
         this.myLocationEnabled = enabled;
