@@ -167,12 +167,15 @@ public class Form extends FragmentActivity
 // The value for component XYZ will be retrieved through form.getXYZStartValues()
 private static final String ARGUMENT_SURVEY = "APP_INVENTOR_SURVEY";
 //Set to the optional String-valued Extra passed in via an Intent on startup.(for Survey component only)
-private String startupValueForSurvey = ""; 
+private String startupValueForSurvey = "";
+  private Bundle onCreateBundle = null;
 
   @Override
   public void onCreate(Bundle icicle) {
     // Called when the activity is first created
     super.onCreate(icicle);
+    Log.i(LOG_TAG, "saveBundle" + icicle);
+    onCreateBundle = icicle; // icicle, (savedInstance == null) if it's not the result of changing orientation
 
     // Figure out the name of this form.
     String className = getClass().getName();
@@ -226,8 +229,16 @@ private String startupValueForSurvey = "";
     // event and leaves it up to the library implementation.
     Initialize();
   }
-  
-  
+
+  /**
+   * Getting Bundle (savedInstance) in the onCreate method (this is needed for
+   * Google Map Component to avoid recreating two map layers when changing orientation)
+   * @return
+   */
+  public Bundle getOnCreateBundle(){
+    return onCreateBundle;
+  }
+
   /*
    * 1) This method is to pass the start value that a Form gets when it is created by some other app using
    * activityStarter or Fuming's create notification (using Android Intent)
@@ -1428,9 +1439,9 @@ private String startupValueForSurvey = "";
    }
   }
   
-  public ViewGroup getView(){
-    return viewLayout.getLayoutManager();
-  }
+//  public ViewGroup getView(){
+//    return viewLayout.getLayoutManager();
+//  }
   
   
 }

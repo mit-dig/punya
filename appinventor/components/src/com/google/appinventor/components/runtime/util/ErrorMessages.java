@@ -160,12 +160,15 @@ public final class ErrorMessages {
   public static final int ERROR_SENSORDB_NOTACTIVE = 2002;
 
   // Please start the next group of error numbers at 2010.
-  public static final int ERROR_GOOGLE_MAP_NOTINSTALLED = 2010;
-  public static final int ERROR_GOOGLE_PLAY_NOTINSTALLED = 2011;
+  public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 2010;
+  public static final int ERROR_GOOGLE_PLAY_NOT_INSTALLED = 2011;
   public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 2012;
   public static final int ERROR_GOOGLE_MAP_MARKER_NOT_EXIST = 2013;
   public static final int ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED = 2014;
   public static final int ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST = 2015;
+  public static final int ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED = 2016;
+  public static final int ERROR_GOOGLE_PLAY_DISABLED = 2017;
+  public static final int ERROR_GOOGLE_PLAY_INVALID = 2018;
 
   
   // Mapping of error numbers to error message format strings.
@@ -425,13 +428,18 @@ public final class ErrorMessages {
     
     errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "%s is not cuurently active");
 
-    errorMessages.put(ERROR_GOOGLE_PLAY_NOTINSTALLED, "Google Play is not installed/available on this phone");
-    errorMessages.put(ERROR_GOOGLE_MAP_NOTINSTALLED, "Google Map is not installed on this phone");
+    errorMessages.put(ERROR_GOOGLE_PLAY_NOT_INSTALLED, "Google Play is not installed/available on this phone");
+    errorMessages.put(ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED, "Google Play Service needs update to newest version");
+    errorMessages.put(ERROR_GOOGLE_MAP_NOT_INSTALLED, "Google Map is not installed on this phone");
     errorMessages.put(ERROR_GOOGLE_MAP_INVALID_INPUT, "Invalid input");
     errorMessages.put(ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, "Marker with id: %s does not exist");
     errorMessages.put(ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED,
         "Unable to decode the JSON text: %s");
     errorMessages.put(ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, "Circle with id: %s does not exist");
+    errorMessages.put(ERROR_GOOGLE_PLAY_DISABLED, "The installed version of Google Play services " +
+        "has been disabled on this device.");
+    errorMessages.put(ERROR_GOOGLE_PLAY_INVALID, "The version of the Google Play services installed " +
+        "on this device is not authentic.");
 
 
   }

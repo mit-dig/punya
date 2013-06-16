@@ -13,13 +13,20 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
@@ -29,13 +36,7 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.*;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
@@ -74,21 +75,21 @@ import com.google.gson.JsonSyntaxException;
     + "com.google.android.providers.gsf.permission.READ_GSERVICES, "
     + "android.permission.WRITE_EXTERNAL_STORAGE")
 @UsesLibraries(libraries = "google-play-services.jar, funf.jar") // we have to include funf.jar because we use gson.JsonParser
-public class GoogleMap extends AndroidViewComponent implements OnResumeListener, OnInitializeListener,
+public class GoogleMap extends AndroidViewComponent implements OnResumeListener, OnInitializeListener, OnPauseListener,
 OnMarkerClickListener, OnInfoWindowClickListener, OnMarkerDragListener, OnMapClickListener, 
-OnMapLongClickListener, OnCameraChangeListener{
+OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener{
 
   private final Activity context;
   private final Form form;
   private static final String TAG = "GoogleMap";
-  private final ComponentContainer myContainer;
   // Layout
   // We create thie LinerLayout and add our mapFragment in it.
   //private final com.google.appinventor.components.runtime.LinearLayout viewLayout;
 //  private final FrameLayout viewLayout;
   // private final android.widget.LinearLayout viewLayout;
-  private LinearLayout viewLayout;
-  private boolean added = false;
+  //private LinearLayout viewLayout;
+  private android.widget.LinearLayout viewLayout;
+
 
   // translates App Inventor alignment codes to Android gravity
   //private final AlignmentUtil alignmentSetter;
@@ -96,9 +97,14 @@ OnMapLongClickListener, OnCameraChangeListener{
   // the alignment for this component's LinearLayout
   private int verticalAlignment;
 
-  private static final String MAP_FRAGMENT_TAG = "map";
+  private final String MAP_FRAGMENT_TAG;
+
+
   private com.google.android.gms.maps.GoogleMap mMap;
   private SupportMapFragment mMapFragment;
+  private Bundle savedInstanceState;
+
+
 
   private HashMap<Marker, Integer> markers = new HashMap<Marker, Integer>();
 
@@ -141,69 +147,80 @@ OnMapLongClickListener, OnCameraChangeListener{
   private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
   private static final AtomicInteger snextMarkerId = new AtomicInteger(1);
   private final Handler androidUIHandler = new Handler();
-  private boolean addedSelf = false;
+
+  // Setting for LocationClient
+  // These settings are the same as the settings for the map. They will in fact give you updates at
+  // the maximal rates currently possible.
+  private LocationClient mLocationClient;
+  private static final LocationRequest REQUEST = LocationRequest.create()
+      .setInterval(5000)         // 5 seconds
+      .setFastestInterval(16)    // 16ms = 60fps
+      .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
   public GoogleMap(ComponentContainer container) throws IOException {
     super(container);
+    Log.i(TAG, "In the constructor of GoogleMap");
     context = container.$context();
     form = container.$form();
-    myContainer = container;
-    // try raw mapView with in the fragmment
-    //viewLayout = new android.widget.LinearLayout(context);
-    //    viewLayout.setId(generateViewId());
-    viewLayout = new LinearLayout(context,LAYOUT_ORIENTATION_VERTICAL);
-    viewLayout.getLayoutManager().setId(generateViewId());
-    container.$add(this);
-    Width(LENGTH_FILL_PARENT);
-    Height(LENGTH_FILL_PARENT);
+    savedInstanceState = form.getOnCreateBundle();
+    Log.i(TAG, "savedInstanceState in GM: " + savedInstanceState);
 
+    // try raw mapView with in the fragmment
+    viewLayout = new android.widget.LinearLayout(context);
+    viewLayout.setId(generateViewId());
+//    viewLayout = new android.widget.LinearLayout(context);
+//    viewLayout.getLayoutManager().setId(generateViewId());
+
+    MAP_FRAGMENT_TAG = "map_" + System.currentTimeMillis();
     //add check if the phone has installed Google Map and Google Play Service sdk
 
     checkGooglePlayServiceSDK() ;
     checkGoogleMapInstalled() ;
 
-//    mMapFragment = (SupportMapFragment) form.getSupportFragmentManager()
-//        .findFragmentByTag(MAP_FRAGMENT_TAG);
+    // TODO: need to add code to check Form (activity) whether savedInstanceState ==null
+    mMapFragment = (SupportMapFragment) form.getSupportFragmentManager()
+        .findFragmentByTag(MAP_FRAGMENT_TAG);
 
 
 //    We only create a fragment if it doesn't already exist.
-//    if (mMapFragment == null) {
-////      // To programmatically add the map, we first create a SupportMapFragment.
-//      mMapFragment = SupportMapFragment.newInstance();
+    if (mMapFragment == null) {
+
+
+      Log.i(TAG, "mMapFragment is null.");
+//      // To programmatically add the map, we first create a SupportMapFragment.
+      mMapFragment = SupportMapFragment.newInstance();
 
       //mMapFragment = new SomeFragment();
-//      FragmentTransaction fragmentTransaction =
-//          form.getSupportFragmentManager().beginTransaction();
-//      Log.i(TAG, "here before adding fragment");
-//      fragmentTransaction.add(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
+      FragmentTransaction fragmentTransaction =
+          form.getSupportFragmentManager().beginTransaction();
+      Log.i(TAG, "here before adding fragment");
+      // try to use replace to see if we solve the issue
+      fragmentTransaction.replace(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
+
+    //  fragmentTransaction.add(viewLayout.getLayoutManager().getId(), mMapFragment, MAP_FRAGMENT_TAG);
+    //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
+      fragmentTransaction.commit();
+
+    }
 //
-//    //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
-//      fragmentTransaction.commit();
-
-
+//    if (savedInstanceState == null) {
+//      Log.i(TAG, "First incarnation of this activity. ");
+//      mMapFragment.setRetainInstance(true);
 //    }
-    // wait until the mMapFragment is created, then we add to the component
 
+    setUpMapIfNeeded();
 
-
-    // We can't be guaranteed that the map is available because Google Play services might
-//    container.$add(this);           // add first (will be WRAP_CONTENT)
-
-
+    container.$add(this);
+    
+    Width(LENGTH_FILL_PARENT);
+    Height(LENGTH_FILL_PARENT);
     form.registerForOnInitialize(this);
     form.registerForOnResume(this);
+    form.registerForOnResume(this);
+    form.registerForOnPause(this);
 
   }
 
-  private void addSelf(){
-    if (!added){
-      myContainer.$add(this);
-      added = true;
-    }
-  }
-
-
- 
 
   /**
    * Generate a value suitable for use in .
@@ -255,10 +272,19 @@ OnMapLongClickListener, OnCameraChangeListener{
         } else {
           // means that Google Service is not available
           form.dispatchErrorOccurredEvent(this, "setUpMapIfNeeded",
-              ErrorMessages.ERROR_GOOGLE_PLAY_NOTINSTALLED);
+              ErrorMessages.ERROR_GOOGLE_PLAY_NOT_INSTALLED);
         }
 
       }
+  }
+
+  private void setUpLocationClientIfNeeded() {
+    if (mLocationClient == null) {
+      mLocationClient = new LocationClient(
+          context,
+          this,  // ConnectionCallbacks
+          this); // OnConnectionFailedListener
+    }
   }
   
   
@@ -267,15 +293,17 @@ OnMapLongClickListener, OnCameraChangeListener{
     // including all the configurations and markers 
     
     // (testing: add an marker)
-    
+    Log.i(TAG, "in setUpMap()");
     // Set listeners for marker events.  See the bottom of this class for their behavior.
     mMap.setOnMarkerClickListener(this);
     mMap.setOnInfoWindowClickListener(this);
     mMap.setOnMarkerDragListener(this);
-    
-    //just for testing
-    mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
 
+    //just for testing
+    int uniqueId = generateMarkerId();
+    Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    markers.put(marker, uniqueId);
+    //////
     // create UiSetting instance and default ui settings of the map
     mUiSettings = mMap.getUiSettings();
     mUiSettings.setCompassEnabled(this.compassEnabled);
@@ -288,14 +316,6 @@ OnMapLongClickListener, OnCameraChangeListener{
     MapIsReady();
 
   }
-
-  //// below are many setters and getters for map UI settings
-//  private boolean compassEnabled = false;
-//  private boolean rotateEnabled = true;
-//  private boolean scrollEnabled = true;
-//  private boolean zoomControlEnabled = false;
-//  private boolean zoomGesturesEnabled = true;
-  ///
 
   @SimpleFunction (description = "Enables/disables the compass widget on the map's ui. Call this only after " +
       "event \"MapIsReady\" is received")
@@ -374,14 +394,33 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   }
 
-  //TODO: check for version update/service disabled as well.
+  //TODO: Move this to Util
   private void checkGooglePlayServiceSDK() {
     //To change body of created methods use File | Settings | File Templates.
     final int googlePlayServicesAvailable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-    if(googlePlayServicesAvailable != ConnectionResult.SUCCESS){
-      form.dispatchErrorOccurredEvent(this, "checkGooglePlayServiceSDK",
-          ErrorMessages.ERROR_GOOGLE_PLAY_NOTINSTALLED);
+    Log.i(TAG, "googlePlayServicesAvailable:" + googlePlayServicesAvailable);
+
+    switch (googlePlayServicesAvailable) {
+      case ConnectionResult.SERVICE_MISSING:
+        form.dispatchErrorOccurredEvent(this, "checkGooglePlayServiceSDK",
+             ErrorMessages.ERROR_GOOGLE_PLAY_NOT_INSTALLED);
+        break;
+      case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
+        form.dispatchErrorOccurredEvent(this, "checkGooglePlayServiceSDK",
+            ErrorMessages.ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED);
+        break;
+      case ConnectionResult.SERVICE_DISABLED:
+        form.dispatchErrorOccurredEvent(this, "checkGooglePlayServiceSDK",
+            ErrorMessages.ERROR_GOOGLE_PLAY_DISABLED);
+        break;
+      case ConnectionResult.SERVICE_INVALID:
+        form.dispatchErrorOccurredEvent(this, "checkGooglePlayServiceSDK",
+            ErrorMessages.ERROR_GOOGLE_PLAY_INVALID);
+        break;
     }
+
+
+
   }
 
   private void checkGoogleMapInstalled() {
@@ -393,7 +432,7 @@ OnMapLongClickListener, OnCameraChangeListener{
     catch(PackageManager.NameNotFoundException e)
     {
       form.dispatchErrorOccurredEvent(this, "checkGoogleMapInstalled",
-          ErrorMessages.ERROR_GOOGLE_MAP_NOTINSTALLED);
+          ErrorMessages.ERROR_GOOGLE_MAP_NOT_INSTALLED);
     }
   }
 
@@ -544,20 +583,22 @@ OnMapLongClickListener, OnCameraChangeListener{
 
   @Override
   public View getView() {
-    return viewLayout.getLayoutManager();
+    //return viewLayout.getLayoutManager();
+    return viewLayout;
   }
 
   @Override
   public void onResume() {
     // TODO:
     Log.i(TAG, "in onResume...Google Map redraw");
-    // http://stackoverflow.com/questions/15001207/android-googlemap-is-null-displays-fine-but-cant-add-markers-polylines
-    if(mMapFragment == null){
-      prepareFragmentView();
+    //set up LocationClient for my location using GMS
+    if(myLocationEnabled){//only if my location is enabled
+      setUpLocationClientIfNeeded();
+      mLocationClient.connect();
     }
-    else{
-      setUpMapIfNeeded();
-    }
+
+    setUpMapIfNeeded();
+
   }
 
 
@@ -566,15 +607,12 @@ OnMapLongClickListener, OnCameraChangeListener{
   public void onInitialize() {
     // TODO Auto-generated method stub
     // do the initialization here...
-    Log.i(TAG, "after reset the form's child view");
-    if(mMapFragment == null){
-      prepareFragmentView();
-    }
-    else{
+//    Log.i(TAG, "after reset the form's child view");
 
-    setUpMapIfNeeded();
-    // fire an event so that AI user could add markers on initialized 
-    }
+//
+//    setUpMapIfNeeded();
+    
+    
   }
 
   private void prepareFragmentView() {
@@ -595,7 +633,8 @@ OnMapLongClickListener, OnCameraChangeListener{
           FragmentTransaction fragmentTransaction = form.getSupportFragmentManager()
               .beginTransaction();
 
-          fragmentTransaction.add(viewLayout.getLayoutManager().getId(),
+          //fragmentTransaction.add(viewLayout.getLayoutManager().getId(),
+          fragmentTransaction.add(viewLayout.getId(),
               mMapFragment, MAP_FRAGMENT_TAG);
 
           fragmentTransaction.commit();
@@ -612,7 +651,8 @@ OnMapLongClickListener, OnCameraChangeListener{
  
   }
 
-  @SimpleFunction(description = "Enable or disable my location widget for Google Map")
+  @SimpleFunction(description = "Enable or disable my location widget control for Google Map. One can call " +
+      "GetMyLocation() to obtain the current location after enable this.\"")
     public void EnableMyLocation(boolean enabled){
       if (this.myLocationEnabled != enabled)
         this.myLocationEnabled = enabled;
@@ -621,11 +661,30 @@ OnMapLongClickListener, OnCameraChangeListener{
         mMap.setMyLocationEnabled(myLocationEnabled);
       }
 
+      setUpLocationClientIfNeeded();
+
   }
-  @SimpleProperty(description = "Indicates whether my locaiton widget is currently enabled for the Google map")
+  @SimpleProperty(description = "Indicates whether my locaiton UI control is currently enabled for the Google map.")
   public boolean MyLocationEnabled(){
     return this.myLocationEnabled;
   }
+
+  @SimpleFunction(description = "Get current location using Google Map Service. Return a YailList with first item being" +
+      "the latitude, the second item being the longitude, and last time being the accuracy of the reading.")
+  public YailList GetMyLocation(){
+
+    ArrayList<Object> latLng = new ArrayList<Object>();
+
+    if (mLocationClient != null && mLocationClient.isConnected()) {
+      Location location = mLocationClient.getLastLocation();
+      latLng.add(location.getLatitude());
+      latLng.add(location.getLongitude());
+      latLng.add(location.getAccuracy());
+    }
+
+    return YailList.makeList(latLng);
+  }
+
 
 
   @SimpleFunction(description = "Set the layer of Google map. Default layer is \"normal\", other choices including \"hybrid\"," +
@@ -754,7 +813,8 @@ OnMapLongClickListener, OnCameraChangeListener{
       + "inner YailList is composed of: "
       + "lat(double) [required], long(double) [required], Color, "
       + "title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added " 
-      +  " markers for future references")
+      + " markers. Note that the markers ids are not meant to persist after " +
+      " the app is closed, but for temporary references to the markers within the program only.")
   public YailList AddMarkers(YailList markers) {
     // For color, check out the code in Form.java$BackgroundColor() e.g. if
     // (argb != Component.COLOR_DEFAULT)
@@ -1264,13 +1324,38 @@ OnMapLongClickListener, OnCameraChangeListener{
   }
 
 
-  @SimpleFunction(description = "Move the map's camera to the specified position and zoom")
+  @SimpleFunction(description = "Move the map's camera to the specified position and zoom level")
   public void MoveCamera(double lat, double lng, float zoom){
     if(mMap != null) {
       mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
     }
 
   }
+
+  /**
+   *
+   * @param neLat Latitude of the northeast location of the bounding box
+   * @param neLng Longitude of the northeast location of the bounding box
+   * @param swLat Latitude of the southwest location of the bounding box
+   * @param swLng Longitude of the southwest location of the bounding box
+   */
+  @SimpleFunction(description = "Transforms the camera such that the specified latitude/longitude " +
+      "bounds are centered on screen at the greatest possible zoom level. Need to specify both latitudes and " +
+      "longitudes for both northeast location and southwest location of the bounding box")
+  public void BoundCamera(double neLat, double neLng, double swLat, double swLng){
+
+    LatLng northeast  = new LatLng(neLat, neLng);
+    LatLng southwest = new LatLng(swLat, swLng);
+    LatLngBounds bounds = new LatLngBounds(northeast, southwest);
+
+    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+    mMap.moveCamera(cameraUpdate);
+
+  }
+
+
+
+
 
   // private class representing the circle overlay. Code copied and extended from Google Example
   // We need to keep a data structure to tie circle and two markers together.
@@ -1383,6 +1468,44 @@ OnMapLongClickListener, OnCameraChangeListener{
     Location.distanceBetween(center.latitude, center.longitude,
         radius.latitude, radius.longitude, result);
     return result[0];
+  }
+
+//
+//  @Override
+//  public void onLocationChanged(Location arg0) {
+//    // TODO Auto-generated method stub
+//    
+//  }
+
+
+  @Override
+  public void onConnectionFailed(ConnectionResult arg0) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void onConnected(Bundle arg0) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void onDisconnected() {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+  @Override
+  public void onPause() {
+    // TODO Auto-generated method stub
+    Log.i(TAG, "OnPause, remote LocationClient");
+    if (mLocationClient != null) {
+      mLocationClient.disconnect();
+    }
   }
 
 
