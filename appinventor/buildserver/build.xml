@@ -159,6 +159,7 @@
 
     <copy toFile="${classes.files.dir}/google-api-services-drive-v2.jar" file="${lib.dir}/googledrive/google-api-services-drive-v2-rev73-1.14.2-beta.jar" />
     <copy toFile="${classes.files.dir}/google-play-services.jar" file="${lib.dir}/googledrive/google-play-services.jar" />
+  	<copy toFile="${classes.files.dir}/android-support-v4.jar" file="${lib.dir}/android_support/android-support-v4.jar" />
     
     <!-- below are included in the Google Drive example, not sure about the dependecies for now -->
     <!-- 

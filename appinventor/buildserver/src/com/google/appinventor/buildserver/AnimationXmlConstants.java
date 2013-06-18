@@ -115,4 +115,23 @@ public class AnimationXmlConstants {
       "\t\t\tandroid:duration=\"@android:integer/config_mediumAnimTime\"/>\n" +
       "</set>";
 
+//  public final static String BASIC_MAP_XML = "<?xml version=\"1.0\" encoding=\"utf-8\"?> \n\n" +
+//      "<fragment xmlns:android=\"http://schemas.android.com/apk/res/android\" \n" +
+//      "\t\tandroid:id=\"@+id/map\" \n" +
+//      "\t\tandroid:layout_width=\"match_parent\" \n" +
+//      "\t\tandroid:layout_height=\"match_parent\" \n"+
+//      "\t\tclass=\"com.google.android.gms.maps.SupportMapFragment\"/>" ;
+
+  public final static String BASIC_MAP_XML= "<LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n" +
+      "    xmlns:tools=\"http://schemas.android.com/tools\"\n" +
+      "    android:id=\"@+id/map\"" +
+      "    android:layout_width=\"fill_parent\"\n" +
+      "    android:layout_height=\"fill_parent\" >\n" +
+      "    \n" +
+      "    <com.google.android.gms.maps.MapView android:id=\"@+id/mapview\"\n" +
+      "        android:layout_width=\"fill_parent\" \n" +
+      "        android:layout_height=\"fill_parent\" />\n" +
+      " \n" +
+      "</LinearLayout>" ;
+
 }

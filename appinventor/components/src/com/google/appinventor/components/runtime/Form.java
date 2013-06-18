@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,14 +36,14 @@ import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
-
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
@@ -75,8 +76,9 @@ import com.google.appinventor.components.runtime.util.ViewUtil;
     description = "Top-level component containing all other components in the program",
     showOnPalette = false)
 @SimpleObject
+@UsesLibraries(libraries = "android-support-v4.jar")
 @UsesPermissions(permissionNames = "android.permission.INTERNET,android.permission.ACCESS_WIFI_STATE,android.permission.ACCESS_NETWORK_STATE")
-public class Form extends Activity
+public class Form extends FragmentActivity
     implements Component, ComponentContainer, HandlesEventDispatching {
   private static final String LOG_TAG = "Form";
   
@@ -165,12 +167,15 @@ public class Form extends Activity
 // The value for component XYZ will be retrieved through form.getXYZStartValues()
 private static final String ARGUMENT_SURVEY = "APP_INVENTOR_SURVEY";
 //Set to the optional String-valued Extra passed in via an Intent on startup.(for Survey component only)
-private String startupValueForSurvey = ""; 
+private String startupValueForSurvey = "";
+  private Bundle onCreateBundle = null;
 
   @Override
   public void onCreate(Bundle icicle) {
     // Called when the activity is first created
     super.onCreate(icicle);
+    Log.i(LOG_TAG, "saveBundle" + icicle);
+    onCreateBundle = icicle; // icicle, (savedInstance == null) if it's not the result of changing orientation
 
     // Figure out the name of this form.
     String className = getClass().getName();
@@ -224,8 +229,16 @@ private String startupValueForSurvey = "";
     // event and leaves it up to the library implementation.
     Initialize();
   }
-  
-  
+
+  /**
+   * Getting Bundle (savedInstance) in the onCreate method (this is needed for
+   * Google Map Component to avoid recreating two map layers when changing orientation)
+   * @return
+   */
+  public Bundle getOnCreateBundle(){
+    return onCreateBundle;
+  }
+
   /*
    * 1) This method is to pass the start value that a Form gets when it is created by some other app using
    * activityStarter or Fuming's create notification (using Android Intent)
@@ -968,7 +981,7 @@ private String startupValueForSurvey = "";
    * @return  width property used by the layout
    */
   @SimpleProperty(category = PropertyCategory.APPEARANCE)
-  public int Width() {
+  public int set() {
     return frameLayout.getWidth();
   }
 
@@ -1104,12 +1117,14 @@ private String startupValueForSurvey = "";
   @Override
   public void setChildWidth(AndroidViewComponent component, int width) {
     // A form is a vertical layout.
+    Log.i("Form", "Set child view Width:" + component.getView().toString());
     ViewUtil.setChildWidthForVerticalLayout(component.getView(), width);
   }
 
   @Override
   public void setChildHeight(AndroidViewComponent component, int height) {
     // A form is a vertical layout.
+    Log.i("Form", "Set child view height:" + component.getView().toString());
     ViewUtil.setChildHeightForVerticalLayout(component.getView(), height);
   }
 
@@ -1423,6 +1438,10 @@ private String startupValueForSurvey = "";
     super.onBackPressed();
    }
   }
+  
+//  public ViewGroup getView(){
+//    return viewLayout.getLayoutManager();
+//  }
   
   
 }

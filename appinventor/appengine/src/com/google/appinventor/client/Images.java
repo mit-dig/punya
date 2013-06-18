@@ -256,7 +256,21 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/chartbig.png")
   ImageResource ldchartbig();
-  
+
+  /**
+   * Designer palette item: Google Map component
+   */
+    @Source("com/google/appinventor/images/gmap.png")
+  ImageResource googlemap();
+
+  /**
+   * Designer item: GoogleMap component in designer
+   *
+   */
+  @Source("com/google/appinventor/images/gmapBig.png")
+  ImageResource googleMapBig();
+
+
   /**
    * Designer item: Dropbox component in designer
    * 

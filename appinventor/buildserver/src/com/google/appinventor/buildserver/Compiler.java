@@ -291,12 +291,23 @@ public final class Compiler {
       for (String permission : permissionsNeeded) {
         out.write("  <uses-permission android:name=\"" + permission + "\" />\n");
       }
+      // add permission, and uses-permission, uses-feature specifically for Google Map
+      // as stated here https://developers.google.com/maps/documentation/android/start
+      if (componentTypes.contains("GoogleMap")){
+        out.write(" <permission ");
+        out.write(" android:name=\"" + packageName +".permission.MAPS_RECEIVE\" ");
+        out.write(" android:protectionLevel=\"signature\" /> \n");
+
+        out.write(" <uses-permission android:name=\"" + packageName + ".permission.MAPS_RECEIVE\" />\n");
+        out.write(" <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />\n");
+      }
+
       // TODO(markf): Change the minSdkVersion below if we ever require an SDK beyond 1.5.
       // The market will use the following to filter apps shown to devices that don't support
       // the specified SDK version.  We might also want to allow users to specify minSdkVersion
       // or have us specify higher SDK versions when the program uses a component that uses
       // features from a later SDK (e.g. Bluetooth).
-      out.write("  <uses-sdk android:minSdkVersion=\"3\" />\n");
+      out.write("  <uses-sdk android:minSdkVersion=\"4\" />\n");
 
       // If we set the targetSdkVersion to 4, we can run full size apps on tablets.
       // On non-tablet hi-res devices like a Nexus One, the screen dimensions will be the actual
@@ -306,7 +317,7 @@ public final class Compiler {
       // much smaller than they should be. There is code in Canvas and ImageSprite to work around
       // this problem, but images and buttons are still an unsolved problem. We'll have to solve
       // that before we can set the targetSdkVersion to 4 here.
-      // out.write("  <uses-sdk android:targetSdkVersion=\"4\" />\n");
+      out.write("  <uses-sdk android:targetSdkVersion=\"10\" />\n");
 
       out.write("  <application ");
 
@@ -430,11 +441,14 @@ public final class Compiler {
       }
 
       // adds the google maps v2 api key
-      if (project.getMapsKey().length() > 0) {
-        System.out.println("Android Manifest: including Google Maps key");
-        out.write("<meta-data android:name=\"com.google.android.maps.v2.API_KEY\" ");
-        out.write("android:value=\""+project.getMapsKey()+"\"/>");
+      if (componentTypes.contains("GoogleMap")) {
+        if (project.getMapsKey().length() > 0) {
+          System.out.println("Android Manifest: including Google Maps key:" + project.getMapsKey());
+          out.write("<meta-data android:name=\"com.google.android.maps.v2.API_KEY\" ");
+          out.write("android:value=\"" + project.getMapsKey() + "\"/>");
+        }
       }
+
 	  // Close the application tag
       out.write("  </application>\n");
       out.write("</manifest>\n");
@@ -497,6 +511,13 @@ public final class Compiler {
     out.println("________Creating animation xml");
     File animDir = createDirectory(resDir, "anim");
     if (!compiler.createAnimationXml(animDir)) {
+      return false;
+    }
+    
+    // Create fragment directory and fragment xml files
+    out.println("________Creating fragment xml");
+    File fragmentDir = createDirectory(resDir, "layout");
+    if (!compiler.createFragmentXml(fragmentDir)) {
       return false;
     }
 
@@ -665,6 +686,24 @@ public final class Compiler {
 
     for (String filename : files.keySet()) {
       File file = new File(animDir, filename);
+      if (!writeXmlFile(file, files.get(filename))) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  /*
+   * Create all the fragment xml files.
+   */
+  private boolean createFragmentXml(File fragDir) {
+    Map<String, String> files = new HashMap<String, String>();
+    //just for testing....now will create AnimantionXmlConstants later
+    files.put("basic_map.xml", AnimationXmlConstants.BASIC_MAP_XML);
+    
+    
+    for (String filename : files.keySet()) {
+      File file = new File(fragDir, filename);
       if (!writeXmlFile(file, files.get(filename))) {
         return false;
       }

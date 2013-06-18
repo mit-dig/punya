@@ -142,7 +142,8 @@
         <pathelement location="${lib.dir}/funf/funf.jar" />
         <pathelement location="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
         <pathelement location="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
-        <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />        
+        <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />      
+      	<pathelement location="${lib.dir}/android_support/android-support-v4.jar"/>
   
         
          
@@ -254,7 +255,8 @@
           <pathelement location="${lib.dir}/funf/funf.jar" />
           <pathelement location="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
           <pathelement location="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
-          <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />        
+          <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />       
+          <pathelement location="${lib.dir}/android_support/android-support-v4.jar" />	
         </classpath>
         <compilerarg line="-processorpath ${local.build.dir}/AnnotationProcessors.jar"/>
         <compilerarg line="-processor @{apt-processor}" />
