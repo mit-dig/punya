@@ -431,7 +431,7 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_GOOGLE_PLAY_NOT_INSTALLED, "Google Play is not installed/available on this phone");
     errorMessages.put(ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED, "Google Play Service needs update to newest version");
     errorMessages.put(ERROR_GOOGLE_MAP_NOT_INSTALLED, "Google Map is not installed on this phone");
-    errorMessages.put(ERROR_GOOGLE_MAP_INVALID_INPUT, "Invalid input");
+    errorMessages.put(ERROR_GOOGLE_MAP_INVALID_INPUT, "Invalid input: %s");
     errorMessages.put(ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, "Marker with id: %s does not exist");
     errorMessages.put(ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED,
         "Unable to decode the JSON text: %s");

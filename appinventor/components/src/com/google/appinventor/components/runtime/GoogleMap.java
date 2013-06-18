@@ -54,6 +54,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import gnu.math.DFloNum;
+import gnu.math.IntNum;
 
 
 /** Component for displaying information on Google Map
@@ -168,10 +170,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // try raw mapView with in the fragmment
     viewLayout = new android.widget.LinearLayout(context);
     viewLayout.setId(generateViewId());
-//    viewLayout = new android.widget.LinearLayout(context);
-//    viewLayout.getLayoutManager().setId(generateViewId());
 
     MAP_FRAGMENT_TAG = "map_" + System.currentTimeMillis();
+    Log.i(TAG, "map_tag:" + MAP_FRAGMENT_TAG);
     //add check if the phone has installed Google Map and Google Play Service sdk
 
     checkGooglePlayServiceSDK() ;
@@ -197,8 +198,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       // try to use replace to see if we solve the issue
       fragmentTransaction.replace(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
 
-    //  fragmentTransaction.add(viewLayout.getLayoutManager().getId(), mMapFragment, MAP_FRAGMENT_TAG);
-    //  fragmentTransaction.add(android.R.id.content, mMapFragment, MAP_FRAGMENT_TAG);
       fragmentTransaction.commit();
 
     }
@@ -298,6 +297,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     mMap.setOnMarkerClickListener(this);
     mMap.setOnInfoWindowClickListener(this);
     mMap.setOnMarkerDragListener(this);
+//    mMap.setMyLocationEnabled(true);
+//    mMap.setOnMapClickListener(this);
+//    mMap.setOnMapLongClickListener(this);
 
     //just for testing
     int uniqueId = generateMarkerId();
@@ -313,6 +315,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     mUiSettings.setZoomGesturesEnabled(this.zoomGesturesEnabled);
 
     // after this method is called, user can add markers and change other settings.
+    //TODO: Actions(Functions) that are called within MapIsReady() are not working
     MapIsReady();
 
   }
@@ -382,15 +385,33 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
 
 
-  @SimpleEvent(description = "Indicates that the map has been rendered and ready for adding markers " +
-      "or changing other settings. Please add or updating markers within this event")
-  public void MapIsReady(){
-    context.runOnUiThread(new Runnable() {
-      public void run() {
-        Log.i(TAG, "Map is ready for adding markers and other setting");
-        EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
-      }
-    });
+    @SimpleEvent(description = "Indicates that the map has been rendered and ready for adding markers " +
+        "or changing other settings. Please add or updating markers within this event")
+    public void MapIsReady(){
+//      context.runOnUiThread(new Runnable() {
+//        public void run() {
+//          Log.i(TAG, "Map is ready for adding markers and other setting");
+//          EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
+//        }
+//      });
+
+      Log.i(TAG, "Map is ready for adding markers and other setting");
+      EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
+
+//
+//    @SimpleEvent(description =  "Called when the user makes a tap gesture on the map")
+//    public void OnMapClick(final double lat, final double lng){
+//      context.runOnUiThread(new Runnable() {
+//        public void run() {
+//          Log.i(TAG, "map is clicked at:" + lat + ", " + lng);
+//          EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapClick", lat, lng);
+//        }
+//
+//      });
+//
+//
+//    }
+//
 
   }
 
@@ -654,11 +675,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   @SimpleFunction(description = "Enable or disable my location widget control for Google Map. One can call " +
       "GetMyLocation() to obtain the current location after enable this.\"")
     public void EnableMyLocation(boolean enabled){
+    Log.i(TAG, "@EnableMyLocation:" + enabled);
       if (this.myLocationEnabled != enabled)
         this.myLocationEnabled = enabled;
 
       if (mMap != null) {
-        mMap.setMyLocationEnabled(myLocationEnabled);
+        mMap.setMyLocationEnabled(enabled);
       }
 
       setUpLocationClientIfNeeded();
@@ -702,7 +724,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     } else {  
       Log.i(TAG, "Error setting layer with name " + layerName);
       form.dispatchErrorOccurredEvent(this, "SetMapType",
-          ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
+          ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, layerName + " is not the correct type");
     }
 
     if(mMap != null) {
@@ -718,10 +740,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
    */
   @SimpleFunction(description = "Enable/Disable to listen to map's click event")
   public void EnableMapClickListener(boolean enabled) {
+    Log.i(TAG, "@EnableMapClickListener:" + enabled);
     if (this.enableMapClickListener != enabled)
       this.enableMapClickListener = enabled;
 
     if (mMap != null) {
+      Log.i(TAG, "enable map listener?: " + enabled);
       mMap.setOnMapClickListener(enabled? this : null);
 
     }
@@ -743,10 +767,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
    */
   @SimpleFunction (description = "Enable/disable to listen to map's long click event")
   public void EnableMapLongClickListener(boolean enabled){
+    Log.i(TAG, "@EnableMapLongClickListener:" + enabled);
     if (this.enableMapLongClickListener != enabled) {
       this.enableMapLongClickListener = enabled;
     }
     if (mMap != null) {
+      Log.i(TAG, "enable long click listener?:" + enabled);
       mMap.setOnMapLongClickListener(enabled? this : null);
     }
   }
@@ -766,11 +792,14 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
    */
   @SimpleFunction (description = "Enable/Disable to listen to map's camera position changed event")
   public void EnableMapCameraPosChangeListener(boolean enabled){
+    Log.i(TAG, "@EnableMapCameraPosChangeListener:" + enabled);
     if (this.enableCameraChangeListener != enabled) {
       this.enableCameraChangeListener = enabled;
 
     }
+
     if (mMap != null) {
+      Log.i(TAG, "enable cameraChangedListener?:" + enabled);
       mMap.setOnCameraChangeListener(enabled? this : null);
     }
 
@@ -814,7 +843,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       + "lat(double) [required], long(double) [required], Color, "
       + "title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added " 
       + " markers. Note that the markers ids are not meant to persist after " +
-      " the app is closed, but for temporary references to the markers within the program only.")
+      " the app is closed, but for temporary references to the markers within the program only. Return an empty list" +
+      " if any error happen in the input")
   public YailList AddMarkers(YailList markers) {
     // For color, check out the code in Form.java$BackgroundColor() e.g. if
     // (argb != Component.COLOR_DEFAULT)
@@ -829,44 +859,100 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // We can use Android.graphics.Color.colorToHSV(int rgbcolor, float[]hsv) to
     // get the hue value in the hsv array
     float[] hsv = new float[3];
+
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     for (Object marker : markers.toArray()) {
+      boolean addOne = true;
       if (marker instanceof YailList) {
+        Log.i(TAG, "interior YailLiat");
         if (((YailList) marker).size() < 2) {
+          addOne = false; // don't add this marker because its invalid inputs, going to the next one
           // throw an exception with error messages
           form.dispatchErrorOccurredEvent(this, "AddMarkers",
-              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
+              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need at least two parameters");
 
         }
-        Double lat = (Double) ((YailList) marker).get(0);
-        Double lng = (Double) ((YailList) marker).get(1);
+        // ((YailList) marker).getObject(0) will return type gnu.math.DFloNum
+        Object latObj =  ((YailList) marker).getObject(0);
+        Object lngObj =  ((YailList) marker).getObject(1);
+        Log.i(TAG, "Type: " + latObj.getClass());
+        Log.i(TAG, "Type: " + lngObj.getClass());
+        Double lat = new Double(0);
+        Double lng = new Double(0);
 
+
+        if (!(latObj instanceof DFloNum && lngObj instanceof DFloNum)){//if one of the lat or lng is not DFloNum
+          addOne = false;
+          form.dispatchErrorOccurredEvent(this, "AddMarkers",
+              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be float numbers");
+          //continue; // don't add this marker because its invalid inputs, going to the next one
+
+        }
+        else {
+          lat = ((DFloNum)latObj).doubleValue();
+          lng = ((DFloNum)lngObj).doubleValue();
+
+        }
+        //default values for optional params
         int color = mMarkerColor;
         String title = "";
         String snippet = "";
         boolean draggable = mMarkerDraggable;
 
         if (((YailList) marker).size() >= 3) {
-          color = (Integer) ((YailList) marker).get(3);
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(2).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(2).toString());
+          // Integer within Yaillist is of type gnu.math.IntNum
+          Object colorObj =  ((YailList) marker).getObject(2);
+
+          if (colorObj instanceof gnu.math.IntNum)
+            color = ((IntNum)((YailList) marker).getObject(2)).intValue();
+          else {
+            addOne = false;
+            form.dispatchErrorOccurredEvent(this, "AddMarkers",
+                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj + "is not a number");
+            //continue; // don't add this marker because its invalid inputs, going to the next one
+          }
+
         }
         if (((YailList) marker).size() >= 4) {
-          title = (String) ((YailList) marker).get(4);
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(3).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(3).toString());
+          title = ((YailList) marker).getObject(4).toString();
         }
         if (((YailList) marker).size() >= 5) {
-          snippet = (String) ((YailList) marker).get(5);
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(4).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(4).toString());
+          snippet = ((YailList) marker).getObject(5).toString();
         }
         if (((YailList) marker).size() >= 6) {
-          draggable = (Boolean) ((YailList) marker).get(6);
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(5).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(5).toString());
+
+          if (((YailList) marker).getObject(5) instanceof Boolean) {
+            draggable = (Boolean) ((YailList) marker).getObject(5);
+          }
+          else {
+            addOne = false;
+            form.dispatchErrorOccurredEvent(this, "AddMarkers",
+                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be either true or false");
+            //continue; // don't add this marker because its invalid inputs, going to the next one
+          }
+
         }
 
         Color.colorToHSV(color, hsv);
-        int uniqueId = generateMarkerId();
-        markerIds.add(uniqueId);
-        addMarkerToMap(lat, lng, uniqueId, hsv[0], title, snippet, draggable);
+        if(addOne) {
+          int uniqueId = generateMarkerId();
+          markerIds.add(uniqueId);
+          addMarkerToMap(lat, lng, uniqueId, hsv[0], title, snippet, draggable);
+        }
+
       } else {
         // fire exception and throw error messages
         form.dispatchErrorOccurredEvent(this, "AddMarkers",
-            ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
+            ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "marker is not represented as list");
+        continue; // don't add this marker because its invalid inputs, going to the next one
 
       }
     }
@@ -906,10 +992,11 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
    * @param snippet
    * @param hue
    */
-  private void addMarkerToMap(Double lat, Double lng, int id, float hue, String title,
+  private int addMarkerToMap(Double lat, Double lng, int id, float hue, String title,
                                String snippet, boolean draggable) {
     // what if there are too many markers on Google Map ?
     // TODO: https://code.google.com/p/android-maps-extensions/
+    Log.i(TAG, "@addMarkerToMap");
     LatLng latlng = new LatLng(lat, lng);
     Marker marker = mMap.addMarker(new MarkerOptions()
         .position(latlng)
@@ -924,15 +1011,42 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     marker.setDraggable(draggable);
 
     markers.put(marker, id);
+    return id;
   }
 
   @SimpleFunction(description = "Adding a list of markers that are represented as JsonArray. " +
   		" The inner JsonObject represents a marker" +
       "and is composed of name-value pairs. Name fields for a marker are: " +
       "\"lat\" (type double) [required], \"lng\"(type double) [required], " +
-      "\"color\"(type int)[in hue value ranging from 0-360], " +
+      "\"color\"(type int)[in hue value ranging from 0~360], " +
       "\"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
   public YailList AddMarkersFromJson(String jsonString) {
+
+//    [
+//    { "lat": 42.35557,
+//        "lng": -71.10264,
+//        "color": 250,
+//        "title": "A co title",
+//        "snippet": "A snippet",
+//        "draggable": true
+//    },
+//    { "lat": 42.35109,
+//        "lng": -71.09951,
+//        "color": 180,
+//        "title": "title 2",
+//        "snippet": "A snippet 2",
+//        "draggable": true
+//    },
+//    { "lat": 42.35621,
+//        "lng": -71.10115,
+//        "color": 180,
+//        "title": "title 3",
+//        "snippet": "Not draggable",
+//        "draggable": false
+//    }
+//
+//    ]
+
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     JsonParser parser = new JsonParser();
     // parse jsonString into jsonArray
@@ -940,49 +1054,58 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       JsonElement markerList = parser.parse(jsonString);
       if (markerList.isJsonArray()) {
         JsonArray markerArray = markerList.getAsJsonArray();
+        boolean addOne = true;
+        Log.i(TAG, "It's a JsonArry: " + markerArray.toString());
         for (JsonElement marker : markerArray) {
           // now we have marker
           if (marker.isJsonObject()) {
             JsonObject markerJson = marker.getAsJsonObject();
             if (markerJson.get("lat") == null || markerJson.get("lng") == null) {
               form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-                  ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
-              return YailList.makeList(markerIds);
+                  ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need to have both lat and lng parameters");
+//              return YailList.makeList(markerIds);
+                addOne = false;
 
             } else { // having correct syntax of a marker in Json
               double latitude = markerJson.get("lat").getAsDouble();
               double longitude = markerJson.get("lng").getAsDouble();
 
               int color = (markerJson.get("color") == null) ? mMarkerColor : markerJson.get("color").getAsInt();
+              if (color < 0 || color > 360) {
+                addOne = false;
+              }
+
               String title = (markerJson.get("title") == null) ? "" : markerJson.get("title").getAsString();
               String snippet = (markerJson.get("snippet") == null) ? "" : markerJson.get("snippet").getAsString();
               boolean draggable = (markerJson.get("draggable") == null) ? mMarkerDraggable : markerJson.get("draggable").getAsBoolean();
-              
-              int uniqueId = generateMarkerId();
-              markerIds.add(uniqueId);
-              addMarkerToMap(latitude, longitude, uniqueId, color, title,
+
+              if(addOne){
+                int uniqueId = generateMarkerId();
+                markerIds.add(uniqueId);
+                addMarkerToMap(latitude, longitude, uniqueId, color, title,
                   snippet, draggable);
+              }
 
             }
 
           } else { // not a JsonObject
             form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
-            return YailList.makeList(markerIds);
+                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "marker is not represented as JsonObject");
+            // return YailList.makeList(markerIds);
           }
 
-        }
+        }//end of JsonArray
 
       } else { // not a JsonArray
         form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-            ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
+            ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "markers needs to be represented as JsonArray");
         return YailList.makeList(markerIds);
       }
 
     } catch (JsonSyntaxException e) {
       form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
           ErrorMessages.ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED, jsonString);
-      return YailList.makeList(markerIds);
+      return YailList.makeList(markerIds); // return an empty markerIds list
     }
 
     return YailList.makeList(markerIds);
@@ -1001,40 +1124,99 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
     for (Object marker : markers.toArray()) {
       if (marker instanceof YailList) {
+        Log.i(TAG, "Interior YailLiat");
         if (((YailList) marker).size() < 2){
           // throw an exception with error messages
           form.dispatchErrorOccurredEvent(this, "AddMarkers",
-              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
+              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need more than 2 inputs");
+          continue; // don't add this marker because its invalid inputs, going to the next one
         }
-        Double lat = (Double) ((YailList) marker).get(0);
-        Double lng = (Double) ((YailList) marker).get(1);
+
+        // ((YailList) marker).getObject(0) will return type gnu.math.DFloNum
+        Object latObj =  ((YailList) marker).getObject(0);
+        Object lngObj =  ((YailList) marker).getObject(1);
+        Log.i(TAG, "Type: " + latObj.getClass());
+        Log.i(TAG, "Type: " + lngObj.getClass());
+        Double lat = new Double(0);
+        Double lng = new Double(0);
+
+
+        if (!(latObj instanceof DFloNum && lngObj instanceof DFloNum)){//if one of the lat or lng is not DFloNum
+          form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
+              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Not a number for latitude or longitude");
+          continue; // don't add this marker because its invalid inputs, going to the next one
+
+        }
+        else {
+          lat = ((DFloNum)latObj).doubleValue();
+          lng = ((DFloNum)lngObj).doubleValue();
+
+        }
+
         Integer uniqueId = generateMarkerId();
         float color = BitmapDescriptorFactory.HUE_BLUE;
         String title = "";
         String snippet = "";
         boolean draggable = mMarkerDraggable;
 
-        if (((YailList) marker).size() >= 3){
-          color = (Float) ((YailList) marker).get(3);
+        if (((YailList) marker).size() >= 3) {
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(2).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(2).toString());
+          // Integer within Yaillist is of type gnu.math.IntNum
+          Object colorObj =  ((YailList) marker).getObject(2);
+
+          if (colorObj instanceof gnu.math.IntNum)
+            color = new Float(((IntNum)((YailList) marker).getObject(2)).intValue());//extract the int val and convert to Float
+          else {
+            form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
+                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj.toString() + " is not a number");
+            continue; // don't add this marker because its invalid inputs, going to the next one
+          }
 
         }
+
+//        if (((YailList) marker).size() >= 3){
+//          color = (Float) ((YailList) marker).getObject(2);
+//          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(2).getClass());
+//          Log.i(TAG, "Value: " + ((YailList) marker).getObject(2).toString());
+//
+//        }
         if (((YailList) marker).size() >= 4){
-          title = (String) ((YailList) marker).get(4);
+          title = (String) ((YailList) marker).getObject(3);
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(3).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(3).toString());
         }
 
         if (((YailList) marker).size() >= 5){
-          snippet = (String) ((YailList) marker).get(5);
+          snippet = (String) ((YailList) marker).getObject(4);
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(4).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(4).toString());
         }
+
         if (((YailList) marker).size() >= 6) {
-          draggable = (Boolean) ((YailList) marker).get(6);
+
+          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(5).getClass());
+          Log.i(TAG, "Value: " + ((YailList) marker).getObject(5).toString());
+
+          if (((YailList) marker).getObject(5) instanceof Boolean) {
+            draggable = (Boolean) ((YailList) marker).getObject(5);
+          }
+          else {
+            form.dispatchErrorOccurredEvent(this, "AddMarkers",
+                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "marker not as a list");
+            continue; // don't add this marker because its invalid inputs, going to the next one
+          }
+
         }
         markerIds.add(uniqueId);
         addMarkerToMap(lat, lng, uniqueId,  color, title, snippet, draggable);
+
       }
       else {
         // fire exception and throw error messages
-        form.dispatchErrorOccurredEvent(this, "AddMarkers",
-            ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT);
+        form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
+            ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Marker is not represented as list");
+        continue;// don't add this marker because its invalid inputs, going to the next one
       }
     }
     return YailList.makeList(markerIds);
@@ -1042,25 +1224,46 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   }
 
   @SimpleFunction(description = "Set the property of a marker, note that the marker has to be added first or else will "
-      + "throw an exception! Properties include: \"color\"(in type float, hue value ranging from 0-360), \"title\" (in type String), "
-      + "\"snippet\"(in type String), \"draggable\"(in type boolean).")
+      + "throw an exception! Properties include: \"color\"(hue value ranging from 0~360), \"title\", "
+      + "\"snippet\", \"draggable\"(give either true or false as the value).")
   public void UpdateMarker(int markerId, String propertyName, Object value) {
     // we don't support update lat, lng here, one can remove the marker and add
     // a new one
+    String property = propertyName.trim();
+    String propVal = value.toString().trim(); //convert everything to String first
+
+    Log.i(TAG, "@UpdateMarker");
+    Log.i(TAG, "markerId:" + markerId);
+    Log.i(TAG, "prop:" + propertyName);
+    Log.i(TAG, "value:" + value);
     Marker marker = getMarkerIfExisted(markerId);
+    Log.i(TAG, "marker?:" + marker);
+
 
     if (marker != null) {
-      if (propertyName.equals("color")) {
-        marker.setIcon(BitmapDescriptorFactory.defaultMarker((Float) value));
-      }
-      if (propertyName.equals("title")) {
-        marker.setTitle((String) value);
-      }
-      if (propertyName.equals("snippet")) {
-        marker.setSnippet((String) value);
-      }
-      if (propertyName.equals("draggable")) {
-        marker.setDraggable((Boolean) value);
+      if (property.equals("color")) {
+          Log.i(TAG, "we are changing color");
+          Float hue = new Float(propVal);
+          if(hue < 0 || hue > 360) {
+            form.dispatchErrorOccurredEvent(this, "UpdateMarker",
+                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, hue.toString());
+          }
+          else{
+
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(new Float(propVal)));
+          }
+        }
+        if (property.equals("title")) {
+          Log.i(TAG, "we are changing title");
+          marker.setTitle(propVal);
+        }
+        if (property.equals("snippet")) {
+          Log.i(TAG, "we are changing snippet");
+          marker.setSnippet(propVal);
+        }
+        if (property.equals("draggable")) {
+          Log.i(TAG, "we are changing draggable");
+          marker.setDraggable(new Boolean(propVal));
       }
     }
 
@@ -1068,7 +1271,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   @SimpleFunction(description = "Get all the existing markers's Ids" )
   public YailList GetAllMarkerID(){
-
     return YailList.makeList(markers.values());
 
   }
@@ -1094,7 +1296,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     }
 
   }
-
 
 
   @Override
@@ -1285,9 +1486,14 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
    * @param zoom
    */
   @SimpleEvent (description = "Called after the camera position of a map has changed.")
-  public void CameraPositionChanged(double lat, double lng, float bearing, float tilt, float zoom){
-    EventDispatcher.dispatchEvent(this, "CameraPositionChanged", lat, lng, bearing, tilt, zoom);
-
+  public void CameraPositionChanged(final double lat, final double lng, final float bearing,
+                                    final float tilt, final float zoom) {
+    context.runOnUiThread(new Runnable(){
+      public void run() {
+        Log.i(TAG, "Camera's position has changed:" + lat + ", " + lng + ", " + bearing + "," + tilt + ", " + zoom);
+        EventDispatcher.dispatchEvent(GoogleMap.this, "CameraPositionChanged", lat, lng, bearing, tilt, zoom);
+      }
+    });
   }
   
 
@@ -1296,7 +1502,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // TODO Auto-generated method stub
     OnMapLongClick(latLng.latitude, latLng.longitude);
 
-    
   }
 
   /**
@@ -1305,8 +1510,15 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
    * @param lng
    */
   @SimpleEvent (description = "Called when the user makes a long-press gesture on the map")
-  public void OnMapLongClick(double lat, double lng){
-    EventDispatcher.dispatchEvent(this, "OnMapLongClick", lat, lng);
+  public void OnMapLongClick(final double lat, final double lng){
+    context.runOnUiThread(new Runnable(){
+      public void run() {
+        Log.i(TAG, "Map is longclicked at:" + lat + ", " + lng);
+        EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapLongClick", lat, lng);
+      }
+
+    });
+
 
   }
 
@@ -1314,13 +1526,22 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   @Override
   public void onMapClick(LatLng latLng) {
     // TODO Auto-generated method stub
+    Log.i(TAG, "receive google maps's onMapClick");
     OnMapClick(latLng.latitude, latLng.longitude);
 
   }
 
   @SimpleEvent(description =  "Called when the user makes a tap gesture on the map")
-  public void OnMapClick(double lat, double lng){
-    EventDispatcher.dispatchEvent(this, "OnMapClick", lat, lng);
+  public void OnMapClick(final double lat, final double lng){
+    context.runOnUiThread(new Runnable() {
+      public void run() {
+        Log.i(TAG, "map is clicked at:" + lat + ", " + lng);
+        EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapClick", lat, lng);
+      }
+
+    });
+
+
   }
 
 
