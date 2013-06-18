@@ -63,6 +63,12 @@ public class PropertyTypeConstants {
   public static final String PROPERTY_TYPE_COMPONENT = "component";
 
   /**
+   * Concept URI field for Semantic Web components.
+   * @see com.google.appinventor.client.widgets.properties.SemanticWebPropertyEditor
+   */
+  public static final String PROPERTY_TYPE_CONCEPT_URI = "concept_uri";
+
+  /**
    * Floating-point values.
    * @see com.google.appinventor.client.widgets.properties.FloatPropertyEditor
    */
@@ -99,6 +105,12 @@ public class PropertyTypeConstants {
    * @see com.google.appinventor.client.widgets.properties.NonNegativeIntegerPropertyEditor
    */
   public static final String PROPERTY_TYPE_NON_NEGATIVE_INTEGER = "non_negative_integer";
+
+  /**
+   * Property URI field for Semantic Web components.
+   * @see com.google.appinventor.client.widgets.properties.SemanticWebPropertyEditor
+   */
+  public static final String PROPERTY_TYPE_PROPERTY_URI = "property_uri";
 
   /**
    * Choices of screen orientations offered by {@link
@@ -162,5 +174,15 @@ public class PropertyTypeConstants {
    * com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidTextReceivingPropertyEditor}.
    */
   public static final String PROPERTY_TYPE_TEXT_RECEIVING = "text_receiving";
+
+  /**
+   * Uri for semantic web resources.
+   */
+  public static final String PROPERTY_TYPE_URI = "uri";
+
+  /**
+   * Base URI for creating semantic web resources.
+   */
+  public static final String PROPERTY_TYPE_BASEURI = "baseuri";
 
 }

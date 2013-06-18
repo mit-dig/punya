@@ -68,6 +68,18 @@
 
   <!-- Servlets -->
 
+  <!-- Remote API -->
+  <servlet>
+    <display-name>Remote API Servlet</display-name>
+    <servlet-name>RemoteApiServlet</servlet-name>
+    <servlet-class>com.google.apphosting.utils.remoteapi.RemoteApiServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RemoteApiServlet</servlet-name>
+    <url-pattern>/remote_api</url-pattern>
+  </servlet-mapping>
+
   <!-- rendezvious -->
   <servlet>
     <servlet-name>rendezvousServlet</servlet-name>
@@ -128,6 +140,21 @@
   <filter-mapping>
     <filter-name>odeAuthFilter</filter-name>
     <servlet-name>projectService</servlet-name>
+  </filter-mapping>
+
+  <!-- semantic web -->
+  <servlet>
+    <servlet-name>semwebService</servlet-name>
+    <servlet-class>com.google.appinventor.server.SemWebServiceImpl</servlet-class>
+    <load-on-startup>10</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>semwebService</servlet-name>
+    <url-pattern>/ode/semweb</url-pattern>
+  </servlet-mapping>
+  <filter-mapping>
+    <filter-name>odeAuthFilter</filter-name>
+    <servlet-name>semwebService</servlet-name>
   </filter-mapping>
 
   <!-- upload -->

@@ -146,6 +146,125 @@ public interface Images extends Resources {
   ImageResource orientationsensor();
 
   /**
+   * Designer palette item: proximitysensor component
+   */
+  @Source("com/google/appinventor/images/proximity.png")
+  ImageResource proximitysensor();
+  
+  /**
+   * Designer palette item: socialProximitysensor component
+   */
+  @Source("com/google/appinventor/images/socialProximitysensor.png")
+  ImageResource socialProximitysensor();
+  
+  /**
+   * Designer palette item: Timer component
+   */
+  @Source("com/google/appinventor/images/timer.png")
+  ImageResource timer();
+  
+  /**
+   * Designer palette item: WifiSensor component
+   */
+  @Source("com/google/appinventor/images/wifiProbe.png")
+  ImageResource wifiSensor();
+  
+  /**
+   * Designer palette item: LocationProbe component
+   */
+  @Source("com/google/appinventor/images/locationProbe.png")
+  ImageResource locationProbeSensor();
+  
+  /**
+   * Designer palette item: ActivityProbeSensor component 
+   */
+  @Source("com/google/appinventor/images/activityProbe.png")
+  ImageResource activityProbeSensor();
+  
+  /**
+   * Designer palette item: CellTowerProbeSensor component
+   */
+  @Source("com/google/appinventor/images/cellTowerProbe.png")
+  ImageResource cellTowerProbeSensor();
+  
+  /**
+   * Designer palette item: RunningApplications component
+   */
+  @Source("com/google/appinventor/images/runningAppsProbe.png")
+  ImageResource runningApps();
+  
+  /**
+   * Designer palette item: ScreenStatus component
+   */
+  @Source("com/google/appinventor/images/screenProbe.png")
+  ImageResource screenStatus();
+  
+  /**
+   * Designer palette item: LightSensor component
+   */
+  @Source("com/google/appinventor/images/lightsensorProbe.png")
+  ImageResource lightSensor();
+  
+  /**
+   * Designer palette item: CallLogHistory component
+   */
+  @Source("com/google/appinventor/images/calllogProbe.png")
+  ImageResource calllogHistory();
+  
+  /**
+   * Designer palette item: SmsHistory component
+   */
+  @Source("com/google/appinventor/images/smsProbe.png")
+  ImageResource smsHistory();
+  
+  /**
+   * Designer palette item: BatterySensor component
+   */
+  @Source("com/google/appinventor/images/batterySensor.png")
+  ImageResource batterySensor();
+  
+  /**
+   * Designer palette item: PedometerSensor component
+   */
+  @Source("com/google/appinventor/images/pedometerSensor.png")
+  ImageResource pedometerSensor();
+  
+  
+  /**
+   * Designer palette item: Survey component
+   */
+  @Source("com/google/appinventor/images/survey.png")
+  ImageResource survey();
+  
+  
+  /**
+   * Designer item: Survey component in designer
+   */
+
+  @Source("com/google/appinventor/images/surveybig.png")
+  ImageResource surveybig();
+  
+  /**
+   * Designer palette item: Linked Data Chart component
+   */
+  @Source("com/google/appinventor/images/chart.png")
+  ImageResource ldchart();
+  
+  /**
+   * Designer item: Linked Data Chart component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/chartbig.png")
+  ImageResource ldchartbig();
+  
+  /**
+   * Designer item: Linked Data Chart component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/dropbox.png")
+  ImageResource dropbox();
+  
+  /**
    * Designer palette item: player component
    */
   @Source("com/google/appinventor/images/player.png")
@@ -330,12 +449,18 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/pedometer.png")
   ImageResource pedometerComponent();
-
+  
   /**
    * Designer pallete item: PhoneStatus Component
    */
   @Source("com/google/appinventor/images/phoneip.png")
   ImageResource phonestatusComponent();
+  /**
+   * Designer palette item: TelephonyInfo Component
+   */
+  @Source("com/google/appinventor/images/info.png")
+  ImageResource telephonyInfo();
+  
 
   /**
    * Designer palette item: Lego Mindstorms NXT components
@@ -374,4 +499,16 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/web.png")
   ImageResource web();
+
+  /**
+   * Designer palette item: Semantic Web Component
+   */
+  @Source("com/google/appinventor/images/semanticWeb.png")
+  ImageResource semanticWeb();
+
+  /**
+   * Designer palette item: Semantic Forms Layout
+   */
+  @Source("com/google/appinventor/images/semanticForm.png")
+  ImageResource semanticForm();
 }

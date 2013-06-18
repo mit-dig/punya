@@ -1,0 +1,4 @@
+Apache Jena retrieved with from Maven using the following commands:
+
+mvn com.googlecode.maven-download-plugin:maven-download-plugin:artifact -DgroupId=org.apache.jena -DartifactId=jena-core -Dversion=2.10.0 -DoutputDirectory=.
+mvn com.googlecode.maven-download-plugin:maven-download-plugin:artifact -DgroupId=org.apache.jena -DartifactId=jena-arq -Dversion=2.10.0 -DoutputDirectory=.
