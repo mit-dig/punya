@@ -81,19 +81,22 @@ public static File getAppDataFolder(Context context) {
 
 
 private static boolean uploadFolderFiles(Context context, File file) throws Exception {
-  //in case when the specified File path is a directory, do we want to do a recursive upload?
-  //we don't do nested looping through a folder to get all the files
-  if(file.isDirectory()){
-     File[] listOfFiles = file.listFiles();
-     for (File f: listOfFiles) {
-       if (uploadSingleFile(context, f))
-         ; //if successful, do nothing, else return false
-       else
-         return false;
-     }
+  //note: we don't do nested looping through a folder to get all the files
+  boolean successful = true;
+ 
+    File[] listOfFiles = file.listFiles();
+    for (File f : listOfFiles) {
+      if (f.isFile()) { // only upload file(s) in a folder
+        successful = uploadSingleFile(context, f);
+        if (successful)
+          ; // if successful, do nothing, else return false
+        else
+          return false; // if we failed to upload any file in the folder
+                        // return false right away
+      }
+    }
 
-  }
-  return true;  
+    return successful;
 
 }
 

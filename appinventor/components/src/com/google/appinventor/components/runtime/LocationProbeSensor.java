@@ -61,7 +61,7 @@ import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 @UsesLibraries(libraries = "funf.jar")
 public class LocationProbeSensor extends ProbeBase{
 	
-	private final String TAG = "LocationProbe";
+	private final String TAG = "LocationProbeSensor";
 	protected final String SIMPLE_LOCATION_PROBE = "edu.mit.media.funf.probe.builtin.SimpleLocationProbe";
 	public static final int UNKNOWN_VALUE = 0;
 	
@@ -82,6 +82,7 @@ public class LocationProbeSensor extends ProbeBase{
 	private final int GOOD_ENOUGHT_ACCURACY = 80;
 	private boolean useGPS = true;
 	private boolean useNetwork = true;
+	private boolean useCache = false;
 	
 	private int goodEnoughAccurary;
 	 
@@ -247,15 +248,36 @@ public class LocationProbeSensor extends ProbeBase{
 	/*
 	 * recreate json config 
 	 */
-	private JsonObject createNewConfig(boolean useGPS, boolean useNetwork, int goodEnoughPrivacy){
+	private JsonObject createNewConfig(boolean useGPS, boolean useNetwork, int goodEnoughAccurary){
 		JsonObject config = new JsonObject();
 		
 		config.addProperty("goodEnoughAccuracy", goodEnoughAccurary);
 		config.addProperty("useGPS", useGPS);
 		config.addProperty("useNetwork", useNetwork);
+		config.addProperty("useCache", useCache);
 
 		return config;
 	}
+	
+	/**
+	 * Set whether the location info will use the last known location without acquiring new location from 
+	 * GPS or Network fix
+	 * @param newVal
+	 */
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "false")
+	@SimpleProperty(description = "Set whether the location info will use the last known location without" +
+			" acquring a new location either through GPC or Network fix")
+	public void UseCache(boolean newVal){
+	  if(useCache != newVal) {
+	    this.useCache = newVal;
+	  }
+	}
+	
+	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
+	public boolean UseCache(){
+	  return useCache;
+	}
+	
 	
 	/**
 	 * Set the good-enough accuracy for location sensor
@@ -336,6 +358,7 @@ public class LocationProbeSensor extends ProbeBase{
 		((JsonObject)dataRequest).addProperty("goodEnoughAccurary", goodEnoughAccurary);
 		((JsonObject)dataRequest).addProperty("useGPS", useGPS);
 		((JsonObject)dataRequest).addProperty("useNetwork", useNetwork);
+		((JsonObject)dataRequest).addProperty("useCache", useCache);
 		 
 		Log.i(TAG, "Location Data request: " + dataRequest.toString());
 

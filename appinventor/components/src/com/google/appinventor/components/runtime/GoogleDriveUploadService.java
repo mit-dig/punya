@@ -1,27 +1,16 @@
-// -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
-
 package com.google.appinventor.components.runtime;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxFileSizeException;
-import com.dropbox.client2.exception.DropboxIOException;
-import com.dropbox.client2.exception.DropboxPartialFileException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.exception.DropboxUnlinkedException;
-import com.google.appinventor.components.runtime.util.DropboxUtil;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 
 import android.app.Service;
@@ -34,45 +23,32 @@ import android.net.NetworkInfo.State;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager.WakeLock;
-import android.text.format.DateFormat;
 import android.util.Log;
+
+
 import edu.mit.media.funf.storage.FileArchive;
 import edu.mit.media.funf.storage.RemoteFileArchive;
 import edu.mit.media.funf.storage.UploadService;
-
 import edu.mit.media.funf.util.EqualsUtil;
 import edu.mit.media.funf.util.HashCodeUtil;
 import edu.mit.media.funf.util.LockUtil;
 import edu.mit.media.funf.util.LogUtil;
- 
-
 
 /*
- * For DropboxUploadService, we try to distinguish two types of upload, 
- * one is the normal-uploading-files which will just upload all the files 
- * in the current specified file path.
- * 
- * The second one is uploading the database file 
+ * This class looks almost identical to DropboxUpload Service, it extends UploadService so that 
+ * it can upload both database file and regular file(s). 
+ * TODO: refactoring it back to UploadService, or create another abstract class that extends UploadService
  */
-public class DropboxUploadService extends UploadService {
-  
-  
+public class GoogleDriveUploadService extends UploadService {
+
   public static final String FILE_TYPE = "filetype";
-  
   
   public static final int
   REGULAR_FILE = 0,
   DATABASE_FILE = 1;
   
-  @Override
-  protected RemoteFileArchive getRemoteArchive(String id) {
-    return new DropboxArchive(getApplicationContext());
-  }
-  private static final String TAG = "DropboxUploadService";
-
-
-
-  private static final int MAX_DROPBOX_RETRIES = 3;
+  private static final int MAX_GOOGLEDRIVE_RETRIES = 6;
+  private static final String TAG = "GoogleDriveUploadService";
   
   private ConnectivityManager connectivityManager;
   private Map<String, Integer> fileFailures;
@@ -82,8 +58,9 @@ public class DropboxUploadService extends UploadService {
   private Thread dbUploadThread;
   private Thread regularUploadThread;
   private WakeLock lock;
+  private String GoogleDriveFolderPath; //specify which folder in Google Drive 	
   
-  //App Inventor specific method for communicating error message to component
+  //App Inventor specific methods for communicating error message to component
   private boolean status = true;
   private String error_message = "";
   
@@ -91,11 +68,17 @@ public class DropboxUploadService extends UploadService {
   private SharedPreferences sharedPreferences;
   
   @Override
+  protected RemoteFileArchive getRemoteArchive(String id) {
+    Log.i(TAG, "Drivefolder: " + GoogleDriveFolderPath);
+    return new GoogleDriveArchive(getApplicationContext(), GoogleDriveFolderPath);
+  }
+  
+  
+  @Override
   public void onCreate() {
     super.onCreate();
-    sharedPreferences =  getApplicationContext().getSharedPreferences(DropboxUtil.PREFS_DROPBOX,
-        Context.MODE_PRIVATE);
     Log.i(TAG, "Creating...");
+    sharedPreferences =  getApplicationContext().getSharedPreferences(GoogleDrive.PREFS_GOOGLEDRIVE, Context.MODE_PRIVATE);
     connectivityManager =(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     lock = LockUtil.getWakeLock(this);
     fileFailures = new HashMap<String, Integer>();
@@ -110,13 +93,14 @@ public class DropboxUploadService extends UploadService {
         while(Thread.currentThread().equals(dbUploadThread) && !dbFilesToUpload.isEmpty()) {
             ArchiveFile archiveFile = dbFilesToUpload.poll();
             Log.i(TAG, "now poll the archiveFile(db) from the queue");
-            //runArchive method deals with uploading db archived file to dropbox
+            //runArchive method deals with uploading db archived file to Google Drive
             runArchive(archiveFile.archive, archiveFile.remoteArchive, archiveFile.file, archiveFile.network);
             Log.i(TAG, "after runArchive");
         }
         dbUploadThread = null;
         stopSelf();
-        
+
+
       }
     });
     
@@ -129,28 +113,28 @@ public class DropboxUploadService extends UploadService {
           Log.i(TAG, "in thread");
           RegularArchiveFile archiveFile = filesToUpload.poll();
           Log.i(TAG, "now poll the archiveFile from the queue");
-          //runUpload method deals with uploading regular files to dropbox
+          //runUpload method deals with uploading regular files to google drive
           runUpload(archiveFile.remoteArchive, archiveFile.file, archiveFile.network);
         }
-        regularUploadThread = null;
+        regularUploadThread = null;        
         stopSelf();
         Log.i(TAG, "I have killed myself, so next thread can be called to run.");
+       
       }
     });
     
     
   }
   
-
-  
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    Log.i(TAG, "Starting DropboxUploadService...");
+    Log.i(TAG, "Starting GoogleDriveUploadService...");
     int network = intent.getIntExtra(NETWORK, NETWORK_ANY);
-    //add one more extra in the intent that passes to DropboxUploadService
     int fileType = intent.getIntExtra(FILE_TYPE, REGULAR_FILE);
     Log.i(TAG, "fileType:" + fileType);
-
+    GoogleDriveFolderPath = (intent.getStringExtra(GoogleDrive.GD_FOLDER) == null)
+    		? GoogleDrive.DEFAULT_GD_FOLDER:intent.getStringExtra(GoogleDrive.GD_FOLDER) ;
+    
     if (isOnline(network)) {
 
       if (fileType == REGULAR_FILE) {
@@ -166,8 +150,7 @@ public class DropboxUploadService extends UploadService {
             regularArchive(remoteArchive, file,network);
           }
         }
-        
-        
+
         // Start upload thread if necessary, even if no files to ensure stop
         if (regularUploadThread != null && !regularUploadThread.isAlive()) {
           Log.i(TAG, "start a new uploading thread....");
@@ -251,10 +234,10 @@ public class DropboxUploadService extends UploadService {
         successUpload = remoteArchive.add(file);
       } catch (Exception e) {
         // something happen that we can't successfully upload the file to
-        // dropbox. Write status logs and error messages to sharedpreference  
+        // google drive , and we will tell the UI component
+        Log.i(TAG, "exception happened, ready to call back to the AI component");
         status = successUpload;
         error_message = getErrorMessage(e);
-        
       }
  
       if (successUpload) {
@@ -271,6 +254,7 @@ public class DropboxUploadService extends UploadService {
           dbFilesToUpload.offer(new ArchiveFile(archive, remoteArchive, file,
               network));
         } else {
+
           Log.i(LogUtil.TAG, "Failed to upload '" + file.getAbsolutePath()
               + "' after 3 attempts.");
           saveStatusLog(status, error_message);
@@ -285,23 +269,7 @@ public class DropboxUploadService extends UploadService {
 
   }
   
-  private void saveStatusLog(boolean status, String message){
-    //save to sharedPreference the latest status 
-    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
-    
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    Date date = new Date();
-    String currentDatetime = dateFormat.format(date);
-    
-    sharedPrefsEditor.putString(Dropbox.DROPBOX_LASTUPLOAD_TIME, currentDatetime);
-    sharedPrefsEditor.putBoolean(Dropbox.DROPBOX_LASTUPLOAD_STATUS, status);
-    sharedPrefsEditor.putString(Dropbox.DROPBOX_LASTUPLOAD_REPORT, message);
 
-    sharedPrefsEditor.commit();        
-    
-  }
-  
-  
   private void runUpload(RemoteFileArchive remoteArchive, File file, int network){
     // this part of code is copied and modified from UploadService.java in funf library
     // only uses when fileType == REGULAR_FILE, else we will use UploadService.java$runArchive()
@@ -311,18 +279,23 @@ public class DropboxUploadService extends UploadService {
     Log.i(TAG, "isOnline:" + isOnline(network) );
     boolean successUpload = false;
  
-    if (numRemoteFailures < MAX_DROPBOX_RETRIES && isOnline(network)) {
-      Log.i(TAG, "uploading to dropbox..." + file.getName());
+    if (numRemoteFailures < MAX_GOOGLEDRIVE_RETRIES && isOnline(network)) {
+      Log.i(TAG, "uploading to google drive..." + file.getName());
       try{
+        
         successUpload = remoteArchive.add(file);
+        Log.i(TAG, "success?:" + successUpload);
       }catch(Exception e){
-        // something happen that we can't successfully upload the file to dropbox
+        Log.i(TAG, "something wrong in GoogleDriveArchive:" + e.toString());
+        e.printStackTrace();
+        // something happen that we can't successfully upload the file to Google drive
         status = successUpload;
         error_message = getErrorMessage(e);
+      
       }
  
       if(successUpload) {
-        Log.i(TAG, "successful upload file to dropbox");
+        Log.i(TAG, "successful upload file to google drive");
         saveStatusLog(true, "success");
         //do nothing
       } else {
@@ -342,6 +315,7 @@ public class DropboxUploadService extends UploadService {
      }else {
       Log.i(TAG, "Canceling upload.  Remote archive '" + remoteArchive.getId() + "' is not currently available.");
       saveStatusLog(status, error_message);
+
     } 
   }
 
@@ -365,8 +339,8 @@ public class DropboxUploadService extends UploadService {
     return false;
 }
   /*
-   * This is a copy of UploadService$archive(), we need to replicate this because it's used in 
-   * DropboxUploadSerive$onStartCommand that override UploadService$onStartCommand
+   * This is a copy of UploadService$archive(), we need to rename and replicate this because it's used in 
+   * GoogleDriveUploadSerive$onStartCommand that override UploadService$onStartCommand
    */
   public void dbArchive(FileArchive archive, RemoteFileArchive remoteArchive, File file, int network) {
     ArchiveFile archiveFile = new ArchiveFile(archive, remoteArchive, file, network);
@@ -402,15 +376,13 @@ public class DropboxUploadService extends UploadService {
     }
   }
   
-
-  
   /**
    * Binder interface to the probe
    */
 
   public class LocalBinder extends Binder {
-    public DropboxUploadService getService() {
-            return DropboxUploadService.this;
+    public GoogleDriveUploadService getService() {
+            return GoogleDriveUploadService.this;
         }
     }
   private final IBinder mBinder = new LocalBinder();
@@ -419,39 +391,68 @@ public class DropboxUploadService extends UploadService {
     return mBinder;
   }
   
-
   private String getErrorMessage(Exception e){
     String errorMsg = "";
     
-    try {
+    try{
       throw e;
-    } catch (DropboxUnlinkedException exp) {
-      // TODO Auto-generated catch block
-      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_TWITTER_EXCEPTION, null); 
-    } catch (DropboxFileSizeException exp){
-      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_FILESIZE, null);
+    } catch (GoogleJsonResponseException e1) {
+      GoogleJsonError error = e1.getDetails();
 
-    } catch (DropboxPartialFileException exp){
-      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_PARTIALFILE, null);
-    } catch (DropboxServerException exp){
-      if(exp.error == DropboxServerException._507_INSUFFICIENT_STORAGE){
-        errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE, null);
+      Log.e(TAG, "Error code: " + error.getCode());
+      Log.e(TAG, "Error message: " + error.getMessage());
+      if(error.getCode() == 401){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS, null);
+      }
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appAccess"))){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION, null);
+      }
+      
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appNotConfigured"))){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR, null);
+        
+      }
+      if (error.getCode() == 403 && (error.getErrors().get(0).getReason().equals("appBlacklisted"))){
+        errorMsg = ErrorMessages.formatMessage(
+            ErrorMessages.ERROR_GOOGLEDRIVE_APP_BLACKLIST, null);        
       }
 
-    } catch (DropboxIOException exp){
-      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_IO, null);
-      
-    } catch (FileNotFoundException exp){
-      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_FILENOTFOUND, null);
-      
-    } catch (Exception exp) {
-      //something bad just happened
-      errorMsg = ErrorMessages.formatMessage(ErrorMessages.ERROR_DROPBOX_EXCEPTION, null);
+      // More error information can be retrieved with error.getErrors().
     }
-        
+      catch (IOException exception){
+        errorMsg = ErrorMessages.formatMessage(
+          ErrorMessages.ERROR_GOOGLEDRIVE_IO_EXCEPTION, null);
+ 
+
+    } catch (Exception exceptfinal) {
+      // TODO Auto-generated catch block
+      errorMsg = ErrorMessages.formatMessage(
+          ErrorMessages.ERROR_GOOGLEDRIVE_EXCEPTION, null);
+    }
+    
     return errorMsg;
+
   }
   
+  private void saveStatusLog(boolean status, String message){
+    //save to sharedPreference the latest status 
+    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    Date date = new Date();
+    String currentDatetime = dateFormat.format(date);
+    
+    sharedPrefsEditor.putBoolean(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, status);
+    sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, message);
+    sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_TIME, currentDatetime);
+    
+    sharedPrefsEditor.commit();        
+    
+  }  
   
   
+
 }

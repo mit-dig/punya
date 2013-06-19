@@ -134,7 +134,7 @@ public final class ErrorMessages {
   // Texting errors
   public static final int ERROR_BAD_VALUE_FOR_TEXT_RECEIVING = 1701;
   
-  // Please start the next group of error numbers at 1801.
+
   public static final int ERROR_DATE_FORMAT = 1801;
   // Dropbox errors 
   public static final int ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET = 1810;
@@ -146,6 +146,29 @@ public final class ErrorMessages {
   public static final int ERROR_DROPBOX_IO = 1816;
   public static final int ERROR_DROPBOX_FILENOTFOUND = 1817;
   public static final int ERROR_DROPBOX_NO_TWO_RUNNING_TASKS = 1818;
+
+  public static final int ERROR_GOOGLEDRIVE_EXCEPTION = 1901;
+  public static final int ERROR_GOOGLEDRIVE_IO_EXCEPTION = 1902;
+  public static final int ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS = 1903;
+  public static final int ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION = 1904;
+  public static final int ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR = 1905;
+  public static final int ERROR_GOOGLEDRIVE_APP_BLACKLIST = 1906;
+  public static final int ERROR_GOOGLEDRIVE_HTTP_RESPONSE = 1907;
+  
+  // Please start the next group of error numbers at 2001.
+  public static final int ERROR_SENSORDB_NOTAVAILABLE = 2001;
+  public static final int ERROR_SENSORDB_NOTACTIVE = 2002;
+
+  // Please start the next group of error numbers at 2010.
+  public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 2010;
+  public static final int ERROR_GOOGLE_PLAY_NOT_INSTALLED = 2011;
+  public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 2012;
+  public static final int ERROR_GOOGLE_MAP_MARKER_NOT_EXIST = 2013;
+  public static final int ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED = 2014;
+  public static final int ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST = 2015;
+  public static final int ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED = 2016;
+  public static final int ERROR_GOOGLE_PLAY_DISABLED = 2017;
+  public static final int ERROR_GOOGLE_PLAY_INVALID = 2018;
 
   
   // Mapping of error numbers to error message format strings.
@@ -394,10 +417,31 @@ public final class ErrorMessages {
     
     errorMessages.put(ERROR_DROPBOX_FILENOTFOUND, "The file to upload was not found.");
     errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
-        "by calling stop.");
+        "by calling <code>StopScheduleUpload</code>.");
     
+
+    errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "Error happened with connection or file I/O");
+    errorMessages.put(ERROR_GOOGLEDRIVE_EXCEPTION, "Something wrong with Google Drive");
     
+    errorMessages.put(ERROR_SENSORDB_NOTAVAILABLE,"%s is not available or not the correct name, " +
+    "select one by calling <code>AvailableActiveSensors</code>");
     
+    errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "%s is not cuurently active");
+
+    errorMessages.put(ERROR_GOOGLE_PLAY_NOT_INSTALLED, "Google Play is not installed/available on this phone");
+    errorMessages.put(ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED, "Google Play Service needs update to newest version");
+    errorMessages.put(ERROR_GOOGLE_MAP_NOT_INSTALLED, "Google Map is not installed on this phone");
+    errorMessages.put(ERROR_GOOGLE_MAP_INVALID_INPUT, "Invalid input: %s");
+    errorMessages.put(ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, "Marker with id: %s does not exist");
+    errorMessages.put(ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED,
+        "Unable to decode the JSON text: %s");
+    errorMessages.put(ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, "Circle with id: %s does not exist");
+    errorMessages.put(ERROR_GOOGLE_PLAY_DISABLED, "The installed version of Google Play services " +
+        "has been disabled on this device.");
+    errorMessages.put(ERROR_GOOGLE_PLAY_INVALID, "The version of the Google Play services installed " +
+        "on this device is not authentic.");
+
+
   }
 
   private ErrorMessages() {

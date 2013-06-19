@@ -68,7 +68,7 @@ import android.util.Log;
  * Comments in the code provide the details.
  *   
  */
-public class OAuth2Helper {  
+public class OAuth2Helper{  
 
   public static final String TAG = "OAuthHelper";
   public static final String PREF_AUTH_TOKEN      = "authToken";
@@ -156,6 +156,7 @@ public class OAuth2Helper {
     // another one using the refresh token.
 
     accountManager.invalidateAuthToken(credential.getAccessToken());
+
     AccountManager.get(activity).invalidateAuthToken(authTokenType, null);
 
     // Try to get the user's account by account name. Might return null
@@ -217,6 +218,23 @@ public class OAuth2Helper {
     editor2.commit();
   }
   
+  
+  /**
+   * Check whether we already have already the access token
+   */
+
+  public boolean CheckAuthorized(Activity activity) {
+    SharedPreferences settings = activity.getPreferences(Activity.MODE_PRIVATE);
+    String accountName = settings.getString(PREF_ACCOUNT_NAME, "");
+    String authToken =  settings.getString(PREF_AUTH_TOKEN, "");
+    if (accountName.length() == 0 || authToken.length() == 0) {
+      return false;
+    }
+    else
+      return true;
+
+  } 
+  
   /**
    * Clients can retrieve error messages statically.
    * @return errorMessage
@@ -225,4 +243,61 @@ public class OAuth2Helper {
     Log.i(TAG, "getErrorMessage = " + errorMessage);
     return errorMessage;
   }
+  
+//  private GoogleAccountCredential getGoogleAccountCredential(
+//      Activity activity, String scope) throws IOException {
+//    //get accountName from SharedPreference
+//    SharedPreferences settings = activity.getPreferences(Activity.MODE_PRIVATE);
+//    String accountName = settings.getString(PREF_ACCOUNT_NAME, "");
+//    
+//    GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(activity, scope);
+//    credential.setSelectedAccountName(accountName);
+//    try {
+//      credential.getToken();
+//    } catch (GoogleAuthException e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
+//    return credential;
+//  }
+//  
+  
+// The main entry point of new OAuth2 using GoogleAccountCredential
+//  public GoogleAccountCredential Authorize(Activity activity, String tokenType, int requestCode) {
+//    SharedPreferences settings = activity.getPreferences(Activity.MODE_PRIVATE);
+//    String accountName = settings.getString(PREF_ACCOUNT_NAME, "");
+//    
+//    GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(activity, tokenType);
+//   
+//    if (CheckAuthorized(activity)){
+//      credential.setSelectedAccountName(accountName);
+//      
+//    }
+//    else {
+//      //call getAccount intent
+//      activity.startActivityForResult(credential.newChooseAccountIntent(), requestCode);
+//    }
+//    
+//    try {
+//      credential.getToken();
+//    } catch (IOException e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    } catch (GoogleAuthException e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
+//    
+//    
+//    return credential;
+//    
+//  }
+//
+//  @Override
+//  public void resultReturned(int requestCode, int resultCode, Intent data) {
+//    // TODO Auto-generated method stub
+//    
+//  }
+  
+  
 }

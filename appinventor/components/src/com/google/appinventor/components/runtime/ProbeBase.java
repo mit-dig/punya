@@ -399,7 +399,7 @@ SensorComponent, OnDestroyListener{
    * Indicates whether the sensed data are saved to DB automatically 
    * 
    */
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+ 
   public boolean EnabledSaveToDB() {
     return enabledSaveToDB;
   }

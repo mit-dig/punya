@@ -4,11 +4,15 @@
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 package com.google.appinventor.components.runtime;
 
-import com.google.api.client.extensions.android2.AndroidHttp;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.googleapis.services.GoogleKeyInitializer;
+
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.fusiontables.Fusiontables;
 import com.google.api.services.fusiontables.Fusiontables.Query.Sql;
 import com.google.appinventor.components.annotations.DesignerComponent;
@@ -23,16 +27,20 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.GoogleDrive.AccessToken;
 import com.google.appinventor.components.runtime.util.ClientLoginHelper;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.IClientLoginHelper;
 import com.google.appinventor.components.runtime.util.OAuth2Helper;
 import com.google.appinventor.components.runtime.util.SdkLevel;
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -119,14 +127,16 @@ import java.util.ArrayList;
 @UsesLibraries(libraries =
     "fusiontables.jar," +
     "google-api-client-beta.jar," +
-    "google-api-client-android2-beta.jar," +
     "google-http-client-beta.jar," +
+    "google-oauth-client-beta.jar," + 
+    "google-api-client-android-beta-14.jar," +
+    "google-http-client-android-beta-14.jar," +
+    "google-api-client-android2-beta.jar," +
     "google-http-client-android2-beta.jar," +
-    "google-http-client-android3-beta.jar," +
-    "google-oauth-client-beta.jar," +
-    "guava-11.0.1.jar")
+    "google-http-client-android3-beta.jar")// + 
+//    "guava-11.0.1.jar")
 
-public class FusiontablesControl extends AndroidNonvisibleComponent implements Component {
+public class FusiontablesControl extends AndroidNonvisibleComponent implements Component, ActivityResultListener {
   private static final String LOG_TAG = "fusion";
   private static final String DIALOG_TEXT = "Choose an account to access FusionTables";
   private static final String FUSION_QUERY_URL = "http://www.google.com/fusiontables/api/query";
@@ -137,6 +147,7 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
   private static final int SERVER_TIMEOUT_MS = 30000;
   public static final String AUTHORIZATION_HEADER_PREFIX = "Bearer ";
 
+  private GoogleAccountCredential credential;
 
   public static final String FUSIONTABLES_URL = "https://www.googleapis.com/fusiontables/v1/query";
   public static final String AUTH_TOKEN_TYPE_FUSIONTABLES = "oauth2:https://www.googleapis.com/auth/fusiontables";
@@ -149,7 +160,9 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
    * See <a href="https://code.google.com/apis/console/">https://code.google.com/apis/console/</a>
    */
   private String apiKey;
-
+  private static final String TAG = "FusiontablesControl";
+  private final int REQUEST_CHOOSE_ACCOUNT; 
+  private final int REQUEST_AUTHORIZE;
 
   /**
    * The query to send to the Fusiontables service.
@@ -181,7 +194,9 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
           "This application must exit.",
           "Rats!");
     }
-
+    REQUEST_CHOOSE_ACCOUNT = form.registerForActivityResult(this);
+    REQUEST_AUTHORIZE = form.registerForActivityResult(this);
+    credential = GoogleAccountCredential.usingOAuth2(activity, AUTH_TOKEN_TYPE_FUSIONTABLES);
     // comment: The above code was originally
     //    Toast.makeText(activity,
     //        "Sorry. The Fusiontables component is not compatible with your phone. Exiting.",
@@ -258,7 +273,16 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
    */
   @SimpleFunction(description = "Send the query to the Fusiontables server.")
   public void SendQuery() {
+    // if not Authorized
+    // ask the user to go throug the OAuth flow
+    AccessToken accessToken = retrieveAccessToken();
+    if(accessToken.accountName.length() == 0){
+      activity.startActivityForResult(credential.newChooseAccountIntent(), REQUEST_CHOOSE_ACCOUNT);
+    }
+    // if authorized 
     new QueryProcessorV1(activity).execute(query);
+    //
+    
   }
 
 //Deprecated  -- Won't work after 12/2012
@@ -383,14 +407,18 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
     Log.i(LOG_TAG, "executing " + query);
     com.google.api.client.http.HttpResponse response = null;
 
-    // Create a Fusiontables service object (from Google API client lib)
+    
     Fusiontables service = new Fusiontables.Builder(
-          AndroidHttp.newCompatibleTransport(),
-          new GsonFactory(),
-          new GoogleCredential())
-    .setApplicationName("App Inventor Fusiontables/v1.0")
-    .setJsonHttpRequestInitializer(new GoogleKeyInitializer(ApiKey()))
-    .build();
+        AndroidHttp.newCompatibleTransport(), new GsonFactory(), credential).build();
+    
+    // Create a Fusiontables service object (from Google API client lib)
+//    Fusiontables service = new Fusiontables.Builder(
+//          AndroidHttp.newCompatibleTransport(),
+//          new GsonFactory(),
+//          new GoogleCredential())
+//    .setApplicationName("App Inventor Fusiontables/v1.0")
+//    .setJsonHttpRequestInitializer(new GoogleKeyInitializer(ApiKey()))
+//    .build();
 
     try {
 
@@ -646,8 +674,13 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
       queryResultStr = "";
 
       // Get a fresh access token
-      OAuth2Helper oauthHelper = new OAuth2Helper();
-      String authToken = oauthHelper.getRefreshedAuthToken(activity, authTokenType);
+//      OAuth2Helper oauthHelper = new OAuth2Helper();
+//      String authToken = oauthHelper.getRefreshedAuthToken(activity, authTokenType);
+//      AccessToken accessToken = retrieveAccessToken();
+//      if(accessToken.accountName.length() == 0)
+      
+      //we assume that it must be authorized already
+      String authToken = getRefreshedAuthToken(activity, authTokenType);
 
       // Make the fusiontables query
 
@@ -690,5 +723,123 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
       GotResult(result);
    }
   }
+  
+  private GoogleAccountCredential setUpGoogleCredential(String scope, String accountName){
+    //get accountName from SharedPreference
+
+    credential = GoogleAccountCredential.usingOAuth2(activity, scope);
+    credential.setSelectedAccountName(accountName);
+    try {
+      credential.getToken();
+      
+    } catch (UserRecoverableAuthException e) {
+        // if the user has not yet authorized
+        Log.i(TAG, "in userRecoverableAuthExp... ");
+        // this means that the user has never grant permission to this app with this scope before
+        UserRecoverableAuthException exception = (UserRecoverableAuthException) e;
+        Intent authorizationIntent = exception.getIntent();
+        activity.startActivityForResult(authorizationIntent,
+            REQUEST_AUTHORIZE);
+    }catch (IOException e) {
+      e.printStackTrace();
+    }   
+      catch (GoogleAuthException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return credential;
+
+  }
+  
+  private String getRefreshedAuthToken(Activity activity, String authTokenType){
+    String authToken = null;
+    AccessToken accessToken = retrieveAccessToken();
+      
+      credential.setSelectedAccountName(accessToken.accountName);
+      try {
+        authToken = credential.getToken();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (GoogleAuthException e) {
+        e.printStackTrace();
+      }
+    
+    return authToken;
+    
+  }
+  
+  
+  @Override
+  public void resultReturned(int requestCode, int resultCode, Intent data) {
+    // When the authentication from Google chooseAccount is back
+
+    if (requestCode == REQUEST_CHOOSE_ACCOUNT) {
+      if (resultCode == Activity.RESULT_OK && data != null
+          && data.getExtras() != null) {
+        //authorize after choosing the account
+        setUpGoogleCredential(AUTH_TOKEN_TYPE_FUSIONTABLES,data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+      }
+   } 
+    if (requestCode == REQUEST_AUTHORIZE) {
+     if (resultCode == Activity.RESULT_OK) {
+
+       String accountName = data
+           .getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+
+       String accessToken = data.getStringExtra(AccountManager.KEY_AUTHTOKEN);
+       saveAccessToken(new AccessToken(accountName, accessToken));
+
+     }
+    }
+
+    
+  }
+  
+  public class AccessToken  {
+    public final String accessToken;
+    public final String accountName;
+
+    public AccessToken(String accountName, String accessToken) {
+        this.accountName= accountName;
+        this.accessToken = accessToken;
+    }
+  
+  }
+  private AccessToken retrieveAccessToken() {
+    SharedPreferences settings = activity.getPreferences(Activity.MODE_PRIVATE);
+    String accountName = settings.getString(OAuth2Helper.PREF_ACCOUNT_NAME, "");
+    String accessToken = settings.getString(OAuth2Helper.PREF_AUTH_TOKEN, "");
+    if (accountName.length() == 0 || accessToken.length() == 0) {
+      return new AccessToken("",""); // returning an accessToken with both params empty
+    }
+    return new AccessToken(accountName, accessToken);
+  }
+  
+  private void saveAccessToken(AccessToken accessToken) {
+    SharedPreferences settings = activity.getPreferences(Activity.MODE_PRIVATE);
+    final SharedPreferences.Editor sharedPrefsEditor = settings.edit();
+    if (accessToken == null) {
+      sharedPrefsEditor.remove(OAuth2Helper.PREF_ACCOUNT_NAME);
+      sharedPrefsEditor.remove(OAuth2Helper.PREF_AUTH_TOKEN);
+    } else {
+      sharedPrefsEditor.putString(OAuth2Helper.PREF_ACCOUNT_NAME, accessToken.accountName);
+      sharedPrefsEditor.putString(OAuth2Helper.PREF_AUTH_TOKEN, accessToken.accessToken);
+      Log.i(TAG, "Save Google Access Token and Account" + accessToken.accountName + ", " + accessToken.accessToken);
+    }
+    sharedPrefsEditor.commit();
+  }  
+  
+  private class AuthTask extends AsyncTask<String, Void, String> {
+
+    @Override
+    protected String doInBackground(String... arg0) {
+      // TODO Auto-generated method stub
+      return null;
+    }
+    
+  }
+  
+  
 
 }

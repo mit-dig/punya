@@ -256,9 +256,14 @@ public class YaVersion {
   // - SEMANTIC_FORM_COMPONENT_VERSION was added.
   // - SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION was added.
   // - TEXTBOX_COMPONENT_VERSION was incremented to 5.
+  // For YOUNG_ANDROID_VERSION 92;
+  // - The GoogleDrive component was added
+  // For YOUNG_ANDROID_VERSION 93;
+  // - The Google Map component was added
+  // TODO: NEED TO FIX THE TOTAL VERSION 
     
  
-  public static final int YOUNG_ANDROID_VERSION = 91;
+  public static final int YOUNG_ANDROID_VERSION = 93;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -685,4 +690,8 @@ public class YaVersion {
   public static final int SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION = 1;
 
   public static final int SEMANTIC_FORM_COMPONENT_VERSION = 1;
+  
+  public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
+
+  public static final int GOOGLE_MAP_COMPONENT_VERSION = 1;
 }

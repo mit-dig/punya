@@ -17,6 +17,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
+import java.security.cert.Certificate;
+
 import com.google.appinventor.server.storage.StorageIo;
 import com.google.appinventor.server.storage.StorageIoInstanceHolder;
 import com.google.appinventor.shared.rpc.user.User;
@@ -95,10 +97,9 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
       KeyStore store = KeyStore.getInstance("jks");
       char[] pass = "android".toCharArray();
       store.load(bais, pass);
-      Key key = store.getKey("androidkey", pass);
+      Certificate cert = store.getCertificateChain("androidkey")[0];
       MessageDigest md = MessageDigest.getInstance( "SHA1" );
-      md.update( key.getEncoded() );
-      String unprocessed = new BigInteger( 1, md.digest() ).toString(16);
+      String unprocessed = new BigInteger( 1, md.digest( cert.getEncoded() ) ).toString(16).toUpperCase();
       StringBuffer sb = new StringBuffer();
       for(int i=0;i<unprocessed.length();i++) {
         sb.append(unprocessed.charAt(i));
@@ -139,9 +140,6 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
       // TODO Auto-generated catch block
       e.printStackTrace();
     } catch (CertificateException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (UnrecoverableKeyException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     } finally {

@@ -124,26 +124,34 @@
         <pathelement location="${lib.dir}/jena/jena-core-2.10.0.jar" />
         <pathelement location="${lib.dir}/jena/jena-arq-2.10.0.jar" />
         <pathelement location="${lib.dir}/jena/jena-iri-0.9.5.jar" />
-<!--        <pathelement location="${lib.dir}/jena/xercesImpl-2.10.0.jar" />-->
         <pathelement location="${lib.dir}/jena/xercesLite.jar" />
-<!--        <pathelement location="${lib.dir}/jena/xml-apis-1.4.01.jar" />-->
-<!--        <pathelement location="${lib.dir}/jena/jcl-over-slf4j-1.6.4.jar" />-->
-<!--        <pathelement location="${lib.dir}/jena/slf4j-api-1.6.4.jar" />-->
-<!--        <pathelement location="${lib.dir}/jena/slf4j-log4j12-1.6.4.jar" />-->
-<!--        <pathelement location="${lib.dir}/jena/slf4j-nop-1.6.4.jar" />-->
         <pathelement location="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
-        <pathelement location="${lib.dir}/fusiontables/fusiontables.jar" />
-        <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
-        <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
-        <pathelement location="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
-        <pathelement location="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
-        <pathelement location="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
-        <pathelement location="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" />
+        <pathelement location="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
+<!--  	<pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />   -->
+	    <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
+<!-- 	<pathelement location="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />  -->
+<!--    <pathelement location="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
+        <pathelement location="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" /> -->
+<!--    <pathelement location="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" /> -->
+
+		<!-- add libraries for google-drive using google-api-java-client version 1.14.1 -->       
+		<pathelement location="${lib.dir}/googledrive/google-http-client-1.14.1-beta.jar" />   
+        <pathelement location="${lib.dir}/googledrive/google-api-client-1.14.1-beta.jar" />
+		<pathelement location="${lib.dir}/googledrive/google-oauth-client-1.14.1-beta.jar" />
+		<pathelement location="${lib.dir}/googledrive/google-api-client-android-1.14.1-beta.jar"/>
+		<pathelement location="${lib.dir}/googledrive/google-http-client-android-1.14.1-beta.jar" /> 
+	    <pathelement location="${lib.dir}/googledrive/google-http-client-gson-1.14.1-beta.jar" /> 
+		<pathelement location="${lib.dir}/googledrive/google-api-services-drive-v2-rev73-1.14.2-beta.jar" />
+		<pathelement location="${lib.dir}/googledrive/google-play-services.jar" />	
         <pathelement location="${lib.dir}/guava/guava-11.0.1.jar" />
         <pathelement location="${lib.dir}/funf/funf.jar" />
         <pathelement location="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
         <pathelement location="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
-        <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />        
+        <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />      
+      	<pathelement location="${lib.dir}/android_support/android-support-v4.jar"/>
+  
+        
+         
        </classpath>
     </ai.javac>
 
@@ -236,26 +244,29 @@
           <pathelement location="${lib.dir}/jena/jena-core-2.10.0.jar" />
           <pathelement location="${lib.dir}/jena/jena-arq-2.10.0.jar" />
           <pathelement location="${lib.dir}/jena/jena-iri-0.9.5.jar" />
-<!--          <pathelement location="${lib.dir}/jena/xercesImpl-2.10.0.jar" />-->
           <pathelement location="${lib.dir}/jena/xercesLite.jar" />
-<!--          <pathelement location="${lib.dir}/jena/xml-apis-1.4.01.jar" />-->
-<!--          <pathelement location="${lib.dir}/jena/jcl-over-slf4j-1.6.4.jar" />-->
-<!--          <pathelement location="${lib.dir}/jena/slf4j-api-1.6.4.jar" />-->
-<!--          <pathelement location="${lib.dir}/jena/slf4j-log4j12-1.6.4.jar" />-->
-<!--          <pathelement location="${lib.dif}/jena/slf4j-nop-1.6.4.jar" />-->
           <pathelement location="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
-          <pathelement location="${lib.dir}/fusiontables/fusiontables.jar" />
-          <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
+          <pathelement location="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
+<!-- 	      <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />   -->
           <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
-          <pathelement location="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
+<!-- 	      <pathelement location="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />   -->
           <pathelement location="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
           <pathelement location="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
-          <pathelement location="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" />
+<!-- 	      <pathelement location="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" /> -->
+		  <pathelement location="${lib.dir}/googledrive/google-http-client-1.14.1-beta.jar" />   
+          <pathelement location="${lib.dir}/googledrive/google-api-client-1.14.1-beta.jar" />
+		  <pathelement location="${lib.dir}/googledrive/google-oauth-client-1.14.1-beta.jar" />
+		  <pathelement location="${lib.dir}/googledrive/google-api-client-android-1.14.1-beta.jar"/>
+		  <pathelement location="${lib.dir}/googledrive/google-http-client-android-1.14.1-beta.jar" /> 
+		  <pathelement location="${lib.dir}/googledrive/google-http-client-gson-1.14.1-beta.jar" /> 
+		  <pathelement location="${lib.dir}/googledrive/google-api-services-drive-v2-rev73-1.14.2-beta.jar" />
+		  <pathelement location="${lib.dir}/googledrive/google-play-services.jar" />	          
           <pathelement location="${lib.dir}/guava/guava-11.0.1.jar" />
           <pathelement location="${lib.dir}/funf/funf.jar" />
           <pathelement location="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
           <pathelement location="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
-          <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />        
+          <pathelement location="${lib.dir}/dropbox/json_simple-1.1.jar" />       
+          <pathelement location="${lib.dir}/android_support/android-support-v4.jar" />	
         </classpath>
         <compilerarg line="-processorpath ${local.build.dir}/AnnotationProcessors.jar"/>
         <compilerarg line="-processor @{apt-processor}" />

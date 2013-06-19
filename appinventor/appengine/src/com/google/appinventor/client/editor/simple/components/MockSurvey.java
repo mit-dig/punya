@@ -7,10 +7,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 public final class MockSurvey extends MockVisibleComponent{
 
 
-	  /**
-	   * Component type name.
-	   */
-	  public static final String TYPE = "Survey";
+	/**
+	 * Component type name.
+	*/
+	public static final String TYPE = "Survey";
 
 	// Large icon image for use in designer. Smaller version is in the palette.
 	private final Image largeImage = new Image(images.surveybig());
