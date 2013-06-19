@@ -100,6 +100,9 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
       Certificate cert = store.getCertificateChain("androidkey")[0];
       MessageDigest md = MessageDigest.getInstance( "SHA1" );
       String unprocessed = new BigInteger( 1, md.digest( cert.getEncoded() ) ).toString(16).toUpperCase();
+      while( unprocessed.length() != 40 ) {
+        unprocessed = "0"+unprocessed;
+      }
       StringBuffer sb = new StringBuffer();
       for(int i=0;i<unprocessed.length();i++) {
         sb.append(unprocessed.charAt(i));
