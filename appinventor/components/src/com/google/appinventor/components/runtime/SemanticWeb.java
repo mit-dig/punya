@@ -4,8 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -558,9 +561,15 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
         }
         sb.append("\"");
         sb.append(varName);
-        sb.append("\":\"");
-        sb.append(varValue);
-        sb.append("\"");
+        sb.append("\":");
+        if(isPrimitiveOrWrapper(varValue.getClass())) {
+          sb.append(varValue);
+        } else {
+          sb.append("\"");
+          sb.append(varValue);
+          sb.append("\"");
+        }
+        sb.append("");
       }
       sb.append("}");
     }
@@ -568,5 +577,13 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
     String result = sb.toString();
     Log.d(LOG_TAG, "JSON = " + result);
     return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static final Set<Class<?>> WRAPPER_TYPES =
+      new HashSet<Class<?>>(Arrays.asList(Boolean.class, Byte.class,
+          Short.class, Integer.class, Long.class, Float.class, Double.class));
+  private static final boolean isPrimitiveOrWrapper(Class<?> clazz) {
+    return clazz.isPrimitive() || WRAPPER_TYPES.contains(clazz);
   }
 }
