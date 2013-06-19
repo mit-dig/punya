@@ -106,6 +106,7 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/gmap.png", images.googlemap());
     bundledImages.put("images/voting.png", images.voting());
     bundledImages.put("images/web.png", images.web());
+    bundledImages.put("images/semanticWeb.png", images.semanticWeb());
     imagesInitialized = true;
   }
 
@@ -287,6 +288,10 @@ public final class SimpleComponentDescriptor {
       return new MockSurvey(editor);
     } else if (name.equals(MockLDVisualization.TYPE)){
       return new MockLDVisualization(editor);
+    } else if (name.equals(MockSemanticForm.TYPE)) {
+      return new MockSemanticForm(editor);
+    } else if (name.equals(MockSWListPicker.TYPE)) {
+      return new MockSWListPicker(editor);
     } else if (name.equals(MockGoogleMap.TYPE)){
       return new MockGoogleMap(editor);
     }

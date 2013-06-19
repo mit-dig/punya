@@ -136,6 +136,12 @@
     <copy toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar" file="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
     <copy toFile="${classes.files.dir}/json-simple.jar" file="${lib.dir}/dropbox/json_simple-1.1.jar" />    
     <copy toFile="${classes.files.dir}/acra-4.4.0.jar" file="${lib.dir}/acra/acra-4.4.0.jar" />
+    <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-android-2.2.6.jar" />
+    <copy toFile="${classes.files.dir}/jena-core.jar" file="${lib.dir}/jena/jena-core-2.10.0.jar" />
+    <copy toFile="${classes.files.dir}/jena-arq.jar" file="${lib.dir}/jena/jena-arq-2.10.0.jar" />
+    <copy toFile="${classes.files.dir}/jena-iri.jar" file="${lib.dir}/jena/jena-iri-0.9.5.jar" />
+    <copy toFile="${classes.files.dir}/xercesImpl.jar" file="${lib.dir}/jena/xercesLite.jar" />
+    <copy toFile="${classes.files.dir}/slf4j-android.jar" file="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
     <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-android-2.2.6.jar" />        
     <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
     <!-- We might replace some of the older versions of google-api-client and http-client -->
@@ -171,7 +177,7 @@
     <copy toFile="${classes.files.dir}/jackson-core-asl.jar" file="${lib.dir}/googledrive/jackson-core-asl-1.9.11.jar" />
     <copy toFile="${classes.files.dir}/jsr305.jar" file="${lib.dir}/googledrive/jsr305-1.3.9.jar" />
      -->
-    <copy toFile="${classes.files.dir}/guava-11.0.1.jar" file="${lib.dir}/guava/guava-11.0.1.jar" />
+<!--    <copy toFile="${classes.files.dir}/guava-11.0.1.jar" file="${lib.dir}/guava/guava-11.0.1.jar" />-->
     <copy toFile="${classes.files.dir}/android.jar" file="${lib.dir}/android/2.2/android.jar" />
     <copy toFile="${classes.files.dir}/dx.jar" file="${lib.dir}/android/tools/dx.jar" />
     <copy toFile="${classes.files.dir}/CommonVersion.jar" file="${build.dir}/common/CommonVersion.jar" />

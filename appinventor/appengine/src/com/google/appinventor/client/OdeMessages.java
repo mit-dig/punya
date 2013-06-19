@@ -1175,7 +1175,6 @@ public interface OdeMessages extends Messages {
   @Description("Text messages are always received, and a notification is shown if the App is in the background.")
   String textReceivingChoiceAlways();
 
-
   // Used in
   // editor/youngandroid/properties/BaseUriPropertyEditor.java
 
