@@ -49,11 +49,7 @@ import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.OnInitializeListener;
 import com.google.appinventor.components.runtime.util.YailList;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import gnu.math.DFloNum;
 import gnu.math.IntNum;
 
@@ -836,7 +832,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
    *
    * @param markers
    * @return
-   * TODO: Adding customized icons
+   * TODO: Adding customized icons, also too many error msgs (disable for now)
    */
   @SimpleFunction(description = "Adding a list of YailLists for markers. The representation of a maker in the "
       + "inner YailList is composed of: "
@@ -868,8 +864,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         if (((YailList) marker).size() < 2) {
           addOne = false; // don't add this marker because its invalid inputs, going to the next one
           // throw an exception with error messages
-          form.dispatchErrorOccurredEvent(this, "AddMarkers",
-              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need at least two parameters");
+//          form.dispatchErrorOccurredEvent(this, "AddMarkers",
+//              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need at least two parameters");
 
         }
         // ((YailList) marker).getObject(0) will return type gnu.math.DFloNum
@@ -883,9 +879,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
         if (!(latObj instanceof DFloNum && lngObj instanceof DFloNum)){//if one of the lat or lng is not DFloNum
           addOne = false;
-          form.dispatchErrorOccurredEvent(this, "AddMarkers",
-              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be float numbers");
-          //continue; // don't add this marker because its invalid inputs, going to the next one
+//          form.dispatchErrorOccurredEvent(this, "AddMarkers",
+//              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be float numbers");
+
 
         }
         else {
@@ -893,6 +889,16 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           lng = ((DFloNum)lngObj).doubleValue();
 
         }
+        //check for lat, lng range
+        // Latitude measurements range from 0° to (+/–)90°.
+        // Longitude measurements range from 0° to (+/–)180
+        if ((lat < -90) || (lat > 90) || (lng < -180) || (lng > 180) ){
+          addOne = false;
+//          form.dispatchErrorOccurredEvent(this, "AddMarkers",
+//              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Range for the latitude or longitude is wrong");
+        }
+
+
         //default values for optional params
         int color = mMarkerColor;
         String title = "";
@@ -909,8 +915,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
             color = ((IntNum)((YailList) marker).getObject(2)).intValue();
           else {
             addOne = false;
-            form.dispatchErrorOccurredEvent(this, "AddMarkers",
-                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj + "is not a number");
+//            form.dispatchErrorOccurredEvent(this, "AddMarkers",
+//                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj + "is not a number");
             //continue; // don't add this marker because its invalid inputs, going to the next one
           }
 
@@ -934,8 +940,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           }
           else {
             addOne = false;
-            form.dispatchErrorOccurredEvent(this, "AddMarkers",
-                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be either true or false");
+//            form.dispatchErrorOccurredEvent(this, "AddMarkers",
+//                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be either true or false");
             //continue; // don't add this marker because its invalid inputs, going to the next one
           }
 
@@ -1049,29 +1055,64 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     JsonParser parser = new JsonParser();
+    float[] hsv = new float[3];
+
     // parse jsonString into jsonArray
     try {
       JsonElement markerList = parser.parse(jsonString);
       if (markerList.isJsonArray()) {
         JsonArray markerArray = markerList.getAsJsonArray();
-        boolean addOne = true;
+
         Log.i(TAG, "It's a JsonArry: " + markerArray.toString());
         for (JsonElement marker : markerArray) {
+          boolean addOne = true;
           // now we have marker
           if (marker.isJsonObject()) {
             JsonObject markerJson = marker.getAsJsonObject();
             if (markerJson.get("lat") == null || markerJson.get("lng") == null) {
-              form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-                  ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need to have both lat and lng parameters");
-//              return YailList.makeList(markerIds);
+//              form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
+//                  ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need to have both lat and lng parameters");
                 addOne = false;
 
             } else { // having correct syntax of a marker in Json
-              double latitude = markerJson.get("lat").getAsDouble();
-              double longitude = markerJson.get("lng").getAsDouble();
 
-              int color = (markerJson.get("color") == null) ? mMarkerColor : markerJson.get("color").getAsInt();
-              if (color < 0 || color > 360) {
+              // check for cases: "lat" : "40.7561"  (as String)
+              JsonPrimitive jpLat = (JsonPrimitive)markerJson.get("lat");
+              JsonPrimitive jpLng = (JsonPrimitive)markerJson.get("lng");
+
+              double latitude;
+              double longitude;
+
+              if (jpLat.isString() && jpLng.isString()){
+                Log.i(TAG, "jpLat:" + jpLat.toString());
+                Log.i(TAG, "jpLng:" + jpLng.toString());
+                latitude =  new Double(jpLat.getAsString());
+                longitude = new Double(jpLng.getAsString());
+                Log.i(TAG, "convert to double:" + latitude + "," + longitude);
+              }
+              else {
+                latitude = markerJson.get("lat").getAsDouble();
+                longitude = markerJson.get("lng").getAsDouble();
+              }
+
+              // check for Lat, Lng correct range
+              // Latitude measurements range from 0° to (+/–)90°.
+              // Longitude measurements range from 0° to (+/–)180
+
+              if ((latitude < -90) || (latitude > 90) || (longitude < -180) || (longitude > 180)) {
+//                form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
+//                    ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Range for latitude or longitude is not correct");
+                Log.i(TAG, "Lat/Lng wrong range:" + latitude + "," + longitude);
+                addOne = false;
+
+              }
+
+              Color.colorToHSV(mMarkerColor, hsv);
+              float defaultColor = hsv[0];
+              float color = (markerJson.get("color") == null) ? defaultColor : markerJson.get("color").getAsInt();
+
+              if ((color < 0) || (color > 360)) {
+                Log.i(TAG, "Wrong color");
                 addOne = false;
               }
 
@@ -1080,6 +1121,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
               boolean draggable = (markerJson.get("draggable") == null) ? mMarkerDraggable : markerJson.get("draggable").getAsBoolean();
 
               if(addOne){
+                Log.i(TAG, "Adding marker" + latitude + "," + longitude);
                 int uniqueId = generateMarkerId();
                 markerIds.add(uniqueId);
                 addMarkerToMap(latitude, longitude, uniqueId, color, title,
@@ -1089,9 +1131,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
             }
 
           } else { // not a JsonObject
-            form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "marker is not represented as JsonObject");
-            // return YailList.makeList(markerIds);
+//            form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
+//                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "marker is not represented as JsonObject");
+
           }
 
         }//end of JsonArray
@@ -1123,13 +1165,15 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
 
     for (Object marker : markers.toArray()) {
+      boolean addOne = true;
       if (marker instanceof YailList) {
         Log.i(TAG, "Interior YailLiat");
         if (((YailList) marker).size() < 2){
           // throw an exception with error messages
           form.dispatchErrorOccurredEvent(this, "AddMarkers",
               ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need more than 2 inputs");
-          continue; // don't add this marker because its invalid inputs, going to the next one
+          addOne = false;
+
         }
 
         // ((YailList) marker).getObject(0) will return type gnu.math.DFloNum
@@ -1144,13 +1188,20 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         if (!(latObj instanceof DFloNum && lngObj instanceof DFloNum)){//if one of the lat or lng is not DFloNum
           form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
               ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Not a number for latitude or longitude");
-          continue; // don't add this marker because its invalid inputs, going to the next one
+          addOne = false;
+//
 
         }
         else {
           lat = ((DFloNum)latObj).doubleValue();
           lng = ((DFloNum)lngObj).doubleValue();
 
+        }
+
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180 ){
+          addOne = false;
+          form.dispatchErrorOccurredEvent(this, "AddMarkers",
+              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Range for the latitude or longitude is wrong");
         }
 
         Integer uniqueId = generateMarkerId();
@@ -1168,19 +1219,14 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           if (colorObj instanceof gnu.math.IntNum)
             color = new Float(((IntNum)((YailList) marker).getObject(2)).intValue());//extract the int val and convert to Float
           else {
+            addOne = false;
             form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
                 ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj.toString() + " is not a number");
-            continue; // don't add this marker because its invalid inputs, going to the next one
+
           }
 
         }
 
-//        if (((YailList) marker).size() >= 3){
-//          color = (Float) ((YailList) marker).getObject(2);
-//          Log.i(TAG, "Type: " +  ((YailList) marker).getObject(2).getClass());
-//          Log.i(TAG, "Value: " + ((YailList) marker).getObject(2).toString());
-//
-//        }
         if (((YailList) marker).size() >= 4){
           title = (String) ((YailList) marker).getObject(3);
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(3).getClass());
@@ -1204,19 +1250,20 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           else {
             form.dispatchErrorOccurredEvent(this, "AddMarkers",
                 ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "marker not as a list");
-            continue; // don't add this marker because its invalid inputs, going to the next one
+            addOne = false;
           }
 
         }
-        markerIds.add(uniqueId);
-        addMarkerToMap(lat, lng, uniqueId,  color, title, snippet, draggable);
-
+        if (addOne){
+          markerIds.add(uniqueId);
+          addMarkerToMap(lat, lng, uniqueId,  color, title, snippet, draggable);
+        }
       }
       else {
         // fire exception and throw error messages
         form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
             ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Marker is not represented as list");
-        continue;// don't add this marker because its invalid inputs, going to the next one
+        return YailList.makeList(markerIds); // return an empty markerIds list
       }
     }
     return YailList.makeList(markerIds);
