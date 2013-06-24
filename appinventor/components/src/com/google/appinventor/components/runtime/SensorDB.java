@@ -366,7 +366,8 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
 	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
 	public String ExportFolderPath(){
-		return this.exportPath;
+	  // the real export path is exportPath + "/" + exportformat
+		return this.exportPath + File.separator + this.exportFormat;
 
 	}
 	@SimpleProperty(category = PropertyCategory.BEHAVIOR)

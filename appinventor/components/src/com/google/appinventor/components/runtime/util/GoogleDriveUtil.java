@@ -26,7 +26,8 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 
 
-
+//TODO: this class is obsolete (most of the codes is merged to GoogleDriveArchive.java
+@Deprecated
 public class GoogleDriveUtil {
   
   

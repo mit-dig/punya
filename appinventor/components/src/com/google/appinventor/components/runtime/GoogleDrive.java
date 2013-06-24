@@ -558,13 +558,15 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
       Log.i(TAG, "Starting doInBackground " + params[0]);
       String filepath = params[0];
       boolean uploadResult = false;
-      
+      Log.i(TAG, "upload filepath:" + filepath);
       java.io.File uploadFile = new java.io.File(filepath);
 
       GoogleDriveArchive gdArchive = new GoogleDriveArchive(activity, gdFolder);
       try {
         uploadResult = gdArchive.uploadDataFile(uploadFile);
+        Log.i(TAG, "upload success or failed?" + uploadResult);
       } catch (Exception e) {
+
         //TODO Read out types of the exception and call UI method to display
         //Could be IOException, GoogleAuthException.... 
         e.printStackTrace();
