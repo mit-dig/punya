@@ -223,7 +223,12 @@ public class GoogleDriveArchive implements RemoteFileArchive {
           body.setParents(Arrays.asList(new ParentReference().setId(parentId)));
         }
         Log.i(TAG, " before insert body");
-        processedFile = service.files().insert(body, mediaContent).execute();
+        //TODO: detect the file name's extension, if it's csv or docx, then we force it to be converted
+
+
+        Drive.Files.Insert insertOperation = service.files().insert(body, mediaContent).setConvert(true);
+        processedFile = insertOperation.execute();
+        //processedFile = service.files().insert(body, mediaContent).execute();
  
         Log.i(TAG, "Processed File ID: %s" + processedFile.getId());
 
@@ -275,10 +280,12 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     // In case when the specified File path is a directory
     // Note that we don't do nested looping through a folder to get all the
     // folders and files
- 
+    Log.i(TAG, "@upalodFolderFiles");
     File[] listOfFiles = file.listFiles();
     for (File f : listOfFiles) {
+      Log.i(TAG, "@uploadFolderFiles:singleFile" + f.toString());
       if (f.isFile()) {
+        Log.i(TAG, "here" + f.toString());
         if (uploadSingleFile(f))
           ; // if successful, do nothing, else return false
         else
@@ -297,11 +304,11 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     getDriveService(); // re-init the Drive service
     Log.i(TAG, "after getDriveService");
     if (file.isDirectory()) {
-
+      Log.i(TAG, "it's a folder");
       return uploadFolderFiles(file);
 
     } else {
-
+      Log.i(TAG, "it's a file");
       return uploadSingleFile(file);
 
     }
