@@ -70,7 +70,7 @@ import com.google.appinventor.components.runtime.util.ErrorMessages;
     + " specific to your app from http://twitter.com/oauth_clients/new </p>", category = ComponentCategory.SOCIAL, nonVisible = true, iconName = "images/twitter.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
-@UsesLibraries(libraries = "funf.jar")
+@UsesLibraries(libraries = "twitter4j.jar")
 public final class Twitter extends AndroidNonvisibleComponent implements
     ActivityResultListener, Component {
   private static final String ACCESS_TOKEN_TAG = "TwitterOauthAccessToken";
