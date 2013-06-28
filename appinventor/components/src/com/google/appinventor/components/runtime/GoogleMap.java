@@ -293,16 +293,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     mMap.setOnMarkerClickListener(this);
     mMap.setOnInfoWindowClickListener(this);
     mMap.setOnMarkerDragListener(this);
-//    mMap.setMyLocationEnabled(true);
-//    mMap.setOnMapClickListener(this);
-//    mMap.setOnMapLongClickListener(this);
 
     //@@ removed the test marker -- by Oshani
-    //just for testing
     //int uniqueId = generateMarkerId();
     //Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     //markers.put(marker, uniqueId);
-    //////
+
     // create UiSetting instance and default ui settings of the map
     mUiSettings = mMap.getUiSettings();
     mUiSettings.setCompassEnabled(this.compassEnabled);
@@ -395,20 +391,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       Log.i(TAG, "Map is ready for adding markers and other setting");
       EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
 
-//
-//    @SimpleEvent(description =  "Called when the user makes a tap gesture on the map")
-//    public void OnMapClick(final double lat, final double lng){
-//      context.runOnUiThread(new Runnable() {
-//        public void run() {
-//          Log.i(TAG, "map is clicked at:" + lat + ", " + lng);
-//          EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapClick", lat, lng);
-//        }
-//
-//      });
-//
-//
-//    }
-//
 
   }
 
@@ -499,9 +481,10 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   private Object getCircleIfExisted(int circleId){
     Object circle = getKeyByValue(circles, circleId);
 
-    if(circle.equals(null)){
+    if(circle == null){
       form.dispatchErrorOccurredEvent(this, "getCircleIfExisted",
           ErrorMessages.ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, Integer.toString(circleId));
+      return null;
     }
     return circle;
   }
@@ -534,10 +517,10 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   }
 
   @SimpleFunction(description = "Set the property of an existing circle. Properties include: " +
-      "\"alpha\"(integer, value ranging from 0~255), \"color\" (integer, hue value ranging 0~360), " +
-      "\"radius\"(float)")
+      "\"alpha\"(number, value ranging from 0~255), \"color\" (nimber, hue value ranging 0~360), " +
+      "\"radius\"(number in meters)")
   public void UpdateCircle(int circleId, String propertyName, Object value){
-
+  Log.i(TAG, "inputs: " + circleId + "," + propertyName + ", " + value);
   float [] hsv = new float[3];
   Object circle = getCircleIfExisted(circleId);  // if it's null, getCircleIfExisted will show error msg
   Circle updateCircle = null; // the real circle content that gets updated
@@ -545,25 +528,66 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   if (circle != null) {
     if (circle instanceof DraggableCircle) {
       updateCircle = ((DraggableCircle) circle).getCircle();
+
     }
     if (circle instanceof Circle) {
       updateCircle = (Circle) circle;
+
     }
-    // updating the circle
-    if (propertyName.equals("alpha")) {
-      int color = updateCircle.getFillColor();
-      Color.colorToHSV(color, hsv);
-      //Color.HSVToColor(mAlpha, new float[] {mColorHue, 1, 1});//default to red, medium level hue color
-      int newColor = Color.HSVToColor((Integer)value, hsv);
-      updateCircle.setFillColor(newColor);
+    try {
+
+      Float val  = Float.parseFloat(value.toString());
+      if (propertyName.equals("alpha")) {
+
+        int color = updateCircle.getFillColor();
+        Color.colorToHSV(color, hsv);
+        Integer alphaVal = val.intValue();
+        //Color.HSVToColor(mAlpha, new float[] {mColorHue, 1, 1});//default to red, medium level hue color
+        int newColor = Color.HSVToColor(alphaVal, hsv);
+        updateCircle.setFillColor(newColor);
+      }
+
+      if (propertyName.equals("color")) {
+        int alpha = Color.alpha(updateCircle.getFillColor());
+
+        int newColor = Color.HSVToColor(alpha, new float[] {val, 1, 1});
+        updateCircle.setFillColor(newColor);
+      }
+
+      if (propertyName.equals("radius")) {
+        // need to cast value to float
+        Float radius = val;
+        updateCircle.setRadius(radius);
+        // if it's a draggableCircle, then we need to remove the previous marker and get new radius marker
+        if (circle instanceof DraggableCircle){
+        // remove previous radius marker
+          Marker centerMarker = ((DraggableCircle) circle).getCenterMarker();
+          Marker oldMarker = ((DraggableCircle) circle).getRadiusMarker();
+          oldMarker.remove();
+          Marker newMarker = mMap.addMarker(new MarkerOptions()
+              .position(toRadiusLatLng(centerMarker.getPosition(), radius))
+              .draggable(true)
+              .icon(BitmapDescriptorFactory.defaultMarker(
+                  BitmapDescriptorFactory.HUE_AZURE)));
+
+          ((DraggableCircle) circle).setRadiusMarker(newMarker);
+          // create a new draggabble circle
+
+        }
+
+      }
+
+
+    } catch(NumberFormatException e) { //can't parse the string
+      form.dispatchErrorOccurredEvent(this, "UpdateCircle",
+          ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, value.toString());
     }
 
-    if (propertyName.equals("color")) {
-      int alpha = Color.alpha(updateCircle.getFillColor());
 
-      int newColor = Color.HSVToColor(alpha, new float[] {(Float)value, 1, 1});
-      updateCircle.setFillColor(newColor);
-    }
+  } else {
+    // the circle doesn't exist
+    form.dispatchErrorOccurredEvent(this, "UpdateCircle",
+          ErrorMessages.ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, circleId);
 
   }
 
@@ -1371,7 +1395,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   @Override
   public void onMarkerDrag(Marker marker) {
     // TODO Auto-generated method stub
-
+    Log.i(TAG, "Dragging M:" + marker);
     Integer markerId = markers.get(marker);
     // if it's a marker for draggable circle then it's not in the hashmap, Ui will not receive this dragging event
     if (markerId != null) {
@@ -1381,7 +1405,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // find if the marker is the center or radius marker of any existing draggable circle,
     // then call the move or resize this draggable circle
     for (DraggableCircle dCircle: mCircles){
-      if ((dCircle.getCenterMarker() == marker) || (dCircle.getRadiusMarker() == marker)) {
+      if ((dCircle.getCenterMarker().equals(marker)) || (dCircle.getRadiusMarker().equals(marker))) {
         dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
       }
     }
@@ -1402,7 +1426,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // find if the marker is the center or radius marker of any existing draggable circle, then call the move or resize
     // this draggable circle
     for (DraggableCircle dCircle: mCircles){
-      if ((dCircle.getCenterMarker() == marker) || (dCircle.getRadiusMarker() == marker)) {
+      if ((dCircle.getCenterMarker().equals(marker)) || (dCircle.getRadiusMarker().equals(marker))) {
         dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
         // also fire FinishedDraggingCircle() to UI
         int uid = circles.get(dCircle);
@@ -1425,7 +1449,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // find if the marker is the center or radius marker of any existing draggable circle, then call the move or resize
     // this draggable circle
     for (DraggableCircle dCircle: mCircles){
-      if ((dCircle.getCenterMarker() == marker) || (dCircle.getRadiusMarker() == marker)) {
+      if ((dCircle.getCenterMarker().equals(marker)) || (dCircle.getRadiusMarker().equals(marker))) {
         dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
       }
     }
@@ -1652,7 +1676,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   // We need to keep a data structure to tie circle and two markers together.
   private class DraggableCircle {
     private final Marker centerMarker;
-    private final Marker radiusMarker;
+    private Marker radiusMarker;
     private final Circle circle;
     private double radius;
 //    private float strokeWidth;
@@ -1741,6 +1765,10 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
     public Double getRadius(){
       return this.radius;
+    }
+
+    public void setRadiusMarker(Marker marker){
+      this.radiusMarker = marker;
     }
 
 
