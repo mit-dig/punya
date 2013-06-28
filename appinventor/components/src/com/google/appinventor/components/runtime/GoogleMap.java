@@ -297,10 +297,11 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 //    mMap.setOnMapClickListener(this);
 //    mMap.setOnMapLongClickListener(this);
 
+    //@@ removed the test marker -- by Oshani
     //just for testing
-    int uniqueId = generateMarkerId();
-    Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
-    markers.put(marker, uniqueId);
+    //int uniqueId = generateMarkerId();
+    //Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    //markers.put(marker, uniqueId);
     //////
     // create UiSetting instance and default ui settings of the map
     mUiSettings = mMap.getUiSettings();
@@ -1322,6 +1323,28 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   }
 
+  @SimpleFunction(description = "Get the title of the marker" )
+  public String GetMarkerTitle(int markerId){
+	  Marker marker = getKeyByValue(markers, markerId);
+
+	    if(marker.equals(null)){
+	      form.dispatchErrorOccurredEvent(this, "getMarkerIfExisted",
+	          ErrorMessages.ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, Integer.toString(markerId));
+	    }
+	  return marker.getTitle();
+  }
+  
+  @SimpleFunction(description = "Get the snippet of the marker" )
+  public String GetMarkerSnippet(int markerId){
+	  Marker marker = getKeyByValue(markers, markerId);
+
+	    if(marker.equals(null)){
+	      form.dispatchErrorOccurredEvent(this, "getMarkerIfExisted",
+	          ErrorMessages.ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, Integer.toString(markerId));
+	    }
+	  return marker.getSnippet();
+  }
+  
   private Marker getMarkerIfExisted(int markerId){
     Marker marker = getKeyByValue(markers, markerId);
 
