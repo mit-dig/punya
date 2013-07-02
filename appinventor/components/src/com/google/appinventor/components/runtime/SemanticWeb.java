@@ -2,8 +2,10 @@ package com.google.appinventor.components.runtime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -585,5 +587,21 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
           Short.class, Integer.class, Long.class, Float.class, Double.class));
   private static final boolean isPrimitiveOrWrapper(Class<?> clazz) {
     return clazz.isPrimitive() || WRAPPER_TYPES.contains(clazz);
+  }
+
+  /**
+   * Decodes URL-encoded text (see RFC 3986) into the original UTF-8 string.
+   * @param text
+   * @return URL-decoded version of text unless text doesn't contain valid
+   * percent-encoded UTF-8 characters, in which case it returns the original
+   * text.
+   */
+  @SimpleFunction
+  public String URLDecodeText(final String text) {
+    try {
+      return URLDecoder.decode(text, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      return text;
+    }
   }
 }
