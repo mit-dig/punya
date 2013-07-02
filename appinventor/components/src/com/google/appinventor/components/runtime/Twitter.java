@@ -77,6 +77,7 @@ public final class Twitter extends AndroidNonvisibleComponent implements
   private static final String ACCESS_SECRET_TAG = "TwitterOauthAccessSecret";
   private static final String MAX_CHARACTERS = "160";
   private static final String URL_HOST = "twitter";
+  private static final String ACCESS_USERNAME_TAG = "username";
   private static final String CALLBACK_URL = Form.APPINVENTOR_URL_SCHEME
       + "://" + URL_HOST;
   private static final String WEBVIEW_ACTIVITY_CLASS = WebViewActivity.class
@@ -140,11 +141,19 @@ public final class Twitter extends AndroidNonvisibleComponent implements
     directMessages = new ArrayList<String>();
     searchResults = new ArrayList<String>();
 
-    sharedPreferences = container.$context().getSharedPreferences("Twitter",
-        Context.MODE_PRIVATE);
+//    sharedPreferences = container.$context().getSharedPreferences("Twitter",
+//        Context.MODE_PRIVATE);
+    sharedPreferences = container.$context().getApplicationContext().getSharedPreferences("Twitter", Context.MODE_PRIVATE); 
     accessToken = retrieveAccessToken();
+    userName = retrieveUserName();
 
     requestCode = form.registerForActivityResult(this);
+  }
+  
+  private String retrieveUserName(){
+	  return sharedPreferences.getString(ACCESS_USERNAME_TAG, "");
+	  
+	  
   }
 
   /**
@@ -321,6 +330,7 @@ public final class Twitter extends AndroidNonvisibleComponent implements
                 accessToken = resultAccessToken;
                 userName = accessToken.getScreenName();
                 saveAccessToken(resultAccessToken);
+                saveUserName(userName);
                 handler.post(new Runnable() {
                   @Override
                   public void run() {
@@ -363,6 +373,18 @@ public final class Twitter extends AndroidNonvisibleComponent implements
           accessToken.getTokenSecret());
     }
     sharedPrefsEditor.commit();
+  }
+  
+  private void saveUserName(String userName){
+	  final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+	    if (userName == null) {
+	        sharedPrefsEditor.remove(ACCESS_USERNAME_TAG);
+	      } 
+	    else {
+	        sharedPrefsEditor.putString(ACCESS_USERNAME_TAG, userName);
+	      }
+	      sharedPrefsEditor.commit();
+
   }
 
   private AccessToken retrieveAccessToken() {
