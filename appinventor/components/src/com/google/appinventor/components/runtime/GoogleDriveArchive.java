@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -185,8 +187,60 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     return file;
  
 	}
-  
-  
+
+  public static final Map<String, String> mediaTypeMap; //use for both setMediaTyp and setmimeType
+
+  static {
+    Map<String, String> aMap = new HashMap<String, String>();
+    aMap.put("xlsx", "application/vnd.ms-excel");
+    aMap.put("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    aMap.put("xml", "text/xml");
+    aMap.put("ods", "application/vnd.oasis.opendocument.spreadsheet");
+    aMap.put("csv", "text/plain");
+    aMap.put("tmpl", "text/plain");
+    aMap.put("pdf", "application/pdf");
+    aMap.put("php", "application/x-httpd-php");
+    aMap.put("jpg", "image/jpeg");
+    aMap.put("png", "image/png");
+    aMap.put("gif", "image/gif");
+    aMap.put("bmp", "image/bmp");
+    aMap.put("txt", "text/plain");
+    aMap.put("doc", "application/msword");
+    aMap.put("js", "text/js");
+    aMap.put("swf", "application/x-shockwave-flash");
+    aMap.put("mp3", "audio/mpeg");
+    aMap.put("zip", "application/zip");
+    aMap.put("rar", "application/rar");
+    aMap.put("tar", "application/tar");
+    aMap.put("cab", "application/cab");
+    aMap.put("html", "text/html");
+    aMap.put("htm", "text/html");
+    aMap.put("default", "application/octet-stream");   // if the file has no extension
+    aMap.put("folder", "application/vnd.google-apps.folder");
+    aMap.put("shortcut", "application/vnd.google-apps.drive-sdk"); //use in setmimeType to create shortcut
+
+    mediaTypeMap = aMap;
+  }
+
+  private String getMediaType(String fileName) {
+    String mediaType = "application/octet-stream"; //default media type
+    String extension = "";
+
+    int i = fileName.lastIndexOf('.');
+    if (i > 0) {//if we have extension
+      extension = fileName.substring(i+1);
+      mediaType = mediaTypeMap.get(extension) == null ? mediaTypeMap.get("default") : mediaTypeMap.get(extension);
+    }
+    else{//if there's no extension
+      mediaType = mediaTypeMap.get("default");
+    }
+
+    Log.i(TAG, "mediaType:" + mediaType);
+
+    return mediaType;
+  }
+
+
   private com.google.api.services.drive.model.File processGDFile(Drive service,
       String parentId, File localFile) throws Exception {
     Log.i(TAG, "We are in processGDFile");
@@ -196,7 +250,10 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     String q = "'" + parentId + "' in parents and" + "title = " + "'"
         + localFile.getName() + "'";
 
-    FileContent mediaContent = new FileContent("", localFile);
+    String mediaType = getMediaType(localFile.getName());
+
+    FileContent mediaContent = new FileContent(mediaType, localFile);
+//    mediaContent.setType("image/jpeg");
 
     FileList resultFileList = ExcuteQuery(q);
  
@@ -207,10 +264,13 @@ public class GoogleDriveArchive implements RemoteFileArchive {
         existed = true;
         com.google.api.services.drive.model.File gdFile = resultFileList
             .getItems().get(0);
-        processedFile = service.files()
-            .update(gdFile.getId(), gdFile, mediaContent).execute();
+        gdFile.setMimeType(mediaType);
+        Drive.Files.Update updateOperation = service.files()
+            .update(gdFile.getId(), gdFile, mediaContent).setConvert(true);
+
+        processedFile = updateOperation.execute();
         // Uncomment the following line to print the File ID.
-        Log.i(TAG, "Processed File ID: %s" + processedFile.getId());
+        Log.i(TAG, "Processed File ID: " + processedFile.getId());
 
       } else {
         Log.i(TAG, "the file is new, create its meta data");
@@ -225,12 +285,12 @@ public class GoogleDriveArchive implements RemoteFileArchive {
         Log.i(TAG, " before insert body");
         //TODO: detect the file name's extension, if it's csv or docx, then we force it to be converted
 
-
+        body.setMimeType(mediaType);
         Drive.Files.Insert insertOperation = service.files().insert(body, mediaContent).setConvert(true);
         processedFile = insertOperation.execute();
         //processedFile = service.files().insert(body, mediaContent).execute();
  
-        Log.i(TAG, "Processed File ID: %s" + processedFile.getId());
+        Log.i(TAG, "Processed File ID: " + processedFile.getId());
 
       }
     } catch (Exception e) {

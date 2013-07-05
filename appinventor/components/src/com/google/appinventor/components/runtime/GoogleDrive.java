@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 import android.accounts.AccountManager;
@@ -59,6 +60,7 @@ import com.google.appinventor.components.runtime.util.OAuth2Helper;
 import com.google.gson.JsonElement;
 
 import edu.mit.media.funf.FunfManager;
+import edu.mit.media.funf.Launcher;
 import edu.mit.media.funf.Schedule;
 import edu.mit.media.funf.pipeline.Pipeline;
 import edu.mit.media.funf.storage.UploadService;
@@ -86,12 +88,14 @@ import edu.mit.media.funf.storage.UploadService;
    "google-play-services.jar," +
    "funf.jar")
 public class GoogleDrive extends AndroidNonvisibleComponent
-implements ActivityResultListener, Component, Pipeline, OnResumeListener{
+implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStopListener, OnDestroyListener{
   
   private static final String TAG = "GoogleDrive";
 
   protected boolean mIsBound = false;
   public static final String GOOGLEDRIVE_PIPE_NAME = "googledrive";
+  private final int pipeId;
+  private static final AtomicInteger snextGoogleDriveID = new AtomicInteger(1);
   
   private final ComponentContainer container;
   private final Handler handler;
@@ -164,14 +168,14 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
           .getManager();
       
       registerSelfToFunfManager(); 
-
+      mIsBound = true;
       Log.i(TAG, "Bound to FunfManager");
 
     }
 
     public void onServiceDisconnected(ComponentName className) {
       mBoundFunfManager = null;
-
+      mIsBound = false;
       Log.i(TAG, "Unbind FunfManager");
 
     }
@@ -192,12 +196,20 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     accessTokenPair = retrieveAccessToken();
     mainUIThreadActivity = container.$context();
     Log.i(TAG, "Package name:" + mainUIThreadActivity.getApplicationContext().getPackageName());
-    // start a FunfManager Service
-    Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
-    mainUIThreadActivity.startService(i);
+//    // start a FunfManager Service
+//    Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
+//    mainUIThreadActivity.startService(i);
 
     // bind to FunfManger (in case the user wants to set up the
     // schedule)
+    if (!Launcher.isLaunched()) {
+      Log.i(TAG, "firstTime launching funManger");
+      Launcher.launch(mainUIThreadActivity);
+    }
+
+    pipeId = generatePipelineId(); // generate pipelineID for each new Google Drive instance.
+    // it's possible that the user has two GoogleDrive instance in two different screen
+
     doBindService();
     this.upload_period = GoogleDrive.SCHEDULE_UPLOAD_PERIOD;
     REQUEST_CHOOSE_ACCOUNT = form.registerForActivityResult(this);
@@ -206,6 +218,9 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     this.gdFolder = GoogleDrive.DEFAULT_GD_FOLDER;
 
     credential = GoogleAccountCredential.usingOAuth2(mainUIThreadActivity, DriveScopes.DRIVE);
+    form.registerForOnStop(this);
+    form.registerForOnDestroy(this);
+    form.registerForOnResume(this);
     
     
   }
@@ -213,7 +228,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
 
     mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
         FunfManager.class), mConnection, Context.BIND_AUTO_CREATE);
-    mIsBound = true;
     Log.i(TAG,
         "FunfManager is bound, and now we could have register dataRequests");
 
@@ -222,11 +236,12 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
   
   void doUnbindService() {
     if (mIsBound) {
-      // unregister Pipeline action 
+      // first unregister Pipeline action
       unregisterPipelineActions();
+      // unregister self
+      mBoundFunfManager.unregisterPipeline(GOOGLEDRIVE_PIPE_NAME + pipeId);
       // Detach our existing connection.
       mainUIThreadActivity.unbindService(mConnection);
-      mIsBound = false;
     }
   }
   
@@ -237,10 +252,23 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     
   }
 
+  private static int generatePipelineId(){
+    return snextGoogleDriveID.incrementAndGet();
+
+  }
+
+
   @Override
   public void onResume() {
     // TODO Auto-generated method stub
+    Log.i(TAG, "I got resumed, mIsBound:" + mIsBound);
     
+  }
+  
+  @Override
+  public void onStop(){
+    Log.i(TAG, "My form: " + mainUIThreadActivity.toString() + " got stopped");
+
   }
 
   @Override
@@ -249,13 +277,17 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
     // This function will run once whenever FunfManager.registerPipeline() is called
     //do nothing for now
     
+    
   }
 
   @Override
   public void onDestroy() {
     // TODO Auto-generated method stub
-    doUnbindService();
-    StopScheduleUpload(); //stop the schedule task
+
+    if (mIsBound) {
+      doUnbindService();
+    }
+
   }
 
   @Override
@@ -379,8 +411,8 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener{
    * This is for later to be wakened up and do previously registered actions 
    */
   private void registerSelfToFunfManager(){
-    Log.i(TAG, "register this class as a Pipeline to FunfManger");
-    mBoundFunfManager.registerPipeline(GOOGLEDRIVE_PIPE_NAME, this);
+    Log.i(TAG, "register this class as a Pipeline to FunfManger: "+ GOOGLEDRIVE_PIPE_NAME + pipeId);
+    mBoundFunfManager.registerPipeline(GOOGLEDRIVE_PIPE_NAME + pipeId, this);
     
   }
 
