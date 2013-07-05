@@ -175,9 +175,9 @@ OnDestroyListener, OnResumeListener, OnStopListener{
 
     // bind to FunfManger (in case the user wants to set up the schedule)
     doBindService();
-    
     //now we get(bind) to the Pipleline class that exists 
     //we can set upload and archive periods using the pipeline
+    form.registerForOnDestroy(this);
 
 
 	}
@@ -626,9 +626,9 @@ OnDestroyListener, OnResumeListener, OnStopListener{
   public void onDestroy() {
     // TODO Auto-generated method stub
     Log.i(TAG, "My form.java got destroyed");
-//    if (mIsBound && mConnection != null) {
-//      doUnbindService();
-//    }
+    if (mIsBound && mConnection != null) {
+      doUnbindService();
+    }
 
   }
 
@@ -637,9 +637,7 @@ OnDestroyListener, OnResumeListener, OnStopListener{
   public void onStop() {
     // TODO Auto-generated method stub
     Log.i(TAG, "My form: " + mainUIThreadActivity.toString() + " got stopped");
-    if (mIsBound && mConnection != null) {
-      doUnbindService();
-    }
+    
   }
 
 
@@ -647,7 +645,6 @@ OnDestroyListener, OnResumeListener, OnStopListener{
   public void onResume() {
     // TODO Auto-generated method stub
     Log.i(TAG, "My form.java got Resumed");
-//    doBindService();
   }
 
 }
