@@ -108,7 +108,6 @@ public final class LinearLayout implements Layout {
 }
 
   public void add(AndroidViewComponent component) {
-    Log.i("LinearLayout", "I am adding: " + component.getView().toString());
 
     layoutManager.addView(component.getView(), new android.widget.LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,  // width
