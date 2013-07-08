@@ -75,7 +75,7 @@ import gnu.math.IntNum;
 @UsesLibraries(libraries = "google-play-services.jar, funf.jar") // we have to include funf.jar because we use gson.JsonParser
 public class GoogleMap extends AndroidViewComponent implements OnResumeListener, OnInitializeListener, OnPauseListener,
 OnMarkerClickListener, OnInfoWindowClickListener, OnMarkerDragListener, OnMapClickListener, 
-OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener{
+OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
   private final Activity context;
   private final Form form;
@@ -1767,12 +1767,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     return result[0];
   }
 
-//
-//  @Override
-//  public void onLocationChanged(Location arg0) {
-//    // TODO Auto-generated method stub
-//    
-//  }
 
 
   @Override
@@ -1784,7 +1778,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   @Override
   public void onConnected(Bundle arg0) {
-    // TODO Auto-generated method stub
+    mLocationClient.requestLocationUpdates(
+        REQUEST, this);  // LocationListener
     
   }
 
@@ -1803,6 +1798,13 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     if (mLocationClient != null) {
       mLocationClient.disconnect();
     }
+  }
+
+
+  @Override
+  public void onLocationChanged(Location arg0) {
+    // TODO Auto-generated method stub
+    
   }
 
 
