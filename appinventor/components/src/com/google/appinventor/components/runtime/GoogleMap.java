@@ -1828,7 +1828,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     context.runOnUiThread(new Runnable() {
       public void run() {
         Log.i(TAG, "location changed"  + lat + lng );
-        EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerClick", lat, lng);
+        EventDispatcher.dispatchEvent(GoogleMap.this, "OnLocationChanged", lat, lng);
       }
     });
 
