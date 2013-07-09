@@ -1114,24 +1114,29 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
               JsonPrimitive jpLat = (JsonPrimitive)markerJson.get("lat");
               JsonPrimitive jpLng = (JsonPrimitive)markerJson.get("lng");
 
-              double latitude;
-              double longitude;
+              double latitude = 0;
+              double longitude = 0;
 
-              if (jpLat.isString() && jpLng.isString()){
-                Log.i(TAG, "jpLat:" + jpLat.toString());
-                Log.i(TAG, "jpLng:" + jpLng.toString());
-                latitude =  new Double(jpLat.getAsString());
-                longitude = new Double(jpLng.getAsString());
-                Log.i(TAG, "convert to double:" + latitude + "," + longitude);
-              }
-              else {
-                latitude = markerJson.get("lat").getAsDouble();
-                longitude = markerJson.get("lng").getAsDouble();
-              }
+              try{ //it's possible that when converting to Double, we will have errors
+                   // for example, some json has "lat": "" (empty string for lat, lng values)
 
+                if (jpLat.isString() && jpLng.isString()){
+                  Log.i(TAG, "jpLat:" + jpLat.toString());
+                  Log.i(TAG, "jpLng:" + jpLng.toString());
+
+                  latitude =  new Double(jpLat.getAsString());
+                  longitude = new Double(jpLng.getAsString());
+                  Log.i(TAG, "convert to double:" + latitude + "," + longitude);
+                }
+                else {
+                  latitude = markerJson.get("lat").getAsDouble();
+                  longitude = markerJson.get("lng").getAsDouble();
+                }
+
+              }  catch (NumberFormatException e){
+                  addOne = false;
+              }
               // check for Lat, Lng correct range
-              // Latitude measurements range from 0�� to (+/���)90��.
-              // Longitude measurements range from 0�� to (+/���)180
 
               if ((latitude < -90) || (latitude > 90) || (longitude < -180) || (longitude > 180)) {
 //                form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
