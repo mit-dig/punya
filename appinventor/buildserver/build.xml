@@ -136,24 +136,18 @@
     <copy toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar" file="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
     <copy toFile="${classes.files.dir}/json-simple.jar" file="${lib.dir}/dropbox/json_simple-1.1.jar" />    -->
     <copy toFile="${classes.files.dir}/acra-4.4.0.jar" file="${lib.dir}/acra/acra-4.4.0.jar" />
-    <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-android-2.2.6.jar" />
+    <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-3.0.3.jar" />
+    <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables.jar" />
+    <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
+    <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/jena-core.jar" file="${lib.dir}/jena/jena-core-2.10.0.jar" />
     <copy toFile="${classes.files.dir}/jena-arq.jar" file="${lib.dir}/jena/jena-arq-2.10.0.jar" />
     <copy toFile="${classes.files.dir}/jena-iri.jar" file="${lib.dir}/jena/jena-iri-0.9.5.jar" />
     <copy toFile="${classes.files.dir}/xercesImpl.jar" file="${lib.dir}/jena/xercesLite.jar" />
     <copy toFile="${classes.files.dir}/slf4j-android.jar" file="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
-<!--    <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" /> -->
-    <!-- We might replace some of the older versions of google-api-client and http-client -->
-
-<!-- <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" /> -->
-<!-- <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-oauth-client-beta.jar" file="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" /> --> 
-        
-    <!-- above might be able to removed in the future (not tested) -->
-<!--  	
     <copy toFile="${classes.files.dir}/google-api-client-android2-beta.jar" file="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android2-beta.jar" file="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" /> -->
+    <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
 	<!-- below are libraries used in Google Drive component -->
 	
 <!--	<copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/googledrive/google-http-client-1.14.1-beta.jar" />

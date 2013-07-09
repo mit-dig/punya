@@ -242,7 +242,7 @@ public class SemanticForm extends AndroidViewComponent implements Component,
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
       description = "Provides a URI for the form even if SubjectURI is not set.")
   public String GenerateSubjectURI() {
-    if(Subject().isEmpty()) {
+    if(Subject().length() == 0) {
       String subj = RdfUtil.generateSubjectForForm(this);
       if(subj == null) {
         return "";
