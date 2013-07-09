@@ -75,7 +75,7 @@ import gnu.math.IntNum;
 @UsesLibraries(libraries = "google-play-services.jar, funf.jar") // we have to include funf.jar because we use gson.JsonParser
 public class GoogleMap extends AndroidViewComponent implements OnResumeListener, OnInitializeListener, OnPauseListener,
 OnMarkerClickListener, OnInfoWindowClickListener, OnMarkerDragListener, OnMapClickListener, 
-OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener{
+OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
   private final Activity context;
   private final Form form;
@@ -293,11 +293,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     mMap.setOnMarkerClickListener(this);
     mMap.setOnInfoWindowClickListener(this);
     mMap.setOnMarkerDragListener(this);
-
-    //@@ removed the test marker -- by Oshani
-    //int uniqueId = generateMarkerId();
-    //Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
-    //markers.put(marker, uniqueId);
 
     // create UiSetting instance and default ui settings of the map
     mUiSettings = mMap.getUiSettings();
@@ -572,11 +567,11 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
           ((DraggableCircle) circle).setRadiusMarker(newMarker);
           // create a new draggabble circle
+ 
 
         }
 
       }
-
 
     } catch(NumberFormatException e) { //can't parse the string
       form.dispatchErrorOccurredEvent(this, "UpdateCircle",
@@ -701,10 +696,23 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         this.myLocationEnabled = enabled;
 
       if (mMap != null) {
-        mMap.setMyLocationEnabled(enabled);
+
+        mMap.setMyLocationEnabled(enabled); // enable google map mylocation widget
+
+        if(enabled){
+          setUpLocationClientIfNeeded();
+          mLocationClient.connect();
+        }
+        else{
+          mLocationClient.disconnect();
+        }
+
       }
 
-      setUpLocationClientIfNeeded();
+
+
+      
+      
 
   }
   @SimpleProperty(description = "Indicates whether my locaiton UI control is currently enabled for the Google map.")
@@ -719,6 +727,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     ArrayList<Object> latLng = new ArrayList<Object>();
 
     if (mLocationClient != null && mLocationClient.isConnected()) {
+      Log.i(TAG, "client is connected");
       Location location = mLocationClient.getLastLocation();
       latLng.add(location.getLatitude());
       latLng.add(location.getLongitude());
@@ -915,8 +924,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
         }
         //check for lat, lng range
-        // Latitude measurements range from 0° to (+/–)90°.
-        // Longitude measurements range from 0° to (+/–)180
+        // Latitude measurements range from 0�� to (+/���)90��.
+        // Longitude measurements range from 0�� to (+/���)180
         if ((lat < -90) || (lat > 90) || (lng < -180) || (lng > 180) ){
           addOne = false;
 //          form.dispatchErrorOccurredEvent(this, "AddMarkers",
@@ -1121,8 +1130,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
               }
 
               // check for Lat, Lng correct range
-              // Latitude measurements range from 0° to (+/–)90°.
-              // Longitude measurements range from 0° to (+/–)180
+              // Latitude measurements range from 0�� to (+/���)90��.
+              // Longitude measurements range from 0�� to (+/���)180
 
               if ((latitude < -90) || (latitude > 90) || (longitude < -180) || (longitude > 180)) {
 //                form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
@@ -1789,12 +1798,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     return result[0];
   }
 
-//
-//  @Override
-//  public void onLocationChanged(Location arg0) {
-//    // TODO Auto-generated method stub
-//    
-//  }
 
 
   @Override
@@ -1806,7 +1809,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   @Override
   public void onConnected(Bundle arg0) {
-    // TODO Auto-generated method stub
+    Log.i(TAG, "onConnected to location listener.....");
+    mLocationClient.requestLocationUpdates(
+        REQUEST, this);  // LocationListener
     
   }
 
@@ -1823,8 +1828,27 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // TODO Auto-generated method stub
     Log.i(TAG, "OnPause, remote LocationClient");
     if (mLocationClient != null) {
+      Log.i(TAG, "before location client disconnect");
       mLocationClient.disconnect();
     }
+  }
+
+
+  @Override
+  public void onLocationChanged(Location location) {
+    // TODO Auto-generated method stub
+    OnLocationChanged(location.getLatitude(), location.getLongitude());
+  }
+
+  @SimpleEvent (description = "Triggers this event when user location has changed. Only works when EnableMylocation is set to true")
+  public void OnLocationChanged(final double lat, final double lng){
+    context.runOnUiThread(new Runnable() {
+      public void run() {
+        Log.i(TAG, "location changed"  + lat + lng );
+        EventDispatcher.dispatchEvent(GoogleMap.this, "OnLocationChanged", lat, lng);
+      }
+    });
+
   }
 
 
