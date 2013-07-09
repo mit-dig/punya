@@ -3,7 +3,9 @@ package com.google.appinventor.components.runtime.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -20,7 +22,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.appinventor.components.runtime.AndroidViewComponent;
@@ -279,7 +284,7 @@ public final class RdfUtil {
     final String conceptUri = component.ConceptURI();
     final String propertyUri = component.PropertyURI();
     // verify that propertyUri is set
-    if(propertyUri == null || propertyUri.isEmpty()) {
+    if(propertyUri == null || propertyUri.length() == 0) {
       Log.w(LOG_TAG, "Property URI is empty");
       return false;
     }
@@ -291,7 +296,7 @@ public final class RdfUtil {
     }
     Resource s = model.getResource( model.expandPrefix( subject ) );
     Property p = model.getProperty( model.expandPrefix( propertyUri ) );
-    if ( conceptUri == null || conceptUri.isEmpty() ) {
+    if ( conceptUri == null || conceptUri.length() == 0 ) {
       // if no concept, try to infer xsd datatype
       if ( value.getClass() == Boolean.class ) {
         model.add( s, p, value.toString(), XSDDatatype.XSDboolean );
@@ -330,7 +335,7 @@ public final class RdfUtil {
     for(AndroidViewComponent i : container) {
       if(i instanceof SemanticForm) {
         SemanticForm nestedForm = (SemanticForm)i;
-        if(nestedForm.PropertyURI() == null || nestedForm.PropertyURI().isEmpty()) {
+        if(nestedForm.PropertyURI() == null || nestedForm.PropertyURI().length() == 0) {
           Log.w(LOG_TAG, "Found nested semantic form without a PropertyURI set");
           continue;
         }
@@ -383,7 +388,7 @@ public final class RdfUtil {
       Model model) {
     Log.i(LOG_TAG, "Triplifying form for subject <"+subject+">");
     String conceptUri = form.ConceptURI();
-    if(conceptUri != null && !conceptUri.isEmpty()) {
+    if(conceptUri != null && conceptUri.length() != 0) {
       Resource subj = model.getResource(subject);
       Resource obj = model.getResource(conceptUri);
       model.add(subj, RDF.type, obj);
@@ -403,7 +408,7 @@ public final class RdfUtil {
       return null;
     }
     Log.v(LOG_TAG, "  concept ? "+component.ConceptURI());
-    if(component.ConceptURI().isEmpty() || component.ConceptURI().startsWith(XSD.getURI())) {
+    if(component.ConceptURI().length() == 0 || component.ConceptURI().startsWith(XSD.getURI())) {
       builder.append(component.Value());
     } else if(component.Value() instanceof String) {
       return (String)component.Value();
@@ -458,7 +463,7 @@ public final class RdfUtil {
    */
   public static String generateSubjectForForm(final SemanticForm form) {
     StringBuilder subject = new StringBuilder();
-    if(form.Subject() != null && !form.Subject().isEmpty()) {
+    if(form.Subject() != null && form.Subject().length() != 0) {
       return form.Subject();
     }
     subject.append(form.BaseURI());
@@ -511,6 +516,99 @@ public final class RdfUtil {
       Log.w(LOG_TAG, "Unable to perform HTTP PUT for given URI", e);
     } catch (IOException e) {
       Log.w(LOG_TAG, "Unable to publish graph due to IO failure", e);
+    }
+    return success;
+  }
+
+  /**
+   * Performs a SPARQL 1.1 Update INSERT DATA operation on a remote triple
+   * store by inserting the triples in <i>model</i> into the optionally named
+   * graph <i>graph</i>
+   * @param uri URI for the endpoint
+   * @param model RDF model to send to the endpoint
+   * @param graph Optional graph URI to insert data into. Pass null to insert
+   * into the default graph.
+   * @return true on success, false otherwise.
+   */
+  public static boolean insertData(URI uri, Model model, String graph) {
+    boolean success = false;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    model.write(baos, "TTL");
+    Log.d(LOG_TAG, "Byte array size: "+baos.size());
+    // get model contents in turtle
+    String contents = null;
+    try {
+      contents = baos.toString("UTF-8");
+    } catch(UnsupportedEncodingException e) {
+      Log.e(LOG_TAG, "Unable to encode query.", e);
+      return false;
+    }
+    baos = null;
+    Log.d(LOG_TAG, "Model: "+contents);
+    // remove PREFIX statements and move them before an insert data block
+    Pattern prefixPattern = Pattern.compile("@prefix[ \t]+([^:]*:)[ \t]+<([^>]+)>[ \t]+.[ \t\r\n]+", Pattern.CASE_INSENSITIVE);
+    Matcher matcher = prefixPattern.matcher(contents);
+    StringBuffer prefixes = new StringBuffer();
+    StringBuffer sb = new StringBuffer("INSERT DATA { ");
+    if(graph != null && graph.length() != 0) {
+      sb.append("GRAPH <"+graph+"> { ");
+    }
+    sb.append("\r\n");
+    while(matcher.find()) {
+      prefixes.append("PREFIX ");
+      prefixes.append(matcher.group(1));
+      prefixes.append(" <");
+      prefixes.append(matcher.group(2));
+      prefixes.append(">\r\n");
+      matcher.appendReplacement(sb, "");
+    }
+    matcher.appendTail(sb);
+    prefixes.append(sb);
+    if(graph != null && graph.length() != 0) {
+      prefixes.append("}\r\n");
+    }
+    prefixes.append("}\r\n");
+    sb = null;
+    HttpURLConnection conn = null;
+    Log.i(LOG_TAG, "Sending update to server:");
+    Log.d(LOG_TAG, prefixes.toString());
+    try {
+      conn = (HttpURLConnection) uri.toURL().openConnection();
+      conn.setDoInput(true);
+      conn.setDoOutput(true);
+      conn.setRequestMethod("POST");
+      conn.setRequestProperty("Content-Length", Integer.toString(prefixes.length()));
+      conn.setRequestProperty("Content-Type", "application/sparql-update");
+      conn.setRequestProperty("Accept", "*/*");
+      String userInfo = uri.getUserInfo();
+      if(userInfo != null && userInfo.length() != 0) {
+        if(!userInfo.contains(":")) {
+          userInfo = userInfo + ":";
+        }
+        String encodedInfo = Base64.encodeToString(userInfo.getBytes("UTF-8"), Base64.DEFAULT);
+        Log.d(LOG_TAG, "Authorization = "+encodedInfo);
+        conn.setRequestProperty("Authorization", "Basic "+encodedInfo);
+      }
+      conn.connect();
+      OutputStream os = conn.getOutputStream();
+      PrintStream ps = new PrintStream(os);
+      ps.print(prefixes);
+      ps.close();
+      int status = conn.getResponseCode();
+      Log.d(LOG_TAG, "HTTP Status = " + status);
+      if(status == 200) {
+        success = true;
+      } else if(status >= 400) {
+        success = false;
+        Log.w(LOG_TAG, "HTTP status for update was "+status);
+      }
+      conn.disconnect();
+    } catch (MalformedURLException e) {
+      Log.w(LOG_TAG, "Unable to insert triples due to malformed URL.");
+    } catch (ProtocolException e) {
+      Log.w(LOG_TAG, "Unable to perform HTTP POST to given URI.", e);
+    } catch (IOException e) {
+      Log.w(LOG_TAG, "Unable to insert triples due to communication issue.", e);
     }
     return success;
   }

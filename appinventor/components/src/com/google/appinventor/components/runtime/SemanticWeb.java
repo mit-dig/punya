@@ -604,4 +604,66 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       return text;
     }
   }
+
+  /**
+   * Attempts to insert the statements contained within this Semantic Web
+   * component into the endpoint with an optional graph.
+   * @param graph Empty string for the default graph, otherwise a valid URI
+   * @param noResolveUpdate true if the component should attempt to resolve the
+   * update URL relative to {@link #EndpointURL()}, false will send the query
+   * directly to {@link #endpointURL()}.
+   */
+  @SimpleFunction
+  public void InsertModelStatementsIntoEndpoint(final String graph, boolean noResolveUpdate) {
+    try {
+      URI part = new URI(null, null, "update", null, null);
+      URI base = URI.create(EndpointURL());
+      final URI uri = noResolveUpdate ? base : base.resolve(part);
+      Runnable call = new Runnable() {
+        public void run() {
+          doInsertModel(uri, graph);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (URISyntaxException e) {
+      Log.w(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
+      FailedToInsertGraph(graph, "Invalid endpoint URI. See log for details.");
+    }
+  }
+
+  private void doInsertModel(final URI uri, final String graph) {
+    try {
+      if(RdfUtil.insertData(uri, model, graph.length() == 0 ? null : graph)) {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+            InsertedModelIntoGraph(graph);
+          }
+        });
+      } else {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+            FailedToInsertGraph(graph, "See log for details.");
+          }
+        });
+      }
+    } catch(final Exception e) {
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          Log.w(LOG_TAG, "Unable to publish graph.", e);
+          FailedToInsertGraph(graph, e.getLocalizedMessage());
+        }
+      });
+    }
+  }
+
+  @SimpleEvent
+  public void FailedToInsertGraph(String graph, String error) {
+    EventDispatcher.dispatchEvent(this, "FailedToInsertGraph", graph, error);
+  }
+
+  @SimpleEvent
+  public void InsertedModelIntoGraph(String graph) {
+    EventDispatcher.dispatchEvent(this, "InsertedModelIntoGraph", graph);
+  }
+
 }
