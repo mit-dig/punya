@@ -585,7 +585,7 @@ public final class RdfUtil {
         if(!userInfo.contains(":")) {
           userInfo = userInfo + ":";
         }
-        String encodedInfo = Base64.encodeToString(userInfo.getBytes("UTF-8"), Base64.DEFAULT);
+        String encodedInfo = Base64.encodeToString(userInfo.getBytes("UTF-8"), Base64.NO_WRAP).trim();
         Log.d(LOG_TAG, "Authorization = "+encodedInfo);
         conn.setRequestProperty("Authorization", "Basic "+encodedInfo);
       }
