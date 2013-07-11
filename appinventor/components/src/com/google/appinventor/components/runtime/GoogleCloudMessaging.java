@@ -136,6 +136,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         //This is for the relaunching the activity that has been waked up by the GCMIntentService
         //launch service
         gcmMessage = container.$form().getGCMStartValues();
+        Log.i(TAG,"The initial value of the gcmMessage is "+gcmMessage);
     }
     
     private String retrieveRegId() {
@@ -358,9 +359,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         @Override
         public void handleMessage(Message msg) {
             gcmMessage = msg.obj.toString();
-            Log.i(TAG, " before call GCMInfoReceived()");
+            Log.i(TAG,"The GCM Message is "+gcmMessage);
             GCMInfoReceived();
-            Log.i(TAG, " after call GCMInfoReceived()");
         }
     };
 
@@ -383,9 +383,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         @Override
         public void handleMessage(Message msg) {
             gcmMessage = msg.obj.toString();
-            Log.i(TAG, " before call RegInfoReceived()");
             RegInfoReceived();
-            Log.i(TAG, " after call RegInfoReceived()");
         }
     };
     

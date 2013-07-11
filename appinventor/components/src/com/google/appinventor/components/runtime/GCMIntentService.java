@@ -65,8 +65,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         mNM = (NotificationManager) mainUIThreadContext.getSystemService(ns);
         Log.i(TAG, "After creating the GCMIntentService");  
         
-        String newMessage = intent.getExtras().getString("message");
-                
+        String newMessage = intent.getExtras().getString("gcmMessage");                
         sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
@@ -94,6 +93,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         
         for (GCMEventListener listener : GCMEventListeners) {
             listener.onMessageReceived(newMessage);
+            Log.i(TAG, "The new message is :" + newMessage);
             Log.i(TAG, "Listener:" + listener.toString());
           }       
         Log.i(TAG, "After the onMessage method");         
@@ -105,7 +105,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         boolean success = GCMServerUtilities.register(context, registrationId,SERVER_URL);
         if(success){
             for (GCMEventListener listener : GCMRegEventListeners) {
-                listener.onMessageReceived("success");
+                listener.onMessageReceived("Registration successfully from the GCM server!");
                 Log.i(TAG, "Listener:" + listener.toString());
               }    
         }      

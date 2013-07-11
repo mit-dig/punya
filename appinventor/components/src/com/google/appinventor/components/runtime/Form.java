@@ -217,7 +217,7 @@ private String startupValueForGCM = "";
      */
     
     if (startIntent != null && startIntent.hasExtra(ARGUMENT_SURVEY)){
-    	Log.i("LOG_TAG", "surveyIntentValue:"+startIntent.getStringExtra(ARGUMENT_SURVEY));
+    	Log.i(LOG_TAG, "surveyIntentValue:"+startIntent.getStringExtra(ARGUMENT_SURVEY));
     	startupValueForSurvey = startIntent.getStringExtra(ARGUMENT_SURVEY); 
     }
     
@@ -235,7 +235,7 @@ private String startupValueForGCM = "";
      */
     
     if (startIntent != null && startIntent.hasExtra(ARGUMENT_GCM)){
-        Log.i("LOG_TAG", "GCMIntentValue:"+startIntent.getStringExtra(ARGUMENT_GCM));
+        Log.i(LOG_TAG, "GCMIntentValue:"+startIntent.getStringExtra(ARGUMENT_GCM));
         startupValueForGCM = startIntent.getStringExtra(ARGUMENT_GCM); 
     }
      
