@@ -245,7 +245,7 @@ public class Dropbox extends AndroidNonvisibleComponent
     super(container.$form());
     this.container = container;
     handler = new Handler();
-    sharedPreferences = container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,
+    sharedPreferences = container.$context().getSharedPreferences(DropboxUtil.PREFS_DROPBOX,
         Context.MODE_PRIVATE);
     //try 
     sharedPreferences.registerOnSharedPreferenceChangeListener(bgServiceStatuslistener);

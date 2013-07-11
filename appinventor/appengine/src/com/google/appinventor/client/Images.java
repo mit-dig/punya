@@ -483,7 +483,7 @@ public interface Images extends Resources {
   ImageResource telephonyInfo();
   
   /**
-   * Designer palette item: TelephonyInfo Component
+   * Designer palette item: GogoleCloudMessaging Component
    */
   @Source("com/google/appinventor/images/googleCloudMessaging.png")
   ImageResource googleCloudMessaging();

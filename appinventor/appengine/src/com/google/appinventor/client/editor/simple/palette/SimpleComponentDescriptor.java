@@ -102,7 +102,8 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/twitter.png", images.twitterComponent());
     bundledImages.put("images/dropbox.png", images.dropbox());
     bundledImages.put("images/chart.png", images.ldchart());
-    bundledImages.put("images/googledrive.png", images.googledrive());    
+    bundledImages.put("images/googledrive.png", images.googledrive());   
+    bundledImages.put("images/googleCloudMessaging.png", images.googleCloudMessaging());    
     bundledImages.put("images/gmap.png", images.googlemap());
     bundledImages.put("images/voting.png", images.voting());
     bundledImages.put("images/web.png", images.web());

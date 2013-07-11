@@ -70,7 +70,15 @@ import android.util.Log;
 /* 
  * @author wli17@mit.edu (Weihua Li)
  */
-@DesignerComponent(version = YaVersion.GOOGLECLOUDMESSAGING_COMPONENT_VERSION, description = "", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/googleCloudMessaging.png")
+@DesignerComponent(version = YaVersion.GOOGLECLOUDMESSAGING_COMPONENT_VERSION, 
+    description = "<p>A non-visible component that enables push notification  " +
+    "by Google Cloud Messaging <a href=\"http://developer.android.com/" +
+    "google/gcm/index.html\" target=\"_blank\">GCM</a>. " +   
+    "<p>You must obtain the sender ID and the GCM server URL " +
+    " specific to your app. </p> ",
+    category = ComponentCategory.FUNF, 
+    nonVisible = true, 
+    iconName = "images/googleCloudMessaging.png")
 @UsesPermissions(permissionNames = "com.google.android.c2dm.permission.RECEIVE, "
         + "android.permission.INTERNET, "
         +"android.permission.GET_ACCOUNTS, "
@@ -353,8 +361,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
     //The GCMIntentService dispatches the intent, and the GoogleCloudMessaging
     //component receive the intent using the listeners.
-    //There are two types of messages: 1)Registration 2)Regular GCM Message
-    
+    //There are two types of messages: 1)Registration 2)Regular GCM Message   
     final Handler msgHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
