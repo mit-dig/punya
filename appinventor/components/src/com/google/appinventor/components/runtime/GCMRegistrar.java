@@ -392,6 +392,7 @@ public final class GCMRegistrar {
                 new Timestamp(expirationTime));
         editor.putLong(PROPERTY_ON_SERVER_EXPIRATION_TIME, expirationTime);
         editor.commit();
+        Log.v(TAG, "After setting registeredOnServer");
     }
 
     /**

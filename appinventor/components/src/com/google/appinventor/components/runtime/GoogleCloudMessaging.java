@@ -235,10 +235,11 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         AsynchUtil.runAsynchronously(new Runnable() {
             public void run() {
                 try {
-                    final String regId = GCMRegistrar.getRegistrationId(form);                    
+                    regId = GCMRegistrar.getRegistrationId(form);                    
                     if (regId.equals("")) {
                         // Automatically registers application
                         GCMRegistrar.register(form, SENDER_ID);
+                        regId = GCMRegistrar.getRegistrationId(form); 
                     } else {
                         // Device is already registered on GCM, check server.
                         if (GCMRegistrar.isRegisteredOnServer(form)) {
@@ -268,17 +269,22 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                 }
             }
         });
+        saveRegId(regId);
+        Log.i(TAG,"The regId is "+regId);
     }
     
     /**
      * Remove authentication for this app instance
      */
     @SimpleFunction(description = "Removes the GCM authorization from this running app instance")
-    public void UnRegister() {
-        saveRegId(null);
+    public void UnRegister() {       
+        Log.i(TAG, "after remove the Regid: "+regId);
         GCMServerUtilities.unregister(form, regId, SERVER_URL);
+        Log.i(TAG, "after unregister from the GCMServerUtilities");
         GCMRegistrar.unregister(form);
+        Log.i(TAG, "after unregister from the GCMRegistrar");
         Enabled(false);
+        saveRegId(null);
     }
 
     /**

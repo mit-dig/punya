@@ -98,9 +98,14 @@ public final class GCMServerUtilities {
         Map<String, String> params = new HashMap<String, String>();
         params.put("regId", regId);
         try {
+            Log.i(TAG,"Before post method, the params is "+params.toString());
             post(serverUrl, params);
+            Log.i(TAG,"Before the GCMRegistrar.setRegisteredOnServer");
             GCMRegistrar.setRegisteredOnServer(context, false);
-        } catch (IOException e) {}
+            Log.i(TAG,"After the GCMRegistrar.setRegisteredOnServer");
+        } catch (IOException e) {
+            Log.i(TAG,"Exception is "+e.toString());
+        }
     }
 
     /**
@@ -136,6 +141,7 @@ public final class GCMServerUtilities {
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) url.openConnection();
+            Log.v(TAG, "After open the Http URL connection");
             conn.setDoOutput(true);
             conn.setUseCaches(false);
             conn.setFixedLengthStreamingMode(bytes.length);
@@ -143,17 +149,23 @@ public final class GCMServerUtilities {
             conn.setRequestProperty("Content-Type",
                     "application/x-www-form-urlencoded;charset=UTF-8");
             // post the request
+            Log.v(TAG, "Before the OutputStream");
             OutputStream out = conn.getOutputStream();
+            Log.v(TAG, "After the OutputStream");
             out.write(bytes);
+            Log.v(TAG, "After the out.write(bytes)");
             out.close();
+            Log.v(TAG, "After the out.close()");
             // handle the response
             int status = conn.getResponseCode();
             if (status != 200) {
+              Log.v(TAG, "Post failed with error code " + status);
               throw new IOException("Post failed with error code " + status);
             }
         } finally {
             if (conn != null) {
                 conn.disconnect();
+                Log.v(TAG, "After conn.disconnect()");
             }
         }
       }
