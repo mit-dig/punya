@@ -264,7 +264,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                     }
                     return;
                 } catch (Exception e) {
-                    Log.i(TAG, "within the exception");
+                    Log.i(TAG, "within the exception of Register");
                     UnRegister();
                 }
             }
@@ -277,14 +277,24 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
      * Remove authentication for this app instance
      */
     @SimpleFunction(description = "Removes the GCM authorization from this running app instance")
-    public void UnRegister() {       
-        Log.i(TAG, "after remove the Regid: "+regId);
-        GCMServerUtilities.unregister(form, regId, SERVER_URL);
-        Log.i(TAG, "after unregister from the GCMServerUtilities");
-        GCMRegistrar.unregister(form);
-        Log.i(TAG, "after unregister from the GCMRegistrar");
-        Enabled(false);
-        saveRegId(null);
+    public void UnRegister() { 
+        
+        AsynchUtil.runAsynchronously(new Runnable() {
+            public void run() {
+                try {
+                    Enabled(false);
+                    Log.i(TAG, "after remove the Regid: "+regId);
+                    GCMServerUtilities.unregister(form, regId, SERVER_URL);
+                    Log.i(TAG, "after unregister from the GCMServerUtilities");
+                    GCMRegistrar.unregister(form);
+                    Log.i(TAG, "after unregister from the GCMRegistrar");
+                    saveRegId(null);
+                    return;
+                } catch (Exception e) {
+                    Log.i(TAG, "within the exception of UnRegister");
+                }
+            }
+        });
     }
 
     /**
