@@ -291,6 +291,7 @@ public final class Compiler {
       for (String permission : permissionsNeeded) {
         out.write("  <uses-permission android:name=\"" + permission + "\" />\n");
       }
+
       // add permission, and uses-permission, uses-feature specifically for Google Map
       // as stated here https://developers.google.com/maps/documentation/android/start
       if (componentTypes.contains("GoogleMap")){
@@ -302,12 +303,18 @@ public final class Compiler {
         out.write(" <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />\n");
       }
 
+      out.write("<permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
+      out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n"); 
+      
+      out.write("<permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
+      out.write("<uses-permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" />\n"); 
+      
       // TODO(markf): Change the minSdkVersion below if we ever require an SDK beyond 1.5.
       // The market will use the following to filter apps shown to devices that don't support
       // the specified SDK version.  We might also want to allow users to specify minSdkVersion
       // or have us specify higher SDK versions when the program uses a component that uses
       // features from a later SDK (e.g. Bluetooth).
-      out.write("  <uses-sdk android:minSdkVersion=\"4\" />\n");
+      out.write("  <uses-sdk android:minSdkVersion=\"8\" />\n");
 
       // If we set the targetSdkVersion to 4, we can run full size apps on tablets.
       // On non-tablet hi-res devices like a Nexus One, the screen dimensions will be the actual
@@ -318,7 +325,6 @@ public final class Compiler {
       // this problem, but images and buttons are still an unsolved problem. We'll have to solve
       // that before we can set the targetSdkVersion to 4 here.
       out.write("  <uses-sdk android:targetSdkVersion=\"10\" />\n");
-
       out.write("  <application ");
 
       // TODO(markf): The preparing to publish doc at
@@ -376,18 +382,19 @@ public final class Compiler {
       out.write("      </intent-filter>\n");
       out.write("    </activity>\n");
 
+
 	  // Add the FUNF probe services
-//      out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
-//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
-//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
-//	  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
+    // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
+    // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
+    // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
+    // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
 
 	  // new version of configurations to include in the manifest.xml. Now need not include each probe individually, 
 	  // but just include the FunfManager service
     // Broadcast receiver for all funf related component  
 	  if(librariesNeeded.contains("funf.jar")){
 	    out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
-//	    out.write("<meta-data android:name=\"main\" android:value=\"{\"@type\": \"com.google.appinventor.components.runtime.sensorDBPipeline\"}\"/>\n");
+    // out.write("<meta-data android:name=\"main\" android:value=\"{\"@type\": \"com.google.appinventor.components.runtime.sensorDBPipeline\"}\"/>\n");
       out.write(" </service>\n");  
 	    out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
 	    out.write("    <intent-filter>\n");
@@ -399,6 +406,43 @@ public final class Compiler {
 	    out.write("    </intent-filter>\n");
 	    out.write("</receiver>\n");
 	  }
+
+    //  Add the FUNF probe services
+    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
+    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
+    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
+    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
+
+    // new version of configurations to include in the manifest.xml. Now need not include each probe individually, 
+    // but just include the FunfManager service
+    // Broadcast receiver for all funf related component  
+    if(librariesNeeded.contains("funf.jar")){
+      out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+    //  out.write("<meta-data android:name=\"main\" android:value=\"{\"@type\": \"com.google.appinventor.components.runtime.sensorDBPipeline\"}\"/>\n");
+      out.write(" </service>\n");  
+      out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
+      out.write("    <intent-filter>\n");
+      out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
+      out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
+      out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
+      out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
+      out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
+      out.write("    </intent-filter>\n");
+      out.write("</receiver>\n");
+    }
+	  
+	  // Add the GCM service
+	  // Declare and use a custom permission so only this application can receive GCM messages:
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");    
+	  out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
+	  out.write("    <intent-filter>");
+	  out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
+	  out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
+	  String temp787 ="        <category android:name=\""+packageName+"\" />\n"; 
+	  out.write(temp787);
+	  out.write("    </intent-filter>");
+	  out.write("</receiver>");
+	  
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
 	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.HttpsUploadService\"></service> \n");

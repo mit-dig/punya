@@ -257,9 +257,10 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 92;
   // - The Google Map component was added
   // TODO: NEED TO FIX THE TOTAL VERSION 
-    
+  // For YOUNG_ANDROID_VERSION 93;
+  // - The Google Cloud Messaging component was added  
  
-  public static final int YOUNG_ANDROID_VERSION = 91;
+  public static final int YOUNG_ANDROID_VERSION = 93;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -556,6 +557,7 @@ public class YaVersion {
   public static final int PEDOMETERSENSOR_COMPONENT_VERSION = 1;
   public static final int SURVEY_COMPONENT_VERSION = 1;
   public static final int TELEPHONY_COMPONENT_VERSION = 1;
+  public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
   public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 2;
