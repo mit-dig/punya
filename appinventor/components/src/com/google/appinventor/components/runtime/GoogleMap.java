@@ -963,12 +963,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         if (((YailList) marker).size() >= 4) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(3).getClass());
           Log.i(TAG, "Value: " + ((YailList) marker).getObject(3).toString());
-          title = ((YailList) marker).getObject(4).toString();
+          title = ((YailList) marker).getObject(3).toString();
         }
         if (((YailList) marker).size() >= 5) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(4).getClass());
           Log.i(TAG, "Value: " + ((YailList) marker).getObject(4).toString());
-          snippet = ((YailList) marker).getObject(5).toString();
+          snippet = ((YailList) marker).getObject(4).toString();
         }
         if (((YailList) marker).size() >= 6) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(5).getClass());

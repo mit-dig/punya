@@ -248,8 +248,8 @@ public class SmsHistory extends ProbeBase{
 	}
 
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable sms history sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		JsonObject newConfig = null;

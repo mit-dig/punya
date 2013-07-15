@@ -328,8 +328,8 @@ public class SocialProximitySensor extends ProbeBase{
 	 * changes and raise the corresponding events.
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable social proximity sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		//check if Bluetooth is even available on this device
 		checkBluetoothAvailabiblity();

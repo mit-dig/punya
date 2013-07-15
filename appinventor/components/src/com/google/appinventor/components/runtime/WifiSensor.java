@@ -267,8 +267,8 @@ public class WifiSensor extends ProbeBase{
 	 * and raise the corresponding events.
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable wifi sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		if (this.enabled != enabled)
 			this.enabled = enabled;

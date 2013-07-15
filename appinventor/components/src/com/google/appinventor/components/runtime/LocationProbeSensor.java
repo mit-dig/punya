@@ -12,14 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.PropertyCategory;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesLibraries;
-import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -41,7 +34,7 @@ import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 
 /**
  * Record GPS location periodically
- * 
+ *
  * @author fuming@mit.edu (Fuming Shih)  
  * 
  */
@@ -223,8 +216,7 @@ public class LocationProbeSensor extends ProbeBase{
 	 * and raise the corresponding events.
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable location probe to run once and receive location")
 	@Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub

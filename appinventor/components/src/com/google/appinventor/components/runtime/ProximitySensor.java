@@ -167,8 +167,8 @@ public class ProximitySensor extends ProbeBase{
 	 * changes and raise the corresponding events.
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable proximity sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		if (this.enabled != enabled)
 			this.enabled = enabled;

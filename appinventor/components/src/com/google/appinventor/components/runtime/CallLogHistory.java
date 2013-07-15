@@ -248,10 +248,10 @@ public class CallLogHistory extends ProbeBase{
 //		Log.i(TAG, "afterDate: " + DateFormat.getDateFormat(context).format(afterDate * 1000));
 //
 //	}
-	
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+
+  @SimpleFunction(description = "Enable calllog history probe to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		JsonObject newConfig = null;

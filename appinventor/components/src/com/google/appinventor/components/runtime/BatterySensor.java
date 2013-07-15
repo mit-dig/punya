@@ -9,13 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesLibraries;
-import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -127,12 +121,11 @@ public class BatterySensor extends ProbeBase{
 
 		}
 
-	};	
-	
-	
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
-	@Override
+	};
+
+
+  @SimpleFunction(description = "Enable battery sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		if (this.enabled != enabled)
