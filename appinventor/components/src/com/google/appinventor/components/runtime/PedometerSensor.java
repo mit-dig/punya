@@ -31,7 +31,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.PedometerKeys;
 				"steps he walks, one could set \"interval\"= duration + 1. There are 9 different sensitivities for " +
 				"detecting walking step, including \"extra high\", \"very high\", \"high\", \"higher\", " +
 				"\"medium\", \"lower\", \"low\", \"very low\", \"extra low\". ", 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/pedometerSensor.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/pedometerSensor.png")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")
 public class PedometerSensor extends ProbeBase{

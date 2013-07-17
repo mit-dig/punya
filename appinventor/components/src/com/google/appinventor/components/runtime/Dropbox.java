@@ -82,7 +82,7 @@ import edu.mit.media.funf.storage.UploadService;
     "<p>You must obtain a App Key and App Secret for Dropbox authorization " +
     " specific to your app from https://www.dropbox.com/developers/apps </p>. " +
     "The component have the capability to schedule a periodic upload event or directly upload data",
-    category = ComponentCategory.FUNF,
+    category = ComponentCategory.CLOUDSTORAGE,
     nonVisible = true,
     iconName = "images/dropbox.png")
 @SimpleObject

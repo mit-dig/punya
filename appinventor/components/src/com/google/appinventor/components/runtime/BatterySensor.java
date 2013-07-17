@@ -28,7 +28,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys;
 
 @DesignerComponent(version = YaVersion.BATTERYSENSOR_COMPONENT_VERSION, 
 		description = "Information about the type and current state of the battery in the device. " , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/batterySensor.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/batterySensor.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.BATTERY_STATS")
 @UsesLibraries(libraries = "funf.jar")

@@ -47,7 +47,7 @@ import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 	"location within a max wait time (default 2 mins), ending early if it finds a location that has at most the goodEnoughAccuracy." +
 	"The default max_wait_time is 2 mins and the default goodEnoughAccuracy is 80. " +
 	"Useful for sparse polling of location to limit battery usage.", 
-	category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/locationProbe.png")
+	category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/locationProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_COARSE_LOCATION, "
 		+ "android.permission.ACCESS_FINE_LOCATION")
@@ -256,7 +256,7 @@ public class LocationProbeSensor extends ProbeBase{
 	 * GPS or Network fix
 	 * @param newVal
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "false")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "Fsocalse")
 	@SimpleProperty(description = "Set whether the location info will use the last known location without" +
 			" acquring a new location either through GPC or Network fix")
 	public void UseCache(boolean newVal){
@@ -295,7 +295,7 @@ public class LocationProbeSensor extends ProbeBase{
 	/**
 	 * Set whether to use GPS or not for the location provider
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "true")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
 	@SimpleProperty
 	public void UseGPS(boolean newVal) {
 		if(useGPS != newVal){
@@ -318,7 +318,7 @@ public class LocationProbeSensor extends ProbeBase{
 	/**
 	 * Set whether to use Network or not for the location provider
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "true")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
 	@SimpleProperty
 	public void UseNetwork(boolean newVal) {
 		if(useNetwork != newVal){

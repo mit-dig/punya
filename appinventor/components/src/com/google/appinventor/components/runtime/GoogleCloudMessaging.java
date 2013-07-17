@@ -76,7 +76,7 @@ import android.util.Log;
     "google/gcm/index.html\" target=\"_blank\">GCM</a>. " +   
     "<p>You must obtain the sender ID and the GCM server URL " +
     " specific to your app. </p> ",
-    category = ComponentCategory.FUNF, 
+    category = ComponentCategory.SOCIAL,
     nonVisible = true, 
     iconName = "images/googleCloudMessaging.png")
 @UsesPermissions(permissionNames = "com.google.android.c2dm.permission.RECEIVE, "
@@ -200,8 +200,9 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     }
 
     // Add / remove the listeners
-    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
-    @SimpleProperty
+//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
+//    @SimpleProperty
+    @SimpleFunction(description = "Enable Google Cloud Messaging to receive push notification")
     public void Enabled(boolean enable) {
 
         enabled = enable;

@@ -50,7 +50,7 @@ import com.google.appinventor.components.common.PropertyTypeConstants;
  * 
  */
 
-@DesignerComponent(version = YaVersion.TIMER_COMPONENT_VERSION, description = "Non-visible component that provides a timer to schedule actions", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/timer.png")
+@DesignerComponent(version = YaVersion.TIMER_COMPONENT_VERSION, description = "Non-visible component that provides a timer to schedule actions", category = ComponentCategory.BASIC, nonVisible = true, iconName = "images/timer.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.VIBRATE, "
 	+ "android.permission.WAKE_LOCK")
@@ -356,9 +356,10 @@ public final class Timer extends AndroidNonvisibleComponent implements
 	 * @param enabled
 	 *            {@code true} starts the timer, {@code false} stops it
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = DEFAULT_ENABLED ? "True"
-			: "False")
-	@SimpleProperty
+//	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = DEFAULT_ENABLED ? "True"
+//			: "False")
+//	@SimpleProperty
+  @SimpleFunction (description = "Enable the timer")
 	public void TimerEnabled(boolean enabled) {
 		if (this.enabled != enabled)
 			this.enabled = enabled;

@@ -27,7 +27,7 @@ import edu.mit.media.funf.probe.builtin.RunningApplicationsProbe;
 
 @DesignerComponent(version = YaVersion.LIGHTSENSOR_COMPONENT_VERSION, 
 		description = "Return information of the current illuminances (lux) by using the light sensor " , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/lightsensorProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/lightsensorProbe.png")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")
 public class LightSensor extends ProbeBase {

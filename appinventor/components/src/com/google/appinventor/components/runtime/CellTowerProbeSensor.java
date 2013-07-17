@@ -29,7 +29,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.CellKeys;
 
 @DesignerComponent(version = YaVersion.CELLTOWERPROBESENSOR_COMPONENT_VERSION, 
 		description = "A component that detects information of the cell tower that the cellphone connects to", 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/cellTowerProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/cellTowerProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_COARSE_LOCATION")
 @UsesLibraries(libraries = "funf.jar")

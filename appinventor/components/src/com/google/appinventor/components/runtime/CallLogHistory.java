@@ -48,7 +48,7 @@ import edu.mit.media.funf.time.TimeUnit;
 				"Could specifiy \"afterDate\" parameter to only read calllog information after that date. " +
 				"Some of the returning fields (name, number, numberType, numberLabel) are hashed " +
 				"for privacy reasons" , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/calllogProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/calllogProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.READ_CONTACTS")
 @UsesLibraries(libraries = "funf.jar")

@@ -52,7 +52,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.BluetoothKeys;
  * 
  */
 
-@DesignerComponent(version = YaVersion.SOCIALPROXIMITYSENSOR_COMPONENT_VERSION, description = "A component that detects whether the Bluetooth-enabled device owned by a friend is close by or not.", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/socialProximitysensor.png")
+@DesignerComponent(version = YaVersion.SOCIALPROXIMITYSENSOR_COMPONENT_VERSION, description = "A component that detects whether the Bluetooth-enabled device owned by a friend is close by or not.", category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/socialProximitysensor.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.WAKE_LOCK, "
 		+ "android.permission.BLUETOOTH, "
@@ -143,8 +143,9 @@ public class SocialProximitySensor extends ProbeBase{
 	 * Indicates whether the sensor should listen for proximity periodically and
 	 * raise the corresponding events.
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+//	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
+//	@SimpleProperty
+  @SimpleFunction(description = "Enable proximity sensor periodically")
 	public void EnabledSchedule(boolean enabledSchedule) {
 		
 		//check if Bluetooth is available

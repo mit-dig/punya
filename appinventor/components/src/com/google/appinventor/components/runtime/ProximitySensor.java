@@ -57,7 +57,7 @@ import edu.mit.media.funf.probe.builtin.SensorProbe;
  * @author fuming@mit.edu (Fuming Shih)
  * 
  */
-@DesignerComponent(version = YaVersion.PROXIMITYSENSOR_COMPONENT_VERSION, description = "A component that detects whether the phone is close to an object or not.", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/proximity.png")
+@DesignerComponent(version = YaVersion.PROXIMITYSENSOR_COMPONENT_VERSION, description = "A component that detects whether the phone is close to an object or not.", category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/proximity.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.WAKE_LOCK")
 @UsesLibraries(libraries = "funf.jar")

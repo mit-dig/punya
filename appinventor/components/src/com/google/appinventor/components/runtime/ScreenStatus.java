@@ -24,7 +24,7 @@ import android.util.Log;
 
 @DesignerComponent(version = YaVersion.SCREENSTATUS_COMPONENT_VERSION, 
 		description = "Return information about the  " , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/screenProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/screenProbe.png")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")
 public class ScreenStatus extends ProbeBase{

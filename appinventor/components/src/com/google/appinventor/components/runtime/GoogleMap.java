@@ -63,7 +63,7 @@ import gnu.math.IntNum;
  */
 @DesignerComponent(version = YaVersion.GOOGLE_MAP_COMPONENT_VERSION,
     description = "Visible component that show information on Google map.",
-    category = ComponentCategory.MISC)
+    category = ComponentCategory.MAPVIZ)
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE, "
     + "android.permission.ACCESS_NETWORK_STATE, "

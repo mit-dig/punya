@@ -25,7 +25,7 @@ import edu.mit.media.funf.probe.builtin.RunningApplicationsProbe;
 
 @DesignerComponent(version = YaVersion.RUNNINGAPPLICATIONS_COMPONENT_VERSION, 
 		description = "The current running stack of applications. Tells you what application that the user is currently using" , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/runningAppsProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/runningAppsProbe.png")
 @UsesPermissions(permissionNames = "android.permission.GET_TASKS")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")

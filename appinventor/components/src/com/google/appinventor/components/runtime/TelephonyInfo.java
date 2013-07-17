@@ -40,7 +40,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.TelephonyKeys;
     		"methods in this class to determine telephony services and states, as well as to " +
     		"access some types of subscriber information. <p> For more info. " +
     		"check http://developer.android.com/reference/android/telephony/TelephonyManager.html", 
-    category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/info.png")
+    category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/info.png")
     
 @SimpleObject
 @UsesPermissions(permissionNames = "android.Manifest.permission.READ_PHONE_STATE")

@@ -32,7 +32,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.CellKeys;
 				"each interval the variance of a device's acceleration and assign labels (high/medium/low) based on " +
 				"whether the variance is above a certain threshold. " +
 				"Intervals are 1 seconds long." , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/activityProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/activityProbe.png")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")
 public class ActivityProbeSensor extends ProbeBase{
