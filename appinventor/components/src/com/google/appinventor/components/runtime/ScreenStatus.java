@@ -4,12 +4,7 @@
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 package com.google.appinventor.components.runtime;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesLibraries;
+import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -29,7 +24,7 @@ import android.util.Log;
 
 @DesignerComponent(version = YaVersion.SCREENSTATUS_COMPONENT_VERSION, 
 		description = "Return information about the  " , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/screenProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/screenProbe.png")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")
 public class ScreenStatus extends ProbeBase{
@@ -119,9 +114,8 @@ public class ScreenStatus extends ProbeBase{
 	 * Indicates whether the sensor should "run once" to listen for current screenStatus
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
-	@Override
+  @SimpleFunction(description = "Enable screen status sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		if (this.enabled != enabled)

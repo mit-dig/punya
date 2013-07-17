@@ -44,7 +44,7 @@ import edu.mit.media.funf.time.TimeUnit;
 @DesignerComponent(version = YaVersion.CALLLOGHISTORY_COMPONENT_VERSION, 
 		description = "Messages sent and received by this device using SMS. Sensitive data is hashed for user privacy." +
 				"Could specifiy \"afterDate\" parameter to only read sms information after that date." , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/smsProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/smsProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.READ_SMS")
 @UsesLibraries(libraries = "funf.jar")
@@ -248,8 +248,8 @@ public class SmsHistory extends ProbeBase{
 	}
 
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable sms history sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		JsonObject newConfig = null;

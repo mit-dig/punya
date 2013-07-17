@@ -8,13 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesLibraries;
-import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -31,7 +25,7 @@ import edu.mit.media.funf.probe.builtin.RunningApplicationsProbe;
 
 @DesignerComponent(version = YaVersion.RUNNINGAPPLICATIONS_COMPONENT_VERSION, 
 		description = "The current running stack of applications. Tells you what application that the user is currently using" , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/runningAppsProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/runningAppsProbe.png")
 @UsesPermissions(permissionNames = "android.permission.GET_TASKS")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")
@@ -156,9 +150,8 @@ public class RunningApplications extends ProbeBase{
 	 * Indicates whether the sensor should "run once" to probe the current running applications
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
-	@Override
+  @SimpleFunction(description = "Enable running application probe to run once and receive location")
+  @Override
 	public void Enabled(boolean enabled) {
 
 		if (this.enabled != enabled)

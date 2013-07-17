@@ -68,7 +68,7 @@ import edu.mit.media.funf.storage.UploadService;
 //TODO: rename this component and the dropbox component to GoogleDriveUploader
 @DesignerComponent(version = YaVersion.GOOGLE_DRIVE_COMPONENT_VERSION,
     description = "This component can upload file(s) to Google Drive.",
-    category = ComponentCategory.FUNF,
+    category = ComponentCategory.CLOUDSTORAGE,
     nonVisible = true,
     iconName = "images/googledrive.png")
 @UsesPermissions(permissionNames = "android.permission.GET_ACCOUNTS," +

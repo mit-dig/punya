@@ -292,8 +292,8 @@ SensorComponent, OnDestroyListener{
    * Indicates whether the sensor should listen for proximity periodically and
    * raise the corresponding events.
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-  @SimpleProperty
+
+  @SimpleFunction(description = "Enables the sensor periodically and raise the corresponding events")
   public void EnabledSchedule(boolean enabledSchedule) {
 
     if (this.enabledSchedule != enabledSchedule)

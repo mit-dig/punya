@@ -53,7 +53,7 @@ import edu.mit.media.funf.storage.DatabaseService;
 import edu.mit.media.funf.storage.NameValueDatabaseService;
 import edu.mit.media.funf.time.DecimalTimeUnit;
 
-@DesignerComponent(version = YaVersion.WIFISENSOR_COMPONENT_VERSION, description = "A component that detects information of the nearby Wireless Access Point", category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/wifiProbe.png")
+@DesignerComponent(version = YaVersion.WIFISENSOR_COMPONENT_VERSION, description = "A component that detects information of the nearby Wireless Access Point", category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/wifiProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_WIFI_STATE, "
 	+ "android.permission.CHANGE_WIFI_STATE")
@@ -267,8 +267,8 @@ public class WifiSensor extends ProbeBase{
 	 * and raise the corresponding events.
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable wifi sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		if (this.enabled != enabled)
 			this.enabled = enabled;

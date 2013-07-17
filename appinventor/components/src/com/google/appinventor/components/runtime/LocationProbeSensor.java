@@ -12,14 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.PropertyCategory;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesLibraries;
-import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -41,7 +34,7 @@ import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 
 /**
  * Record GPS location periodically
- * 
+ *
  * @author fuming@mit.edu (Fuming Shih)  
  * 
  */
@@ -54,7 +47,7 @@ import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 	"location within a max wait time (default 2 mins), ending early if it finds a location that has at most the goodEnoughAccuracy." +
 	"The default max_wait_time is 2 mins and the default goodEnoughAccuracy is 80. " +
 	"Useful for sparse polling of location to limit battery usage.", 
-	category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/locationProbe.png")
+	category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/locationProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_COARSE_LOCATION, "
 		+ "android.permission.ACCESS_FINE_LOCATION")
@@ -223,8 +216,7 @@ public class LocationProbeSensor extends ProbeBase{
 	 * and raise the corresponding events.
 	 */
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+  @SimpleFunction(description = "Enable location probe to run once and receive location")
 	@Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
@@ -264,7 +256,7 @@ public class LocationProbeSensor extends ProbeBase{
 	 * GPS or Network fix
 	 * @param newVal
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "false")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "Fsocalse")
 	@SimpleProperty(description = "Set whether the location info will use the last known location without" +
 			" acquring a new location either through GPC or Network fix")
 	public void UseCache(boolean newVal){
@@ -303,7 +295,7 @@ public class LocationProbeSensor extends ProbeBase{
 	/**
 	 * Set whether to use GPS or not for the location provider
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "true")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
 	@SimpleProperty
 	public void UseGPS(boolean newVal) {
 		if(useGPS != newVal){
@@ -326,7 +318,7 @@ public class LocationProbeSensor extends ProbeBase{
 	/**
 	 * Set whether to use Network or not for the location provider
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "true")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
 	@SimpleProperty
 	public void UseNetwork(boolean newVal) {
 		if(useNetwork != newVal){

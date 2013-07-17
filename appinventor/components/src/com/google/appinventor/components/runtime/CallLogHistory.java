@@ -48,7 +48,7 @@ import edu.mit.media.funf.time.TimeUnit;
 				"Could specifiy \"afterDate\" parameter to only read calllog information after that date. " +
 				"Some of the returning fields (name, number, numberType, numberLabel) are hashed " +
 				"for privacy reasons" , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/calllogProbe.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/calllogProbe.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.READ_CONTACTS")
 @UsesLibraries(libraries = "funf.jar")
@@ -248,10 +248,10 @@ public class CallLogHistory extends ProbeBase{
 //		Log.i(TAG, "afterDate: " + DateFormat.getDateFormat(context).format(afterDate * 1000));
 //
 //	}
-	
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
+
+  @SimpleFunction(description = "Enable calllog history probe to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		JsonObject newConfig = null;

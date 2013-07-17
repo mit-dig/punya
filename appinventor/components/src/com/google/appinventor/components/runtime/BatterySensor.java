@@ -9,13 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesLibraries;
-import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -34,7 +28,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys;
 
 @DesignerComponent(version = YaVersion.BATTERYSENSOR_COMPONENT_VERSION, 
 		description = "Information about the type and current state of the battery in the device. " , 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/batterySensor.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/batterySensor.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.BATTERY_STATS")
 @UsesLibraries(libraries = "funf.jar")
@@ -127,12 +121,11 @@ public class BatterySensor extends ProbeBase{
 
 		}
 
-	};	
-	
-	
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
-	@SimpleProperty
-	@Override
+	};
+
+
+  @SimpleFunction(description = "Enable battery sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		if (this.enabled != enabled)

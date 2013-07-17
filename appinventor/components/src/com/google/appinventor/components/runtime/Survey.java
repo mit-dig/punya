@@ -68,7 +68,7 @@ import android.util.Log;
  */
 
 @DesignerComponent(version = YaVersion.SURVEY_COMPONENT_VERSION,
-        category = ComponentCategory.FUNF,
+        category = ComponentCategory.SOCIAL,
         description = "Component for displaying surveys. This component makes use " +
         		"of Android WebView to display survey question. AI Developer " +
         		"could customize survey question and survey types. After the questions " +

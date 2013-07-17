@@ -63,7 +63,7 @@ import gnu.math.IntNum;
  */
 @DesignerComponent(version = YaVersion.GOOGLE_MAP_COMPONENT_VERSION,
     description = "Visible component that show information on Google map.",
-    category = ComponentCategory.MISC)
+    category = ComponentCategory.MAPVIZ)
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE, "
     + "android.permission.ACCESS_NETWORK_STATE, "
@@ -963,12 +963,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         if (((YailList) marker).size() >= 4) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(3).getClass());
           Log.i(TAG, "Value: " + ((YailList) marker).getObject(3).toString());
-          title = ((YailList) marker).getObject(4).toString();
+          title = ((YailList) marker).getObject(3).toString();
         }
         if (((YailList) marker).size() >= 5) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(4).getClass());
           Log.i(TAG, "Value: " + ((YailList) marker).getObject(4).toString());
-          snippet = ((YailList) marker).getObject(5).toString();
+          snippet = ((YailList) marker).getObject(4).toString();
         }
         if (((YailList) marker).size() >= 6) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(5).getClass());

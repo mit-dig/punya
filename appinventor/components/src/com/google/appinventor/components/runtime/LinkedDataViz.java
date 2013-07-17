@@ -42,7 +42,7 @@ import com.google.gson.JsonParser;
  */
 
 @DesignerComponent(version = YaVersion.LINKED_DATA_COMPONENT_VERSION,
-    category = ComponentCategory.FUNF,
+    category = ComponentCategory.MAPVIZ,
     description = "Component for Visualizing Linked Data. This component makes use " +
         "of Android WebView for visualization and allows users to input sparql queries")
 @SimpleObject

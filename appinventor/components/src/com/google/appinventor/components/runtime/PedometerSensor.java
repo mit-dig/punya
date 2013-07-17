@@ -9,13 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
-import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.PropertyCategory;
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesLibraries;
+import com.google.appinventor.components.annotations.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -37,7 +31,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.PedometerKeys;
 				"steps he walks, one could set \"interval\"= duration + 1. There are 9 different sensitivities for " +
 				"detecting walking step, including \"extra high\", \"very high\", \"high\", \"higher\", " +
 				"\"medium\", \"lower\", \"low\", \"very low\", \"extra low\". ", 
-		category = ComponentCategory.FUNF, nonVisible = true, iconName = "images/pedometerSensor.png")
+		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/pedometerSensor.png")
 @SimpleObject
 @UsesLibraries(libraries = "funf.jar")
 public class PedometerSensor extends ProbeBase{
@@ -171,7 +165,8 @@ public class PedometerSensor extends ProbeBase{
 	}
 
 
-	@Override
+  @SimpleFunction(description = "Enable pedometer sensor to run once")
+  @Override
 	public void Enabled(boolean enabled) {
 		// TODO Auto-generated method stub
 		if (this.enabled != enabled)
