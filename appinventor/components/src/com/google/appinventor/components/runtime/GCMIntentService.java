@@ -105,7 +105,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         boolean success = GCMServerUtilities.register(context, registrationId,SERVER_URL);
         if(success){
             for (GCMEventListener listener : GCMRegEventListeners) {
-                listener.onMessageReceived("Registration successfully from the GCM server!");
+                listener.onMessageReceived("Registered successfully with GCM 3rd party server!");
                 Log.i(TAG, "Listener:" + listener.toString());
               }    
         }      

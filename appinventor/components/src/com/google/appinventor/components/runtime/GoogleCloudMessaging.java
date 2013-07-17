@@ -235,11 +235,10 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         AsynchUtil.runAsynchronously(new Runnable() {
             public void run() {
                 try {
-                    regId = GCMRegistrar.getRegistrationId(form);                    
+                    final String regId = GCMRegistrar.getRegistrationId(form);                    
                     if (regId.equals("")) {
                         // Automatically registers application
                         GCMRegistrar.register(form, SENDER_ID);
-                        regId = GCMRegistrar.getRegistrationId(form); 
                     } else {
                         // Device is already registered on GCM, check server.
                         if (GCMRegistrar.isRegisteredOnServer(form)) {
@@ -269,7 +268,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                 }
             }
         });
-        saveRegId(regId);
+        regId = GCMRegistrar.getRegistrationId(form);
         Log.i(TAG,"The regId is "+regId);
     }
     
