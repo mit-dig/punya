@@ -2,10 +2,7 @@ package com.google.appinventor.components.runtime;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
@@ -1386,6 +1383,17 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       marker.remove(); // remove from the google map
     }
 
+  }
+
+  @SimpleFunction(description = "Remove all markers on the map")
+  public void RemoveAllMarkers(){
+
+  Set<Marker> markersToRemove = markers.keySet();
+    for (Marker m : markersToRemove){
+      m.remove(); //remove all markers on the google map
+    }
+
+    markers.clear();
   }
 
 
