@@ -2,10 +2,7 @@ package com.google.appinventor.components.runtime;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
@@ -958,12 +955,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         if (((YailList) marker).size() >= 4) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(3).getClass());
           Log.i(TAG, "Value: " + ((YailList) marker).getObject(3).toString());
-          title = ((YailList) marker).getObject(4).toString();
+          title = ((YailList) marker).getObject(3).toString();
         }
         if (((YailList) marker).size() >= 5) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(4).getClass());
           Log.i(TAG, "Value: " + ((YailList) marker).getObject(4).toString());
-          snippet = ((YailList) marker).getObject(5).toString();
+          snippet = ((YailList) marker).getObject(4).toString();
         }
         if (((YailList) marker).size() >= 6) {
           Log.i(TAG, "Type: " +  ((YailList) marker).getObject(5).getClass());
@@ -1403,6 +1400,17 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       marker.remove(); // remove from the google map
     }
 
+  }
+
+  @SimpleFunction(description = "Remove all markers on the map")
+  public void RemoveAllMarkers(){
+
+  Set<Marker> markersToRemove = markers.keySet();
+    for (Marker m : markersToRemove){
+      m.remove(); //remove all markers on the google map
+    }
+
+    markers.clear();
   }
 
 
