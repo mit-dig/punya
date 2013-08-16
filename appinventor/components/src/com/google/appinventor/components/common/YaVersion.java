@@ -228,8 +228,10 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 78:
   // - NEARFIELD_COMPONENT_VERSION was incremented to 1
   // For YOUNG_ANDROID_VERSION 79:
+  // - GOOGLECLOUDMESSAGING_COMPONENT_VERSION was incremented to 1
+  // For YOUNG_ANDROID_VERSION 80:
   // - FORM_COMPONENT_VERSION was incremented to 11.
-  public static final int YOUNG_ANDROID_VERSION = 79;
+  public static final int YOUNG_ANDROID_VERSION = 80;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -638,5 +640,9 @@ public class YaVersion {
   // For SLIDER_COMPONENT_VERSION 1:
   // - Initial version.
   public static final int SLIDER_COMPONENT_VERSION = 1;
+  
+  // For GOOGLECLOUDMESSAGING_COMPONENT_VERSI 1:
+  // - Initial version.
+  public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
 
 }

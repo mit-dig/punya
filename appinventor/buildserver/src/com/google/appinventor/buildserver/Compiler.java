@@ -341,12 +341,20 @@ public final class Compiler {
       for (String permission : permissionsNeeded) {
         out.write("  <uses-permission android:name=\"" + permission + "\" />\n");
       }
+      
+      // Google Cloud Messaging
+      out.write("<permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
+      out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n"); 
+      
+      out.write("<permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
+      out.write("<uses-permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" />\n"); 
+      
       // TODO(markf): Change the minSdkVersion below if we ever require an SDK beyond 1.5.
       // The market will use the following to filter apps shown to devices that don't support
       // the specified SDK version.  We might also want to allow users to specify minSdkVersion
       // or have us specify higher SDK versions when the program uses a component that uses
       // features from a later SDK (e.g. Bluetooth).
-      out.write("  <uses-sdk android:minSdkVersion=\"3\" />\n");
+      out.write("  <uses-sdk android:minSdkVersion=\"8\" />\n");
 
       // If we set the targetSdkVersion to 4, we can run full size apps on tablets.
       // On non-tablet hi-res devices like a Nexus One, the screen dimensions will be the actual
@@ -434,6 +442,18 @@ public final class Compiler {
       out.write("        <action android:name=\"android.intent.action.MAIN\" />\n");
       out.write("      </intent-filter>\n");
       out.write("    </activity>\n");
+      
+      // Add the Google Cloud Messaging service
+      // Declare and use a custom permission so only this application can receive GCM messages:
+      out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");    
+      out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
+      out.write("    <intent-filter>");
+      out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
+      out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
+      String temp787 ="        <category android:name=\""+packageName+"\" />\n"; 
+      out.write(temp787);
+      out.write("    </intent-filter>");
+      out.write("</receiver>");
 
       // BroadcastReceiver for Texting Component
       if (componentTypes.contains("Texting")) {

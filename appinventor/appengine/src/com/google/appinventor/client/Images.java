@@ -434,4 +434,10 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/procedures.png")
   ImageResource procedures();
+  
+  /**
+   * Designer palette item: GogoleCloudMessaging Component
+   */
+  @Source("com/google/appinventor/images/googleCloudMessaging.png")
+  ImageResource googleCloudMessaging();
 }
