@@ -20,6 +20,7 @@ public enum ComponentCategory {
   SENSORS("Sensors"),
   ARRANGEMENTS("Screen Arrangement"),
   LEGOMINDSTORMS("LEGO\u00AE MINDSTORMS\u00AE"),
+  MAPVIZ("Map & Visualization"),
   MISC("Other stuff"),
   EXPERIMENTAL("Not ready for prime time"),
   //OBSOLETE("Old stuff"),// removed to remove old stuff from the menu

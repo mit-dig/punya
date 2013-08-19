@@ -1,5 +1,9 @@
-package com.google.appinventor.components.runtime;
+// -*- mode: java; c-basic-offset: 2; -*-
+// Copyright 2009-2011 Google, All Rights reserved
+// Copyright 2011-2012 MIT, All rights reserved
+// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 
+package com.google.appinventor.components.runtime;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,13 +57,13 @@ import com.google.gson.*;
 import gnu.math.DFloNum;
 import gnu.math.IntNum;
 
-
-/** Component for displaying information on Google Map
+/* Component for displaying information on Google Map
  * This component makes use of Android MapView (v2) to location specific information.
  * App Inventor user could use this component to do things like those demo apps
  * for Google Mapview in the android sdk
  *
  * @author fuming@mit.mit (Fuming Shih)
+ * @author wli17@mit.edu (Weihua Li)
  */
 @DesignerComponent(version = YaVersion.GOOGLE_MAP_COMPONENT_VERSION,
     description = "Visible component that show information on Google map.",
@@ -82,31 +86,21 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   private static final String TAG = "GoogleMap";
   // Layout
   // We create thie LinerLayout and add our mapFragment in it.
-  //private final com.google.appinventor.components.runtime.LinearLayout viewLayout;
-//  private final FrameLayout viewLayout;
+  // private final com.google.appinventor.components.runtime.LinearLayout viewLayout;
+  // private final FrameLayout viewLayout;
   // private final android.widget.LinearLayout viewLayout;
-  //private LinearLayout viewLayout;
+  // private LinearLayout viewLayout;
   private android.widget.LinearLayout viewLayout;
-
-
+  
   // translates App Inventor alignment codes to Android gravity
-  //private final AlignmentUtil alignmentSetter;
-
-  // the alignment for this component's LinearLayout
-  private int verticalAlignment;
-
+  // private final AlignmentUtil alignmentSetter;
   private final String MAP_FRAGMENT_TAG;
-
-
   private com.google.android.gms.maps.GoogleMap mMap;
   private SupportMapFragment mMapFragment;
   private Bundle savedInstanceState;
-
-
-
   private HashMap<Marker, Integer> markers = new HashMap<Marker, Integer>();
 
-  //basic configurations of a map
+  // basic configurations of a map
   private int mapType = com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
   private boolean myLocationEnabled = false;
   private boolean compassEnabled = false;
@@ -179,12 +173,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         .findFragmentByTag(MAP_FRAGMENT_TAG);
 
 
-//    We only create a fragment if it doesn't already exist.
+    // We only create a fragment if it doesn't already exist.
     if (mMapFragment == null) {
 
 
       Log.i(TAG, "mMapFragment is null.");
-//      // To programmatically add the map, we first create a SupportMapFragment.
+      // To programmatically add the map, we first create a SupportMapFragment.
       mMapFragment = SupportMapFragment.newInstance();
 
       //mMapFragment = new SomeFragment();
@@ -195,13 +189,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       fragmentTransaction.replace(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
 
       fragmentTransaction.commit();
-
     }
-//
-//    if (savedInstanceState == null) {
-//      Log.i(TAG, "First incarnation of this activity. ");
-//      mMapFragment.setRetainInstance(true);
-//    }
 
     setUpMapIfNeeded();
 
@@ -381,17 +369,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     @SimpleEvent(description = "Indicates that the map has been rendered and ready for adding markers " +
         "or changing other settings. Please add or updating markers within this event")
     public void MapIsReady(){
-//      context.runOnUiThread(new Runnable() {
-//        public void run() {
-//          Log.i(TAG, "Map is ready for adding markers and other setting");
-//          EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
-//        }
-//      });
-
       Log.i(TAG, "Map is ready for adding markers and other setting");
       EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
-
-
   }
 
   //TODO: Move this to Util
@@ -418,9 +397,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
             ErrorMessages.ERROR_GOOGLE_PLAY_INVALID);
         break;
     }
-
-
-
   }
 
   private void checkGoogleMapInstalled() {
@@ -588,10 +564,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // the circle doesn't exist
     form.dispatchErrorOccurredEvent(this, "UpdateCircle",
           ErrorMessages.ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, circleId);
-
   }
-
-
   }
 
   @SimpleFunction(description = "Get all circles Ids. A short cut to get all the references for the eixisting circles")
@@ -631,31 +604,17 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   @Override
   public void onResume() {
-    // TODO:
     Log.i(TAG, "in onResume...Google Map redraw");
     //set up LocationClient for my location using GMS
     if(myLocationEnabled){//only if my location is enabled
       setUpLocationClientIfNeeded();
       mLocationClient.connect();
     }
-
     setUpMapIfNeeded();
-
   }
-
-
 
   @Override
-  public void onInitialize() {
-    // TODO Auto-generated method stub
-    // do the initialization here...
-//    Log.i(TAG, "after reset the form's child view");
-
-//
-//    setUpMapIfNeeded();
-    
-    
-  }
+  public void onInitialize() {}
 
   private void prepareFragmentView() {
 
@@ -689,8 +648,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         }
       }
     });
-
- 
   }
 
   @SimpleFunction(description = "Enable or disable my location widget control for Google Map. One can call " +
@@ -711,14 +668,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         else{
           mLocationClient.disconnect();
         }
-
       }
-
-
-
-      
-      
-
   }
   @SimpleProperty(description = "Indicates whether my locaiton UI control is currently enabled for the Google map.")
   public boolean MyLocationEnabled(){
@@ -742,8 +692,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     return YailList.makeList(latLng);
   }
 
-
-
   @SimpleFunction(description = "Set the layer of Google map. Default layer is \"normal\", other choices including \"hybrid\"," +
       "\"satellite\", and \"terrain\" ")
   public void SetMapType(String layerName){
@@ -765,8 +713,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     if(mMap != null) {
       mMap.setMapType(this.mapType);
     }
-
-
   }
 
   /**
@@ -782,9 +728,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     if (mMap != null) {
       Log.i(TAG, "enable map listener?: " + enabled);
       mMap.setOnMapClickListener(enabled? this : null);
-
     }
-
   }
 
   /**
@@ -837,7 +781,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       Log.i(TAG, "enable cameraChangedListener?:" + enabled);
       mMap.setOnCameraChangeListener(enabled? this : null);
     }
-
   }
 
   /**
@@ -848,7 +791,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   public boolean MapCameraChangedListenerEnabled() {
     return this.enableCameraChangeListener;
   }
-
 
   @SimpleProperty(description = "Indicates the current map type")
   public String MapType(){
@@ -861,10 +803,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         return "satellite";
       case com.google.android.gms.maps.GoogleMap.MAP_TYPE_TERRAIN:
         return "terrain";
- 
     } 
     return null;
-
   }
 
   /**
@@ -902,10 +842,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         Log.i(TAG, "interior YailLiat");
         if (((YailList) marker).size() < 2) {
           addOne = false; // don't add this marker because its invalid inputs, going to the next one
-          // throw an exception with error messages
-//          form.dispatchErrorOccurredEvent(this, "AddMarkers",
-//              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need at least two parameters");
-
         }
         // ((YailList) marker).getObject(0) will return type gnu.math.DFloNum
         Object latObj =  ((YailList) marker).getObject(0);
@@ -918,23 +854,15 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
         if (!(latObj instanceof DFloNum && lngObj instanceof DFloNum)){//if one of the lat or lng is not DFloNum
           addOne = false;
-//          form.dispatchErrorOccurredEvent(this, "AddMarkers",
-//              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be float numbers");
-
-
-        }
-        else {
+        } else {
           lat = ((DFloNum)latObj).doubleValue();
           lng = ((DFloNum)lngObj).doubleValue();
-
         }
         //check for lat, lng range
         // Latitude measurements range from 0�� to (+/���)90��.
         // Longitude measurements range from 0�� to (+/���)180
         if ((lat < -90) || (lat > 90) || (lng < -180) || (lng > 180) ){
           addOne = false;
-//          form.dispatchErrorOccurredEvent(this, "AddMarkers",
-//              ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Range for the latitude or longitude is wrong");
         }
 
 
@@ -954,9 +882,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
             color = ((IntNum)((YailList) marker).getObject(2)).intValue();
           else {
             addOne = false;
-//            form.dispatchErrorOccurredEvent(this, "AddMarkers",
-//                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj + "is not a number");
-            //continue; // don't add this marker because its invalid inputs, going to the next one
           }
 
         }
@@ -979,11 +904,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           }
           else {
             addOne = false;
-//            form.dispatchErrorOccurredEvent(this, "AddMarkers",
-//                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "need to be either true or false");
-            //continue; // don't add this marker because its invalid inputs, going to the next one
           }
-
         }
 
         Color.colorToHSV(color, hsv);
@@ -1066,32 +987,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       "\"color\"(type int)[in hue value ranging from 0~360], " +
       "\"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
   public YailList AddMarkersFromJson(String jsonString) {
-
-//    [
-//    { "lat": 42.35557,
-//        "lng": -71.10264,
-//        "color": 250,
-//        "title": "A co title",
-//        "snippet": "A snippet",
-//        "draggable": true
-//    },
-//    { "lat": 42.35109,
-//        "lng": -71.09951,
-//        "color": 180,
-//        "title": "title 2",
-//        "snippet": "A snippet 2",
-//        "draggable": true
-//    },
-//    { "lat": 42.35621,
-//        "lng": -71.10115,
-//        "color": 180,
-//        "title": "title 3",
-//        "snippet": "Not draggable",
-//        "draggable": false
-//    }
-//
-//    ]
-
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     JsonParser parser = new JsonParser();
     float[] hsv = new float[3];
@@ -1109,8 +1004,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           if (marker.isJsonObject()) {
             JsonObject markerJson = marker.getAsJsonObject();
             if (markerJson.get("lat") == null || markerJson.get("lng") == null) {
-//              form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-//                  ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Need to have both lat and lng parameters");
                 addOne = false;
 
             } else { // having correct syntax of a marker in Json
@@ -1144,8 +1037,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
               // check for Lat, Lng correct range
 
               if ((latitude < -90) || (latitude > 90) || (longitude < -180) || (longitude > 180)) {
-//                form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-//                    ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Range for latitude or longitude is not correct");
                 Log.i(TAG, "Lat/Lng wrong range:" + latitude + "," + longitude);
                 addOne = false;
 
@@ -1171,15 +1062,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
                 addMarkerToMap(latitude, longitude, uniqueId, color, title,
                   snippet, draggable);
               }
-
             }
-
-          } else { // not a JsonObject
-//            form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
-//                ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "marker is not represented as JsonObject");
-
-          }
-
+          } 
         }//end of JsonArray
 
       } else { // not a JsonArray
@@ -1233,13 +1117,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
               ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "Not a number for latitude or longitude");
           addOne = false;
-//
-
-        }
-        else {
+        } else {
           lat = ((DFloNum)latObj).doubleValue();
           lng = ((DFloNum)lngObj).doubleValue();
-
         }
 
         if (lat < -90 || lat > 90 || lng < -180 || lng > 180 ){
@@ -1266,9 +1146,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
             addOne = false;
             form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
                 ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj.toString() + " is not a number");
-
           }
-
         }
 
         if (((YailList) marker).size() >= 4){
@@ -1357,7 +1235,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           marker.setDraggable(new Boolean(propVal));
       }
     }
-
   }
 
   @SimpleFunction(description = "Get all the existing markers's Ids" )
@@ -1406,8 +1283,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
       }
     }
-
-
   }
 
   @Override
@@ -1431,7 +1306,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         FinishedDraggingCircle(uid, center.latitude, center.longitude, dCircle.getRadius());
       }
     }
-
   }
 
   @Override
@@ -1462,8 +1336,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerDragStart", markerId, latitude, longitude);
       }
     });
-
-
   }
 
   @SimpleEvent(description = "When a marker is been dragged")
@@ -1474,7 +1346,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerDrag", markerId, latitude, longitude);
       }
     });
-
   }
 
 
@@ -1487,8 +1358,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerDragEnd", markerId, latitude, longitude);
       }
     });
-
-
   }
 
   @SimpleEvent(description = "When a marker is clicked")
@@ -1499,7 +1368,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerClick", markerId, latitude, longitude);
       }
     });
-
   }
 
   @SimpleEvent (description = "When the marker's infowindow is clicked, returning marker's id")
@@ -1515,10 +1383,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   @Override
   public void onInfoWindowClick(Marker marker) {
     // TODO Auto-generated method stub
-
     Integer markerId = markers.get(marker);
     InfoWindowClicked(markerId);
-
   }
 
   @Override
@@ -1533,9 +1399,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // for the default behavior to occur (which is for the camera to move such that the
     // marker is centered and for the marker's info window to open, if it has one).
     return false;
-
   }
-
 
   /**
    * A small util function to get the key-value mapping in a map.
@@ -1563,9 +1427,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     Float bearing = position.bearing;
     Float tilt = position.tilt;
     Float zoom = position.zoom;
-
     CameraPositionChanged(lat, lng, bearing, tilt, zoom);
-    
   }
 
   /**
@@ -1592,7 +1454,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   public void onMapLongClick(LatLng latLng) {
     // TODO Auto-generated method stub
     OnMapLongClick(latLng.latitude, latLng.longitude);
-
   }
 
   /**
@@ -1607,12 +1468,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         Log.i(TAG, "Map is longclicked at:" + lat + ", " + lng);
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapLongClick", lat, lng);
       }
-
     });
-
-
   }
-
 
   @Override
   public void onMapClick(LatLng latLng) {
@@ -1629,10 +1486,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         Log.i(TAG, "map is clicked at:" + lat + ", " + lng);
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapClick", lat, lng);
       }
-
     });
-
-
   }
 
 
@@ -1641,7 +1495,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     if(mMap != null) {
       mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
     }
-
   }
 
   /**
@@ -1665,10 +1518,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   }
 
-
-
-
-
   // private class representing the circle overlay. Code copied and extended from Google Example
   // We need to keep a data structure to tie circle and two markers together.
   private class DraggableCircle {
@@ -1676,9 +1525,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     private Marker radiusMarker;
     private final Circle circle;
     private double radius;
-//    private float strokeWidth;
-//    private int strokeColor;
-//    private int fillColor;
 
     // In Draggable circle, AI user will not get reference of the inner objects (circle, markers)
     public DraggableCircle(LatLng center, double radius, float strokeWidth, int strokeColor, int fillColor) {
@@ -1767,9 +1613,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     public void setRadiusMarker(Marker marker){
       this.radiusMarker = marker;
     }
-
-
-
   }
 
   /** Generate LatLng of radius marker */
@@ -1785,31 +1628,23 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         radius.latitude, radius.longitude, result);
     return result[0];
   }
-
-
-
+  
   @Override
   public void onConnectionFailed(ConnectionResult arg0) {
     // TODO Auto-generated method stub
-    
   }
-
 
   @Override
   public void onConnected(Bundle arg0) {
     Log.i(TAG, "onConnected to location listener.....");
     mLocationClient.requestLocationUpdates(
         REQUEST, this);  // LocationListener
-    
   }
-
 
   @Override
   public void onDisconnected() {
     // TODO Auto-generated method stub
-    
   }
-
 
   @Override
   public void onPause() {
@@ -1820,7 +1655,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       mLocationClient.disconnect();
     }
   }
-
 
   @Override
   public void onLocationChanged(Location location) {
@@ -1836,10 +1670,5 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnLocationChanged", lat, lng);
       }
     });
-
   }
-
-
-
-
 }
