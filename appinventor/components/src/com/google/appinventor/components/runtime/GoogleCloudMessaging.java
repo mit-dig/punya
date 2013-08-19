@@ -1,3 +1,8 @@
+// -*- mode: java; c-basic-offset: 2; -*-
+// Copyright 2009-2011 Google, All Rights reserved
+// Copyright 2011-2012 MIT, All rights reserved
+// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+
 package com.google.appinventor.components.runtime;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
@@ -68,6 +73,7 @@ import android.util.Log;
  */
 
 /* 
+ * @author fuming@mit.mit (Fuming Shih)
  * @author wli17@mit.edu (Weihua Li)
  */
 @DesignerComponent(version = YaVersion.GOOGLECLOUDMESSAGING_COMPONENT_VERSION, 
@@ -200,8 +206,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     }
 
     // Add / remove the listeners
-//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
-//    @SimpleProperty
+    // @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
+    // @SimpleProperty
     @SimpleFunction(description = "Enable Google Cloud Messaging to receive push notification")
     public void Enabled(boolean enable) {
 
