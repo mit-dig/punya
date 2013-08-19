@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -59,6 +60,7 @@ import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.OnInitializeListener;
 import com.google.appinventor.components.runtime.util.SdkLevel;
 import com.google.appinventor.components.runtime.util.ViewUtil;
+import com.google.appinventor.components.annotations.UsesLibraries;
 
 /**
  * Component underlying activities and UI apps, not directly accessible to Simple programmers.
@@ -74,8 +76,9 @@ import com.google.appinventor.components.runtime.util.ViewUtil;
     description = "Top-level component containing all other components in the program",
     showOnPalette = false)
 @SimpleObject
+@UsesLibraries(libraries = "android-support-v4.jar")
 @UsesPermissions(permissionNames = "android.permission.INTERNET,android.permission.ACCESS_WIFI_STATE,android.permission.ACCESS_NETWORK_STATE")
-public class Form extends Activity
+public class Form extends FragmentActivity
     implements Component, ComponentContainer, HandlesEventDispatching {
   private static final String LOG_TAG = "Form";
 
@@ -165,11 +168,14 @@ public class Form extends Activity
   private static final String ARGUMENT_GCM = "APP_INVENTOR_GCM";
   //Set to the optional String-valued Extra passed in via an Intent on startup.(for GCM component only)
   private String startupValueForGCM = ""; 
+  private Bundle onCreateBundle = null;
 
   @Override
   public void onCreate(Bundle icicle) {
     // Called when the activity is first created
     super.onCreate(icicle);
+    Log.i(LOG_TAG, "saveBundle" + icicle);
+    onCreateBundle = icicle; // icicle, (savedInstance == null) if it's not the result of changing orientation
 
     // Figure out the name of this form.
     String className = getClass().getName();
@@ -220,6 +226,15 @@ public class Form extends Activity
     // before initialization finishes. Instead the compiler suppresses the invocation of the
     // event and leaves it up to the library implementation.
     Initialize();
+  }
+  
+  /**
+  * Getting Bundle (savedInstance) in the onCreate method (this is needed for
+  * Google Map Component to avoid recreating two map layers when changing orientation)
+  * @return
+  */
+  public Bundle getOnCreateBundle(){
+      return onCreateBundle;
   }
     
   /*
@@ -1016,7 +1031,7 @@ public class Form extends Activity
    * @return  width property used by the layout
    */
   @SimpleProperty(category = PropertyCategory.APPEARANCE)
-  public int Width() {
+  public int set() {
     return frameLayout.getWidth();
   }
 
@@ -1153,12 +1168,14 @@ public class Form extends Activity
   @Override
   public void setChildWidth(AndroidViewComponent component, int width) {
     // A form is a vertical layout.
+    Log.i("Form", "Set child view Width:" + component.getView().toString());
     ViewUtil.setChildWidthForVerticalLayout(component.getView(), width);
   }
 
   @Override
   public void setChildHeight(AndroidViewComponent component, int height) {
     // A form is a vertical layout.
+    Log.i("Form", "Set child view height:" + component.getView().toString());
     ViewUtil.setChildHeightForVerticalLayout(component.getView(), height);
   }
 

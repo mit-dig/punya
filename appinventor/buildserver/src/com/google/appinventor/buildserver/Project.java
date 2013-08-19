@@ -79,6 +79,7 @@ public final class Project {
   private static final String ASSETSTAG = "assets";
   private static final String BUILDTAG = "build";
   private static final String USESLOCATIONTAG = "useslocation";
+  private static final String MAPKEY = "mapskey";
 
   // Table containing project properties
   private Properties properties;
@@ -307,5 +308,13 @@ public final class Project {
       }
     }
     return sources;
+  }
+  
+  public String getMapsKey() {
+    return properties.getProperty(MAPKEY, "");
+  }
+  
+  public void setMapsKey(String maps) {
+    properties.setProperty(MAPKEY, maps);
   }
 }

@@ -6,7 +6,8 @@
 package com.google.appinventor.client;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
-
+import com.google.appinventor.client.editor.SettingsEditor;
+import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
@@ -21,6 +22,7 @@ import com.google.appinventor.client.explorer.commands.SaveAllEditorsCommand;
 import com.google.appinventor.client.explorer.commands.ShowBarcodeCommand;
 import com.google.appinventor.client.explorer.commands.ShowProgressBarCommand;
 import com.google.appinventor.client.explorer.commands.WaitForBuildResultCommand;
+import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.Toolbar;
@@ -108,6 +110,7 @@ public class DesignToolbar extends Toolbar {
   private static final String WIDGET_NAME_CHECKPOINT = "Checkpoint";
   private static final String WIDGET_NAME_ADDFORM = "AddForm";
   private static final String WIDGET_NAME_REMOVEFORM = "RemoveForm";
+  private static final String WIDGET_NAME_SETTINGS = "Settings";
   private static final String WIDGET_NAME_BUILD = "Build";
   private static final String WIDGET_NAME_BUILD_BARCODE = "Barcode";
   private static final String WIDGET_NAME_BUILD_DOWNLOAD = "Download";
@@ -163,6 +166,8 @@ public class DesignToolbar extends Toolbar {
           new AddFormAction()));
       addButton(new ToolbarItem(WIDGET_NAME_REMOVEFORM, MESSAGES.removeFormButton(),
           new RemoveFormAction()));
+      addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
+          new ChangeSettingsAction()));
     }
 
     List<ToolbarItem> connectToItems = Lists.newArrayList();
@@ -633,5 +638,14 @@ public class DesignToolbar extends Toolbar {
     setButtonEnabled(WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR, !blocks);
     setButtonEnabled(WIDGET_NAME_SWITCH_TO_FORM_EDITOR, blocks);
     setDropDownButtonVisible(WIDGET_NAME_CONNECT_TO, blocks);
+  }
+  
+  private class ChangeSettingsAction implements Command {
+      @Override
+      public void execute() {
+      ProjectRootNode projectRootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
+      Project p = Ode.getInstance().getProjectManager().getProject(projectRootNode);
+      new SettingsEditor(p).show();
+      }
   }
 }

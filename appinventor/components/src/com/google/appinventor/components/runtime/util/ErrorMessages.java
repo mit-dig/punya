@@ -139,6 +139,17 @@ public final class ErrorMessages {
   public static final int ERROR_REPL_SECURITY_ERROR = 1801;
 
   // Please start the next group of error numbers at 1901.
+  
+  // Please start the next group of error numbers at 2010.
+  public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 2010;
+  public static final int ERROR_GOOGLE_PLAY_NOT_INSTALLED = 2011;
+  public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 2012;
+  public static final int ERROR_GOOGLE_MAP_MARKER_NOT_EXIST = 2013;
+  public static final int ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED = 2014;
+  public static final int ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST = 2015;
+  public static final int ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED = 2016;
+  public static final int ERROR_GOOGLE_PLAY_DISABLED = 2017;
+  public static final int ERROR_GOOGLE_PLAY_INVALID = 2018;
 
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
@@ -366,6 +377,19 @@ public final class ErrorMessages {
       "Text Receiving should be either 1, 2 or 3.");
     errorMessages.put(ERROR_REPL_SECURITY_ERROR,
       "Security Error Receiving Blocks from Browser.");
+    
+    errorMessages.put(ERROR_GOOGLE_PLAY_NOT_INSTALLED, "Google Play is not installed/available on this phone");
+    errorMessages.put(ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED, "Google Play Service needs update to newest version");
+    errorMessages.put(ERROR_GOOGLE_MAP_NOT_INSTALLED, "Google Map is not installed on this phone");
+    errorMessages.put(ERROR_GOOGLE_MAP_INVALID_INPUT, "Invalid input: %s");
+    errorMessages.put(ERROR_GOOGLE_MAP_MARKER_NOT_EXIST, "Marker with id: %s does not exist");
+    errorMessages.put(ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED,
+      "Unable to decode the JSON text: %s");
+    errorMessages.put(ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, "Circle with id: %s does not exist");
+    errorMessages.put(ERROR_GOOGLE_PLAY_DISABLED, "The installed version of Google Play services " +
+      "has been disabled on this device.");
+    errorMessages.put(ERROR_GOOGLE_PLAY_INVALID, "The version of the Google Play services installed " +
+       "on this device is not authentic.");
   }
 
   private ErrorMessages() {

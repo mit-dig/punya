@@ -1,0 +1,7 @@
+some of the libraries can be removed when try to include in the
+/component/build.xml
+/buildserver/build.xml
+
+For example, gson, google-client-api, google-http-client, oauth stuff (have been included by Ralph's fusionTable
+component already)
+
