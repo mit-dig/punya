@@ -138,6 +138,32 @@ public final class ErrorMessages {
   // Repl Communication Errors
   public static final int ERROR_REPL_SECURITY_ERROR = 1801;
 
+  // Dropbox errors 
+  public static final int ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET = 1810;
+  public static final int ERROR_DROPBOX_EXCEPTION = 1811;
+  public static final int ERROR_DROPBOX_UNLINKED = 1812;
+  public static final int ERROR_DROPBOX_FILESIZE = 1813;
+  public static final int ERROR_DROPBOX_PARTIALFILE = 1814;
+  public static final int ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE = 1815;
+  public static final int ERROR_DROPBOX_IO = 1816;
+  public static final int ERROR_DROPBOX_FILENOTFOUND = 1817;
+  public static final int ERROR_DROPBOX_NO_TWO_RUNNING_TASKS = 1818;
+  
+  // CallLog/smslog errors
+  public static final int ERROR_DATE_FORMAT = 1840;
+
+  public static final int ERROR_GOOGLEDRIVE_EXCEPTION = 1901;
+  public static final int ERROR_GOOGLEDRIVE_IO_EXCEPTION = 1902;
+  public static final int ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS = 1903;
+  public static final int ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION = 1904;
+  public static final int ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR = 1905;
+  public static final int ERROR_GOOGLEDRIVE_APP_BLACKLIST = 1906;
+  public static final int ERROR_GOOGLEDRIVE_HTTP_RESPONSE = 1907;
+  
+  // Please start the next group of error numbers at 2001.
+  public static final int ERROR_SENSORDB_NOTAVAILABLE = 2001;
+  public static final int ERROR_SENSORDB_NOTACTIVE = 2002;
+
   // Please start the next group of error numbers at 1901.
   
   // Please start the next group of error numbers at 2010.
@@ -377,6 +403,32 @@ public final class ErrorMessages {
       "Text Receiving should be either 1, 2 or 3.");
     errorMessages.put(ERROR_REPL_SECURITY_ERROR,
       "Security Error Receiving Blocks from Browser.");
+    
+ // CallLogs history errors
+    errorMessages.put(ERROR_DATE_FORMAT,
+      "The date string has wrong format, please refer to the documentation of the setting method again.");
+    
+    errorMessages.put(ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET, 
+        "The AppKey and AppSecret properties must be set in order to authorize access " +
+        "for Dropbox. Please obtain a App Key and App Secret specific to your app from " +
+        "https://www.dropbox.com/developers/apps");
+    
+    errorMessages.put(ERROR_DROPBOX_EXCEPTION,
+    "Dropbox error: %s");
+    
+    errorMessages.put(ERROR_DROPBOX_FILESIZE, "This file is too big to upload, at most " +
+        "150 MB.");
+    errorMessages.put(ERROR_DROPBOX_UNLINKED , "This app wasn't authenticated properly");
+    errorMessages.put(ERROR_DROPBOX_IO, "Network error while uploading the file.");
+    
+    errorMessages.put(ERROR_DROPBOX_PARTIALFILE, "The operation was canceled by Dropbox");
+    
+    errorMessages.put(ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE, "Your dropbox usage is over quota.");
+    
+    errorMessages.put(ERROR_DROPBOX_FILENOTFOUND, "The file to upload was not found.");
+    errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
+        "by calling <code>StopScheduleUpload</code>.");
+    
     
     errorMessages.put(ERROR_GOOGLE_PLAY_NOT_INSTALLED, "Google Play is not installed/available on this phone");
     errorMessages.put(ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED, "Google Play Service needs update to newest version");

@@ -233,7 +233,26 @@ public class YaVersion {
   // - FORM_COMPONENT_VERSION was incremented to 11.
   // For YOUNG_ANDROID_VERSION 81;
   // - The Google Map component was added
-  public static final int YOUNG_ANDROID_VERSION = 81;
+  // For YOUNG_ANDROID_VERSION 82;
+  // - The Wifi Sensor component was added
+  // For YOUNG_ANDROID_VERSION 83;
+  // - The proximity sensor component was added
+  // For YOUNG_ANDROID_VERSION 84;
+  // - The social proximity sensor component was added
+  // For YOUNG_ANDROID_VERSION 85;
+  // - The activity probe sensor component was added
+  // For YOUNG_ANDROID_VERSION 86;
+  // - The batter probe sensor component was added
+  // For YOUNG_ANDROID_VERSION 87;
+  // - The calllog probe component was added
+  // For YOUNG_ANDROID_VERSION 88;
+  // - The celltower probe component was added
+  // FOR YOUNG_ANDROID_VERSION 89;
+  // - The light sensor component was added
+  // FOR YOUNG_ANDROID_VERSION 90;
+  // - The location probe sensor component was added
+  
+  public static final int YOUNG_ANDROID_VERSION = 90;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -643,12 +662,37 @@ public class YaVersion {
   // - Initial version.
   public static final int SLIDER_COMPONENT_VERSION = 1;
   
-  // For GOOGLECLOUDMESSAGING_COMPONENT_VERSI 1:
+  // For GOOGLECLOUDMESSAGING_COMPONENT_VERSION 1:
   // - Initial version.
   public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
   
-  // For GOOGLEMAP_COMPONENT_VERSI 1:
+  // For GOOGLEMAP_COMPONENT_VERSION 1:
   // - Initial version.
   public static final int GOOGLE_MAP_COMPONENT_VERSION = 1;
+  
+  // For WIFISENSOR_COMPONENT_VERSION 1:
+  // - Initial version.
+  public static final int WIFISENSOR_COMPONENT_VERSION = 1;
+  // For PROXIMITYSENSOR_COMPONENT_VERSION 1:
+  // - Initial version.
+  public static final int PROXIMITYSENSOR_COMPONENT_VERSION = 1;
+  
+  // For SOCIALPROXIMITYSENSOR_COMPONENT_VERSION 1:
+  // - Initial version.
+  
+  public static final int SOCIALPROXIMITYSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int ACTIVITYPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int CALLLOGHISTORY_COMPONENT_VERSION = 1;
+  
+  public static final int BATTERYSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int CELLTOWERPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int LIGHTSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int LOCATIONPROBESENSOR_COMPONENT_VERSION = 1;
+  
 
 }

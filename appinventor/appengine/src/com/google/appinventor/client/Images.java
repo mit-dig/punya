@@ -6,6 +6,7 @@
 package com.google.appinventor.client;
 
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.user.client.ui.Tree.Resources;
 
 /**
@@ -453,5 +454,59 @@ public interface Images extends Resources {
   */
   @Source("com/google/appinventor/images/gmapBig.png")
   ImageResource googleMapBig();
+  
+  /**
+   * Designer palette item: WifiSensor component
+   */
+  @Source("com/google/appinventor/images/wifiProbe.png")
+  ImageResource wifiSensor();
+  
+  /**
+   * Designer palette item: proximitysensor component
+   */
+  @Source("com/google/appinventor/images/proximity.png")
+  ImageResource proximitysensor();
+  
+  /**
+   * Designer palette item: socialProximitysensor component
+   */
+  @Source("com/google/appinventor/images/socialProximitysensor.png")
+  ImageResource socialProximitysensor();
+  
+  /**
+   * Designer palette item: ActivityProbeSensor component 
+   */
+  @Source("com/google/appinventor/images/activityProbe.png")
+  ImageResource activityProbeSensor();
+  
+  /**
+   * Designer palette item: BatterySensor component
+   */
+  @Source("com/google/appinventor/images/batterySensor.png")
+  ImageResource batterySensor();
+  
+  /**
+   * Designer palette item: CallLogHistory component
+   */
+  @Source("com/google/appinventor/images/calllogProbe.png")
+  ImageResource calllogHistory();
+  
+  /**
+   * Designer palette item: CellTowerProbeSensor component
+   */
+  @Source("com/google/appinventor/images/cellTowerProbe.png")
+  ImageResource cellTowerProbeSensor();
+  
+  /**
+   * Designer palette item: LightSensor component
+   */
+  @Source("com/google/appinventor/images/lightsensorProbe.png")
+  ImageResource lightSensor();
+  
+  /**
+   * Designer palette item: LocationProbe component
+   */
+  @Source("com/google/appinventor/images/locationProbe.png")
+  ImageResource locationProbeSensor();
 
 }
