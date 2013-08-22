@@ -508,5 +508,36 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/locationProbe.png")
   ImageResource locationProbeSensor();
+  
+  /**
+   * Designer palette item: PedometerSensor component
+   */
+  @Source("com/google/appinventor/images/pedometerSensor.png")
+  ImageResource pedometerSensor();
+  
+  /**
+   * Designer palette item: RunningApplications component
+   */
+  @Source("com/google/appinventor/images/runningAppsProbe.png")
+  ImageResource runningApps();
+  
+  /**
+   * Designer palette item: ScreenStatus component
+   */
+  @Source("com/google/appinventor/images/screenProbe.png")
+  ImageResource screenStatus();
+  
+  /**
+   * Designer palette item: SmsHistory component
+   */
+  @Source("com/google/appinventor/images/smsProbe.png")
+  ImageResource smsHistory();
+  
+  /**
+   * Designer palette item: TelephonyInfo Component
+   */
+  @Source("com/google/appinventor/images/info.png")
+  ImageResource telephonyInfo();
+  
 
 }

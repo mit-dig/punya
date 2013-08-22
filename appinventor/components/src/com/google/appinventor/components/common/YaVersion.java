@@ -251,6 +251,16 @@ public class YaVersion {
   // - The light sensor component was added
   // FOR YOUNG_ANDROID_VERSION 90;
   // - The location probe sensor component was added
+  // FOR YOUNG_ANDROID_VERSION 91;
+  // - THe pedometer sensor component was added
+  // FOR YOUNG_ANDROID_VERSION 92;
+  // - The Running application probe component was added
+  // FOR YOUNG_ANDROID_VERSION 93;
+  // - The Screen probe component was added
+  // FOR YOUNG_ANDROID_VRESION 94;
+  // - The SMS log probe component was added
+  // FOR YOUNG_ANDROID_VERSION 95
+  // - The Telephony probe component was added
   
   public static final int YOUNG_ANDROID_VERSION = 90;
 
@@ -694,5 +704,14 @@ public class YaVersion {
   
   public static final int LOCATIONPROBESENSOR_COMPONENT_VERSION = 1;
   
+  public static final int PEDOMETERSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int RUNNINGAPPLICATIONS_COMPONENT_VERSION = 1;
+  
+  public static final int SCREENSTATUS_COMPONENT_VERSION = 1;
+  
+  public static final int SMSLOGHISTORY_COMPONENT_VERSION = 1;
+  
+  public static final int TELEPHONY_COMPONENT_VERSION = 1; 
 
 }

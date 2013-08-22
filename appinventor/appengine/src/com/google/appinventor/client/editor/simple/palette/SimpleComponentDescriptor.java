@@ -98,6 +98,12 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/cellTowerProbe.png", images.cellTowerProbeSensor());
     bundledImages.put("images/lightsensorProbe.png", images.lightSensor());
     bundledImages.put("images/locationProbe.png", images.locationProbeSensor());
+    bundledImages.put("images/pedometer.png", images.pedometerComponent());
+    bundledImages.put("images/runningAppsProbe.png", images.runningApps());
+    bundledImages.put("images/screenProbe.png", images.screenStatus());    
+    bundledImages.put("images/smsProbe.png", images.smsHistory());
+    bundledImages.put("images/info.png", images.telephonyInfo());
+    
     
     imagesInitialized = true;
   }
