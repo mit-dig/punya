@@ -98,13 +98,15 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/cellTowerProbe.png", images.cellTowerProbeSensor());
     bundledImages.put("images/lightsensorProbe.png", images.lightSensor());
     bundledImages.put("images/locationProbe.png", images.locationProbeSensor());
-    bundledImages.put("images/pedometer.png", images.pedometerComponent());
+    bundledImages.put("images/pedometerSensor.png", images.pedometerSensor());
     bundledImages.put("images/runningAppsProbe.png", images.runningApps());
     bundledImages.put("images/screenProbe.png", images.screenStatus());    
     bundledImages.put("images/smsProbe.png", images.smsHistory());
     bundledImages.put("images/info.png", images.telephonyInfo());
-    
-    
+    bundledImages.put("images/timer.png", images.timer());
+    bundledImages.put("images/dropbox.png", images.dropbox());
+    bundledImages.put("images/survey.png", images.survey());
+
     imagesInitialized = true;
   }
 
@@ -284,6 +286,8 @@ public final class SimpleComponentDescriptor {
       return new MockVideoPlayer(editor);
     } else if (name.equals(MockWebViewer.TYPE)) {
       return new MockWebViewer(editor);
+    } else if (name.equals(MockSurvey.TYPE)){
+        return new MockSurvey(editor);  
     } else if (name.equals(MockGoogleMap.TYPE)){
       return new MockGoogleMap(editor);
     } else {

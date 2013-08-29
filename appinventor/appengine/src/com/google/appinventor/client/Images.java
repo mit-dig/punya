@@ -539,5 +539,34 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/info.png")
   ImageResource telephonyInfo();
   
+  /**
+   * Designer palette item: Timer component
+   */
+  @Source("com/google/appinventor/images/timer.png")
+  ImageResource timer();
+  
+
+  /**
+   * Designer item: Dropbox component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/dropbox.png")
+  ImageResource dropbox();
+  
+  /**
+   * Designer palette item: Survey component
+   */
+  @Source("com/google/appinventor/images/survey.png")
+  ImageResource survey();
+  
+  
+  /**
+   * Designer item: Survey component in designer
+   */
+
+  @Source("com/google/appinventor/images/surveybig.png")
+  ImageResource surveybig();
+  
+  
 
 }

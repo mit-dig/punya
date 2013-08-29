@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>
+        </title>
+        <link rel="stylesheet" href="jquery.mobile.min.css" />
+        <style>
+            /* App custom styles */
+        </style>
+        <script src="jquery.min.js">
+        </script>
+        <script src="jquery.mobile.min.js">
+        </script>
+        <script>
+            function formSubmit()
+                {
+                    var response = $('input:radio[name="ans"]:checked').val();
+                    saveSurvey.saveResponse(response);
+                    saveSurvey.closeApp();
+
+                }
+        </script>
+    </head>
+    <body>
+        <!-- Home -->
+        <div data-role="page" id="page1">
+            <!--<div data-theme="a" data-role="header">
+                <h3>
+                    Answer Question
+                </h3>
+            </div>-->
+            <div data-role="content">
+                <h1 id="_txt_qt">
+                    Question_content
+                </h1>
+                <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup" data-type="vertical">
+                        <legend>
+                            Choose:
+                        </legend>
+                        <input id="radio2" name="ans" value="radio1" type="radio" />
+                        <label for="radio2">
+                            Yes
+                        </label>
+                        <input id="radio4" name="ans" value="radio4" type="radio" />
+                        <label for="radio4">
+                            No
+                        </label>
+                        <input id="radio5" name="ans" value="radio5" type="radio" />
+                        <label for="radio5">
+                            Decline
+                        </label>
+                    </fieldset>
+                </div>
+                <input value="Submit" onclick="formSubmit()" type="submit" />
+            </div>
+        </div>
+        <script>
+            //App custom javascript
+        </script>
+    </body>
+</html>

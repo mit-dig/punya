@@ -261,8 +261,17 @@ public class YaVersion {
   // - The SMS log probe component was added
   // FOR YOUNG_ANDROID_VERSION 95
   // - The Telephony probe component was added
+  // FOR YOUNG_ANDROID_VERSION 96
+  // - The Timer component was added
+  // FOR YOUNG_ANDROID_VERSION 97
+  // - The Dropbox component was added
+  // FOR YOUNG_ANDROID_VERSION 98
+  // - The SensorDB component was added
+  // FOR YOUNG_ANDROID_VERSION 99
+  // - The Survey component was added
   
-  public static final int YOUNG_ANDROID_VERSION = 90;
+  
+  public static final int YOUNG_ANDROID_VERSION = 99;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -713,5 +722,12 @@ public class YaVersion {
   public static final int SMSLOGHISTORY_COMPONENT_VERSION = 1;
   
   public static final int TELEPHONY_COMPONENT_VERSION = 1; 
-
+  
+  public static final int TIMER_COMPONENT_VERSION = 1;
+  
+  public static final int DROPBOX_COMPONENT_VERSION = 1;
+  
+  public static final int  SENSORDB_COMPONENT_VERSION = 1;
+  
+  public static final int SURVEY_COMPONENT_VERSION = 1;
 }

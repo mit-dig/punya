@@ -165,6 +165,15 @@ public class Form extends FragmentActivity
   //The convention for naming a extra value that requires the Form to pass along can be: 
   //APP_INVENTOR_XYZ (XYZ = component's name)
   //The value for component XYZ will be retrieved through form.getXYZStartValues()
+  private static final String ARGUMENT_SURVEY = "APP_INVENTOR_SURVEY";
+  //Set to the optional String-valued Extra passed in via an Intent on startup.(for Survey component only)
+  private String startupValueForSurvey = "";
+  
+  //This is the constant value that will be passed in as the key in the intent's putExtra to find
+  //the component that the Form will pass the intent's extra value to 
+  //The convention for naming a extra value that requires the Form to pass along can be: 
+  //APP_INVENTOR_XYZ (XYZ = component's name)
+  //The value for component XYZ will be retrieved through form.getXYZStartValues()
   private static final String ARGUMENT_GCM = "APP_INVENTOR_GCM";
   //Set to the optional String-valued Extra passed in via an Intent on startup.(for GCM component only)
   private String startupValueForGCM = ""; 
@@ -235,6 +244,18 @@ public class Form extends FragmentActivity
   */
   public Bundle getOnCreateBundle(){
       return onCreateBundle;
+  }
+  
+  /*
+   * 1) This method is to pass the start value that a Form gets when it is created by some other app using
+   * activityStarter or Fuming's create notification (using Android Intent)
+   * 2) The alternative to pass the intent's extra values could use listeners such as resgisterForXXX in 
+   * Form.java. ,  
+   */
+  public String getSurveyStartValues(){
+
+	  return startupValueForSurvey;
+
   }
     
   /*
