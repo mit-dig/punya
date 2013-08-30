@@ -106,6 +106,7 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/timer.png", images.timer());
     bundledImages.put("images/dropbox.png", images.dropbox());
     bundledImages.put("images/survey.png", images.survey());
+    bundledImages.put("images/googledrive.png", images.googledrive());   
 
     imagesInitialized = true;
   }

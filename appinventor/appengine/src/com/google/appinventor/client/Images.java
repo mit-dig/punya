@@ -567,6 +567,13 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/surveybig.png")
   ImageResource surveybig();
   
+  /**
+   * Designer item: GoogleDrive component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/googledrive.png")
+  ImageResource googledrive();
+  
   
 
 }

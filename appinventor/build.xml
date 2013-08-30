@@ -95,7 +95,7 @@
         <pathelement location="lib/oauth/google-http-client-android3-1.10.3-beta.jar" />
         <pathelement location="lib/oauth/google-oauth-client-1.10.1-beta.jar" />
         <!-- fusiontables libs -->
-        <pathelement location="lib/fusiontables/fusiontables.jar" />
+        <pathelement location="lib/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
         <!-- acra -->
         <pathelement location="lib/acra/acra-4.4.0.jar" />
         <!-- gwt libs -->

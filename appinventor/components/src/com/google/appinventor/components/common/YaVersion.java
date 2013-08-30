@@ -269,9 +269,11 @@ public class YaVersion {
   // - The SensorDB component was added
   // FOR YOUNG_ANDROID_VERSION 99
   // - The Survey component was added
+  // FOR YOUNG_ANDROID_VERSION 100
+  // - The Google Drive component was added
   
   
-  public static final int YOUNG_ANDROID_VERSION = 99;
+  public static final int YOUNG_ANDROID_VERSION = 100;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -730,4 +732,6 @@ public class YaVersion {
   public static final int  SENSORDB_COMPONENT_VERSION = 1;
   
   public static final int SURVEY_COMPONENT_VERSION = 1;
+  
+  public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
 }
