@@ -60,4 +60,17 @@ public class ComponentConstants {
   public static final int TEXT_RECEIVING_OFF = 1;
   public static final int TEXT_RECEIVING_FOREGROUND = 2;
   public static final int TEXT_RECEIVING_ALWAYS = 3;
+  
+  /*
+   * Designer setting for Survey
+   */
+  
+  public static final int SURVEY_STYLE_TEXTBOX = 1;
+  public static final int SURVEY_STYLE_TEXTAREA = 2;
+  public static final int SURVEY_STYLE_MULTIPLECHOICE = 3;
+  public static final int SURVEY_STYLE_CHOOSELIST = 4;
+  public static final int SURVEY_STYLE_CHECKBOX = 5;
+  public static final int SURVEY_STYLE_SCALE = 6;
+  public static final int SURVEY_STYLE_YESNO = 7;
+    
 }

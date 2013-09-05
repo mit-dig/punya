@@ -13,13 +13,18 @@
         <script src="jquery.mobile.min.js">
         </script>
         <script>
-            function formSubmit()
-                {
+            function formSubmit(){
                     var response = $('input:radio[name="ans"]:checked').val();
                     saveSurvey.saveResponse(response);
                     saveSurvey.closeApp();
 
-                }
+            }
+
+            function formCancel(){
+                var response = "N/A";
+                saveSurvey.saveResponse(response);
+
+            }
         </script>
     </head>
     <body>
@@ -32,7 +37,7 @@
             </div>-->
             <div data-role="content">
                 <h1 id="_txt_qt">
-                    Question_content
+                    Question
                 </h1>
                 <div data-role="fieldcontain">
                     <fieldset data-role="controlgroup" data-type="vertical">
@@ -54,6 +59,7 @@
                     </fieldset>
                 </div>
                 <input value="Submit" onclick="formSubmit()" type="submit" />
+                <input id="_btn_cancel" onclick="formCancel()" value="Withdraw" type="submit" />
             </div>
         </div>
         <script>

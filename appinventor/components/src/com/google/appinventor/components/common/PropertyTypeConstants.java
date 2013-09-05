@@ -162,5 +162,14 @@ public class PropertyTypeConstants {
    * com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidTextReceivingPropertyEditor}.
    */
   public static final String PROPERTY_TYPE_TEXT_RECEIVING = "text_receiving";
+  
+  /**
+   * Choices of Survey Style options. {@link
+   * com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidSurveyStylePropertyEditor}.
+
+   */
+  public static final String PROPERTY_TYPE_SURVEY_STYLE = "survey_style";
+  
+  
 
 }

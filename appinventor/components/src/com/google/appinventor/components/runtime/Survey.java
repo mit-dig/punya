@@ -4,32 +4,29 @@
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 package com.google.appinventor.components.runtime;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import android.os.Handler;
+import android.os.Environment;
+
+import com.google.appinventor.components.annotations.*;
+import com.google.appinventor.components.common.ComponentConstants;
+
 
 import org.json.JSONObject;
 
-import com.google.appinventor.components.annotations.DesignerComponent;
- 
-import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleFunction;
-import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.annotations.UsesPermissions;
-import com.google.appinventor.components.annotations.UsesAssets;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.PropertyTypeConstants;
  
 import com.google.appinventor.components.common.YaVersion;
 
  
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.HttpsUploadService;
+import com.google.appinventor.components.runtime.util.SdkLevel;
 import com.google.appinventor.components.runtime.util.YailList;
  
 import com.google.gson.JsonArray;
@@ -47,7 +44,7 @@ import java.math.BigDecimal;
 
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.Context;	
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -72,8 +69,13 @@ import android.util.Log;
         description = "Component for displaying surveys. This component makes use " +
         		"of Android WebView to display survey question. AI Developer " +
         		"could customize survey question and survey types. After the questions " +
-        		"are answered, they will be saved into local database and upload to remote server.")
+        		"are answered, they will be saved into local database and upload to remote server." +
+                "We suggest to put survey component in a standalone screen. The survey can be " +
+                "triggered by two ways, 1) through the user interaction on the main screens, " +
+                "2) through the user triggers the screen that contains this survey by tapping the " +
+                "notification.")
 @SimpleObject
+@UsesLibraries(libraries = "funf.jar")
 @UsesAssets(fileNames = "jquery.mobile.min.css," +
 		"jquery.min.js," +
 		"jquery.mobile.min.js," +
@@ -89,15 +91,16 @@ import android.util.Log;
 public class Survey extends AndroidViewComponent{
 	
 	public static final String SURVEY_HEADER = "edu.mit.csail.dig.esm.";
-	
-	private static Activity mainUI;
+    private static final String SURVEY_DBNAME = "__SURVEY_DB__";
+
+    private static Form mainUI;
 	private SharedPreferences prefs;
-	
+	private String exportRoot; // The exportRoot is the same with NameValueDatabaseService
 	private final WebView webview;
 	private final static String TEXTBOX = "textbox";
 	private final static String TEXTAREA = "textarea";
 	private final static String MULTIPLECHOICE = "multipleChoice"; //it's actually radio button
-	private final static String CHOOSELIST = "chooselist";
+	private final static String CHOOSELIST = "chooselist"   ;
 	private final static String CHECKBOX = "checkbox";
 	private final static String SCALE = "scale";
 	private final static String YESNO = "yesno";
@@ -120,7 +123,7 @@ public class Survey extends AndroidViewComponent{
       DecimalTimeUnit.MILLI);
 	
 	//store mapping to survey template (survey templates are store current in the asset folder)
-	private static final HashMap <String, String> surveyTemplate = new HashMap<String, String>();
+            private static final HashMap <String, String> surveyTemplate = new HashMap<String, String>();
 	static{
 		surveyTemplate.put(TEXTBOX, getTemplatePath(TEXTBOX));
 		surveyTemplate.put(YESNO, getTemplatePath(YESNO));
@@ -131,11 +134,14 @@ public class Survey extends AndroidViewComponent{
 		surveyTemplate.put(SCALE, getTemplatePath(SCALE));
 		
 	}
-	/*
-	 * We store the template in the App Inventor's asset and point WebViewer to it (file:///android_asset/")
-	 * However we require the user to manually upload the templates to as assets, including html, css, and js files. 
-	 * TODO: could we put all the file in a folder that will end up in the resource folder of an Android project?
-	 */
+
+    private String exportFormat = NameValueDatabaseService.EXPORT_CSV;
+
+    /*
+     * We store the template in the App Inventor's assets and point WebViewer
+     * to it (file:///android_asset/"). The templates used by the Survey components
+     * are stored in buildserver/src/com/google/appinventor/buildserver/resources
+     */
 	private static String getTemplatePath(String name){
 		return name + ".html"; 
 		//return "file:///android_asset/" + name + ".html";
@@ -150,7 +156,10 @@ public class Survey extends AndroidViewComponent{
 	 */
 	public Survey(ComponentContainer container) throws IOException {
 		super(container);
-    mainUI = container.$context();
+    mainUI = container.$form();
+    exportRoot =  new File(Environment.getExternalStorageDirectory(), mainUI.getPackageName()) +
+                File.separator + "export";
+
     JsonParser parse = new JsonParser();
     webview = new WebView(container.$context());
     webview.getSettings().setJavaScriptEnabled(true);
@@ -158,7 +167,7 @@ public class Survey extends AndroidViewComponent{
 		webview.setVerticalScrollBarEnabled(true);
  
 		container.$add(this);
-		prefs = getSystemPrefs(mainUI);
+
 		
 
 		webview.setOnTouchListener(new View.OnTouchListener() {
@@ -193,8 +202,6 @@ public class Survey extends AndroidViewComponent{
 		 * "question": "What is your favorite food"
 		 * "options": ["apple", "banana", "strawberry", "orange"],
 		 * "surveyGroup": "MIT-food-survey"
-		 * 
-		 * 
 		 * }
 		 * 
 		 */
@@ -213,13 +220,10 @@ public class Survey extends AndroidViewComponent{
 			}
 			
 			this.options = arrOptions;
-			
-			LoadSurvey();
-			
+
+			Log.i(TAG, "Survey component got created");
 		}
-		
-		
-//		webview.loadData(data, mimeType, encoding);
+
 	}
 	@Override
 	public View getView() {
@@ -249,58 +253,28 @@ public class Survey extends AndroidViewComponent{
 		super.Height(height);
 	}
 	
-	
-	private void prepareComponents(){
-		/*
-		 * let's try something 
-		 */
-		
-		VerticalArrangement verticalArr = new VerticalArrangement(container);
-		verticalArr.Width(Component.LENGTH_FILL_PARENT); // at ViewUtil.java
 
-		container.$add(verticalArr);
-		
-		Label qLabel = new Label(verticalArr);
-		qLabel.BackgroundColor(Component.COLOR_BLACK); // color is in Component interface
-		qLabel.Width(Component.LENGTH_FILL_PARENT);
-		qLabel.Text("");
-		verticalArr.$add(qLabel);
-		com.google.appinventor.components.runtime.Button btn = new Button(verticalArr);
-		
-//		btn.getView().setOnClickListener(ocl); // this is my own btn onclick
-
-		
-		
-	}
-	
-	
-	
-	
 	/*
 	 * This will load up the survey in the WebView. Need to set style, set question, and set options 
 	 * use webView.loadData() to load from an HTML string
 	 * 
 	 */
-	@SimpleFunction(description = "Need to set survey style, set question before" +  
+	@SimpleFunction(description = "Set survey style, set question before" +  
 			 "call LoadSurvey")
 	public void LoadSurvey() throws IOException{
-		
+        Log.i(TAG,  "Before load data" );
 		this.htmlContent = genSurvey();
 		Log.i(TAG,  "HTML: " + this.htmlContent );
 		//before loading we bind webview with SaveSurvey inner class to interface with js
-		
-		/*
-		 *  SaveSurvey(Context context, String surveyGroup, String style, 
-										String question, ArrayList options){
-		 */
+
 		
 		this.webview.addJavascriptInterface(new SaveSurvey(this.container.$form(), this.surveyGroup, 
 											    this.style, this.question, this.options), "saveSurvey");
 		
 		//see http://pivotallabs.com/users/tyler/blog/articles/1853-android-webview-loaddata-vs-loaddatawithbaseurl-
 		//http://myexperiencewithandroid.blogspot.com/2011/09/android-loaddatawithbaseurl.html
-		this.webview.loadDataWithBaseURL("file:///android_asset/", this.htmlContent, "text/html", "UTF-8", null);
-		
+		this.webview.loadDataWithBaseURL("file:///android_asset/component/", this.htmlContent, "text/html", "UTF-8", null);
+
 		Log.i(TAG,  "After load data" );
 		
 		
@@ -311,12 +285,42 @@ public class Survey extends AndroidViewComponent{
 		this.surveyGroup = surveyGroup;
 		
 	}
+	/**
+	 * Sets the style of the survey
+	 * @param question
+	 */
 	
-	
-	@SimpleProperty()
-	public void SetStyle(String style){
-		this.style = style;
-		
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SURVEY_STYLE, defaultValue = "1")
+	@SimpleProperty(description = "Set the style of the survey with integer. 1 = textbox, 2 = textarea, " +
+			"3 = multiplechoice, 4 = chooselist, 5 = checkbox, 6 = scale, 7 = yesno")
+	public void SetStyle(int style) {
+		switch (style) {	
+		case ComponentConstants.SURVEY_STYLE_TEXTBOX:
+			this.style = TEXTBOX;
+			break;
+		case ComponentConstants.SURVEY_STYLE_TEXTAREA:
+			this.style = TEXTAREA;
+			break;
+		case ComponentConstants.SURVEY_STYLE_MULTIPLECHOICE:
+			this.style = MULTIPLECHOICE; 
+			break;
+		case ComponentConstants.SURVEY_STYLE_CHOOSELIST:
+			this.style = CHOOSELIST;
+			break;
+		case ComponentConstants.SURVEY_STYLE_CHECKBOX:
+			this.style = CHECKBOX;
+			break;
+		case ComponentConstants.SURVEY_STYLE_SCALE:
+			this.style = SCALE;
+			break;
+		case ComponentConstants.SURVEY_STYLE_YESNO:
+			this.style = YESNO;
+			
+		default:
+			this.style = TEXTBOX;
+
+		}
+
 	}
 	
 	@SimpleProperty()
@@ -405,10 +409,12 @@ public class Survey extends AndroidViewComponent{
 		return optHtml.toString();
 		
 	}
-	
-	private static void close(){
+
+    // in the html files for survey templates
+	private static void close(String result){
 		Log.i(TAG, "before closing the Activity" );
-		mainUI.finish();
+
+		mainUI.finishActivityWithTextResult(result);
 	}
 	
 	/*
@@ -417,7 +423,9 @@ public class Survey extends AndroidViewComponent{
 	 * 2. replace survey's question and survey's options in the template
 	 */
 	private String genSurvey() throws IOException{
-		String templatePath  = getTemplatePath(this.style);
+
+		String templatePath  = "component" + File.separator + getTemplatePath(this.style);
+
 		
 		BufferedInputStream in = new BufferedInputStream(container.$context().getAssets().open(templatePath));
 
@@ -441,9 +449,9 @@ public class Survey extends AndroidViewComponent{
     	String questionBlk = "<h1 id=\"_txt_qt\">";
     	int insertPos = sb.indexOf(questionBlk) + questionBlk.length();
     
-    	int insertQuestionPos = sb.indexOf("Question_content", insertPos);
+    	int insertQuestionPos = sb.indexOf("Question", insertPos);
     	
-    	sb.replace(insertQuestionPos, insertQuestionPos + "Question_content".length(), this.question);
+    	sb.replace(insertQuestionPos, insertQuestionPos + "Question".length(), this.question);
     	
     	Log.i(TAG, "after replace question:" + sb.toString());
     	// B. generate options
@@ -489,27 +497,17 @@ public class Survey extends AndroidViewComponent{
 						+ "input name=\"slider\"".length());
 				
 				sb.replace(startPosOfDefault, startPosOfDefault + 9, "value=\"" + this.options.get(2) + "\"");
-				
-				
+
     		}else{
     			; //do nothing, use the template
     		}
-    		
+
     	}
 
     	return sb.toString();
  
 	}
-	
-	private SharedPreferences getSystemPrefs(Context context) {
-		// TODO Currently survey is using the same sharedPreference file to get accessToken saved by the probes
-		// this won't work if the Survey component is not in the same app as the probe component
-		// We rely on probe component to get accessToken through ProbeBase.Authorize()
-		return context.getSharedPreferences(ProbeBase.class.getName()
-				+ "_system", android.content.Context.MODE_PRIVATE);
-	}
-	
- 
+
 	
 	/*
 	 * 1. This inner class is to create an interface between javascript in WebView and Android
@@ -521,17 +519,14 @@ public class Survey extends AndroidViewComponent{
 	 *    and saved locally (in prefs).
 	 */
 	public class SaveSurvey{
-		private String databasename = ProbeBase.PROBE_BASE_NAME; //use the same database as funf data
+		private String databasename = SURVEY_DBNAME; //use the same database as funf data
 
 		private String surveyGroup;
 		Context mContext;
 		private String style;
 		private String question;
 		private ArrayList<String> options;
-		private String answer;
-		private String accessToken;
-		//TODO: for testing, will make this a parament to SaveSurvey in the future
-		private final String UPLOAD_URL = "http://air.csail.mit.edu:8002/connectors/set_funf_data";
+
 		public SaveSurvey(Context context, String surveyGroup, String style, 
 										String question, ArrayList options){
 			mContext = context;
@@ -541,11 +536,10 @@ public class Survey extends AndroidViewComponent{
 			this.options = options;
  
 		}
-		
-		
-		public void closeApp(){
+
+		private void closeApp(String result){
 			Log.i(TAG, "Closing the app");
-			Survey.close();
+			Survey.close(result);
 			
 		}
 		
@@ -558,23 +552,7 @@ public class Survey extends AndroidViewComponent{
 			mContext.startService(i);
 			
 		}
-		
-		private void uploadData(boolean wifiOnly) {
-			archiveData();
-			String archiveName = databasename;
-			// we also get the uploadURL from other probe component
-			String uploadUrl = prefs.getString("uploadURL", UPLOAD_URL);
-			Intent i = new Intent(mContext, HttpsUploadService.class);
-			i.putExtra(UploadService.ARCHIVE_ID, archiveName);
-			i.putExtra(UploadService.REMOTE_ARCHIVE_ID, uploadUrl);
-			i.putExtra(UploadService.NETWORK,
-					(wifiOnly) ? UploadService.NETWORK_WIFI_ONLY
-							: UploadService.NETWORK_ANY);
-			mContext.startService(i);
 
-			// getSystemPrefs().edit().putLong(LAST_DATA_UPLOAD,
-			// System.currentTimeMillis()).commit();
-		}
 
 		public void saveResponse(String answer) {
 			Log.i(TAG, "saveResponse is called");
@@ -594,7 +572,6 @@ public class Survey extends AndroidViewComponent{
 			((JsonObject) surveyData).addProperty("style", style);
 			((JsonObject) surveyData).addProperty("surveyGroup", surveyGroup);
 			((JsonObject) surveyData).addProperty("question", question);
-			((JsonObject) surveyData).addProperty("style", style);
 
 			JsonElement optionsData = new JsonArray();
 
@@ -620,54 +597,100 @@ public class Survey extends AndroidViewComponent{
 				((JsonObject) surveyData).addProperty("answer", answer);
 
 			}
-			((JsonObject) surveyData).addProperty("probe", SURVEY_HEADER + style);
+			((JsonObject) surveyData).addProperty("probe", SURVEY_HEADER);
 			((JsonObject) surveyData).add("timezoneOffset", new JsonPrimitive(localOffsetSeconds));
 			((JsonObject) surveyData).addProperty("timestamp", System.currentTimeMillis()/1000);
 				
 
 			// write to DB
 	     
-      Bundle b = new Bundle();
-      b.putString(NameValueDatabaseService.DATABASE_NAME_KEY,
-          databasename);
-      b.putLong(NameValueDatabaseService.TIMESTAMP_KEY, timestamp);
-      b.putString(NameValueDatabaseService.NAME_KEY, SURVEY_HEADER
-          + style);
-    
+			Bundle b = new Bundle();
+			b.putString(NameValueDatabaseService.DATABASE_NAME_KEY,
+					databasename);
+			b.putLong(NameValueDatabaseService.TIMESTAMP_KEY, timestamp);
+			b.putString(NameValueDatabaseService.NAME_KEY, SURVEY_HEADER
+					+ style);
+
 			b.putString(NameValueDatabaseService.VALUE_KEY,
 					surveyData.toString());
 			Intent i = new Intent(mContext, NameValueDatabaseService.class);
 			i.setAction(DatabaseService.ACTION_RECORD);
 			i.putExtras(b);
 			mContext.startService(i);
-			
 
-			// let's test this with uploading the data to trust server.
-			// To be able to upload the app needs to obtain the "accessToken" first and save it in SharedPreferences
-			// Survey component should not worry about how to obtain the accessToken. 
-			// 1. Check if the app has accessToken in SharedPreferences
-			// 2. Try to upload 
-			accessToken = prefs.getString("accessToken", "");
-			
-			Log.i(TAG, "accessToken:" + accessToken);
-			if(accessToken != ""){
-				uploadData(DEFAULT_DATA_UPLOAD_ON_WIFI_ONLY);
-			}
-
+            // we close the open activity with returned result
+            closeApp(answer);
 		}
 
 		
 	}
 
-	/**
-	 * Indicates that a photo was taken with the camera and provides the path to
-	 * the stored picture.
-	 */
-	@SimpleEvent
-	public void AfterSurveyAnswer(String answer) {
-		EventDispatcher.dispatchEvent(this, "AfterSurveyAnswer", answer);
-	}
-	  
+    /**
+     *
+     * @return
+     */
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public String DBName(){
+        return SURVEY_DBNAME;
+
+    }
+    
+    /*
+     * Exporting Survey DB to External Storage
+     */
+    @SimpleFunction(description = "Export Survey results database as CSV files or JSON files." +
+            "Input \"csv\" or \"json\" for exporting format.")
+    public void Export(String format){
+        if (format == NameValueDatabaseService.EXPORT_JSON)
+            this.exportFormat = NameValueDatabaseService.EXPORT_JSON;
+        else
+            this.exportFormat = NameValueDatabaseService.EXPORT_CSV;
+        //if the user input the wrong format, we will just use csv by default
+        Log.i(TAG, "exporting data...at: " + System.currentTimeMillis());
+
+        Bundle b = new Bundle();
+        b.putString(NameValueDatabaseService.DATABASE_NAME_KEY, SURVEY_DBNAME);
+        b.putString(NameValueDatabaseService.EXPORT_KEY, format);
+        Intent i = new Intent(mainUI, NameValueDatabaseService.class);
+        i.setAction(DatabaseService.ACTION_EXPORT);
+        i.putExtras(b);
+
+    }
+
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR, 
+    		description = "Get the export path for survey results")
+    public String ExportFolderPath(){
+        // the real export path is exportPath + "/" + exportformat
+        return this.exportRoot + File.separator + this.exportFormat;
+
+    }
+
+
+//    /**
+//     * Sets whether you want the {@link #MessageReceived(String,String)} event to
+//     * get run when a new text message is received.
+//     *
+//     * @param enabled  0 = never receive, 1 = receive foreground only, 2 = receive always
+//     *
+//     */
+//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_TEXT_RECEIVING, defaultValue = "2") // Default is FOREGROUND
+//    @SimpleProperty()
+//    public void ReceivingEnabled(int enabled) {
+//        if ((enabled < ComponentConstants.TEXT_RECEIVING_OFF) ||
+//                (enabled > ComponentConstants.TEXT_RECEIVING_ALWAYS)) {
+//            container.$form().dispatchErrorOccurredEvent(this, "Texting",
+//                    ErrorMessages.ERROR_BAD_VALUE_FOR_TEXT_RECEIVING, enabled);
+//            return;
+//        }
+//
+//        Texting.receivingEnabled = enabled;
+//        SharedPreferences prefs = activity.getSharedPreferences(PREF_FILE, Activity.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = prefs.edit();
+//        editor.putInt(PREF_RCVENABLED, enabled);
+//        editor.remove(PREF_RCVENABLED_LEGACY); // Remove any legacy value
+//        editor.commit();
+//    }
+
 	  
 	  
 }
