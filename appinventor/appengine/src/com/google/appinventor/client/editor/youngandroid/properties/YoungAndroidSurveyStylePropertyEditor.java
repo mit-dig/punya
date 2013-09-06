@@ -27,7 +27,7 @@ public class YoungAndroidSurveyStylePropertyEditor extends ChoicePropertyEditor 
   
   public static final String YESNO = ComponentConstants.SURVEY_STYLE_YESNO + "";
   
-  public static final String CHECKBOX = ComponentConstants.SURVEY_STYLE_CHECKBOX+ "";
+  public static final String CHECKBOX = ComponentConstants.SURVEY_STYLE_CHECKBOX + "";
   
 
   private static final Choice[] tchoices = new Choice[] {

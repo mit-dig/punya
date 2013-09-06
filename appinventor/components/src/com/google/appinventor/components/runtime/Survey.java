@@ -27,6 +27,7 @@ import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.HttpsUploadService;
 import com.google.appinventor.components.runtime.util.SdkLevel;
+import com.google.appinventor.components.runtime.util.SensorDbUtil;
 import com.google.appinventor.components.runtime.util.YailList;
  
 import com.google.gson.JsonArray;
@@ -90,7 +91,7 @@ import android.util.Log;
 									"android.permission.INTERNET")
 public class Survey extends AndroidViewComponent{
 	
-	public static final String SURVEY_HEADER = "edu.mit.csail.dig.esm.";
+	public static final String SURVEY_HEADER = "edu.mit.csail.dig.survey";
     private static final String SURVEY_DBNAME = "__SURVEY_DB__";
 
     private static Form mainUI;
@@ -192,7 +193,7 @@ public class Survey extends AndroidViewComponent{
 		Height(LENGTH_FILL_PARENT);
 		
 		//set default survey style
-		style =  MULTIPLECHOICE; //default style
+		style =  TEXTBOX; //default style
 		
 		// see if the Survey is created by someone tapping on a notification! 
 		// create the Survey and load it in the webviewer
@@ -294,6 +295,7 @@ public class Survey extends AndroidViewComponent{
 	@SimpleProperty(description = "Set the style of the survey with integer. 1 = textbox, 2 = textarea, " +
 			"3 = multiplechoice, 4 = chooselist, 5 = checkbox, 6 = scale, 7 = yesno")
 	public void SetStyle(int style) {
+		Log.i(TAG, "the style is: " + style);
 		switch (style) {	
 		case ComponentConstants.SURVEY_STYLE_TEXTBOX:
 			this.style = TEXTBOX;
@@ -315,7 +317,7 @@ public class Survey extends AndroidViewComponent{
 			break;
 		case ComponentConstants.SURVEY_STYLE_YESNO:
 			this.style = YESNO;
-			
+			break;
 		default:
 			this.style = TEXTBOX;
 
@@ -423,8 +425,9 @@ public class Survey extends AndroidViewComponent{
 	 * 2. replace survey's question and survey's options in the template
 	 */
 	private String genSurvey() throws IOException{
-
-		String templatePath  = "component" + File.separator + getTemplatePath(this.style);
+		Log.i(TAG, "the style is: " + style);
+//		String templatePath  = "component" + File.separator + getTemplatePath(this.style);
+		String templatePath  = "component" + File.separator + surveyTemplate.get(this.style);
 
 		
 		BufferedInputStream in = new BufferedInputStream(container.$context().getAssets().open(templatePath));
@@ -460,7 +463,7 @@ public class Survey extends AndroidViewComponent{
     	// 2. For "scale" style, the first three options will be specifying the 
     	// min, max and default value of the scale
     	
-    	if (this.style.equals(this.MULTIPLECHOICE) || this.style.equals(this.CHECKBOX)|| this.style.equals(this.YESNO)){
+    	if (this.style.equals(this.MULTIPLECHOICE) || this.style.equals(this.CHECKBOX)){
     		
     		int startPos = sb.indexOf("</legend>") + "</legend>".length();
     		int endPos = sb.indexOf("</fieldset>");
@@ -608,8 +611,7 @@ public class Survey extends AndroidViewComponent{
 			b.putString(NameValueDatabaseService.DATABASE_NAME_KEY,
 					databasename);
 			b.putLong(NameValueDatabaseService.TIMESTAMP_KEY, timestamp);
-			b.putString(NameValueDatabaseService.NAME_KEY, SURVEY_HEADER
-					+ style);
+			b.putString(NameValueDatabaseService.NAME_KEY, SURVEY_HEADER);
 
 			b.putString(NameValueDatabaseService.VALUE_KEY,
 					surveyData.toString());
@@ -654,6 +656,7 @@ public class Survey extends AndroidViewComponent{
         Intent i = new Intent(mainUI, NameValueDatabaseService.class);
         i.setAction(DatabaseService.ACTION_EXPORT);
         i.putExtras(b);
+        mainUI.startService(i);
 
     }
 
@@ -663,33 +666,18 @@ public class Survey extends AndroidViewComponent{
         // the real export path is exportPath + "/" + exportformat
         return this.exportRoot + File.separator + this.exportFormat;
 
+        
+    }
+    
+    @SimpleFunction(description ="This will clean up the survey database on the smartphone")
+    public void DeleteSurveyDB(){
+        Intent i = new Intent(mainUI, NameValueDatabaseService.class);
+        Log.i(TAG, "archiving data...at: " + System.currentTimeMillis());
+        i.setAction(DatabaseService.ACTION_ARCHIVE);
+        i.putExtra(DatabaseService.DATABASE_NAME_KEY, SURVEY_DBNAME);
+        mainUI.startService(i);
     }
 
-
-//    /**
-//     * Sets whether you want the {@link #MessageReceived(String,String)} event to
-//     * get run when a new text message is received.
-//     *
-//     * @param enabled  0 = never receive, 1 = receive foreground only, 2 = receive always
-//     *
-//     */
-//    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_TEXT_RECEIVING, defaultValue = "2") // Default is FOREGROUND
-//    @SimpleProperty()
-//    public void ReceivingEnabled(int enabled) {
-//        if ((enabled < ComponentConstants.TEXT_RECEIVING_OFF) ||
-//                (enabled > ComponentConstants.TEXT_RECEIVING_ALWAYS)) {
-//            container.$form().dispatchErrorOccurredEvent(this, "Texting",
-//                    ErrorMessages.ERROR_BAD_VALUE_FOR_TEXT_RECEIVING, enabled);
-//            return;
-//        }
-//
-//        Texting.receivingEnabled = enabled;
-//        SharedPreferences prefs = activity.getSharedPreferences(PREF_FILE, Activity.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = prefs.edit();
-//        editor.putInt(PREF_RCVENABLED, enabled);
-//        editor.remove(PREF_RCVENABLED_LEGACY); // Remove any legacy value
-//        editor.commit();
-//    }
 
 	  
 	  
