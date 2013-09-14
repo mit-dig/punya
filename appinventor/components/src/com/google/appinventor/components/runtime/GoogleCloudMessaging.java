@@ -132,7 +132,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         // Set up listeners
         context = container.$context();
         mainUIThreadActivity = container.$context();
-        sharedPreferences = container.$context().getSharedPreferences("GoogleCloudMessaging",Context.MODE_PRIVATE);
+        sharedPreferences = container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         regId = retrieveRegId();
         
         // get Notification Manager
@@ -151,6 +151,17 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         //launch service
         gcmMessage = container.$form().getGCMStartValues();
         Log.i(TAG,"The initial value of the gcmMessage is "+gcmMessage);
+    }
+    
+    @SimpleFunction(description = "check to see if there is an exisiting preference for the GCM; if " +
+    		"there is, enables the listeners.")
+    public void checkAndSetPreference() {
+        Log.i(TAG, "Checking the preference now, either in or out");
+        //check for if there is an exisiting preference for the GCM; if there is, enables the listeners.
+        if(sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "").equals("in")) {
+            Log.i(TAG,"Enabled the listeners after failure.");
+            Enabled(true);
+        }
     }
     
     private String retrieveRegId() {
@@ -213,7 +224,9 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
         enabled = enable;
         if (enabled) {
+            Log.i(TAG, "Before registerGCMEvent - regListener");
             registerGCMEvent(context, regListener, REG_GCM_TYPE);
+            Log.i(TAG, "Before registerGCMEvent - msgListener");
             registerGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
         } else {
             unRegisterGCMEvent(context, regListener, REG_GCM_TYPE);
@@ -432,6 +445,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     
     //Add the listener to the GCMIntentService
     public void registerGCMEvent(Context context, GCMEventListener listener, String eventType) {
+        Log.i(TAG, "Before the registerGCMEvent");
         mBoundGCMIntentService.requestGCMMessage(context, listener, eventType);
     }
     

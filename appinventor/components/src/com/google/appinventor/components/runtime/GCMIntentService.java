@@ -66,7 +66,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "After creating the GCMIntentService");  
         
         String newMessage = intent.getExtras().getString("gcmMessage");                
-        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
         String optPref;
@@ -158,14 +158,18 @@ public class GCMIntentService extends GCMBaseIntentService {
     // This is a method for App Inventor's component to receive two types of messages from Google GCM
     // 1. general GCM message 2. registeration finished message
     public void requestGCMMessage(Context context, GCMEventListener listener, String type){
-        //add the listener to the list of listerners
-        if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
-            GCMEventListeners.add(listener);
-        else{//for registeration type of messages
-            GCMRegEventListeners.add(listener);
+        if((!GCMEventListeners.contains(listener))&&(!GCMEventListeners.contains(listener))){
+            Log.i(TAG, "No listener registered."); 
+            //add the listener to the list of listerners
+            if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
+                GCMEventListeners.add(listener);
+            else{//for registeration type of messages
+                GCMRegEventListeners.add(listener);
+            }
+            //Save the action into the sharedPreference
+            setSharedPreference(context,"in");
+            Log.i(TAG, "After the requestGCMMessage"); 
         }
-        //Save the action into the sharedPreference
-        setSharedPreference(context,"in");
     }
     
     // This is a method for App Inventor's component to option out two types of messages from Google GCM
@@ -195,7 +199,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     // GCM service.
     private void setSharedPreference(Context context, String pref){
         //save the GCM Message opt in/out preference to sharedPreference for later use
-        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
         final SharedPreferences.Editor sharedPrefsEditor =
