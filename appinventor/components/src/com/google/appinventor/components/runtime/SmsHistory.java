@@ -143,14 +143,18 @@ public class SmsHistory extends ProbeBase{
 			String hashedAddress = data.get(ProbeKeys.SmsKeys.ADDRESS).getAsString();
 			String hashedBody = data.get(ProbeKeys.SmsKeys.BODY).getAsString();
  
+			if(privacySafe){
+			  JsonObject addrJson = jsonParser.parse(hashedAddress).getAsJsonObject();
+			  JsonObject bodyson = jsonParser.parse(hashedBody).getAsJsonObject();
+	      address = addrJson.get("ONE_WAY_HASH").getAsString();
+	      body = bodyson.get("ONE_WAY_HASH").getAsString();
+			}
+			else{
+			  address = data.get(ProbeKeys.SmsKeys.ADDRESS).getAsString();
+			  body = data.get(ProbeKeys.SmsKeys.BODY).getAsString();
+			  
+			}
 
-			JsonObject addrJson = jsonParser.parse(hashedAddress).getAsJsonObject();
-			JsonObject bodyson = jsonParser.parse(hashedBody).getAsJsonObject();
-
-
-
-			address = addrJson.get("ONE_WAY_HASH").getAsString();
-			body = bodyson.get("ONE_WAY_HASH").getAsString();
 			date = data.get(ProbeKeys.SmsKeys.DATE).getAsLong();
 			read = data.get(ProbeKeys.SmsKeys.READ).getAsBoolean();
 
@@ -221,7 +225,10 @@ public class SmsHistory extends ProbeBase{
 	 * for example "2012-06-01 20:00:00" will read all SMS after June 1, 8pm
 	 * Empty value will return all SMS messages
 	 */
-	@SimpleFunction(description = "Specify the date after which the SMS messages occurred. The formate should be \"YYYY-MM-DD HH:mm:ss\"")
+	@SimpleFunction(description = "Specify the date after which the SMS messages occurred. " +
+			"The formate should be \"YYYY-MM-DD HH:mm:ss\". Note everytime when the SMS messages are read, one needs to" +
+			"reset AfterDate if likes to read those messages again." +
+			"")
 	@SimpleProperty
 	public void AfterDate(String datePoint) {
 
@@ -262,8 +269,10 @@ public class SmsHistory extends ProbeBase{
 				newConfig = new JsonObject();
 
 				newConfig.addProperty("afterDate", this.afterDate);
-				probe = gson.fromJson(newConfig, SmsProbe.class);
-			}
+			}	
+			
+			newConfig.addProperty("hideSensitiveData", privacySafe);
+			probe = gson.fromJson(newConfig, SmsProbe.class);
 
 			probe.registerListener(listener);
 
@@ -321,7 +330,8 @@ public class SmsHistory extends ProbeBase{
 	/**
 	 * The phone number associated with message. (hashed for privacy reason)
 	 */
-	@SimpleProperty(description = "The  address (phone number) associated with message, hashed for privacy reason. ")
+	@SimpleProperty(description = "The  address (phone number) associated with message. If HideSensitiveData is set " +
+			"to True then hashed values will be returned for privacy reason.")
 	public String Address(){
 		Log.i(TAG, "returning address of the message: " + address);
 		return address;	
@@ -331,7 +341,8 @@ public class SmsHistory extends ProbeBase{
 	/**
 	 * The body of the message. (hashed for privacy reason)
 	 */
-	@SimpleProperty(description = "The  body of the message, hashed for privacy reason. ")
+	@SimpleProperty(description = "The  body of the message, hashed for privacy reason. If HideSensitiveData is set " +
+      "to True then hashed values will be returned for privacy reason.")
 	public String Body(){
 		Log.i(TAG, "returning address of the message: " + address);
 		return body;	

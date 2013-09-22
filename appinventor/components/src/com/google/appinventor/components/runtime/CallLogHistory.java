@@ -130,30 +130,37 @@ public class CallLogHistory extends ProbeBase{
 			IJsonObject data = (IJsonObject) msg.obj;
 			Log.i(TAG, "Update component's varibles.....");
 			
-			
-			String hashedName = data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
-			String hashedNumber = data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
-			String hashedNnumberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
-			String haseddNumberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
-			
-			JsonObject nameJson = jsonParser.parse(hashedName).getAsJsonObject();
-			JsonObject numberJson = jsonParser.parse(hashedNumber).getAsJsonObject();
-			JsonObject numberTypeJson = jsonParser.parse(hashedNnumberType).getAsJsonObject();
-			JsonObject numberLabelJson = jsonParser.parse(haseddNumberLabel).getAsJsonObject();
-			
-			
-			name = nameJson.get("ONE_WAY_HASH").getAsString();
-			number = numberJson.get("ONE_WAY_HASH").getAsString();
-			numberType = numberTypeJson.get("ONE_WAY_HASH").getAsString();
-			numberLabel = numberLabelJson.get("ONE_WAY_HASH").getAsString();
-			
+			if(privacySafe){
+		     String hashedName = data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
+		     String hashedNumber = data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
+		     String hashedNnumberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
+		     String haseddNumberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
+			   
+		     JsonObject nameJson = jsonParser.parse(hashedName).getAsJsonObject();
+		     JsonObject numberJson = jsonParser.parse(hashedNumber).getAsJsonObject();
+		     JsonObject numberTypeJson = jsonParser.parse(hashedNnumberType).getAsJsonObject();
+		     JsonObject numberLabelJson = jsonParser.parse(haseddNumberLabel).getAsJsonObject();
+		     
+		     name = nameJson.get("ONE_WAY_HASH").getAsString();
+		     number = numberJson.get("ONE_WAY_HASH").getAsString();
+		     numberType = numberTypeJson.get("ONE_WAY_HASH").getAsString();
+		     numberLabel = numberLabelJson.get("ONE_WAY_HASH").getAsString();
+
+			}else{
+			  //clear text will be returned
+			  name= data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
+			  number = data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
+			  numberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
+			  numberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
+
+			}
+
 			date = data.get(ProbeKeys.CallLogKeys.DATE).getAsLong();
 			duration = data.get(ProbeKeys.CallLogKeys.DURATION).getAsInt();
 			
 			// get the string representation of call type 
 			type =  getTypeName(data.get(ProbeKeys.CallLogKeys.TYPE).getAsInt());
-		
-  
+
 			CalllogsInfoReceived();
  
 
@@ -264,9 +271,9 @@ public class CallLogHistory extends ProbeBase{
 				newConfig = new JsonObject();
 
 				newConfig.addProperty("afterDate", this.afterDate);
-				probe = gson.fromJson(newConfig, CallLogProbe.class);
 			}
-
+	    newConfig.addProperty("hideSensitiveData", privacySafe);
+      probe = gson.fromJson(newConfig, CallLogProbe.class);
 			probe.registerListener(listener);
 
 			Log.i(TAG, "run-once config:" + newConfig);
@@ -330,8 +337,9 @@ public class CallLogHistory extends ProbeBase{
 	/**
 	 * Returns hashedName associated with the phone number
 	 */
-	@SimpleProperty(description = "Name (hashed format) associated with the phone number")
-	public String HashedName(){
+	@SimpleProperty(description = "Name associated with the phone number. " +
+			"Return in hashed value if HideSensitiveData is set to True")
+	public String Name(){
 		Log.i(TAG, "returning hashedName: " + name);
 		return name;	
 	}
@@ -339,8 +347,9 @@ public class CallLogHistory extends ProbeBase{
 	/**
 	 * The phone number (hashed) as the user entered it
 	 */
-	@SimpleProperty(description = "The phone number (hashed format) as the user entered it.")
-	public String HashedNumber(){
+	@SimpleProperty(description = "The phone number as the user entered it. Return in hashed " +
+			"value if HideSensitiveData is set to True")
+	public String Number(){
 		Log.i(TAG, "returning hashedNumber: " + number);
 		return number;	
 	}
@@ -367,8 +376,9 @@ public class CallLogHistory extends ProbeBase{
 	 * The cached number label, for a custom number type, 
 	 * associated with the phone number, if it exists.
 	 */
-	@SimpleProperty(description = "The number label (hashed format), for a custom number type, " +
-			"associated with the phone number, if it exists.")
+	@SimpleProperty(description = "The number label, for a custom number type, " +
+			"associated with the phone number, if it exists. Return in hashed value if HideSensitiveData" +
+			"is set to True")
 	public String NumberLabel(){
 		Log.i(TAG, "returning numberLabel: " + numberLabel);
 		return numberLabel;	
@@ -378,8 +388,8 @@ public class CallLogHistory extends ProbeBase{
 	 * The cached number type (Home, Work, etc) associated 
 	 * with the phone number, if it exists.
 	 */
-	@SimpleProperty(description = "The number type (Home, Work, etc) associated with the phone number, " +
-			"but in hashed format")
+	@SimpleProperty(description = "The number type (Home, Work, etc) associated with the phone number. " +
+			"Return in hashed value if HideSensitiveData is set to True")
 	public String NumberType(){
 		Log.i(TAG, "returning numberLabel: " + numberType);
 		return numberType;	
