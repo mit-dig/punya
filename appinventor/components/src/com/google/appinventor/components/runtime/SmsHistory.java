@@ -329,6 +329,8 @@ public class SmsHistory extends ProbeBase{
 
 		if (afterDate != 0)
 			((JsonObject) dataRequest).addProperty("afterDate", afterDate);
+		
+		((JsonObject) dataRequest).addProperty("hideSensitiveData", privacySafe);
 
 		Log.i(TAG, "CallLog request: " + dataRequest.toString());
 
@@ -366,9 +368,9 @@ public class SmsHistory extends ProbeBase{
 
 
 	/**
-	 * The body of the message. (hashed for privacy reason)
+	 * The body of the message.  
 	 */
-	@SimpleProperty(description = "The  body of the message, hashed for privacy reason. If HideSensitiveData is set " +
+	@SimpleProperty(description = "The  body of the message. If HideSensitiveData is set " +
       "to True then hashed values will be returned for privacy reason.")
 	public String Body(){
 		Log.i(TAG, "returning address of the message: " + address);

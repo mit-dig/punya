@@ -46,7 +46,7 @@ import edu.mit.media.funf.time.TimeUnit;
 		description = "Return information of recent calls. A wrapper around Android.Calllog.Calls " +
 				"(see http://developer.android.com/reference/android/provider/CallLog.Calls.html). " +
 				"Could specifiy \"afterDate\" parameter to only read calllog information after that date. " +
-				"Some of the returning fields (name, number, numberType, numberLabel) are hashed " +
+				"Some of the returning fields (name, number, numberType, numberLabel) can be returned as hashed " +
 				"for privacy reasons" , 
 		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/calllogProbe.png")
 @SimpleObject
@@ -309,13 +309,12 @@ public class CallLogHistory extends ProbeBase{
 		if (afterDate != 0)
 			((JsonObject) dataRequest).addProperty("afterDate", afterDate);
 
+		((JsonObject) dataRequest).addProperty("hideSensitiveData", privacySafe);
 		Log.i(TAG, "CallLog request: " + dataRequest.toString());
 
 		mBoundFunfManager.requestData(listener, dataRequest);
 		
-		
-		
-		
+
 		
 	}
 
