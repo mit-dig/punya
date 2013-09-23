@@ -126,7 +126,9 @@ public class CallLogHistory extends ProbeBase{
 	final Handler myHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-
+			//When sensitive is set to true. Funf will generate all hashed values for all the fields, 
+			// including those that are empty (e.g. numberLabel); 
+			// But if we set to true, then we have to take care of those empty values ourselves.
 			IJsonObject data = (IJsonObject) msg.obj;
 			Log.i(TAG, "Update component's varibles.....");
 			
@@ -148,10 +150,14 @@ public class CallLogHistory extends ProbeBase{
 
 			}else{
 			  //clear text will be returned
-			  name= data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
-			  number = data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
-			  numberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
-			  numberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
+			  name= data.get(ProbeKeys.CallLogKeys.NAME) == null ? "" :
+				  data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
+			  number = data.get(ProbeKeys.CallLogKeys.NUMBER) == null ? "" :
+				  data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
+			  numberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE) == null ? "":
+				  data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
+			  numberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL) == null ? "":
+				  data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
 
 			}
 
@@ -264,17 +270,16 @@ public class CallLogHistory extends ProbeBase{
 		JsonObject newConfig = null;
 		if (this.enabled != enabled)
 			this.enabled = enabled;
-
+		newConfig = new JsonObject();
 		if (enabled) {
 
 			if (afterDate != 0) { // recreate json config
-				newConfig = new JsonObject();
-
 				newConfig.addProperty("afterDate", this.afterDate);
 			}
+			
 	    newConfig.addProperty("hideSensitiveData", privacySafe);
-      probe = gson.fromJson(newConfig, CallLogProbe.class);
-			probe.registerListener(listener);
+	    probe = gson.fromJson(newConfig, CallLogProbe.class);
+		probe.registerListener(listener);
 
 			Log.i(TAG, "run-once config:" + newConfig);
 		} else {

@@ -257,7 +257,7 @@ SensorComponent, OnDestroyListener{
    * Set whether the returned values will be privacy safe (hashed) or not
    */
   
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "True")
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
   @SimpleProperty(description = "If set to True, then sensitive values will be hashed. Note that for some" +
   		" application, only hashed values will be good enough. It's not necessary to read clear " +
   		"text of user information which can cause some privacy issues.")
