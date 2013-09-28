@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,6 +42,9 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
+import com.google.api.client.http.FileContent;
+import com.google.api.services.drive.model.ParentReference;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -113,6 +117,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
   ////////////////
   private String gdFolder;
+  private String gdFolder_id;
   
   //binding to GoogleDriveUploadService and FunfManager Service
   
@@ -440,6 +445,49 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
   public boolean WifiOnly() {
     return wifiOnly;
   }
+    
+  /**
+   * Copy the public master app scripts
+   */
+  @SimpleFunction(description = "Copy the master app scripts to your Google Drive root. It" +
+  		"will return true if successful, otherwise false.")
+  public void CopyFile(String googleDocId) { 
+	final String id = googleDocId;
+    AsynchUtil.runAsynchronously(new Runnable() {
+      public void run() {
+	    File copiedFile = new File();	
+	    copiedFile.setMimeType("application/vnd.google-apps.folder");
+	    copiedFile.setParents(
+	            Arrays.asList(new ParentReference().setId(gdFolder_id)));
+	    try {
+	      service.files().copy(id, copiedFile).execute();
+	    } catch (IOException e) {
+	      System.out.println("An error occurred: " + e);
+	    }
+      }
+    });
+  }
+  
+  /**
+   * Copy the public master app scripts
+   */
+  @SimpleFunction(description = "Create a folder witht the given name.")
+  public void CreateFolder(String folderName) { 
+	final String FolderName = folderName;
+    AsynchUtil.runAsynchronously(new Runnable() {
+      public void run() {
+	    File body = new File();
+	    body.setTitle(FolderName);
+	    body.setMimeType("application/vnd.google-apps.folder");
+	    try {
+	    	File folder = service.files().insert(body).execute();
+	    	gdFolder_id = folder.getId();
+	    } catch (IOException e) {
+	      System.out.println("An error occurred: " + e);
+	    }
+      }
+    });
+  }
   
   /**
    * Start OAuth2 Authentication to ask for user's permission for using Google Drive
@@ -692,8 +740,6 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
   }
   
-  
-  
   /*
    * Upload a file to Google Drive
    */
@@ -713,7 +759,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
         e.printStackTrace();
       }
     }
-    else {
+    else { 
       filePath = filepath;
     }
     
