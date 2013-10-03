@@ -42,6 +42,8 @@ public final class GCMServerUtilities {
     private static final Random random = new Random();
     
     private static final String TAG = "ServerUtilities";
+    //URL for webapp from Google App Scripts (GAS)
+    private static final String GAS_BASE = "https://script.google.com/macros";
     
     //This need to be dynamically assigne.
     //static String SERVER_URL = "";
@@ -53,8 +55,20 @@ public final class GCMServerUtilities {
      */
     static boolean register(final Context context, final String regId, String SERVER_URL) {
         Log.i(TAG, "registering device (regId = " + regId + ")");
-        String serverUrl = SERVER_URL + "/register";
+        String serverUrl = "";        
         Map<String, String> params = new HashMap<String, String>();
+        
+        // If the webapp is from GAS, we need to add redirect url extension to the params because Google
+        // does not allow that.
+        if(SERVER_URL.contains(GAS_BASE)){
+        	serverUrl = SERVER_URL;
+        	params.put("type", "register");
+        	
+        }        
+        else {
+        	serverUrl = SERVER_URL + "/register";
+        }
+        
         params.put("regId", regId);
         long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
         // Once GCM returns a registration id, we need to register it in the
@@ -88,6 +102,8 @@ public final class GCMServerUtilities {
         }
         return false;
     }
+    
+
 
     /**
      * Unregister this account/device pair within the server.

@@ -90,7 +90,7 @@ public abstract class ProbeBase extends AndroidNonvisibleComponent implements
 SensorComponent, OnDestroyListener{
   protected boolean enabled = false; // run once
   protected boolean enabledSchedule = false; // run periodically
-  
+  boolean privacySafe = false; // by default sensitive values clear text
   
   private final String TAG = "ProbeBase";
   /*
@@ -253,6 +253,27 @@ SensorComponent, OnDestroyListener{
   }
 
 
+  /**
+   * Set whether the returned values will be privacy safe (hashed) or not
+   */
+  
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
+  @SimpleProperty(description = "If set to True, then sensitive values will be hashed. Note that for some" +
+  		" application, only hashed values will be good enough. It's not necessary to read clear " +
+  		"text of user information which can cause some privacy issues.")
+  public void HideSensitiveData(boolean hideSensitive){
+    
+    this.privacySafe = hideSensitive;
+  
+  }
+  
+  /**
+   * Indicates whether the returned values will be privacy safe (hashed) or not
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public boolean HideSensitiveData() {
+    return privacySafe;
+  }
   
   /**
    * Set the length of the interval for a re-occurring probe activity. 

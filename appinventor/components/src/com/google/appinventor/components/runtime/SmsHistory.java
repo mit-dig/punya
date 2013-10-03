@@ -101,6 +101,21 @@ public class SmsHistory extends ProbeBase{
 			 *   "timestamp":1335467311.983,
 			 *   "type":2}
 			 */
+			// If privacySafe is set to False. Return clear text
+			
+//			{"address":"+9999999",
+//			 "body":"(1/2)You've got a new voicemail", 
+//			 "date":1379705102582,
+//			 "locked":false,
+//			 "protocol":0,
+//			 "read":true,
+//			 "reply_path_present":false,
+//			 "service_center":"+12404492158",
+//			 "status":-1,
+//			 "thread_id":44,
+//			 "timestamp":1379705102.582,
+//			 "type":1}
+
 
 			 /*
 			  * Some notes for SMS:type (http://stackoverflow.com/questions/8447735/android-sms-type-constants)
@@ -139,29 +154,45 @@ public class SmsHistory extends ProbeBase{
 			IJsonObject data = (IJsonObject) msg.obj;
 			Log.i(TAG, "Update component's varibles.....");
 
-
-			String hashedAddress = data.get(ProbeKeys.SmsKeys.ADDRESS).getAsString();
-			String hashedBody = data.get(ProbeKeys.SmsKeys.BODY).getAsString();
+			//TODO: it's possible that not all fields will exist
  
+			if(privacySafe){
+			  String hashedAddress = data.get(ProbeKeys.SmsKeys.ADDRESS) == null ? "":
+				  data.get(ProbeKeys.SmsKeys.ADDRESS).getAsString();
+			  String hashedBody = data.get(ProbeKeys.SmsKeys.BODY) == null ? "":
+				  data.get(ProbeKeys.SmsKeys.BODY).getAsString();
+			  
+			  if (hashedAddress != ""){
+				  JsonObject addrJson = jsonParser.parse(hashedAddress).getAsJsonObject();
+				  address = addrJson.get("ONE_WAY_HASH").getAsString();
+			  }
+			  else{
+				  address = "";
+			  }
+			  if (hashedBody != ""){
+				  JsonObject bodyjson = jsonParser.parse(hashedBody).getAsJsonObject();
+				  body = bodyjson.get("ONE_WAY_HASH").getAsString();
+			  }
+			  else{
+				  body = "";
+			  }
+			}
+			else{
 
-			JsonObject addrJson = jsonParser.parse(hashedAddress).getAsJsonObject();
-			JsonObject bodyson = jsonParser.parse(hashedBody).getAsJsonObject();
+			  address = (data.get(ProbeKeys.SmsKeys.ADDRESS) == null) ? "" : 
+				  data.get(ProbeKeys.SmsKeys.ADDRESS).getAsString(); 
 
+			  body = (data.get(ProbeKeys.SmsKeys.BODY) == null) ? "" : 
+				  data.get(ProbeKeys.SmsKeys.BODY).getAsString();
+			}
 
-
-			address = addrJson.get("ONE_WAY_HASH").getAsString();
-			body = bodyson.get("ONE_WAY_HASH").getAsString();
 			date = data.get(ProbeKeys.SmsKeys.DATE).getAsLong();
 			read = data.get(ProbeKeys.SmsKeys.READ).getAsBoolean();
 
 			// get the string representation of sms type
 			type = getTypeName(data.get(ProbeKeys.SmsKeys.TYPE).getAsInt());
 
-			Log.i(TAG, "DEBUG TYPE: " + type);
-
-
 			SmsInfoReceived();
- 
 
 		}
 
@@ -221,8 +252,11 @@ public class SmsHistory extends ProbeBase{
 	 * for example "2012-06-01 20:00:00" will read all SMS after June 1, 8pm
 	 * Empty value will return all SMS messages
 	 */
-	@SimpleFunction(description = "Specify the date after which the SMS messages occurred. The formate should be \"YYYY-MM-DD HH:mm:ss\"")
-	@SimpleProperty
+
+	@SimpleFunction (description = "Specify the date after which the SMS messages occurred. " +
+			"The formate should be \"YYYY-MM-DD HH:mm:ss\". Note everytime when the SMS messages are read, one needs to" +
+			"reset AfterDate if likes to read those messages again." +
+			"")
 	public void AfterDate(String datePoint) {
 
 		Date date = null;
@@ -246,6 +280,8 @@ public class SmsHistory extends ProbeBase{
 
 
 	}
+	
+
 
 
   @SimpleFunction(description = "Enable sms history sensor to run once")
@@ -255,15 +291,15 @@ public class SmsHistory extends ProbeBase{
 		JsonObject newConfig = null;
 		if (this.enabled != enabled)
 			this.enabled = enabled;
-
+		newConfig = new JsonObject();
 		if (enabled) {
 
 			if (afterDate != 0) { // recreate json config
-				newConfig = new JsonObject();
-
 				newConfig.addProperty("afterDate", this.afterDate);
-				probe = gson.fromJson(newConfig, SmsProbe.class);
-			}
+			}	
+			
+			newConfig.addProperty("hideSensitiveData", privacySafe);
+			probe = gson.fromJson(newConfig, SmsProbe.class);
 
 			probe.registerListener(listener);
 
@@ -293,6 +329,8 @@ public class SmsHistory extends ProbeBase{
 
 		if (afterDate != 0)
 			((JsonObject) dataRequest).addProperty("afterDate", afterDate);
+		
+		((JsonObject) dataRequest).addProperty("hideSensitiveData", privacySafe);
 
 		Log.i(TAG, "CallLog request: " + dataRequest.toString());
 
@@ -321,7 +359,8 @@ public class SmsHistory extends ProbeBase{
 	/**
 	 * The phone number associated with message. (hashed for privacy reason)
 	 */
-	@SimpleProperty(description = "The  address (phone number) associated with message, hashed for privacy reason. ")
+	@SimpleProperty(description = "The  address (phone number) associated with message. If HideSensitiveData is set " +
+			"to True then hashed values will be returned for privacy reason.")
 	public String Address(){
 		Log.i(TAG, "returning address of the message: " + address);
 		return address;	
@@ -329,9 +368,10 @@ public class SmsHistory extends ProbeBase{
 
 
 	/**
-	 * The body of the message. (hashed for privacy reason)
+	 * The body of the message.  
 	 */
-	@SimpleProperty(description = "The  body of the message, hashed for privacy reason. ")
+	@SimpleProperty(description = "The  body of the message. If HideSensitiveData is set " +
+      "to True then hashed values will be returned for privacy reason.")
 	public String Body(){
 		Log.i(TAG, "returning address of the message: " + address);
 		return body;	
