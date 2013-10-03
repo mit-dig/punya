@@ -273,8 +273,6 @@ public class YaVersion {
   // - The Google Drive component was added
   // FOR YOUNG_ANDROID_VERSION 101
   // - The Contact info component was added
-  
-  
   public static final int YOUNG_ANDROID_VERSION = 101;
 
   // ............................... Blocks Language Version Number ...............................
@@ -535,7 +533,9 @@ public class YaVersion {
   // For LISTPICKER_COMPONENT_VERSION 6:
   // - The getIntent method was modified to provide the ListPickerActivity
   //   with the parent Form's open screen animation.
-  public static final int LISTPICKER_COMPONENT_VERSION = 6;
+  // For LISTPICKER_COMPONENT_VERSION 7:
+  // - Added ShowFilterBar property
+  public static final int LISTPICKER_COMPONENT_VERSION = 7;
 
   // For LOCATIONSENSOR_COMPONENT_VERSION 2:
   // - The TimeInterval and DistanceInterval properties were added.

@@ -9,6 +9,8 @@ import java.util.Formatter;
 import java.security.MessageDigest;
 
 import android.app.Activity;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.NetworkInfo;
@@ -100,22 +102,47 @@ public class PhoneStatus extends AndroidNonvisibleComponent implements Component
     return sb.toString();
   }
 
-  @SimpleFunction(description = "Returns true if we are running in the emulator")
-  public boolean isEmulator() {
-    if (Build.FINGERPRINT.startsWith("generic"))
-      return true;
-    return false;
+  @SimpleFunction(description = "Returns true if we are running in the emulator or USB Connection")
+  public boolean isDirect() {
+    if (form instanceof ReplForm) {
+      return ((ReplForm)form).isDirect();
+    } else {
+      return false;
+    }
   }
 
   @SimpleFunction(description = "Start the internal AppInvHTTPD to listen for incoming forms. FOR REPL USE ONLY!")
-  public void startHTTPD() {
-    ReplForm.topform.startHTTPD();
+  public void startHTTPD(boolean secure) {
+    ReplForm.topform.startHTTPD(secure);
   }
 
   @SimpleFunction(description = "Declare that we have loaded our initial assets and other assets should come from the sdcard")
   public void setAssetsLoaded() {
     if (form instanceof ReplForm) {
       ((ReplForm) form).setAssetsLoaded();
+    }
+  }
+
+  @SimpleFunction(description = "Causes an Exception, used to debug exception processing.")
+  public static void doFault() throws Exception {
+    throw new Exception("doFault called!");
+    // Thread t = new Thread(new Runnable() { // Cause an exception in a background thread to test bugsense
+    //  public void run() {
+    //    String nonesuch = null;
+    //    String causefault = nonesuch.toString(); // This should cause a null pointer fault.
+    //  }
+    //   });
+    // t.start();
+  }
+
+  @SimpleFunction(description = "Obtain the Android Application Version")
+  public String getVersionName() {
+    try {
+      PackageInfo pInfo = form.getPackageManager().getPackageInfo(form.getPackageName(), 0);
+      return (pInfo.versionName);
+    } catch (NameNotFoundException e) {
+      Log.e(LOG_TAG, "Exception fetching package name.", e);
+      return ("");
     }
   }
 

@@ -128,7 +128,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
     public GoogleCloudMessaging(ComponentContainer container) {
         super(container.$form());
-
+        form.registerForOnDestroy(this);
+        
         // Set up listeners
         context = container.$context();
         mainUIThreadActivity = container.$context();
@@ -153,9 +154,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         Log.i(TAG,"The initial value of the gcmMessage is "+gcmMessage);
     }
     
-    @SimpleFunction(description = "check to see if there is an exisiting preference for the GCM; if " +
-    		"there is, enables the listeners.")
-    public void checkAndSetPreference() {
+    // check to see if there is an exisiting preference for the GCM; if there is, enables the listeners.
+    private void checkAndSetPreference() {
         Log.i(TAG, "Checking the preference now, either in or out");
         //check for if there is an exisiting preference for the GCM; if there is, enables the listeners.
         if(sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "").equals("in")) {
@@ -185,7 +185,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @Override
     public void onDestroy() {
         // remember to unbind
-        doUnbindService();
+        Log.i(TAG, "My GoogleCloudMessaging.java got destroyed");
+        if (mIsBound && mConnection != null) {
+          Log.i(TAG, "In the onDestroy method, before the doUnbindService method.");
+          doUnbindService();
+          Log.i(TAG, "In the onDestroy method, after the doUnbindService method.");
+        }
     }
 
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
@@ -237,6 +242,11 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @SimpleFunction()
     public boolean isRegistered(){
         return GCMRegistrar.isRegisteredOnServer(form);
+    }
+    
+    @SimpleFunction()
+    public boolean areServicesReadied(){
+        return mIsBound;
     }
     
     /**
@@ -360,7 +370,9 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             // cast its IBinder to a concrete class and directly access it.
             mBoundGCMIntentService = ((GCMIntentService.LocalBinder) service)
                     .getService();
-            Log.i(TAG, "Bound to GCMIntentService");           
+            mIsBound = true;
+            Log.i(TAG, "Bound to GCMIntentService");  
+            checkAndSetPreference();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -369,6 +381,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             // Because it is running in our same process, we should never
             // see this happen.
             mBoundGCMIntentService = null;
+            mIsBound = false;
             Log.i(TAG, "Unbind GCMIntentService");
         }
     };
@@ -380,7 +393,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         // supporting component replacement by other applications).
         mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
                 GCMIntentService.class), mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
         Log.i(TAG,
                 "GCMIntentService is bound, and now we could have register dataRequests");
     }

@@ -357,6 +357,10 @@ public interface OdeMessages extends Messages {
   @Description("Error shown when a new component name would be the same as an existing one")
   String duplicateComponentNameError();
 
+  @DefaultMessage("Component instance names cannot be the same as a component type")
+  @Description("Error shown when a new component name would be the same as a component type name")
+  String sameAsComponentTypeNameError();
+
   @DefaultMessage("Component name cannot be any of the following: CsvUtil, Double, Float, " +
       "Integer, JavaCollection, JavaIterator, KawaEnvironment, Long, Short, SimpleForm, String, " +
       "Pattern, YailList, YailNumberToString, YailRuntimeError")
@@ -1172,7 +1176,7 @@ public interface OdeMessages extends Messages {
   String wirelessButton();
 
   @DefaultMessage("Disconnect Companion")
-  @Description("Message providing details about starting the wireless connection.")
+  @Description("Message providing details about disconnecting a wireless connection.")
   String wirelessButtonConnected();
 
   @DefaultMessage("Connect Emulator")
@@ -1180,7 +1184,7 @@ public interface OdeMessages extends Messages {
   String emulatorButton();
 
   @DefaultMessage("Disconnect Emulator")
-  @Description("Message providing details about starting the emulator connection.")
+  @Description("Message providing details about disconnecting an emulator connection.")
   String emulatorButtonConnected();
   
   // Used in
@@ -1194,4 +1198,11 @@ public interface OdeMessages extends Messages {
   @Description("Change the project settings")
   String changeSettingsButton();
 
+  @DefaultMessage("Connect via USB")
+  @Description("Message providing details about starting a USB connection.")
+  String usbButton();
+
+  @DefaultMessage("Disconnect USB")
+  @Description("Message providing details about disconnecting a USB connection.")
+  String usbButtonConnected();
 }
