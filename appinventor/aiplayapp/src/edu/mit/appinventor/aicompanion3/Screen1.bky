@@ -1,5 +1,5 @@
 <xml xmlns="http://www.w3.org/1999/xhtml">
-  <block type="ConnectButton_Click" x="4" y="5">
+  <block type="ConnectButton_Click" x="4" y="4">
     <title name="COMPONENT_SELECTOR">ConnectButton</title>
     <statement name="DO">
       <block type="CodeBox_HideKeyboard">
@@ -22,7 +22,107 @@
       </block>
     </statement>
   </block>
-  <block type="BarcodeScanner1_AfterScan" x="1120" y="5">
+  <block type="procedures_defnoreturn" x="690" y="4">
+    <mutation></mutation>
+    <title name="NAME">startdirectconnect</title>
+    <statement name="STACK">
+      <block type="local_declaration_statement" inline="false">
+        <mutation>
+          <localname name="name"></localname>
+        </mutation>
+        <title name="VAR0">ignore</title>
+        <value name="DECL0">
+          <block type="text">
+            <title name="TEXT"></title>
+          </block>
+        </value>
+        <statement name="STACK">
+          <block type="lexical_variable_set" inline="false">
+            <title name="VAR">ignore</title>
+            <value name="VALUE">
+              <block type="PhoneStatus1_setHmacSeedReturnCode" inline="false">
+                <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+                <value name="ARG0">
+                  <block type="text">
+                    <title name="TEXT">emulator</title>
+                  </block>
+                </value>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <next>
+          <block type="PhoneStatus1_startHTTPD" inline="false">
+            <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+            <value name="ARG0">
+              <block type="logic_boolean">
+                <title name="BOOL">TRUE</title>
+              </block>
+            </value>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" x="1806" y="4">
+    <mutation></mutation>
+    <title name="NAME">badversion</title>
+    <statement name="STACK">
+      <block type="ErrorLabel_setproperty" inline="false">
+        <mutation yailtype="text"></mutation>
+        <title name="COMPONENT_SELECTOR">ErrorLabel</title>
+        <title name="PROP">Text</title>
+        <value name="VALUE">
+          <block type="text">
+            <title name="TEXT">The version of App Inventor you are using is not compatible with this Companion app. </title>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="ScanButton_Click" x="4" y="145">
+    <title name="COMPONENT_SELECTOR">ScanButton</title>
+    <statement name="DO">
+      <block type="BarcodeScanner1_DoScan">
+        <title name="COMPONENT_SELECTOR">BarcodeScanner1</title>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" x="690" y="210">
+    <mutation>
+      <arg name="x"></arg>
+    </mutation>
+    <title name="NAME">doconnect</title>
+    <statement name="STACK">
+      <block type="procedures_callnoreturn" inline="false">
+        <mutation name="callrendezvous">
+          <arg name="code"></arg>
+        </mutation>
+        <title name="PROCNAME">callrendezvous</title>
+        <value name="ARG0">
+          <block type="PhoneStatus1_setHmacSeedReturnCode" inline="false">
+            <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+            <value name="ARG0">
+              <block type="lexical_variable_get">
+                <title name="VAR">x</title>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="PhoneStatus1_startHTTPD" inline="false">
+            <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+            <value name="ARG0">
+              <block type="logic_false">
+                <title name="BOOL">FALSE</title>
+              </block>
+            </value>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="BarcodeScanner1_AfterScan" x="4" y="235">
     <title name="COMPONENT_SELECTOR">BarcodeScanner1</title>
     <statement name="DO">
       <block type="CodeBox_setproperty" inline="false">
@@ -50,7 +150,151 @@
       </block>
     </statement>
   </block>
-  <block type="procedures_defnoreturn" x="4" y="146">
+  <block type="Screen1_Initialize" x="4" y="401">
+    <title name="COMPONENT_SELECTOR">Screen1</title>
+    <statement name="DO">
+      <block type="ScanButton_setproperty" inline="false">
+        <mutation yailtype="number"></mutation>
+        <title name="COMPONENT_SELECTOR">ScanButton</title>
+        <title name="PROP">BackgroundColor</title>
+        <value name="VALUE">
+          <block type="color_green">
+            <title name="COLOR">#009900</title>
+          </block>
+        </value>
+        <next>
+          <block type="ConnectButton_setproperty" inline="false">
+            <mutation yailtype="number"></mutation>
+            <title name="COMPONENT_SELECTOR">ConnectButton</title>
+            <title name="PROP">BackgroundColor</title>
+            <value name="VALUE">
+              <block type="color_green">
+                <title name="COLOR">#ffcc00</title>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" inline="false">
+                <mutation else="1"></mutation>
+                <value name="IF0">
+                  <block type="PhoneStatus1_isDirect">
+                    <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="EmulatorPanel_setproperty" inline="false">
+                    <mutation yailtype="boolean"></mutation>
+                    <title name="COMPONENT_SELECTOR">PhonePanel</title>
+                    <title name="PROP">Visible</title>
+                    <value name="VALUE">
+                      <block type="logic_false">
+                        <title name="BOOL">FALSE</title>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="EmulatorPanel_setproperty" inline="false">
+                        <mutation yailtype="boolean"></mutation>
+                        <title name="COMPONENT_SELECTOR">EmulatorPanel</title>
+                        <title name="PROP">Visible</title>
+                        <value name="VALUE">
+                          <block type="logic_boolean">
+                            <title name="BOOL">TRUE</title>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="IPContainer_setproperty" inline="false">
+                            <mutation yailtype="boolean"></mutation>
+                            <title name="COMPONENT_SELECTOR">IPContainer</title>
+                            <title name="PROP">Visible</title>
+                            <value name="VALUE">
+                              <block type="logic_boolean">
+                                <title name="BOOL">FALSE</title>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="procedures_callnoreturn">
+                                <mutation name="startdirectconnect"></mutation>
+                                <title name="PROCNAME">startdirectconnect</title>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <statement name="ELSE">
+                  <block type="EmulatorPanel_setproperty" inline="false">
+                    <mutation yailtype="boolean"></mutation>
+                    <title name="COMPONENT_SELECTOR">PhonePanel</title>
+                    <title name="PROP">Visible</title>
+                    <value name="VALUE">
+                      <block type="logic_boolean">
+                        <title name="BOOL">TRUE</title>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="EmulatorPanel_setproperty" inline="false">
+                        <mutation yailtype="boolean"></mutation>
+                        <title name="COMPONENT_SELECTOR">EmulatorPanel</title>
+                        <title name="PROP">Visible</title>
+                        <value name="VALUE">
+                          <block type="logic_false">
+                            <title name="BOOL">FALSE</title>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="ipaddrlabel_setproperty" inline="false">
+                            <mutation yailtype="text"></mutation>
+                            <title name="COMPONENT_SELECTOR">ipaddrlabel</title>
+                            <title name="PROP">Text</title>
+                            <value name="VALUE">
+                              <block type="PhoneStatus1_GetWifiIpAddress">
+                                <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="IPContainer_setproperty" inline="false">
+                                <mutation yailtype="boolean"></mutation>
+                                <title name="COMPONENT_SELECTOR">IPContainer</title>
+                                <title name="PROP">Visible</title>
+                                <value name="VALUE">
+                                  <block type="logic_boolean">
+                                    <title name="BOOL">TRUE</title>
+                                  </block>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="PhoneStatus1_setAssetsLoaded">
+                    <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+                    <next>
+                      <block type="versionlabel_setproperty" inline="false">
+                        <mutation yailtype="text"></mutation>
+                        <title name="COMPONENT_SELECTOR">versionlabel</title>
+                        <title name="PROP">Text</title>
+                        <value name="VALUE">
+                          <block type="PhoneStatus1_getVersionName">
+                            <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" x="690" y="401">
     <mutation>
       <arg name="code"></arg>
     </mutation>
@@ -113,228 +357,6 @@
             </value>
           </block>
         </value>
-      </block>
-    </statement>
-  </block>
-  <block type="procedures_defnoreturn" x="1120" y="171">
-    <mutation></mutation>
-    <title name="NAME">badversion</title>
-    <statement name="STACK">
-      <block type="ErrorLabel_setproperty" inline="false">
-        <mutation yailtype="text"></mutation>
-        <title name="COMPONENT_SELECTOR">ErrorLabel</title>
-        <title name="PROP">Text</title>
-        <value name="VALUE">
-          <block type="text">
-            <title name="TEXT">The version of App Inventor you are using is not compatible with this Companion app. </title>
-          </block>
-        </value>
-      </block>
-    </statement>
-  </block>
-  <block type="procedures_defnoreturn" x="1120" y="261">
-    <mutation></mutation>
-    <title name="NAME">startemulator</title>
-    <statement name="STACK">
-      <block type="local_declaration_statement" inline="false">
-        <mutation>
-          <localname name="name"></localname>
-        </mutation>
-        <title name="VAR0">ignore</title>
-        <value name="DECL0">
-          <block type="text">
-            <title name="TEXT"></title>
-          </block>
-        </value>
-        <statement name="STACK">
-          <block type="lexical_variable_set" inline="false">
-            <title name="VAR">ignore</title>
-            <value name="VALUE">
-              <block type="PhoneStatus1_setHmacSeedReturnCode" inline="false">
-                <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
-                <value name="ARG0">
-                  <block type="text">
-                    <title name="TEXT">emulator</title>
-                  </block>
-                </value>
-              </block>
-            </value>
-          </block>
-        </statement>
-        <next>
-          <block type="PhoneStatus1_startHTTPD">
-            <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
-          </block>
-        </next>
-      </block>
-    </statement>
-  </block>
-  <block type="procedures_defnoreturn" x="4" y="411">
-    <mutation>
-      <arg name="x"></arg>
-    </mutation>
-    <title name="NAME">doconnect</title>
-    <statement name="STACK">
-      <block type="procedures_callnoreturn" inline="false">
-        <mutation name="callrendezvous">
-          <arg name="code"></arg>
-        </mutation>
-        <title name="PROCNAME">callrendezvous</title>
-        <value name="ARG0">
-          <block type="PhoneStatus1_setHmacSeedReturnCode" inline="false">
-            <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
-            <value name="ARG0">
-              <block type="lexical_variable_get">
-                <title name="VAR">x</title>
-              </block>
-            </value>
-          </block>
-        </value>
-        <next>
-          <block type="PhoneStatus1_startHTTPD">
-            <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
-          </block>
-        </next>
-      </block>
-    </statement>
-  </block>
-  <block type="Screen1_Initialize" x="1120" y="441">
-    <title name="COMPONENT_SELECTOR">Screen1</title>
-    <statement name="DO">
-      <block type="ScanButton_setproperty" inline="false">
-        <mutation yailtype="number"></mutation>
-        <title name="COMPONENT_SELECTOR">ScanButton</title>
-        <title name="PROP">BackgroundColor</title>
-        <value name="VALUE">
-          <block type="color_green">
-            <title name="COLOR">#009900</title>
-          </block>
-        </value>
-        <next>
-          <block type="ConnectButton_setproperty" inline="false">
-            <mutation yailtype="number"></mutation>
-            <title name="COMPONENT_SELECTOR">ConnectButton</title>
-            <title name="PROP">BackgroundColor</title>
-            <value name="VALUE">
-              <block type="color_green">
-                <title name="COLOR">#ffcc00</title>
-              </block>
-            </value>
-            <next>
-              <block type="controls_if" inline="false">
-                <mutation else="1"></mutation>
-                <value name="IF0">
-                  <block type="PhoneStatus1_isEmulator">
-                    <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
-                  </block>
-                </value>
-                <statement name="DO0">
-                  <block type="EmulatorPanel_setproperty" inline="false">
-                    <mutation yailtype="boolean"></mutation>
-                    <title name="COMPONENT_SELECTOR">PhonePanel</title>
-                    <title name="PROP">Visible</title>
-                    <value name="VALUE">
-                      <block type="logic_false">
-                        <title name="BOOL">FALSE</title>
-                      </block>
-                    </value>
-                    <next>
-                      <block type="EmulatorPanel_setproperty" inline="false">
-                        <mutation yailtype="boolean"></mutation>
-                        <title name="COMPONENT_SELECTOR">EmulatorPanel</title>
-                        <title name="PROP">Visible</title>
-                        <value name="VALUE">
-                          <block type="logic_boolean">
-                            <title name="BOOL">TRUE</title>
-                          </block>
-                        </value>
-                        <next>
-                          <block type="IPContainer_setproperty" inline="false">
-                            <mutation yailtype="boolean"></mutation>
-                            <title name="COMPONENT_SELECTOR">IPContainer</title>
-                            <title name="PROP">Visible</title>
-                            <value name="VALUE">
-                              <block type="logic_boolean">
-                                <title name="BOOL">FALSE</title>
-                              </block>
-                            </value>
-                            <next>
-                              <block type="procedures_callnoreturn">
-                                <mutation name="startemulator"></mutation>
-                                <title name="PROCNAME">startemulator</title>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </statement>
-                <statement name="ELSE">
-                  <block type="EmulatorPanel_setproperty" inline="false">
-                    <mutation yailtype="boolean"></mutation>
-                    <title name="COMPONENT_SELECTOR">PhonePanel</title>
-                    <title name="PROP">Visible</title>
-                    <value name="VALUE">
-                      <block type="logic_boolean">
-                        <title name="BOOL">TRUE</title>
-                      </block>
-                    </value>
-                    <next>
-                      <block type="EmulatorPanel_setproperty" inline="false">
-                        <mutation yailtype="boolean"></mutation>
-                        <title name="COMPONENT_SELECTOR">EmulatorPanel</title>
-                        <title name="PROP">Visible</title>
-                        <value name="VALUE">
-                          <block type="logic_false">
-                            <title name="BOOL">FALSE</title>
-                          </block>
-                        </value>
-                        <next>
-                          <block type="ipaddrlabel_setproperty" inline="false">
-                            <mutation yailtype="text"></mutation>
-                            <title name="COMPONENT_SELECTOR">ipaddrlabel</title>
-                            <title name="PROP">Text</title>
-                            <value name="VALUE">
-                              <block type="PhoneStatus1_GetWifiIpAddress">
-                                <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
-                              </block>
-                            </value>
-                            <next>
-                              <block type="IPContainer_setproperty" inline="false">
-                                <mutation yailtype="boolean"></mutation>
-                                <title name="COMPONENT_SELECTOR">IPContainer</title>
-                                <title name="PROP">Visible</title>
-                                <value name="VALUE">
-                                  <block type="logic_boolean">
-                                    <title name="BOOL">TRUE</title>
-                                  </block>
-                                </value>
-                              </block>
-                            </next>
-                          </block>
-                        </next>
-                      </block>
-                    </next>
-                  </block>
-                </statement>
-                <next>
-                  <block type="PhoneStatus1_setAssetsLoaded">
-                    <title name="COMPONENT_SELECTOR">PhoneStatus1</title>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </next>
-      </block>
-    </statement>
-  </block>
-  <block type="ScanButton_Click" x="4" y="577">
-    <title name="COMPONENT_SELECTOR">ScanButton</title>
-    <statement name="DO">
-      <block type="BarcodeScanner1_DoScan">
-        <title name="COMPONENT_SELECTOR">BarcodeScanner1</title>
       </block>
     </statement>
   </block>
