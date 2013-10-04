@@ -1051,7 +1051,7 @@ public class Form extends FragmentActivity
    * @return  width property used by the layout
    */
   @SimpleProperty(category = PropertyCategory.APPEARANCE)
-  public int set() {
+  public int Width() {
     return frameLayout.getWidth();
   }
 
