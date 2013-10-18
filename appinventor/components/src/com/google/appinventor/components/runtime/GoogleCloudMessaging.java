@@ -245,7 +245,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     }
     
     @SimpleFunction()
-    public boolean areServicesReadied(){
+    public boolean isServiceReady(){
         return mIsBound;
     }
     
