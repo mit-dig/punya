@@ -33,6 +33,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     // notification
     private static final String ARGUMENT_GCM = "APP_INVENTOR_GCM";
+    private static final String GCM_MESSAGE_PLAYLOAD_KEY = "gcmMessage";
     private Notification notification;
     private PendingIntent mContentIntent;
     private NotificationManager mNM;
@@ -55,6 +56,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "Received message");        
         Log.i(TAG, "The context is"+context.toString());
         mainUIThreadContext = context;
+        String newMessage;
         
         PACKAGE_NAME = mainUIThreadContext.getPackageName();
         Log.i(TAG,"The package name is "+PACKAGE_NAME+".");
@@ -65,7 +67,12 @@ public class GCMIntentService extends GCMBaseIntentService {
         mNM = (NotificationManager) mainUIThreadContext.getSystemService(ns);
         Log.i(TAG, "After creating the GCMIntentService");  
         
-        String newMessage = intent.getExtras().getString("gcmMessage");                
+        if (!intent.getExtras().containsKey(GCM_MESSAGE_PLAYLOAD_KEY)) {
+        	newMessage = "Error: This message didn't contain the gcmMessage field in the extras.";
+        } else {
+            newMessage = intent.getExtras().getString(GCM_MESSAGE_PLAYLOAD_KEY); 
+        }
+        
         sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
