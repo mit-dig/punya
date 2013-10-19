@@ -87,6 +87,7 @@ public final class TextBox extends TextBoxBase {
     super(container, new EditText(container.$context()));
     NumbersOnly(false);
     MultiLine(false);
+    SubjectIdentifier(false);
 
     // We need to set the IME options here.  Otherwise, Android's default
     // behavior is that the action button will be Done or Next, depending on

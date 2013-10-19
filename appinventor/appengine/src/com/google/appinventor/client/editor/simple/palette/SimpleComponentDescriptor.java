@@ -124,6 +124,8 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/survey.png", images.survey());
     bundledImages.put("images/googledrive.png", images.googledrive());   
 
+    bundledImages.put("images/semanticWeb.png", images.semanticWeb());
+
     imagesInitialized = true;
   }
 
@@ -304,20 +306,17 @@ public final class SimpleComponentDescriptor {
     } else if (name.equals(MockWebViewer.TYPE)) {
       return new MockWebViewer(editor);
     } else if (name.equals(MockSurvey.TYPE)){
-<<<<<<< HEAD
         return new MockSurvey(editor);  
     } else if (name.equals(MockGoogleMap.TYPE)){
       return new MockGoogleMap(editor);
-    } else {
-=======
-      return new MockSurvey(editor);
-    } else if (name.equals(MockLDVisualization.TYPE)){
-      return new MockLDVisualization(editor);
+    } else if (name.equals(MockSemanticForm.TYPE)) {
+      return new MockSemanticForm(editor);
+    } else if (name.equals(MockSWListPicker.TYPE)) {
+      return new MockSWListPicker(editor);
     } else if (name.equals(MockGoogleMap.TYPE)){
       return new MockGoogleMap(editor);
     }
       else {
->>>>>>> develop
       // TODO(user): add 3rd party mock component proxy here
       throw new UnsupportedOperationException("unknown component: " + name);
     }

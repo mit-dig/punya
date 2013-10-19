@@ -271,9 +271,14 @@ public class YaVersion {
   // - The Survey component was added
   // FOR YOUNG_ANDROID_VERSION 100
   // - The Google Drive component was added
-  
+  // For YOUNG_ANDROID_VERSION 101:
+  // - SEMANTIC_FORM_COMPONENT_VERSION was added.
+  // - SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION was added.
+  // - TEXTBOX_COMPONENT_VERSION was incremented to 5.
+
   
   public static final int YOUNG_ANDROID_VERSION = 100;
+
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -628,7 +633,9 @@ public class YaVersion {
   // For TEXTBOX_COMPONENT_VERSION 4:
   // - The HideKeyboard method was added.
   // - The MultiLine property was added.
-  public static final int TEXTBOX_COMPONENT_VERSION = 4;
+  // For TEXTBOX_COMPONENT_VERSION 5:
+  // - Implementation of LDComponent was added.
+  public static final int TEXTBOX_COMPONENT_VERSION = 5;
 
   public static final int TEXTTOSPEECH_COMPONENT_VERSION = 1;
 
@@ -710,6 +717,10 @@ public class YaVersion {
   public static final int SEMANTIC_WEB_COMPONENT_VERSION = 1;
   
   public static final int LINKED_DATA_COMPONENT_VERSION = 1;
+
+  public static final int SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION = 1;
+
+  public static final int SEMANTIC_FORM_COMPONENT_VERSION = 1;
   
   public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
 

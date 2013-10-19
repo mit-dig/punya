@@ -142,6 +142,21 @@
     <servlet-name>projectService</servlet-name>
   </filter-mapping>
 
+  <!-- semantic web -->
+  <servlet>
+    <servlet-name>semwebService</servlet-name>
+    <servlet-class>com.google.appinventor.server.SemWebServiceImpl</servlet-class>
+    <load-on-startup>10</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>semwebService</servlet-name>
+    <url-pattern>/ode/semweb</url-pattern>
+  </servlet-mapping>
+  <filter-mapping>
+    <filter-name>odeAuthFilter</filter-name>
+    <servlet-name>semwebService</servlet-name>
+  </filter-mapping>
+
   <!-- upload -->
   <servlet>
     <servlet-name>uploadServlet</servlet-name>

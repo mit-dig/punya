@@ -12,7 +12,7 @@ import android.app.Activity;
  * interface.
  *
  */
-public interface ComponentContainer {
+public interface ComponentContainer extends Iterable<AndroidViewComponent> {
   /**
    * Returns the activity context (which can be retrieved from the root
    * container - aka the form).

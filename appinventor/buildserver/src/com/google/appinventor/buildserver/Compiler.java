@@ -58,6 +58,9 @@ public final class Compiler {
   // Kawa and DX processes can use a lot of memory. We only launch one Kawa or DX process at a time.
   private static final Object SYNC_KAWA_OR_DX = new Object();
 
+  private static final String SWLIST_ACTIVITY_CLASS =
+      "com.google.appinventor.components.runtime.SWListActivity";
+
   // TODO(sharon): temporary until we add support for new activities
   private static final String LIST_ACTIVITY_CLASS =
       "com.google.appinventor.components.runtime.ListPickerActivity";
@@ -478,6 +481,11 @@ public final class Compiler {
         out.write("    </activity>\n");
       }
 
+      // SWListActivity
+      out.write("    <activity android:name=\"" + SWLIST_ACTIVITY_CLASS + "\" " +
+          "android:configChanges=\"orientation|keyboardHidden\" " +
+          "android:screenOrientation=\"behind\">\n");
+      out.write("    </activity>\n");
       // ListPickerActivity
       out.write("    <activity android:name=\"" + LIST_ACTIVITY_CLASS + "\" " +
           "android:configChanges=\"orientation|keyboardHidden\" " +

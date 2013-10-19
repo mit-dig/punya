@@ -16,13 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-<<<<<<< HEAD
 import java.security.cert.Certificate;
-=======
-
-import java.security.cert.Certificate;
-
->>>>>>> develop
 import com.google.appinventor.server.storage.StorageIo;
 import com.google.appinventor.server.storage.StorageIoInstanceHolder;
 import com.google.appinventor.shared.rpc.user.User;
@@ -87,6 +81,7 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
   public void deleteUserFile(String fileName) {
     storageIo.deleteUserFile(userInfoProvider.getUserId(), fileName);
   }
+
   
     /**
      * Get the SHA1 fingerprint for the user's keystore

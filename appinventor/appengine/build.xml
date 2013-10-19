@@ -124,6 +124,20 @@
     <!-- gwt libs -->
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/gwt_jquery/gwt-jquery1.1.jar" />
+    <!-- jena libs -->
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/jcl-over-slf4j-1.6.4.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/jena-arq-2.10.0.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/jena-core-2.10.0.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/jena-iri-0.9.5.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/jena-larq-1.0.1-SNAPSHOT.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/lucene/lucene-core-3.6.2.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/httpclient/httpclient-4.2.3.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/httpclient/httpcore-4.2.4.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/slf4j-api-1.6.4.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/slf4j-log4j12-1.6.4.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/xercesImpl-2.10.0.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/xml-apis-1.4.01.jar" />
     <!-- Add any additional server libs that need to be copied -->
     <copy todir="${build.war.dir}/WEB-INF/lib" flatten="true">
       <fileset dir="${appengine.sdk}/lib/user" includes="**/*.jar"/>
@@ -307,6 +321,7 @@
         <pathelement location="${lib.dir}/guava/guava-14.0.1.jar" /> 
         <pathelement location="${lib.dir}/gwt_dragdrop/gwt-dnd-3.2.3.jar" />
         <pathelement location="${lib.dir}/gwt_incubator/gwt-incubator-20101117-r1766.jar" />
+        <pathelement location="${lib.dir}/gwt_jquery/gwt-jquery1.1.jar" />
         <!-- gwt libs -->
         <pathelement location="${gwt.sdk}/gwt-user.jar"/>
       </classpath>
@@ -356,6 +371,7 @@
         <pathelement location="${lib.dir}/guava/guava-gwt-14.0.1.jar" />
         <pathelement location="${lib.dir}/gwt_dragdrop/gwt-dnd-3.2.3.jar" />
         <pathelement location="${lib.dir}/gwt_incubator/gwt-incubator-20101117-r1766.jar" />
+        <pathelement location="${lib.dir}/gwt_jquery/gwt-jquery1.1.jar" />
         <!-- gwt libs -->
         <pathelement location="${gwt.sdk}/gwt-dev.jar"/>
         <pathelement location="${gwt.sdk}/gwt-user.jar"/>
