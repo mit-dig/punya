@@ -28,21 +28,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleFunction;
+import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
@@ -52,7 +53,6 @@ import com.google.appinventor.components.runtime.collect.Lists;
 import com.google.appinventor.components.runtime.collect.Maps;
 import com.google.appinventor.components.runtime.collect.Sets;
 import com.google.appinventor.components.runtime.util.AlignmentUtil;
-import com.google.appinventor.components.runtime.util.AnimationUtil;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.FullScreenVideoUtil;
 import com.google.appinventor.components.runtime.util.JsonUtil;
@@ -61,6 +61,7 @@ import com.google.appinventor.components.runtime.util.OnInitializeListener;
 import com.google.appinventor.components.runtime.util.SdkLevel;
 import com.google.appinventor.components.runtime.util.ViewUtil;
 import com.google.appinventor.components.annotations.UsesLibraries;
+
 
 /**
  * Component underlying activities and UI apps, not directly accessible to Simple programmers.
@@ -81,7 +82,7 @@ import com.google.appinventor.components.annotations.UsesLibraries;
 public class Form extends FragmentActivity
     implements Component, ComponentContainer, HandlesEventDispatching {
   private static final String LOG_TAG = "Form";
-
+  
   // *** set this back to false after review
   private static final boolean DEBUG = true;
 
@@ -157,7 +158,6 @@ public class Form extends FragmentActivity
   // the name of the secondary screen. It is saved so that it can be passed to the OtherScreenClosed
   // event.
   private String nextFormName;
-
   private FullScreenVideoUtil fullScreenVideoUtil;
   
   //This is the constant value that will be passed in as the key in the intent's putExtra to find
@@ -178,6 +178,9 @@ public class Form extends FragmentActivity
   //Set to the optional String-valued Extra passed in via an Intent on startup.(for GCM component only)
   private String startupValueForGCM = ""; 
   private Bundle onCreateBundle = null;
+
+  private long lastBackPressTime;
+
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -208,6 +211,26 @@ public class Form extends FragmentActivity
 
     fullScreenVideoUtil = new FullScreenVideoUtil(this, androidUIHandler);
 
+    
+    /*
+     * Add by Fuming.
+     * We can save extras values that are intended for the Survey component, 
+     * and later the component can read the value through container$form 
+     * TODO: need to think about how to pass intent to a component through notification.
+     * Something like the activity starter: the extra_key will be the component name 
+     * the extra_value to pass in will be a json string. 
+     * 
+     * TODO: We could think of a more general approach that could work for arbitrary AI component that needs
+     * intent data at start up.
+     * 
+     */
+    
+    if (startIntent != null && startIntent.hasExtra(ARGUMENT_SURVEY)){
+    	Log.i(LOG_TAG, "surveyIntentValue:"+startIntent.getStringExtra(ARGUMENT_SURVEY));
+    	startupValueForSurvey = startIntent.getStringExtra(ARGUMENT_SURVEY); 
+    }
+    
+
     /*
      * Add by Weihua Li.
      * We can save extras values that are intended for the GCM component, 
@@ -225,7 +248,7 @@ public class Form extends FragmentActivity
         Log.i(LOG_TAG, "GCMIntentValue:"+startIntent.getStringExtra(ARGUMENT_GCM));
         startupValueForGCM = startIntent.getStringExtra(ARGUMENT_GCM); 
     }
-    
+
     // Add application components to the form
     $define();
 
@@ -257,7 +280,8 @@ public class Form extends FragmentActivity
 	  return startupValueForSurvey;
 
   }
-    
+
+  
   /*
    * 1) This method is to pass the start value that a Form gets when it is created by some other app using
    * activityStarter or Wei's create notification (using Android Intent)
@@ -266,7 +290,7 @@ public class Form extends FragmentActivity
    */
   public String getGCMStartValues(){
       return startupValueForGCM;
-  }    
+  }
 
   private void defaultPropertyValues() {
     Scrollable(true); // frameLayout is created in Scrollable()
@@ -312,31 +336,31 @@ public class Form extends FragmentActivity
       });
     }
   }
-
-  /*
-   * Here we override the hardware back button, just to make sure
-   * that the closing screen animation is applied. (In API level
-   * 5, we can simply override the onBackPressed method rather
-   * than bothering with onKeyDown)
-   */
-  @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {      
-      if (!BackPressed()) {
-        boolean handled = super.onKeyDown(keyCode, event);
-        AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
-        return handled;
-      } else {
-        return true;
-      }      
-    }
-    return super.onKeyDown(keyCode, event);
-  }
-
-  @SimpleEvent(description = "Device back button pressed.")
-  public boolean BackPressed() {
-    return EventDispatcher.dispatchEvent(this, "BackPressed");
-  }
+//
+//  /*
+//   * Here we override the hardware back button, just to make sure
+//   * that the closing screen animation is applied. (In API level
+//   * 5, we can simply override the onBackPressed method rather
+//   * than bothering with onKeyDown)
+//   */
+//  @Override
+//  public boolean onKeyDown(int keyCode, KeyEvent event) {
+//    if (keyCode == KeyEvent.KEYCODE_BACK) {      
+//      if (!BackPressed()) {
+//        boolean handled = super.onKeyDown(keyCode, event);
+//        AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
+//        return handled;
+//      } else {
+//        return true;
+//      }      
+//    }
+//    return super.onKeyDown(keyCode, event);
+//  }
+//
+//  @SimpleEvent(description = "Device back button pressed.")
+//  public boolean BackPressed() {
+//    return EventDispatcher.dispatchEvent(this, "BackPressed");
+//  }
   
   // onActivityResult should be triggered in only two cases:
   // (1) The result is for some other component in the app, not this Form itself
@@ -357,11 +381,11 @@ public class Form extends FragmentActivity
         resultString = data.getStringExtra(RESULT_NAME);
       } else {
         resultString = "";
-      }
+      }  
       Object decodedResult = decodeJSONStringForForm(resultString, "other screen closed");
       // nextFormName was set when this screen opened the secondary screen
-      OtherScreenClosed(nextFormName, decodedResult);
-    } else {
+      OtherScreenClosed(nextFormName, decodedResult); 
+    } else { 
       // Another component (such as a ListPicker, ActivityStarter, etc) is expecting this result.
       ActivityResultListener component = activityResultMap.get(requestCode);
       if (component != null) {
@@ -369,7 +393,7 @@ public class Form extends FragmentActivity
       }
     }
   }
-
+  
   // functionName is a string to include in the error message that will be shown
   // if the JSON decoding fails
   private  static Object decodeJSONStringForForm(String jsonString, String functionName) {
@@ -672,7 +696,6 @@ public class Form extends FragmentActivity
     if (backgroundDrawable != null) {
       ViewUtil.setBackgroundImage(frameLayout, backgroundDrawable);
     }
-
     setContentView(frameLayout);
     frameLayout.requestLayout();
   }
@@ -1021,7 +1044,7 @@ public class Form extends FragmentActivity
   public void Icon(String name) {
     // We don't actually need to do anything.
   }
-
+  
   /**
    * Specifies the Version Code.
    *
@@ -1033,7 +1056,7 @@ public class Form extends FragmentActivity
   public void VersionCode(int vCode) {
     // We don't actually need to do anything.
   }
-
+  
   /**
    * Specifies the Version Name.
    *
@@ -1045,7 +1068,7 @@ public class Form extends FragmentActivity
   public void VersionName(String vName) {
     // We don't actually need to do anything.
   }
-
+  
   /**
    * Width property getter method.
    *
@@ -1122,7 +1145,6 @@ public class Form extends FragmentActivity
     try {
       Log.i(LOG_TAG, "startNewForm starting activity:" + activityIntent);
       startActivityForResult(activityIntent, SWITCH_FORM_REQUEST_CODE);
-      AnimationUtil.ApplyOpenScreenAnimation(this, openAnimType);
     } catch (ActivityNotFoundException e) {
       dispatchErrorOccurredEvent(this, functionName,
           ErrorMessages.ERROR_SCREEN_NOT_FOUND, nextFormName);
@@ -1150,12 +1172,12 @@ public class Form extends FragmentActivity
     }
     return jsonResult;
   }
-
+  
   @SimpleEvent(description = "Event raised when another screen has closed and control has " +
       "returned to this screen.")
   public void OtherScreenClosed(String otherScreenName, Object result) {
     if (DEBUG) {
-      Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " +
+      Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " + 
           otherScreenName + ", result = " + result.toString());
     }
     EventDispatcher.dispatchEvent(this, "OtherScreenClosed", otherScreenName, result);
@@ -1237,12 +1259,12 @@ public class Form extends FragmentActivity
   public static Object getStartValue() {
     if (activeForm != null) {
       return decodeJSONStringForForm(activeForm.startupValue, "get start value");
-    } else {
+    } else { 
       throw new IllegalStateException("activeForm is null");
     }
   }
-
-
+  
+ 
   /**
    * Closes the current screen, as opposed to finishApplication, which
    * exits the entire application.
@@ -1279,13 +1301,12 @@ public class Form extends FragmentActivity
     }
   }
 
-
+  
   protected void closeForm(Intent resultIntent) {
     if (resultIntent != null) {
       setResult(Activity.RESULT_OK, resultIntent);
     }
     finish();
-    AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
   }
 
   // This is called from runtime.scm when a "close application" block is executed.
@@ -1453,7 +1474,7 @@ public class Form extends FragmentActivity
       throw e.getTargetException();
     }
   }
-
+  
   /**
    * Perform some action related to fullscreen video display.
    * @param action
@@ -1490,4 +1511,31 @@ public class Form extends FragmentActivity
   public synchronized Bundle fullScreenVideoAction(int action, VideoPlayer source, Object data) {
     return fullScreenVideoUtil.performAction(action, source, data);
   }
+  
+  
+  
+  /*
+   * Added by Fuming to prevent AI user accidently kill activity that runs and binds to Background service
+   * @see android.app.Activity#onBackPressed()
+   */
+  @Override
+  public void onBackPressed() {
+    Toast toast = null;
+	if (this.lastBackPressTime < System.currentTimeMillis() - 4000) {
+      toast = Toast.makeText(this, "Press back again will kill the activity! Try press Home button", 4000);
+      toast.show();
+      this.lastBackPressTime = System.currentTimeMillis();
+    } else {
+      if (toast != null) {
+      toast.cancel();
+    }
+    super.onBackPressed();
+   }
+  }
+  
+//  public ViewGroup getView(){
+//    return viewLayout.getLayoutManager();
+//  }
+  
+  
 }

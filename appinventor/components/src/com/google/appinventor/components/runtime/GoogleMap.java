@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
@@ -10,6 +11,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+=======
+package com.google.appinventor.components.runtime;
+
+
+import java.io.IOException;
+import java.util.*;
+>>>>>>> develop
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
@@ -58,6 +66,7 @@ import gnu.math.DFloNum;
 import gnu.math.IntNum;
 
 /* Component for displaying information on Google Map
+
  * This component makes use of Android MapView (v2) to location specific information.
  * App Inventor user could use this component to do things like those demo apps
  * for Google Mapview in the android sdk
@@ -101,6 +110,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   private HashMap<Marker, Integer> markers = new HashMap<Marker, Integer>();
 
   // basic configurations of a map
+
   private int mapType = com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
   private boolean myLocationEnabled = false;
   private boolean compassEnabled = false;
@@ -173,12 +183,14 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         .findFragmentByTag(MAP_FRAGMENT_TAG);
 
 
+
     // We only create a fragment if it doesn't already exist.
     if (mMapFragment == null) {
 
 
       Log.i(TAG, "mMapFragment is null.");
       // To programmatically add the map, we first create a SupportMapFragment.
+
       mMapFragment = SupportMapFragment.newInstance();
 
       //mMapFragment = new SomeFragment();
@@ -190,6 +202,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
       fragmentTransaction.commit();
     }
+
 
     setUpMapIfNeeded();
 
@@ -371,6 +384,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     public void MapIsReady(){
       Log.i(TAG, "Map is ready for adding markers and other setting");
       EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
+
   }
 
   //TODO: Move this to Util
@@ -564,7 +578,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // the circle doesn't exist
     form.dispatchErrorOccurredEvent(this, "UpdateCircle",
           ErrorMessages.ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST, circleId);
-  }
+  	}
   }
 
   @SimpleFunction(description = "Get all circles Ids. A short cut to get all the references for the eixisting circles")
@@ -604,6 +618,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   @Override
   public void onResume() {
+
     Log.i(TAG, "in onResume...Google Map redraw");
     //set up LocationClient for my location using GMS
     if(myLocationEnabled){//only if my location is enabled
@@ -615,6 +630,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   @Override
   public void onInitialize() {}
+
 
   private void prepareFragmentView() {
 
@@ -668,7 +684,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         else{
           mLocationClient.disconnect();
         }
+
       }
+
   }
   @SimpleProperty(description = "Indicates whether my locaiton UI control is currently enabled for the Google map.")
   public boolean MyLocationEnabled(){
@@ -713,6 +731,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     if(mMap != null) {
       mMap.setMapType(this.mapType);
     }
+
   }
 
   /**
@@ -728,7 +747,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     if (mMap != null) {
       Log.i(TAG, "enable map listener?: " + enabled);
       mMap.setOnMapClickListener(enabled? this : null);
+
     }
+
   }
 
   /**
@@ -781,6 +802,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       Log.i(TAG, "enable cameraChangedListener?:" + enabled);
       mMap.setOnCameraChangeListener(enabled? this : null);
     }
+
   }
 
   /**
@@ -791,6 +813,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   public boolean MapCameraChangedListenerEnabled() {
     return this.enableCameraChangeListener;
   }
+
 
   @SimpleProperty(description = "Indicates the current map type")
   public String MapType(){
@@ -803,8 +826,10 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         return "satellite";
       case com.google.android.gms.maps.GoogleMap.MAP_TYPE_TERRAIN:
         return "terrain";
+
     } 
     return null;
+
   }
 
   /**
@@ -842,6 +867,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         Log.i(TAG, "interior YailLiat");
         if (((YailList) marker).size() < 2) {
           addOne = false; // don't add this marker because its invalid inputs, going to the next one
+
         }
         // ((YailList) marker).getObject(0) will return type gnu.math.DFloNum
         Object latObj =  ((YailList) marker).getObject(0);
@@ -854,6 +880,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
         if (!(latObj instanceof DFloNum && lngObj instanceof DFloNum)){//if one of the lat or lng is not DFloNum
           addOne = false;
+
         } else {
           lat = ((DFloNum)latObj).doubleValue();
           lng = ((DFloNum)lngObj).doubleValue();
@@ -863,8 +890,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         // Longitude measurements range from 0�� to (+/���)180
         if ((lat < -90) || (lat > 90) || (lng < -180) || (lng > 180) ){
           addOne = false;
-        }
 
+        }
 
         //default values for optional params
         int color = mMarkerColor;
@@ -882,6 +909,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
             color = ((IntNum)((YailList) marker).getObject(2)).intValue();
           else {
             addOne = false;
+
           }
 
         }
@@ -905,6 +933,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           else {
             addOne = false;
           }
+
         }
 
         Color.colorToHSV(color, hsv);
@@ -987,6 +1016,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       "\"color\"(type int)[in hue value ranging from 0~360], " +
       "\"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
   public YailList AddMarkersFromJson(String jsonString) {
+
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     JsonParser parser = new JsonParser();
     float[] hsv = new float[3];
@@ -1062,8 +1092,10 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
                 addMarkerToMap(latitude, longitude, uniqueId, color, title,
                   snippet, draggable);
               }
+
             }
           } 
+
         }//end of JsonArray
 
       } else { // not a JsonArray
@@ -1120,6 +1152,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         } else {
           lat = ((DFloNum)latObj).doubleValue();
           lng = ((DFloNum)lngObj).doubleValue();
+
         }
 
         if (lat < -90 || lat > 90 || lng < -180 || lng > 180 ){
@@ -1147,6 +1180,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
             form.dispatchErrorOccurredEvent(this, "AddMarkersHue",
                 ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, colorObj.toString() + " is not a number");
           }
+
         }
 
         if (((YailList) marker).size() >= 4){
@@ -1235,6 +1269,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           marker.setDraggable(new Boolean(propVal));
       }
     }
+
+
   }
 
   @SimpleFunction(description = "Get all the existing markers's Ids" )
@@ -1266,6 +1302,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   }
 
 
+
+
   @Override
   public void onMarkerDrag(Marker marker) {
     // TODO Auto-generated method stub
@@ -1283,6 +1321,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         dCircle.onMarkerMoved(marker);   //ask the draggable circle to change it's appearance
       }
     }
+
   }
 
   @Override
@@ -1306,6 +1345,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         FinishedDraggingCircle(uid, center.latitude, center.longitude, dCircle.getRadius());
       }
     }
+
+
   }
 
   @Override
@@ -1336,6 +1377,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerDragStart", markerId, latitude, longitude);
       }
     });
+
   }
 
   @SimpleEvent(description = "When a marker is been dragged")
@@ -1346,6 +1388,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerDrag", markerId, latitude, longitude);
       }
     });
+
   }
 
 
@@ -1358,6 +1401,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerDragEnd", markerId, latitude, longitude);
       }
     });
+
   }
 
   @SimpleEvent(description = "When a marker is clicked")
@@ -1368,6 +1412,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMarkerClick", markerId, latitude, longitude);
       }
     });
+
   }
 
   @SimpleEvent (description = "When the marker's infowindow is clicked, returning marker's id")
@@ -1383,8 +1428,10 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   @Override
   public void onInfoWindowClick(Marker marker) {
     // TODO Auto-generated method stub
+
     Integer markerId = markers.get(marker);
     InfoWindowClicked(markerId);
+
   }
 
   @Override
@@ -1399,7 +1446,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     // for the default behavior to occur (which is for the camera to move such that the
     // marker is centered and for the marker's info window to open, if it has one).
     return false;
+
   }
+
 
   /**
    * A small util function to get the key-value mapping in a map.
@@ -1428,6 +1477,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     Float tilt = position.tilt;
     Float zoom = position.zoom;
     CameraPositionChanged(lat, lng, bearing, tilt, zoom);
+
   }
 
   /**
@@ -1454,6 +1504,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   public void onMapLongClick(LatLng latLng) {
     // TODO Auto-generated method stub
     OnMapLongClick(latLng.latitude, latLng.longitude);
+
   }
 
   /**
@@ -1468,8 +1519,10 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         Log.i(TAG, "Map is longclicked at:" + lat + ", " + lng);
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapLongClick", lat, lng);
       }
+
     });
   }
+
 
   @Override
   public void onMapClick(LatLng latLng) {
@@ -1486,7 +1539,9 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         Log.i(TAG, "map is clicked at:" + lat + ", " + lng);
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnMapClick", lat, lng);
       }
+
     });
+
   }
 
 
@@ -1495,6 +1550,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     if(mMap != null) {
       mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
     }
+
   }
 
   /**
@@ -1613,6 +1669,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     public void setRadiusMarker(Marker marker){
       this.radiusMarker = marker;
     }
+
   }
 
   /** Generate LatLng of radius marker */
@@ -1628,6 +1685,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         radius.latitude, radius.longitude, result);
     return result[0];
   }
+
   
   @Override
   public void onConnectionFailed(ConnectionResult arg0) {
@@ -1639,6 +1697,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     Log.i(TAG, "onConnected to location listener.....");
     mLocationClient.requestLocationUpdates(
         REQUEST, this);  // LocationListener
+
   }
 
   @Override
@@ -1670,5 +1729,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         EventDispatcher.dispatchEvent(GoogleMap.this, "OnLocationChanged", lat, lng);
       }
     });
+
   }
+
 }

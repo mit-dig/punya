@@ -20,7 +20,6 @@
 
   <target name="tests"
           depends="BuildServerTests,YailGeneratorTests">
-
   </target>
 
   <!-- =====================================================================
@@ -126,6 +125,9 @@
       <fileset dir="${build.dir}/components"
                includes="AndroidRuntime.jar,simple_components.txt,simple_components_build_info.json"/>
     </copy>
+  	<copy todir="${classes.files.dir}/template" flatten="true">
+  	 	  <fileset dir="${src.dir}/${buildserver.pkg}/resources/template" includes="*"/>
+  	</copy>	
     <copy toFile="${classes.files.dir}/YailGenerator.jar" file="${local.build.dir}/YailGenerator.jar" />
     <copy toFile="${classes.files.dir}/kawa.jar" file="${lib.dir}/kawa/kawa-1.11-modified.jar" />
     <copy toFile="${classes.files.dir}/funf.jar" file="${lib.dir}/funf/funf.jar" />

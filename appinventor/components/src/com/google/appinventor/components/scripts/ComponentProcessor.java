@@ -16,6 +16,7 @@ import com.google.appinventor.components.annotations.UsesAssets;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesNativeLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.UsesTemplates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -50,27 +51,26 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
 /**
- * Processor for generating output files based on the annotations and
- * javadoc in the component source code.
+ * Processor for generating output files based on the annotations and javadoc in
+ * the component source code.
  * <p>
  * Specifically, this reads over the source files, building up a representation
- * of components and their designer properties, properties, methods, and
- * events. Concrete subclasses implement the method {@link #outputResults()}
- * to generate output.
+ * of components and their designer properties, properties, methods, and events.
+ * Concrete subclasses implement the method {@link #outputResults()} to generate
+ * output.
  * <p>
  * Currently, the following annotations are used:
  * <ul>
- *   <li> {@link DesignerComponent} and {@link SimpleObject} to identify
- *        components.  Subclasses can distinguish between the two through
- *        the boolean fields
- *        {@link ComponentProcessor.ComponentInfo#designerComponent} and
- *        {@link ComponentProcessor.ComponentInfo#simpleObject}.
- *   <li> {@link DesignerProperty} to identify designer properties.
- *   <li> {@link SimpleProperty} to identify properties.
- *   <li> {@link SimpleFunction} to identify methods.
- *   <li> {@link SimpleEvent} to identify events.
+ * <li> {@link DesignerComponent} and {@link SimpleObject} to identify
+ * components. Subclasses can distinguish between the two through the boolean
+ * fields {@link ComponentProcessor.ComponentInfo#designerComponent} and
+ * {@link ComponentProcessor.ComponentInfo#simpleObject}.
+ * <li> {@link DesignerProperty} to identify designer properties.
+ * <li> {@link SimpleProperty} to identify properties.
+ * <li> {@link SimpleFunction} to identify methods.
+ * <li> {@link SimpleEvent} to identify events.
  * </ul>
- *
+ * 
  * @author spertus@google.com (Ellen Spertus)
  */
 public abstract class ComponentProcessor extends AbstractProcessor {
@@ -106,8 +106,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private Types typeUtils;
 
   /**
-   * Produced through {@link ProcessingEnvironment#getMessager()} and
-   * used for outputing errors and warnings.
+   * Produced through {@link ProcessingEnvironment#getMessager()} and used for
+   * outputing errors and warnings.
    */
   // Set in process()
   protected Messager messager;
@@ -118,17 +118,20 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   private int pass = 0;
 
   /**
-   * Information about every App Inventor component.  Keys are fully-qualified names
-   * (such as "com.google.appinventor.components.runtime.components.android.Label"), and
-   * values are the corresponding {@link ComponentProcessor.ComponentInfo} objects.
-   * This is constructed by {@link #process} for use in {@link #outputResults()}.
+   * Information about every App Inventor component. Keys are fully-qualified
+   * names (such as
+   * "com.google.appinventor.components.runtime.components.android.Label"), and
+   * values are the corresponding {@link ComponentProcessor.ComponentInfo}
+   * objects. This is constructed by {@link #process} for use in
+   * {@link #outputResults()}.
    */
-  protected final SortedMap<String, ComponentInfo> components = Maps.newTreeMap();
+  protected final SortedMap<String, ComponentInfo> components = Maps
+      .newTreeMap();
 
   private final List<String> componentTypes = Lists.newArrayList();
 
   /**
-   * Represents a parameter consisting of a name and a type.  The type is a
+   * Represents a parameter consisting of a name and a type. The type is a
    * String representation of the java type, such as "int", "double", or
    * "java.lang.String".
    */
@@ -145,9 +148,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Constructs a Parameter.
-     *
-     * @param name the parameter name
-     * @param type the parameter's Java type (such as "int" or "java.lang.String")
+     * 
+     * @param name
+     *          the parameter name
+     * @param type
+     *          the parameter's Java type (such as "int" or "java.lang.String")
      */
     protected Parameter(String name, String type) {
       this.name = name;
@@ -155,15 +160,16 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Provides a Yail type for a given parameter type.  This is useful because
+     * Provides a Yail type for a given parameter type. This is useful because
      * the parameter types used for {@link Event} are Simple types (e.g.,
-     * "Single"), while the parameter types used for {@link Method} are
-     * Java types (e.g., "int".
-     *
-     * @param parameter a parameter
+     * "Single"), while the parameter types used for {@link Method} are Java
+     * types (e.g., "int".
+     * 
+     * @param parameter
+     *          a parameter
      * @return the string representation of the corresponding Yail type
-     * @throws RuntimeException if {@code parameter} does not have a
-     *         corresponding Yail type
+     * @throws RuntimeException
+     *           if {@code parameter} does not have a corresponding Yail type
      */
     protected String parameterToYailType(Parameter parameter) {
       return javaTypeToYailType(type);
@@ -198,8 +204,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     protected final List<Parameter> parameters;
     protected final boolean userVisible;
 
-    protected ParameterizedFeature(String name, String description, String feature,
-        boolean userVisible) {
+    protected ParameterizedFeature(String name, String description,
+        String feature, boolean userVisible) {
       super(name, description, feature);
       this.userVisible = userVisible;
       parameters = Lists.newArrayList();
@@ -212,10 +218,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * Generates a comma-separated string corresponding to the parameter list,
      * using Yail types (e.g., "number n, text t1").
-     *
+     * 
      * @return a string representation of the parameter list
-     * @throws RuntimeException if the parameter type cannot be mapped to any
-     *         of the legal return values
+     * @throws RuntimeException
+     *           if the parameter type cannot be mapped to any of the legal
+     *           return values
      */
     protected String toParameterString() {
       StringBuilder sb = new StringBuilder();
@@ -235,8 +242,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   /**
    * Represents an App Inventor event (annotated with {@link SimpleEvent}).
    */
-  protected final class Event extends ParameterizedFeature
-      implements Cloneable, Comparable<Event> {
+  protected final class Event extends ParameterizedFeature implements
+      Cloneable, Comparable<Event> {
     // Inherits name, description, and parameters
 
     protected Event(String name, String description, boolean userVisible) {
@@ -262,8 +269,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
    * Represents an App Inventor component method (annotated with
    * {@link SimpleFunction}).
    */
-  protected final class Method extends ParameterizedFeature
-      implements Cloneable, Comparable<Method> {
+  protected final class Method extends ParameterizedFeature implements
+      Cloneable, Comparable<Method> {
     // Inherits name, description, and parameters
     private String returnType;
 
@@ -307,7 +314,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private String componentInfoName;
 
     protected Property(String name, String description,
-                       PropertyCategory category, boolean userVisible) {
+        PropertyCategory category, boolean userVisible) {
       this.name = name;
       this.description = description;
       this.propertyCategory = category;
@@ -318,7 +325,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     @Override
     public Property clone() {
-      Property that = new Property(name, description, propertyCategory, userVisible);
+      Property that = new Property(name, description, propertyCategory,
+          userVisible);
       that.type = type;
       that.readable = readable;
       that.writable = writable;
@@ -345,7 +353,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * Returns the description of this property, as retrieved by
      * {@link SimpleProperty#description()}.
-     *
+     * 
      * @return the description of this property
      */
     protected String getDescription() {
@@ -353,9 +361,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns whether this property is visible in the Blocks Editor, as retrieved
-     * from {@link SimpleProperty#userVisible()}.
-     *
+     * Returns whether this property is visible in the Blocks Editor, as
+     * retrieved from {@link SimpleProperty#userVisible()}.
+     * 
      * @return whether the property is visible in the Blocks Editor
      */
     protected boolean isUserVisible() {
@@ -363,8 +371,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns this property's Java type (e.g., "int", "double", or "java.lang.String").
-     *
+     * Returns this property's Java type (e.g., "int", "double", or
+     * "java.lang.String").
+     * 
      * @return the feature's Java type
      */
     protected String getType() {
@@ -373,7 +382,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Returns whether this property is readable (has a getter).
-     *
+     * 
      * @return whether this property is readable
      */
     protected boolean isReadable() {
@@ -382,7 +391,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Returns whether this property is writable (has a setter).
-     *
+     * 
      * @return whether this property is writable
      */
     protected boolean isWritable() {
@@ -392,7 +401,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * Returns a string indicating whether this property is readable and/or
      * writable.
-     *
+     * 
      * @return one of "read-write", "read-only", or "write-only"
      * @throws {@link RuntimeException} if the property is neither readable nor
      *         writable
@@ -406,8 +415,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         }
       } else {
         if (!writable) {
-          throw new RuntimeException("Property " + name +
-                                     " is neither readable nor writable");
+          throw new RuntimeException("Property " + name
+              + " is neither readable nor writable");
         }
         return WRITE_ONLY;
       }
@@ -422,6 +431,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     // Inherits name and description
     /**
      * Permissions required by this component.
+     * 
      * @see android.Manifest.permission
      */
     protected final Set<String> permissions;
@@ -443,13 +453,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Properties of this component that are visible in the Designer.
+     * 
      * @see DesignerProperty
      */
     protected final SortedMap<String, DesignerProperty> designerProperties;
 
     /**
-     * Properties of this component, whether or not they are visible in
-     * the Designer.  The keys of this map are a superset of the keys of
+     * Properties of this component, whether or not they are visible in the
+     * Designer. The keys of this map are a superset of the keys of
      * {@link #designerProperties}.
      */
     protected final SortedMap<String, Property> properties;
@@ -471,14 +482,14 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     protected final boolean abstractClass;
 
     /**
-     * The displayed name of this component.  This is usually the same as the
-     * {@link Class#getSimpleName()}.  The exception is for the component
+     * The displayed name of this component. This is usually the same as the
+     * {@link Class#getSimpleName()}. The exception is for the component
      * {@link com.google.appinventor.components.runtime.Form}, for which the
      * name "Screen" is used.
      */
     protected final String displayName;
 
-    private String helpDescription;  // Shorter popup description
+    private String helpDescription; // Shorter popup description
     private String category;
     private String categoryString;
     private boolean simpleObject;
@@ -489,9 +500,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     private String iconName;
 
     protected ComponentInfo(Element element) {
-      super(element.getSimpleName().toString(),  // Short name
-            elementUtils.getDocComment(element),
-            "Component");
+      super(element.getSimpleName().toString(), // Short name
+          elementUtils.getDocComment(element), "Component");
       displayName = getDisplayNameForComponentType(name);
       permissions = Sets.newHashSet();
       libraries = Sets.newHashSet();
@@ -510,19 +520,21 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         }
         if (annotationName.equals(DesignerComponent.class.getName())) {
           designerComponent = true;
-          DesignerComponent designerComponentAnnotation =
-              element.getAnnotation(DesignerComponent.class);
+          DesignerComponent designerComponentAnnotation = element
+              .getAnnotation(DesignerComponent.class);
 
           // Override javadoc description with explicit description
           // if provided.
-          String explicitDescription = designerComponentAnnotation.description();
+          String explicitDescription = designerComponentAnnotation
+              .description();
           if (!explicitDescription.isEmpty()) {
             description = explicitDescription;
           }
 
           // Set helpDescription to the designerHelpDescription field if
           // provided; otherwise, use description
-          helpDescription = designerComponentAnnotation.designerHelpDescription();
+          helpDescription = designerComponentAnnotation
+              .designerHelpDescription();
           if (helpDescription.isEmpty()) {
             helpDescription = description;
           }
@@ -539,12 +551,13 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * A brief description of this component to be shown when the user requests
-     * help in the Designer.  This is obtained from the first of the following that
-     * was provided in the source code for the component:
+     * help in the Designer. This is obtained from the first of the following
+     * that was provided in the source code for the component:
      * <ol>
-     *   <li> {@link DesignerComponent#designerHelpDescription()}</li>
-     *   <li> {@link DesignerComponent#description()}</li>
-     *   <li> the Javadoc preceding the beginning of the class corresponding to the component</li>
+     * <li> {@link DesignerComponent#designerHelpDescription()}</li>
+     * <li> {@link DesignerComponent#description()}</li>
+     * <li>the Javadoc preceding the beginning of the class corresponding to the
+     * component</li>
      * </ol>
      */
     protected String getHelpDescription() {
@@ -552,9 +565,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns the name of this component's category within the Designer, as displayed
-     * (for example, "Screen Arrangement").
-     *
+     * Returns the name of this component's category within the Designer, as
+     * displayed (for example, "Screen Arrangement").
+     * 
      * @return the name of this component's Designer category
      */
     protected String getCategory() {
@@ -562,10 +575,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns the String representation of the EnumConstant corresponding to this
-     * component's category within the Designer (for example, "ARRANGEMENTS").
-     * Usually, you should use {@link #getCategory()} instead.
-     *
+     * Returns the String representation of the EnumConstant corresponding to
+     * this component's category within the Designer (for example,
+     * "ARRANGEMENTS"). Usually, you should use {@link #getCategory()} instead.
+     * 
      * @return the EnumConstant representing this component's Designer category
      */
     protected String getCategoryString() {
@@ -575,7 +588,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     /**
      * Returns the version number of this component, as specified by
      * {@link DesignerComponent#version()}.
-     *
+     * 
      * @return the version number of this component
      */
     protected int getVersion() {
@@ -583,9 +596,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     /**
-     * Returns whether this component is shown on the palette in the Designer, as
-     * specified by {@link DesignerComponent#showOnPalette()}.
-     *
+     * Returns whether this component is shown on the palette in the Designer,
+     * as specified by {@link DesignerComponent#showOnPalette()}.
+     * 
      * @return whether this component is shown on the Designer palette
      */
     protected boolean getShowOnPalette() {
@@ -594,20 +607,22 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     /**
      * Returns whether this component is non-visible on the device's screen, as
-     * specified by {@link DesignerComponent#nonVisible()}.  Examples of non-visible
-     * components are {@link com.google.appinventor.components.runtime.LocationSensor}
-     * and {@link com.google.appinventor.components.runtime.Clock}.
-     *
-     * @return {@code true} if the component is non-visible, {@code false} otherwise
+     * specified by {@link DesignerComponent#nonVisible()}. Examples of
+     * non-visible components are
+     * {@link com.google.appinventor.components.runtime.LocationSensor} and
+     * {@link com.google.appinventor.components.runtime.Clock}.
+     * 
+     * @return {@code true} if the component is non-visible, {@code false}
+     *         otherwise
      */
     protected boolean getNonVisible() {
       return nonVisible;
     }
 
     /**
-     * Returns the name of the icon file used on the Designer palette, as specified in
-     * {@link DesignerComponent#iconName()}.
-     *
+     * Returns the name of the icon file used on the Designer palette, as
+     * specified in {@link DesignerComponent#iconName()}.
+     * 
      * @return the name of the icon file
      */
     protected String getIconName() {
@@ -615,16 +630,17 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     private String getDisplayNameForComponentType(String componentTypeName) {
-      // Users don't know what a 'Form' is.  They know it as a 'Screen'.
+      // Users don't know what a 'Form' is. They know it as a 'Screen'.
       return "Form".equals(componentTypeName) ? "Screen" : componentTypeName;
     }
 
   }
 
   /**
-   * Returns the annotations supported by this {@code ComponentProcessor}, namely those related
-   * to components ({@link com.google.appinventor.components.annotations}).
-   *
+   * Returns the annotations supported by this {@code ComponentProcessor},
+   * namely those related to components (
+   * {@link com.google.appinventor.components.annotations}).
+   * 
    * @return the supported annotations
    */
   @Override
@@ -640,19 +656,23 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   /**
-   * Processes the component-related annotations ({@link
-   * com.google.appinventor.components.annotations}),
-   * populating {@link #components} and initializing {@link #messager} for use within
-   * {@link #outputResults()}, which is called at the end of this method and must be overriden by
-   * concrete subclasses.
-   *
-   * @param annotations the annotation types requested to be processed
-   * @param roundEnv environment for information about the current and prior round
-   * @return {@code true}, indicating that the annotations have been claimed by this processor.
+   * Processes the component-related annotations (
+   * {@link com.google.appinventor.components.annotations}), populating
+   * {@link #components} and initializing {@link #messager} for use within
+   * {@link #outputResults()}, which is called at the end of this method and
+   * must be overriden by concrete subclasses.
+   * 
+   * @param annotations
+   *          the annotation types requested to be processed
+   * @param roundEnv
+   *          environment for information about the current and prior round
+   * @return {@code true}, indicating that the annotations have been claimed by
+   *         this processor.
    * @see AbstractProcessor#process
    */
   @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+  public boolean process(Set<? extends TypeElement> annotations,
+      RoundEnvironment roundEnv) {
     // This method will be called many times for the source code.
     // Only do something on the first pass.
     pass++;
@@ -695,16 +715,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     return true;
   }
 
-    /*
-     * This processes an element if it represents a component, reading in its
-     * information and adding it to components.  If this component is a
-     * subclass of another component, this method recursively calls itself on the
-     * superclass.
-     */
+  /*
+   * This processes an element if it represents a component, reading in its
+   * information and adding it to components. If this component is a subclass of
+   * another component, this method recursively calls itself on the superclass.
+   */
   private void processComponent(Element element) {
     // If the element is not a component (e.g., Float), return early.
-    if (element.getAnnotation(SimpleObject.class) == null &&
-        element.getAnnotation(DesignerComponent.class) == null) {
+    if (element.getAnnotation(SimpleObject.class) == null
+        && element.getAnnotation(DesignerComponent.class) == null) {
       return;
     }
 
@@ -717,10 +736,12 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     // Create new ComponentInfo.
     ComponentInfo componentInfo = new ComponentInfo(element);
 
-    // Check if this extends another component (DesignerComponent or SimpleObject).
-    List<? extends TypeMirror> directSupertypes = typeUtils.directSupertypes(element.asType());
+    // Check if this extends another component (DesignerComponent or
+    // SimpleObject).
+    List<? extends TypeMirror> directSupertypes = typeUtils
+        .directSupertypes(element.asType());
     if (!directSupertypes.isEmpty()) {
-      // Only look at the first one.  Later ones would be interfaces,
+      // Only look at the first one. Later ones would be interfaces,
       // which we don't care about.
       String parentName = directSupertypes.get(0).toString();
       ComponentInfo parentComponent = components.get(parentName);
@@ -744,19 +765,27 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         componentInfo.assets.addAll(parentComponent.assets);
         // Since we don't modify DesignerProperties, we can just call Map.putAll to copy the
         // designer properties from parentComponent to componentInfo.
-        componentInfo.designerProperties.putAll(parentComponent.designerProperties);
-        // NOTE(lizlooney) We can't just call Map.putAll to copy the events/properties/methods from
-        // parentComponent to componentInfo because then each component will share a single
-        // Event/Property/Method and if one component overrides something about an
-        // Event/Property/Method, then it will affect all the other components that are sharing
+        componentInfo.designerProperties
+            .putAll(parentComponent.designerProperties);
+        // NOTE(lizlooney) We can't just call Map.putAll to copy the
+        // events/properties/methods from
+        // parentComponent to componentInfo because then each component will
+        // share a single
+        // Event/Property/Method and if one component overrides something about
+        // an
+        // Event/Property/Method, then it will affect all the other components
+        // that are sharing
         // that Event/Property/Method.
         for (Map.Entry<String, Event> entry : parentComponent.events.entrySet()) {
           componentInfo.events.put(entry.getKey(), entry.getValue().clone());
         }
-        for (Map.Entry<String, Property> entry : parentComponent.properties.entrySet()) {
-          componentInfo.properties.put(entry.getKey(), entry.getValue().clone());
+        for (Map.Entry<String, Property> entry : parentComponent.properties
+            .entrySet()) {
+          componentInfo.properties
+              .put(entry.getKey(), entry.getValue().clone());
         }
-        for (Map.Entry<String, Method> entry : parentComponent.methods.entrySet()) {
+        for (Map.Entry<String, Method> entry : parentComponent.methods
+            .entrySet()) {
           componentInfo.methods.put(entry.getKey(), entry.getValue().clone());
         }
       }
@@ -815,25 +844,26 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         && element.getKind() == ElementKind.METHOD;
   }
 
-  private Property executableElementToProperty(Element element, String componentInfoName) {
+  private Property executableElementToProperty(Element element,
+      String componentInfoName) {
     String propertyName = element.getSimpleName().toString();
     SimpleProperty simpleProperty = element.getAnnotation(SimpleProperty.class);
 
     if (!(element.asType() instanceof ExecutableType)) {
-      throw new RuntimeException("element.asType() is not an ExecutableType for " +
-                                 propertyName);
+      throw new RuntimeException(
+          "element.asType() is not an ExecutableType for " + propertyName);
     }
 
     Property property = new Property(propertyName,
-                                     simpleProperty.description(),
-                                     simpleProperty.category(),
-                                     simpleProperty.userVisible());
+        simpleProperty.description(), simpleProperty.category(),
+        simpleProperty.userVisible());
 
     // Get parameters to tell if this is a getter or setter.
     ExecutableType executableType = (ExecutableType) element.asType();
     List<? extends TypeMirror> parameters = executableType.getParameterTypes();
 
-    // Check if it is a setter or getter, and set the property's readable, writable,
+    // Check if it is a setter or getter, and set the property's readable,
+    // writable,
     // and type fields appropriately.
     TypeMirror typeMirror;
     if (parameters.size() == 0) {
@@ -841,15 +871,15 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       property.readable = true;
       typeMirror = executableType.getReturnType();
       if (typeMirror.getKind().equals(TypeKind.VOID)) {
-        throw new RuntimeException("Property method is void and has no parameters: "
-                                   + propertyName);
+        throw new RuntimeException(
+            "Property method is void and has no parameters: " + propertyName);
       }
     } else {
       // It is a setter.
       property.writable = true;
       if (parameters.size() != 1) {
-        throw new RuntimeException("Too many parameters for setter for " +
-                                   propertyName);
+        throw new RuntimeException("Too many parameters for setter for "
+            + propertyName);
       }
       typeMirror = parameters.get(0);
     }
@@ -865,7 +895,7 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   private void processProperties(ComponentInfo componentInfo,
-                                 Element componentElement) {
+      Element componentElement) {
     // We no longer support properties that use the variant type.
 
     for (Element element : componentElement.getEnclosedElements()) {
@@ -877,25 +907,30 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       String propertyName = element.getSimpleName().toString();
 
       // Designer property information
-      DesignerProperty designerProperty = element.getAnnotation(DesignerProperty.class);
+      DesignerProperty designerProperty = element
+          .getAnnotation(DesignerProperty.class);
       if (designerProperty != null) {
         componentInfo.designerProperties.put(propertyName, designerProperty);
       }
 
       // If property is overridden without again using SimpleProperty, remove
-      // it.  For example, this is done for Ball.Width(), which overrides the
+      // it. For example, this is done for Ball.Width(), which overrides the
       // inherited property Width() because Ball uses Radius() instead.
       if (element.getAnnotation(SimpleProperty.class) == null) {
         if (componentInfo.properties.containsKey(propertyName)) {
           // Look at the prior property's componentInfoName.
           Property priorProperty = componentInfo.properties.get(propertyName);
           if (priorProperty.componentInfoName.equals(componentInfo.name)) {
-            // The prior property's componentInfoName is the same as this componentInfo's name.
-            // This is just a read-only or write-only property. We don't need to do anything
+            // The prior property's componentInfoName is the same as this
+            // componentInfo's name.
+            // This is just a read-only or write-only property. We don't need to
+            // do anything
             // special here.
           } else {
-            // The prior property's componentInfoName is the different than this componentInfo's
-            // name. This is an overridden property without the SimpleProperty annotation and we
+            // The prior property's componentInfoName is the different than this
+            // componentInfo's
+            // name. This is an overridden property without the SimpleProperty
+            // annotation and we
             // need to remove it.
             componentInfo.properties.remove(propertyName);
           }
@@ -904,43 +939,51 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         // Create a new Property element, then compare and combine it with any
         // prior Property element with the same property name, verifying that
         // they are consistent.
-        Property newProperty = executableElementToProperty(element, componentInfo.name);
+        Property newProperty = executableElementToProperty(element,
+            componentInfo.name);
 
         if (componentInfo.properties.containsKey(propertyName)) {
           Property priorProperty = componentInfo.properties.get(propertyName);
 
           if (!priorProperty.type.equals(newProperty.type)) {
             // The 'real' type of a property is determined by its getter, if
-            // it has one.  In theory there can be multiple setters which
+            // it has one. In theory there can be multiple setters which
             // take different types and those types can differ from the
             // getter.
             if (newProperty.readable) {
               priorProperty.type = newProperty.type;
             } else if (priorProperty.writable) {
-              // TODO(user): handle lang_def and document generation for multiple setters.
-              throw new RuntimeException("Inconsistent types " + priorProperty.type +
-                                         " and " + newProperty.type + " for property " +
-                                         propertyName + " in component " + componentInfo.name);
+              // TODO(user): handle lang_def and document generation for
+              // multiple setters.
+              throw new RuntimeException("Inconsistent types "
+                  + priorProperty.type + " and " + newProperty.type
+                  + " for property " + propertyName + " in component "
+                  + componentInfo.name);
             }
           }
 
-          // Merge newProperty into priorProperty, which is already in the properties map.
-          if (priorProperty.description.isEmpty() && !newProperty.description.isEmpty()) {
+          // Merge newProperty into priorProperty, which is already in the
+          // properties map.
+          if (priorProperty.description.isEmpty()
+              && !newProperty.description.isEmpty()) {
             priorProperty.description = newProperty.description;
           }
           if (priorProperty.propertyCategory == PropertyCategory.UNSET) {
             priorProperty.propertyCategory = newProperty.propertyCategory;
-          } else if (newProperty.propertyCategory != priorProperty.propertyCategory &&
-                     newProperty.propertyCategory != PropertyCategory.UNSET) {
-            throw new RuntimeException(
-                "Property " + propertyName + " has inconsistent categories " +
-                priorProperty.propertyCategory + " and " +
-                newProperty.propertyCategory + " in component " +
-                componentInfo.name);
+          } else if (newProperty.propertyCategory != priorProperty.propertyCategory
+              && newProperty.propertyCategory != PropertyCategory.UNSET) {
+            throw new RuntimeException("Property " + propertyName
+                + " has inconsistent categories "
+                + priorProperty.propertyCategory + " and "
+                + newProperty.propertyCategory + " in component "
+                + componentInfo.name);
           }
-          priorProperty.readable = priorProperty.readable || newProperty.readable;
-          priorProperty.writable = priorProperty.writable || newProperty.writable;
-          priorProperty.userVisible = priorProperty.userVisible && newProperty.userVisible;
+          priorProperty.readable = priorProperty.readable
+              || newProperty.readable;
+          priorProperty.writable = priorProperty.writable
+              || newProperty.writable;
+          priorProperty.userVisible = priorProperty.userVisible
+              && newProperty.userVisible;
           priorProperty.componentInfoName = componentInfo.name;
         } else {
           // Add the new property to the properties map.
@@ -951,10 +994,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   // Note: The top halves of the bodies of processEvent() and processMethods()
-  // are very similar.  I tried refactoring in several ways but it just made
+  // are very similar. I tried refactoring in several ways but it just made
   // things more complex.
   private void processEvents(ComponentInfo componentInfo,
-                             Element componentElement) {
+      Element componentElement) {
     for (Element element : componentElement.getEnclosedElements()) {
       if (!isPublicMethod(element)) {
         continue;
@@ -962,7 +1005,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
       // Get the name of the prospective event.
       String eventName = element.getSimpleName().toString();
-      SimpleEvent simpleEventAnnotation = element.getAnnotation(SimpleEvent.class);
+      SimpleEvent simpleEventAnnotation = element
+          .getAnnotation(SimpleEvent.class);
 
       // Remove overriden events unless SimpleEvent is again specified.
       // See comment in processProperties for an example.
@@ -975,10 +1019,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         if (eventDescription.isEmpty()) {
           eventDescription = elementUtils.getDocComment(element);
           if (eventDescription == null) {
-            messager.printMessage(Diagnostic.Kind.WARNING,
-                                  "In component " + componentInfo.name +
-                                  ", event " + eventName +
-                                  " is missing a description.");
+            messager.printMessage(Diagnostic.Kind.WARNING, "In component "
+                + componentInfo.name + ", event " + eventName
+                + " is missing a description.");
             eventDescription = "";
           }
         }
@@ -988,23 +1031,23 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Verify that this element has an ExecutableType.
         if (!(element instanceof ExecutableElement)) {
-          throw new RuntimeException("In component " + componentInfo.name +
-                                     ", the representation of SimpleEvent " + eventName +
-                                     " does not implement ExecutableElement.");
+          throw new RuntimeException("In component " + componentInfo.name
+              + ", the representation of SimpleEvent " + eventName
+              + " does not implement ExecutableElement.");
         }
         ExecutableElement e = (ExecutableElement) element;
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          event.addParameter(ve.getSimpleName().toString(),
-                             ve.asType().toString());
+          event.addParameter(ve.getSimpleName().toString(), ve.asType()
+              .toString());
         }
       }
     }
   }
 
   private void processMethods(ComponentInfo componentInfo,
-                                Element componentElement) {
+      Element componentElement) {
     for (Element element : componentElement.getEnclosedElements()) {
       if (!isPublicMethod(element)) {
         continue;
@@ -1012,7 +1055,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
       // Get the name of the prospective method.
       String methodName = element.getSimpleName().toString();
-      SimpleFunction simpleFunctionAnnotation = element.getAnnotation(SimpleFunction.class);
+      SimpleFunction simpleFunctionAnnotation = element
+          .getAnnotation(SimpleFunction.class);
 
       // Remove overriden methods unless SimpleFunction is again specified.
       // See comment in processProperties for an example.
@@ -1025,10 +1069,9 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         if (methodDescription.isEmpty()) {
           methodDescription = elementUtils.getDocComment(element);
           if (methodDescription == null) {
-            messager.printMessage(Diagnostic.Kind.WARNING,
-                                  "In component " + componentInfo.name +
-                                  ", method " + methodName +
-                                  " is missing a description.");
+            messager.printMessage(Diagnostic.Kind.WARNING, "In component "
+                + componentInfo.name + ", method " + methodName
+                + " is missing a description.");
             methodDescription = "";
           }
         }
@@ -1038,16 +1081,16 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
         // Verify that this element has an ExecutableType.
         if (!(element instanceof ExecutableElement)) {
-          throw new RuntimeException("In component " + componentInfo.name +
-                                     ", the representation of SimpleFunction " + methodName +
-                                     " does not implement ExecutableElement.");
+          throw new RuntimeException("In component " + componentInfo.name
+              + ", the representation of SimpleFunction " + methodName
+              + " does not implement ExecutableElement.");
         }
         ExecutableElement e = (ExecutableElement) element;
 
         // Extract the parameters.
         for (VariableElement ve : e.getParameters()) {
-          method.addParameter(ve.getSimpleName().toString(),
-                              ve.asType().toString());
+          method.addParameter(ve.getSimpleName().toString(), ve.asType()
+              .toString());
         }
 
         // Extract the return type.
@@ -1059,25 +1102,31 @@ public abstract class ComponentProcessor extends AbstractProcessor {
   }
 
   /**
-   * <p>Outputs the required component information in the desired format.  It is called by
-   * {@link #process} after the fields {@link #components} and {@link #messager}
-   * have been populated.</p>
-   *
-   * <p>Implementations of this methods should call {@link #getOutputWriter(String)} to obtain a
-   * {@link Writer} for their output.  Diagnostic messages should be written
-   * using {@link #messager}.</p>
+   * <p>
+   * Outputs the required component information in the desired format. It is
+   * called by {@link #process} after the fields {@link #components} and
+   * {@link #messager} have been populated.
+   * </p>
+   * 
+   * <p>
+   * Implementations of this methods should call
+   * {@link #getOutputWriter(String)} to obtain a {@link Writer} for their
+   * output. Diagnostic messages should be written using {@link #messager}.
+   * </p>
    */
   protected abstract void outputResults() throws IOException;
 
   /**
-   * Returns the appropriate Yail type (e.g., "number" or "text") for a
-   * given Java type (e.g., "float" or "java.lang.String").  All component
-   * names are converted to "component".
-   *
-   * @param type a type name, as returned by {@link TypeMirror#toString()}
+   * Returns the appropriate Yail type (e.g., "number" or "text") for a given
+   * Java type (e.g., "float" or "java.lang.String"). All component names are
+   * converted to "component".
+   * 
+   * @param type
+   *          a type name, as returned by {@link TypeMirror#toString()}
    * @return one of "boolean", "text", "number", "list", or "component".
-   * @throws RuntimeException if the parameter cannot be mapped to any of the
-   *         legal return values
+   * @throws RuntimeException
+   *           if the parameter cannot be mapped to any of the legal return
+   *           values
    */
   protected final String javaTypeToYailType(String type) {
     // boolean -> boolean
@@ -1089,8 +1138,8 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return "text";
     }
     // {float, double, int, short, long} -> number
-    if (type.equals("float") || type.equals("double") || type.equals("int") ||
-        type.equals("short") || type.equals("long")) {
+    if (type.equals("float") || type.equals("double") || type.equals("int")
+        || type.equals("short") || type.equals("long")) {
       return "number";
     }
     // YailList -> list
@@ -1116,31 +1165,36 @@ public abstract class ComponentProcessor extends AbstractProcessor {
       return "component";
     }
 
-    throw new RuntimeException("Cannot convert Java type '" + type +
-                               "' to Yail type");
+    throw new RuntimeException("Cannot convert Java type '" + type
+        + "' to Yail type");
   }
 
   /**
    * Creates and returns a {@link FileObject} for output.
-   *
-   * @param fileName the name of the output file
+   * 
+   * @param fileName
+   *          the name of the output file
    * @return the {@code FileObject}
-   * @throws IOException if the file cannot be created
+   * @throws IOException
+   *           if the file cannot be created
    */
-  protected FileObject createOutputFileObject(String fileName) throws IOException {
-    return processingEnv.getFiler().
-      createResource(StandardLocation.SOURCE_OUTPUT, OUTPUT_PACKAGE, fileName);
+  protected FileObject createOutputFileObject(String fileName)
+      throws IOException {
+    return processingEnv.getFiler().createResource(
+        StandardLocation.SOURCE_OUTPUT, OUTPUT_PACKAGE, fileName);
   }
 
   /**
-   * Returns a {@link Writer} to which output should be written.  As with any
-   * {@code Writer}, the methods {@link Writer#flush()} and {@link Writer#close()}
-   * should be called when output is complete.
-   *
-   * @param fileName the name of the output file
+   * Returns a {@link Writer} to which output should be written. As with any
+   * {@code Writer}, the methods {@link Writer#flush()} and
+   * {@link Writer#close()} should be called when output is complete.
+   * 
+   * @param fileName
+   *          the name of the output file
    * @return the {@code Writer}
-   * @throws IOException if the {@code Writer} or underlying {@link FileObject}
-   *         cannot be created
+   * @throws IOException
+   *           if the {@code Writer} or underlying {@link FileObject} cannot be
+   *           created
    */
   protected Writer getOutputWriter(String fileName) throws IOException {
     return createOutputFileObject(fileName).openWriter();

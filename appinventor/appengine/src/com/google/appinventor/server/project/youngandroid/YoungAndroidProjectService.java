@@ -144,6 +144,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
    * @param icon the name of the asset to use as the application icon
    * @param vcode the version code
    * @param vname the version name
+   * @param mapskey the key for the Google Maps API
    */
   public static String getProjectPropertiesFileContents(String projectName, String qualifiedName,
     String icon, String vcode, String vname, String useslocation, String mapskey) {
@@ -251,7 +252,11 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String oldMapsKey = Strings.nullToEmpty(properties.getProperty("mapskey"));
 
     if (!newIcon.equals(oldIcon) || !newVCode.equals(oldVCode) || !newVName.equals(oldVName)
+<<<<<<< HEAD
       || !newUsesLocation.equals(oldUsesLocation) || !newMapsKey.equals(oldMapsKey)){
+=======
+      || !newUsesLocation.equals(oldUsesLocation) || !newMapsKey.equals(oldMapsKey)) {
+>>>>>>> develop
       // Recreate the project.properties and upload it to storageIo.
       String projectName = properties.getProperty("name");
       String qualifiedName = properties.getProperty("main");
@@ -294,7 +299,11 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     project.addTextFile(new TextFile(yailFileName, yailFileContents));
 
     // Create new project
+<<<<<<< HEAD
     return storageIo.createProject(userId, project, getProjectSettings("", "1", "1.0", "false",""));
+=======
+    return storageIo.createProject(userId, project, getProjectSettings("", "1", "1.0", "false", ""));
+>>>>>>> develop
   }
 
   @Override

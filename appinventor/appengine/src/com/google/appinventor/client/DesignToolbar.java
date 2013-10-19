@@ -6,6 +6,10 @@
 package com.google.appinventor.client;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 import com.google.appinventor.client.editor.SettingsEditor;
 import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.client.editor.FileEditor;
@@ -23,7 +27,10 @@ import com.google.appinventor.client.explorer.commands.ShowBarcodeCommand;
 import com.google.appinventor.client.explorer.commands.ShowProgressBarCommand;
 import com.google.appinventor.client.explorer.commands.WaitForBuildResultCommand;
 import com.google.appinventor.client.explorer.project.Project;
+<<<<<<< HEAD
 import com.google.appinventor.client.output.OdeLog;
+=======
+>>>>>>> develop
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.common.version.AppInventorFeatures;
@@ -169,6 +176,8 @@ public class DesignToolbar extends Toolbar {
       addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
           new ChangeSettingsAction()));
     }
+    addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
+        new ChangeSettingsAction()));
 
     List<ToolbarItem> connectToItems = Lists.newArrayList();
     addDropDownButton(WIDGET_NAME_CONNECT_TO, MESSAGES.connectToButton(), connectToItems, true);
@@ -354,7 +363,6 @@ public class DesignToolbar extends Toolbar {
       startRepl(currentProject.currentScreen, true); // true means we are the emulator
     }
   }
-
 
   private class BarcodeAction implements Command {
     @Override

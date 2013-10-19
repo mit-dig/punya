@@ -1167,6 +1167,7 @@ public interface OdeMessages extends Messages {
   @Description("Text messages are always received, and a notification is shown if the App is in the background.")
   String textReceivingChoiceAlways();
 
+
   @DefaultMessage("Connect Companion")
   @Description("Message providing details about starting the wireless connection.")
   String wirelessButton();
@@ -1182,14 +1183,14 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Disconnect Emulator")
   @Description("Message providing details about starting the emulator connection.")
   String emulatorButtonConnected();
-  
+
   // Used in
   // editor/youngandroid/properties/BaseUriPropertyEditor.java
 
   @DefaultMessage("The URI {0} does not end in a # or /")
   @Description("Exception message used when a URI entered by the user does not end in an appropriate character.")
   String notABaseUri(String uri);
-  
+
   @DefaultMessage("Settings")
   @Description("Change the project settings")
   String changeSettingsButton();

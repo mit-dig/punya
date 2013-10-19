@@ -158,7 +158,7 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 50:
   // - TEXTBOX_COMPONENT_VERSION was incremented to 4:
   // For YOUNG_ANDROID_VERSION 51:
-  // - CANVAS_COMPONENT_VERSION was incremented to 5.
+  // - CANVAS_VERSION was incremented to 5.
   // - BLOCKS_LANGUAGE_VERSION was incremented to 16.
   // For YOUNG_ANDROID_VERSION 52:
   // - BLOCKS_LANGUAGE_VERSION was incremented to 17.
@@ -281,7 +281,7 @@ public class YaVersion {
   // 1. Increment YOUNG_ANDROID_VERSION above.
   // 2. Increment BLOCKS_LANGUAGE_VERSION here
   // 3. Add code in yacodeblocks.BlockSaveFile#upgradeLanguage to upgrade the .blk file contents
-  // 4. Add code in YoungAndroidFormUpgrader to upgrade the source file
+  // See also
 
   // For BLOCKS_LANGUAGE_VERSION 2:
   // - Allow arguments of different procedures and events to have the same names.
@@ -317,14 +317,14 @@ public class YaVersion {
   // For BLOCKS_LANGUAGE_VERSION 16:
   // - Added make-color and split-color to Color drawer.
   // For BLOCKS_LANGUAGE_VERSION 17:
-  // - Changed open-screen to open-another-screen
-  // - Changed open-screen-with-start-text to open-another-screen-with-start-value
-  // - Marked get-startup-text as a bad block
-  // - Added get-start-value
-  // - Added get-plain-start-text
-  // - Marked close-screen-with-result as a bad block
-  // - Added close-screen-with-value
-  // - Added close-screen-with-plain-text
+  // Changed open-screen to open-another-screen
+  // Changed open-screen-with-start-text to open-another-screen-with-start-value
+  // Marked get-startup-text as a bad block
+  // Added get-start-value
+  // Added get-plain-start-text
+  // Marked close-screen-with-result as a bad block
+  // Added close-screen-with-value
+  // Added close-screen-with-plain-text
   public static final int BLOCKS_LANGUAGE_VERSION = 17;
 
   // ................................. Component Version Numbers ..................................
@@ -361,7 +361,7 @@ public class YaVersion {
 
   // For BALL_COMPONENT_VERSION 2:
   // - The PointTowards method was added (for all sprites)
-  // - The heading property was changed from int to double (for all sprites)
+  // - The heading property was changed from int to double (for all sprites
   // For BALL_COMPONENT_VERSION 3:
   // - The Z property was added (also for ImageSprite)
   // For BALL_COMPONENT_VERSION 4:
@@ -398,10 +398,8 @@ public class YaVersion {
   // - The LongClick event was added.
   // For BUTTON_COMPONENT_VERSION 4:
   // - The Shape property was added.
-  // For BUTTON_COMPONENT_VERSION 5:
-  // - The ShowFeedback property was added.
-  public static final int BUTTON_COMPONENT_VERSION = 5;
-
+  public static final int BUTTON_COMPONENT_VERSION = 4;
+    
   public static final int CAMCORDER_COMPONENT_VERSION = 1;
 
   public static final int CAMERA_COMPONENT_VERSION = 1;
@@ -465,6 +463,7 @@ public class YaVersion {
   // For FORM_COMPONENT_VERSION 11:
   // - OpenScreenAnimation and CloseScreenAnimation are now properties.
   public static final int FORM_COMPONENT_VERSION = 11;
+
 
   // For FUSIONTABLESCONTROL_COMPONENT_VERSION 2:
   // - The Fusiontables API was migrated from SQL to V1
@@ -551,6 +550,33 @@ public class YaVersion {
   // - The yaw parameter to OrientationChanged was renamed to azimuth.
   public static final int ORIENTATIONSENSOR_COMPONENT_VERSION = 2;
 
+  public static final int PROXIMITYSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int SOCIALPROXIMITYSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int WIFISENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int LOCATIONPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int CELLTOWERPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int ACTIVITYPROBESENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int RUNNINGAPPLICATIONS_COMPONENT_VERSION = 1;
+  
+  public static final int SCREENSTATUS_COMPONENT_VERSION = 1;
+  
+  public static final int LIGHTSENSOR_COMPONENT_VERSION = 1;
+  
+  public static final int CALLLOGHISTORY_COMPONENT_VERSION = 1;
+  
+  public static final int TIMER_COMPONENT_VERSION = 1;
+  
+  public static final int BATTERYSENSOR_COMPONENT_VERSION = 1;
+  public static final int PEDOMETERSENSOR_COMPONENT_VERSION = 1;
+  public static final int SURVEY_COMPONENT_VERSION = 1;
+  public static final int TELEPHONY_COMPONENT_VERSION = 1;
+  public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
   public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 2;
@@ -678,60 +704,27 @@ public class YaVersion {
   // For WEBVIEWER_COMPONENT_VERSION 3:
   // - Add UsesLocation property to set location permissions
   public static final int WEBVIEWER_COMPONENT_VERSION = 3;
+  
+  public static final int DROPBOX_COMPONENT_VERSION = 1;
+
+  public static final int SEMANTIC_WEB_COMPONENT_VERSION = 1;
+  
+  public static final int LINKED_DATA_COMPONENT_VERSION = 1;
+  
+  public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
 
   // For SLIDER_COMPONENT_VERSION 1:
   // - Initial version.
   public static final int SLIDER_COMPONENT_VERSION = 1;
-  
-  // For GOOGLECLOUDMESSAGING_COMPONENT_VERSION 1:
-  // - Initial version.
-  public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
-  
+
   // For GOOGLEMAP_COMPONENT_VERSION 1:
   // - Initial version.
   public static final int GOOGLE_MAP_COMPONENT_VERSION = 1;
   
-  // For WIFISENSOR_COMPONENT_VERSION 1:
-  // - Initial version.
-  public static final int WIFISENSOR_COMPONENT_VERSION = 1;
-  // For PROXIMITYSENSOR_COMPONENT_VERSION 1:
-  // - Initial version.
-  public static final int PROXIMITYSENSOR_COMPONENT_VERSION = 1;
-  
-  // For SOCIALPROXIMITYSENSOR_COMPONENT_VERSION 1:
-  // - Initial version.
-  
-  public static final int SOCIALPROXIMITYSENSOR_COMPONENT_VERSION = 1;
-  
-  public static final int ACTIVITYPROBESENSOR_COMPONENT_VERSION = 1;
-  
-  public static final int CALLLOGHISTORY_COMPONENT_VERSION = 1;
-  
-  public static final int BATTERYSENSOR_COMPONENT_VERSION = 1;
-  
-  public static final int CELLTOWERPROBESENSOR_COMPONENT_VERSION = 1;
-  
-  public static final int LIGHTSENSOR_COMPONENT_VERSION = 1;
-  
-  public static final int LOCATIONPROBESENSOR_COMPONENT_VERSION = 1;
-  
-  public static final int PEDOMETERSENSOR_COMPONENT_VERSION = 1;
-  
-  public static final int RUNNINGAPPLICATIONS_COMPONENT_VERSION = 1;
-  
-  public static final int SCREENSTATUS_COMPONENT_VERSION = 1;
-  
   public static final int SMSLOGHISTORY_COMPONENT_VERSION = 1;
-  
-  public static final int TELEPHONY_COMPONENT_VERSION = 1; 
-  
-  public static final int TIMER_COMPONENT_VERSION = 1;
-  
-  public static final int DROPBOX_COMPONENT_VERSION = 1;
-  
+
   public static final int  SENSORDB_COMPONENT_VERSION = 1;
   
-  public static final int SURVEY_COMPONENT_VERSION = 1;
-  
-  public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
+
+
 }

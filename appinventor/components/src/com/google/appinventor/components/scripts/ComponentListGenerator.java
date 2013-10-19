@@ -12,6 +12,8 @@ import java.util.Set;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 
+import com.sun.tools.javac.util.JCDiagnostic.DiagnosticType;
+
 /**
  * Tool to generate a list of the simple component types, and the permissions and libraries
  * (build info) required for each component.
@@ -92,5 +94,17 @@ public final class ComponentListGenerator extends ComponentProcessor {
       separator = ", ";
     }
     sb.append("]");
+  }
+  
+  private static void outputComponentTemplates(ComponentInfo component, StringBuilder sb){
+	sb.append("{\"name\": \"");
+	sb.append(component.name);
+	sb.append("\", \"templates\": [");
+	String separator = "";
+	for (String template : component.templates) {
+	  sb.append(separator).append("\"").append(template).append("\"");
+	  separator = ", ";
+	}
+	sb.append("]}");  
   }
 }

@@ -118,8 +118,9 @@ public final class ErrorMessages {
   // Contact picker (and PhoneNumberPicker) errors
   public static final int ERROR_PHONE_UNSUPPORTED_CONTACT_PICKER = 1107;
   public static final int ERROR_PHONE_UNSUPPORTED_SEARCH_IN_CONTACT_PICKING = 1108;
-  // Camcorder errors
+  //Camcorder errors
   public static final int ERROR_CAMCORDER_NO_CLIP_RETURNED = 1201;
+    
   // VideoPlayer errors
   public static final int ERROR_VIDEOPLAYER_FULLSCREEN_UNAVAILBLE = 1301;
   public static final int ERROR_VIDEOPLAYER_FULLSCREEN_CANT_EXIT = 1302;
@@ -166,6 +167,7 @@ public final class ErrorMessages {
 
   // Please start the next group of error numbers at 1901.
   
+
   // Please start the next group of error numbers at 2010.
   public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 2010;
   public static final int ERROR_GOOGLE_PLAY_NOT_INSTALLED = 2011;
@@ -176,7 +178,7 @@ public final class ErrorMessages {
   public static final int ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED = 2016;
   public static final int ERROR_GOOGLE_PLAY_DISABLED = 2017;
   public static final int ERROR_GOOGLE_PLAY_INVALID = 2018;
-
+  
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
   static {
@@ -375,9 +377,11 @@ public final class ErrorMessages {
         "The software used in this app cannot extract contacts from this type of phone.");
     errorMessages.put(ERROR_PHONE_UNSUPPORTED_SEARCH_IN_CONTACT_PICKING,
         "To pick contacts, pick them directly, without using search.");
+      
     // Camcorder errors
     errorMessages.put(ERROR_CAMCORDER_NO_CLIP_RETURNED,
-        "The camcorder did not return a clip.");
+    	"The camcorder did not return a clip.");
+
     // VideoPlayer errors
     errorMessages.put(ERROR_VIDEOPLAYER_FULLSCREEN_UNAVAILBLE,
         "Cannot start fullscreen mode.");
@@ -428,8 +432,6 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_DROPBOX_FILENOTFOUND, "The file to upload was not found.");
     errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
         "by calling <code>StopScheduleUpload</code>.");
-    
-    
     errorMessages.put(ERROR_GOOGLE_PLAY_NOT_INSTALLED, "Google Play is not installed/available on this phone");
     errorMessages.put(ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED, "Google Play Service needs update to newest version");
     errorMessages.put(ERROR_GOOGLE_MAP_NOT_INSTALLED, "Google Map is not installed on this phone");
@@ -442,6 +444,7 @@ public final class ErrorMessages {
       "has been disabled on this device.");
     errorMessages.put(ERROR_GOOGLE_PLAY_INVALID, "The version of the Google Play services installed " +
        "on this device is not authentic.");
+
   }
 
   private ErrorMessages() {

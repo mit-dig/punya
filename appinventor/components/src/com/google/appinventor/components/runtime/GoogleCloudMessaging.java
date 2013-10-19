@@ -1,8 +1,11 @@
+<<<<<<< HEAD
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 
+=======
+>>>>>>> develop
 package com.google.appinventor.components.runtime;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
@@ -70,9 +73,6 @@ import android.util.Log;
  * 4. The GCMIntentService calls the GCMEventListener. The GCMEventListener passes back 
  * the message to the mainUIThreadActivity
  * 
- */
-
-/* 
  * @author fuming@mit.mit (Fuming Shih)
  * @author wli17@mit.edu (Weihua Li)
  */
@@ -208,6 +208,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     // Add / remove the listeners
     // @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
     // @SimpleProperty
+ 
     @SimpleFunction(description = "Enable Google Cloud Messaging to receive push notification")
     public void Enabled(boolean enable) {
 

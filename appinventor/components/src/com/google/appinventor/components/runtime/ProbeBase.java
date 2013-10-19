@@ -65,15 +65,18 @@ import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import com.google.gson.JsonPrimitive;
 
  
 import edu.mit.media.funf.FunfManager;
+
 import edu.mit.media.funf.config.RuntimeTypeAdapterFactory;
 import edu.mit.media.funf.json.IJsonObject;
 import edu.mit.media.funf.probe.builtin.ProbeKeys.BaseProbeKeys;
 import edu.mit.media.funf.storage.DatabaseService;
 import edu.mit.media.funf.storage.NameValueDatabaseService;
+
 import edu.mit.media.funf.time.DecimalTimeUnit;
 
 
@@ -321,6 +324,7 @@ SensorComponent, OnDestroyListener{
 //  public Class<? extends UploadService> getUploadServiceClass() {
 //    return HttpsUploadService.class;
 //  }
+
   
   
   public static SharedPreferences getSystemPrefs(Context context) {

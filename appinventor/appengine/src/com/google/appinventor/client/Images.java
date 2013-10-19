@@ -151,7 +151,9 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/orientationsensor.png")
   ImageResource orientationsensor();
+  
 
+  
   /**
    * Designer palette item: player component
    */
@@ -343,13 +345,24 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/pedometer.png")
   ImageResource pedometerComponent();
-
+  
   /**
    * Designer pallete item: PhoneStatus Component
    */
   @Source("com/google/appinventor/images/phoneip.png")
   ImageResource phonestatusComponent();
-
+  /**
+   * Designer palette item: TelephonyInfo Component
+   */
+  @Source("com/google/appinventor/images/info.png")
+  ImageResource telephonyInfo();
+  
+  /**
+   * Designer palette item: GogoleCloudMessaging Component
+   */
+  @Source("com/google/appinventor/images/googleCloudMessaging.png")
+  ImageResource googleCloudMessaging();
+  
   /**
    * Designer palette item: Lego Mindstorms NXT components
    */
@@ -436,11 +449,6 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/procedures.png")
   ImageResource procedures();
   
-  /**
-   * Designer palette item: GogoleCloudMessaging Component
-   */
-  @Source("com/google/appinventor/images/googleCloudMessaging.png")
-  ImageResource googleCloudMessaging();
   
   /**
   * Designer palette item: Google Map component
@@ -533,11 +541,6 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/smsProbe.png")
   ImageResource smsHistory();
   
-  /**
-   * Designer palette item: TelephonyInfo Component
-   */
-  @Source("com/google/appinventor/images/info.png")
-  ImageResource telephonyInfo();
   
   /**
    * Designer palette item: Timer component

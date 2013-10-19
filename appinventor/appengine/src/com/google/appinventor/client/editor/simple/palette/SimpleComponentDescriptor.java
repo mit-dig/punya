@@ -77,6 +77,22 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/phoneip.png", images.phonestatusComponent());
     bundledImages.put("images/phoneCall.png", images.phonecall());
     bundledImages.put("images/player.png", images.player());
+    bundledImages.put("images/proximity.png", images.proximitysensor());
+    bundledImages.put("images/socialProximitysensor.png", images.socialProximitysensor());
+    bundledImages.put("images/timer.png", images.timer());
+    bundledImages.put("images/wifiProbe.png", images.wifiSensor());
+    bundledImages.put("images/locationProbe.png", images.locationProbeSensor());
+    bundledImages.put("images/cellTowerProbe.png", images.cellTowerProbeSensor());
+    bundledImages.put("images/activityProbe.png", images.activityProbeSensor());
+    bundledImages.put("images/runningAppsProbe.png", images.runningApps());
+    bundledImages.put("images/screenProbe.png", images.screenStatus());    
+    bundledImages.put("images/lightsensorProbe.png", images.lightSensor());
+    bundledImages.put("images/calllogProbe.png", images.calllogHistory());
+    bundledImages.put("images/smsProbe.png", images.smsHistory());
+    bundledImages.put("images/batterySensor.png", images.batterySensor());
+    bundledImages.put("images/pedometerSensor.png", images.pedometerSensor());
+    bundledImages.put("images/survey.png", images.survey());
+    bundledImages.put("images/info.png", images.telephonyInfo());
     bundledImages.put("images/soundEffect.png", images.soundeffect());
     bundledImages.put("images/soundRecorder.png", images.soundRecorder());
     bundledImages.put("images/speechRecognizer.png", images.speechRecognizer());
@@ -288,10 +304,20 @@ public final class SimpleComponentDescriptor {
     } else if (name.equals(MockWebViewer.TYPE)) {
       return new MockWebViewer(editor);
     } else if (name.equals(MockSurvey.TYPE)){
+<<<<<<< HEAD
         return new MockSurvey(editor);  
     } else if (name.equals(MockGoogleMap.TYPE)){
       return new MockGoogleMap(editor);
     } else {
+=======
+      return new MockSurvey(editor);
+    } else if (name.equals(MockLDVisualization.TYPE)){
+      return new MockLDVisualization(editor);
+    } else if (name.equals(MockGoogleMap.TYPE)){
+      return new MockGoogleMap(editor);
+    }
+      else {
+>>>>>>> develop
       // TODO(user): add 3rd party mock component proxy here
       throw new UnsupportedOperationException("unknown component: " + name);
     }

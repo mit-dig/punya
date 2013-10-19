@@ -5,6 +5,7 @@
 
 package com.google.appinventor.buildserver;
 
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
@@ -96,6 +97,7 @@ public final class Compiler {
   private static final String COMPONENT_BUILD_INFO =
       RUNTIME_FILES_DIR + "simple_components_build_info.json";
 
+
   /*
    * Resource paths to yail runtime, runtime library files and sdk tools.
    * To get the real file paths, call getResource() with one of these constants.
@@ -116,6 +118,7 @@ public final class Compiler {
       RUNTIME_FILES_DIR + "acra-4.4.0.jar";
   private static final String DX_JAR =
       RUNTIME_FILES_DIR + "dx.jar";
+
 
   @VisibleForTesting
   static final String YAIL_RUNTIME =
@@ -140,6 +143,9 @@ public final class Compiler {
       new ConcurrentHashMap<String, Set<String>>();
 
   private final ConcurrentMap<String, Set<String>> componentAssets =
+    new ConcurrentHashMap<String, Set<String>>();
+  
+  private final ConcurrentMap<String, Set<String>> componentTemplates = 
     new ConcurrentHashMap<String, Set<String>>();
 
   /**
@@ -172,9 +178,11 @@ public final class Compiler {
   // Maximum ram that can be used by a child processes, in MB.
   private final int childProcessRamMb;
   private Set<String> librariesNeeded; // Set of component libraries
+
   private Set<String> nativeLibrariesNeeded; // Set of component native libraries
   private Set<String> assetsNeeded; // Set of component assets
   private File libsDir; // The directory that will contain any native libraries for packaging
+
 
   /*
    * Generate the set of Android permissions needed by this project.
@@ -241,6 +249,30 @@ public final class Compiler {
       librariesNeeded.addAll(componentLibraries.get(componentType));
     }
     System.out.println("Libraries needed, n= " + librariesNeeded.size());
+  }
+  
+  /*
+   * Generate the set of Android templates needd by this project.
+   */
+  @VisibleForTesting
+  void generateTemplateNames() {
+	    // Before we can use componentLibraries, we have to call loadComponentLibraries().
+	try {
+	  loadComponentTemplateNames();
+	} catch (IOException e) {
+	  // This is fatal.
+	  e.printStackTrace();
+	  userErrors.print(String.format(ERROR_IN_STAGE, "Templates"));
+	} catch (JSONException e) {
+	  // This is fatal, but shouldn't actually ever happen.
+	  e.printStackTrace();
+	  userErrors.print(String.format(ERROR_IN_STAGE, "Templates"));
+	}
+	templatesNeeded = Sets.newHashSet();
+	for (String componentType : componentTypes) {
+	  templatesNeeded.addAll(componentTemplates.get(componentType));
+	}
+	System.out.println("Templates needed, n= " + templatesNeeded.size());	  
   }
 
   /*
@@ -341,14 +373,17 @@ public final class Compiler {
       for (String permission : permissionsNeeded) {
         out.write("  <uses-permission android:name=\"" + permission + "\" />\n");
       }
+
       
       // Google Cloud Messaging
+
       out.write("<permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
       out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n"); 
       
       out.write("<permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
       out.write("<uses-permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" />\n"); 
       
+
       // add permission, and uses-permission, uses-feature specifically for Google Map
       // as stated here https://developers.google.com/maps/documentation/android/start
       if (componentTypes.contains("GoogleMap")){
@@ -359,12 +394,13 @@ public final class Compiler {
           out.write(" <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />\n");
       }
       
+
       // TODO(markf): Change the minSdkVersion below if we ever require an SDK beyond 1.5.
       // The market will use the following to filter apps shown to devices that don't support
       // the specified SDK version.  We might also want to allow users to specify minSdkVersion
       // or have us specify higher SDK versions when the program uses a component that uses
       // features from a later SDK (e.g. Bluetooth).
-      out.write("  <uses-sdk android:minSdkVersion=\"8\" />\n");
+      out.write("  <uses-sdk android:minSdkVersion=\"3\" />\n");
 
       // If we set the targetSdkVersion to 4, we can run full size apps on tablets.
       // On non-tablet hi-res devices like a Nexus One, the screen dimensions will be the actual
@@ -374,8 +410,10 @@ public final class Compiler {
       // much smaller than they should be. There is code in Canvas and ImageSprite to work around
       // this problem, but images and buttons are still an unsolved problem. We'll have to solve
       // that before we can set the targetSdkVersion to 4 here.
+
       // out.write("  <uses-sdk android:targetSdkVersion=\"4\" />\n");
-      out.write("  <uses-sdk android:targetSdkVersion=\"10\" />\n");
+      //out.write("  <uses-sdk android:targetSdkVersion=\"10\" />\n");
+
 
       out.write("  <application ");
 
@@ -453,6 +491,7 @@ public final class Compiler {
       out.write("        <action android:name=\"android.intent.action.MAIN\" />\n");
       out.write("      </intent-filter>\n");
       out.write("    </activity>\n");
+<<<<<<< HEAD
       
       // Add the Google Cloud Messaging service
       // Declare and use a custom permission so only this application can receive GCM messages:
@@ -492,6 +531,9 @@ public final class Compiler {
       out.write("</receiver>");
 	  }
       
+=======
+
+>>>>>>> develop
 
 	  // Add the FUNF probe services
       // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
@@ -504,6 +546,10 @@ public final class Compiler {
       // Broadcast receiver for all funf related component  
 	  if(librariesNeeded.contains("funf.jar")){
 	    out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
+<<<<<<< HEAD
+=======
+	    // out.write("<meta-data android:name=\"main\" android:value=\"{\"@type\": \"com.google.appinventor.components.runtime.sensorDBPipeline\"}\"/>\n");
+>>>>>>> develop
 	    out.write(" </service>\n");  
 	    out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
 	    out.write("    <intent-filter>\n");
@@ -540,7 +586,22 @@ public final class Compiler {
       out.write("</receiver>\n");
     }
 	  
+<<<<<<< HEAD
 
+=======
+	  // Add the GCM service
+	  // Declare and use a custom permission so only this application can receive GCM messages:
+	  out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");    
+	  out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
+	  out.write("    <intent-filter>");
+	  out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
+	  out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
+	  String temp787 ="        <category android:name=\""+packageName+"\" />\n"; 
+	  out.write(temp787);
+	  out.write("    </intent-filter>");
+	  out.write("</receiver>");
+	  
+>>>>>>> develop
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
 	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.HttpsUploadService\"></service> \n");
@@ -591,6 +652,16 @@ public final class Compiler {
         }
       }
 
+      // adds the google maps v2 api key
+      if (componentTypes.contains("GoogleMap")) {
+        if (project.getMapsKey().length() > 0) {
+          System.out.println("Android Manifest: including Google Maps key:" + project.getMapsKey());
+          out.write("<meta-data android:name=\"com.google.android.maps.v2.API_KEY\" ");
+          out.write("android:value=\"" + project.getMapsKey() + "\"/>");
+        }
+      }
+
+	  // Close the application tag
       out.write("  </application>\n");
       out.write("</manifest>\n");
       out.close();
@@ -630,8 +701,18 @@ public final class Compiler {
 
     // Get names of component-required libraries and assets.
     compiler.generateLibraryNames();
+<<<<<<< HEAD
     compiler.generateNativeLibraryNames();
     compiler.generateAssets();
+=======
+    
+    // TODO: code for copying all neededTemplates from AppEngine's /WEBINF/template to Android asset folder
+    // Move needed templates files to project's asset folder
+     
+    compiler.generateTemplateNames(); //after this we have all templateNames used by the components in templatesNeeded
+    compiler.copyTemplatesToAssets();
+    
+>>>>>>> develop
 
     // Create build directory.
     File buildDir = createDirectory(project.getBuildDirectory());
@@ -649,6 +730,13 @@ public final class Compiler {
     out.println("________Creating animation xml");
     File animDir = createDirectory(resDir, "anim");
     if (!compiler.createAnimationXml(animDir)) {
+      return false;
+    }
+    
+    // Create fragment directory and fragment xml files
+    out.println("________Creating fragment xml");
+    File fragmentDir = createDirectory(resDir, "layout");
+    if (!compiler.createFragmentXml(fragmentDir)) {
       return false;
     }
 
@@ -751,7 +839,65 @@ public final class Compiler {
 
     return true;
   }
+  
+  /*
+   * Create asset files and copy all needed templates used by the components in this project
+   */
 
+  private boolean copyTemplatesToAssets(){
+	// checkout implementation in IdMap.java and Whiltelist.java
+	// 
+	  
+	LOG.info("The asset dir: " + project.getAssetsDirectory());
+ 
+	createDirectory(project.getAssetsDirectory()); //make sure we have asset folder created
+
+	// checkout the files can be read in from the resource 
+	// icon = ImageIO.read(Compiler.class.getResource(DEFAULT_ICON));
+//    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(resourcePath)),
+//            file);
+
+	try {
+
+	  File assetFolder = project.getAssetsDirectory();
+	  
+	  for (String templateName : templatesNeeded) {
+		String target = assetFolder.getAbsolutePath() + "/" + templateName;
+		String source = TEMPLATE_DIR + templateName;
+		
+		out.println("(DEBUG) Copying " + source + 
+				" to " + assetFolder.getAbsolutePath() + "/" + templateName);
+	    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(source)),
+	    		  new File(target));
+		
+//		String source = templateFolder + templateName;
+//		String target = assetFolder.getAbsolutePath() + "/" + templateName;
+//
+//
+//	    FileInputStream fileInputStream = new FileInputStream(source);
+//	    FileOutputStream fileOutputStream = new FileOutputStream(target);
+//	    
+//        int bufferSize;
+//        byte[] bufffer = new byte[512];
+//        
+//        while ((bufferSize = fileInputStream.read(bufffer)) > 0) {
+//          fileOutputStream.write(bufffer, 0, bufferSize);
+//        }
+//        fileInputStream.close();
+//        fileOutputStream.close();
+
+	  }
+
+	  
+	} catch (IOException e) {
+	    e.printStackTrace();
+	    return false;
+	}
+
+	return true;
+
+  }
+  
   /*
    * Creates all the animation xml files.
    */
@@ -778,6 +924,24 @@ public final class Compiler {
 
     for (String filename : files.keySet()) {
       File file = new File(animDir, filename);
+      if (!writeXmlFile(file, files.get(filename))) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  /*
+   * Create all the fragment xml files.
+   */
+  private boolean createFragmentXml(File fragDir) {
+    Map<String, String> files = new HashMap<String, String>();
+    //just for testing....now will create AnimantionXmlConstants later
+    files.put("basic_map.xml", AnimationXmlConstants.BASIC_MAP_XML);
+    
+    
+    for (String filename : files.keySet()) {
+      File file = new File(fragDir, filename);
       if (!writeXmlFile(file, files.get(filename))) {
         return false;
       }
@@ -999,10 +1163,13 @@ public final class Compiler {
       // This works when a JDK is installed with the JRE.
       jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
           File.separator + "jarsigner");
+<<<<<<< HEAD
       if (System.getProperty("os.name").startsWith("Windows")) {
         jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
             File.separator + "jarsigner.exe");
       }
+=======
+>>>>>>> develop
       if (!jarsignerFile.exists()) {
         LOG.warning("YAIL compiler - could not find jarsigner.");
         err.println("YAIL compiler - could not find jarsigner.");
@@ -1297,8 +1464,56 @@ public final class Compiler {
     }
   }
 
+<<<<<<< HEAD
   /*
    *  Loads permissions and information on component libraries and assets.
+=======
+  private void loadComponentPermissions() throws IOException, JSONException {
+    synchronized (componentPermissions) {
+      if (componentPermissions.isEmpty()) {
+        String permissionsJson = Resources.toString(
+            Compiler.class.getResource(COMPONENT_PERMISSIONS), Charsets.UTF_8);
+
+        JSONArray componentsArray = new JSONArray(permissionsJson);
+        int componentslength = componentsArray.length();
+        for (int componentsIndex = 0; componentsIndex < componentslength; componentsIndex++) {
+          JSONObject componentObject = componentsArray.getJSONObject(componentsIndex);
+          String name = componentObject.getString("name");
+
+          Set<String> permissionsForThisComponent = Sets.newHashSet();
+
+          JSONArray permissionsArray = componentObject.getJSONArray("permissions");
+          int permissionsLength = permissionsArray.length();
+          for (int permissionsIndex = 0; permissionsIndex < permissionsLength; permissionsIndex++) {
+            String permission = permissionsArray.getString(permissionsIndex);
+            permissionsForThisComponent.add(permission);
+          }
+
+          componentPermissions.put(name, permissionsForThisComponent);
+        }
+      }
+      if (project != null) {    // Only do this if we have a project (testing doesn't provide one :-( ).
+        LOG.log(Level.INFO, "usesLocation = " + project.getUsesLocation());
+        if (project.getUsesLocation().equals("True")) { // Add location permissions if any WebViewer requests it
+          Set<String> locationPermissions = Sets.newHashSet(); // via a Property.
+          // See ProjectEditor.recordLocationSettings()
+          locationPermissions.add("android.permission.ACCESS_FINE_LOCATION");
+          locationPermissions.add("android.permission.ACCESS_COARSE_LOCATION");
+          locationPermissions.add("android.permission.ACCESS_MOCK_LOCATION");
+          componentPermissions.put("WebViewer", locationPermissions);
+        }
+      }
+    }
+  }
+
+  
+  /**
+   * Loads the names of template jars for each component and stores them in
+   * componentLibraries.
+   *
+   * @throws IOException
+   * @throws JSONException
+>>>>>>> develop
    */
   private void loadJsonInfo(ConcurrentMap<String, Set<String>> infoMap, String targetInfo)
       throws IOException, JSONException {
@@ -1327,6 +1542,40 @@ public final class Compiler {
       }
     }
   }
+  
+  /**
+   * Loads the names of template files for each component and stores them in
+   * componentTemplates.
+   *
+   * @throws IOException
+   * @throws JSONException
+   */
+  private void loadComponentTemplateNames() throws IOException, JSONException {
+    synchronized (componentTemplates) {
+      if (componentTemplates.isEmpty()) {
+        String templatesJson = Resources.toString(
+            Compiler.class.getResource(COMPONENT_TMEPLATES), Charsets.UTF_8);
+
+        JSONArray componentsArray = new JSONArray(templatesJson);
+        int componentslength = componentsArray.length();
+        for (int componentsIndex = 0; componentsIndex < componentslength; componentsIndex++) {
+          JSONObject componentObject = componentsArray.getJSONObject(componentsIndex);
+          String name = componentObject.getString("name");
+
+          Set<String> templatesForThisComponent = Sets.newHashSet();
+
+          JSONArray templatesArray = componentObject.getJSONArray("templates");
+          int templatesLength = templatesArray.length();
+          for (int templatesIndex = 0; templatesIndex < templatesLength; templatesIndex++) {
+            String templateName = templatesArray.getString(templatesIndex);
+            templatesForThisComponent.add(templateName);
+          }
+          componentTemplates.put(name, templatesForThisComponent);
+        }
+      }
+    }
+  }
+
 
   /**
    * Copy one file to another. If destination file does not exist, it is created.
