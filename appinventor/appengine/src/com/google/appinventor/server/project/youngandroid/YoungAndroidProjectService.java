@@ -252,11 +252,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String oldMapsKey = Strings.nullToEmpty(properties.getProperty("mapskey"));
 
     if (!newIcon.equals(oldIcon) || !newVCode.equals(oldVCode) || !newVName.equals(oldVName)
-<<<<<<< HEAD
       || !newUsesLocation.equals(oldUsesLocation) || !newMapsKey.equals(oldMapsKey)){
-=======
-      || !newUsesLocation.equals(oldUsesLocation) || !newMapsKey.equals(oldMapsKey)) {
->>>>>>> develop
+
       // Recreate the project.properties and upload it to storageIo.
       String projectName = properties.getProperty("name");
       String qualifiedName = properties.getProperty("main");
@@ -299,11 +296,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     project.addTextFile(new TextFile(yailFileName, yailFileContents));
 
     // Create new project
-<<<<<<< HEAD
     return storageIo.createProject(userId, project, getProjectSettings("", "1", "1.0", "false",""));
-=======
-    return storageIo.createProject(userId, project, getProjectSettings("", "1", "1.0", "false", ""));
->>>>>>> develop
+
   }
 
   @Override

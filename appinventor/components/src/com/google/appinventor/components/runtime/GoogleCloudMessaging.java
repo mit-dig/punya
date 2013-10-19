@@ -1,11 +1,8 @@
-<<<<<<< HEAD
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 
-=======
->>>>>>> develop
 package com.google.appinventor.components.runtime;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
@@ -73,6 +70,9 @@ import android.util.Log;
  * 4. The GCMIntentService calls the GCMEventListener. The GCMEventListener passes back 
  * the message to the mainUIThreadActivity
  * 
+ */
+
+/* 
  * @author fuming@mit.mit (Fuming Shih)
  * @author wli17@mit.edu (Weihua Li)
  */
@@ -128,11 +128,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
     public GoogleCloudMessaging(ComponentContainer container) {
         super(container.$form());
-
+        form.registerForOnDestroy(this);
+        
         // Set up listeners
         context = container.$context();
         mainUIThreadActivity = container.$context();
-        sharedPreferences = container.$context().getSharedPreferences("GoogleCloudMessaging",Context.MODE_PRIVATE);
+        sharedPreferences = container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         regId = retrieveRegId();
         
         // get Notification Manager
@@ -151,6 +152,16 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         //launch service
         gcmMessage = container.$form().getGCMStartValues();
         Log.i(TAG,"The initial value of the gcmMessage is "+gcmMessage);
+    }
+    
+    // check to see if there is an exisiting preference for the GCM; if there is, enables the listeners.
+    private void checkAndSetPreference() {
+        Log.i(TAG, "Checking the preference now, either in or out");
+        //check for if there is an exisiting preference for the GCM; if there is, enables the listeners.
+        if(sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "").equals("in")) {
+            Log.i(TAG,"Enabled the listeners after failure.");
+            Enabled(true);
+        }
     }
     
     private String retrieveRegId() {
@@ -174,7 +185,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @Override
     public void onDestroy() {
         // remember to unbind
-        doUnbindService();
+        Log.i(TAG, "My GoogleCloudMessaging.java got destroyed");
+        if (mIsBound && mConnection != null) {
+          Log.i(TAG, "In the onDestroy method, before the doUnbindService method.");
+          doUnbindService();
+          Log.i(TAG, "In the onDestroy method, after the doUnbindService method.");
+        }
     }
 
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
@@ -208,13 +224,14 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     // Add / remove the listeners
     // @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
     // @SimpleProperty
- 
     @SimpleFunction(description = "Enable Google Cloud Messaging to receive push notification")
     public void Enabled(boolean enable) {
 
         enabled = enable;
         if (enabled) {
+            Log.i(TAG, "Before registerGCMEvent - regListener");
             registerGCMEvent(context, regListener, REG_GCM_TYPE);
+            Log.i(TAG, "Before registerGCMEvent - msgListener");
             registerGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
         } else {
             unRegisterGCMEvent(context, regListener, REG_GCM_TYPE);
@@ -225,6 +242,11 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @SimpleFunction()
     public boolean isRegistered(){
         return GCMRegistrar.isRegisteredOnServer(form);
+    }
+    
+    @SimpleFunction()
+    public boolean isServiceReady(){
+        return mIsBound;
     }
     
     /**
@@ -348,7 +370,9 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             // cast its IBinder to a concrete class and directly access it.
             mBoundGCMIntentService = ((GCMIntentService.LocalBinder) service)
                     .getService();
-            Log.i(TAG, "Bound to GCMIntentService");           
+            mIsBound = true;
+            Log.i(TAG, "Bound to GCMIntentService");  
+            checkAndSetPreference();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -357,6 +381,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             // Because it is running in our same process, we should never
             // see this happen.
             mBoundGCMIntentService = null;
+            mIsBound = false;
             Log.i(TAG, "Unbind GCMIntentService");
         }
     };
@@ -368,7 +393,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         // supporting component replacement by other applications).
         mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
                 GCMIntentService.class), mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
         Log.i(TAG,
                 "GCMIntentService is bound, and now we could have register dataRequests");
     }
@@ -433,6 +457,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     
     //Add the listener to the GCMIntentService
     public void registerGCMEvent(Context context, GCMEventListener listener, String eventType) {
+        Log.i(TAG, "Before the registerGCMEvent");
         mBoundGCMIntentService.requestGCMMessage(context, listener, eventType);
     }
     
