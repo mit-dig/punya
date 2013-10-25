@@ -6,10 +6,7 @@
 package com.google.appinventor.client;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
-<<<<<<< HEAD
-=======
 
->>>>>>> develop
 import com.google.appinventor.client.editor.SettingsEditor;
 import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.client.editor.FileEditor;
@@ -27,10 +24,7 @@ import com.google.appinventor.client.explorer.commands.ShowBarcodeCommand;
 import com.google.appinventor.client.explorer.commands.ShowProgressBarCommand;
 import com.google.appinventor.client.explorer.commands.WaitForBuildResultCommand;
 import com.google.appinventor.client.explorer.project.Project;
-<<<<<<< HEAD
 import com.google.appinventor.client.output.OdeLog;
-=======
->>>>>>> develop
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.common.version.AppInventorFeatures;

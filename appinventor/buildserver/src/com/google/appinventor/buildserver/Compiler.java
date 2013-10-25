@@ -82,6 +82,8 @@ public final class Compiler {
   public static final String NATIVE_TARGET = "native";
   // Must match ComponentListGenerator.ASSETS_TARGET
   private static final String ASSETS_TARGET = "assets";
+  // Must match ComponentListGenerator.TEMPLATE_TARGET
+  private static final String TEMPLATE_TARGET = "templates";
   // Must match Component.ASSET_DIRECTORY
   private static final String ASSET_DIRECTORY = "component";
 
@@ -96,6 +98,14 @@ public final class Compiler {
 
   private static final String DEFAULT_VERSION_CODE = "1";
   private static final String DEFAULT_VERSION_NAME = "1.0";
+
+  private static final String COMPONENT_PERMISSIONS =
+          RUNTIME_FILES_DIR + "simple_components_permissions.json";
+
+  private static final String COMPONENT_TEMPLATES =
+          RUNTIME_FILES_DIR + "simple_components_templates.json";
+
+  private static final String TEMPLATE_DIR = RUNTIME_FILES_DIR + "template/";
 
   private static final String COMPONENT_BUILD_INFO =
       RUNTIME_FILES_DIR + "simple_components_build_info.json";
@@ -181,7 +191,7 @@ public final class Compiler {
   // Maximum ram that can be used by a child processes, in MB.
   private final int childProcessRamMb;
   private Set<String> librariesNeeded; // Set of component libraries
-
+  private Set<String> templatesNeeded; // Set of component templates
   private Set<String> nativeLibrariesNeeded; // Set of component native libraries
   private Set<String> assetsNeeded; // Set of component assets
   private File libsDir; // The directory that will contain any native libraries for packaging
@@ -499,7 +509,6 @@ public final class Compiler {
       out.write("        <action android:name=\"android.intent.action.MAIN\" />\n");
       out.write("      </intent-filter>\n");
       out.write("    </activity>\n");
-<<<<<<< HEAD
       
       // Add the Google Cloud Messaging service
       // Declare and use a custom permission so only this application can receive GCM messages:
@@ -539,9 +548,6 @@ public final class Compiler {
       out.write("</receiver>");
 	  }
       
-=======
-
->>>>>>> develop
 
 	  // Add the FUNF probe services
       // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
@@ -554,10 +560,6 @@ public final class Compiler {
       // Broadcast receiver for all funf related component  
 	  if(librariesNeeded.contains("funf.jar")){
 	    out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
-<<<<<<< HEAD
-=======
-	    // out.write("<meta-data android:name=\"main\" android:value=\"{\"@type\": \"com.google.appinventor.components.runtime.sensorDBPipeline\"}\"/>\n");
->>>>>>> develop
 	    out.write(" </service>\n");  
 	    out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
 	    out.write("    <intent-filter>\n");
@@ -594,22 +596,7 @@ public final class Compiler {
       out.write("</receiver>\n");
     }
 	  
-<<<<<<< HEAD
 
-=======
-	  // Add the GCM service
-	  // Declare and use a custom permission so only this application can receive GCM messages:
-	  out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");    
-	  out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
-	  out.write("    <intent-filter>");
-	  out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
-	  out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
-	  String temp787 ="        <category android:name=\""+packageName+"\" />\n"; 
-	  out.write(temp787);
-	  out.write("    </intent-filter>");
-	  out.write("</receiver>");
-	  
->>>>>>> develop
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
 	  out.write("<service android:name=\"com.google.appinventor.components.runtime.util.HttpsUploadService\"></service> \n");
@@ -709,10 +696,8 @@ public final class Compiler {
 
     // Get names of component-required libraries and assets.
     compiler.generateLibraryNames();
-<<<<<<< HEAD
     compiler.generateNativeLibraryNames();
     compiler.generateAssets();
-=======
     
     // TODO: code for copying all neededTemplates from AppEngine's /WEBINF/template to Android asset folder
     // Move needed templates files to project's asset folder
@@ -720,7 +705,6 @@ public final class Compiler {
     compiler.generateTemplateNames(); //after this we have all templateNames used by the components in templatesNeeded
     compiler.copyTemplatesToAssets();
     
->>>>>>> develop
 
     // Create build directory.
     File buildDir = createDirectory(project.getBuildDirectory());
@@ -748,13 +732,6 @@ public final class Compiler {
       return false;
     }
 
-    // Create fragment directory and fragment xml files
-    out.println("________Creating fragment xml");
-    File fragmentDir = createDirectory(resDir, "layout");
-    if (!compiler.createFragmentXml(fragmentDir)) {
-      return false;
-    }
-    
     // Determine android permissions.
     out.println("________Determining permissions");
     Set<String> permissionsNeeded = compiler.generatePermissions();
@@ -973,23 +950,6 @@ public final class Compiler {
   }
   
   /*
-  * Create all the fragment xml files.
-  */
-  private boolean createFragmentXml(File fragDir) {
-    Map<String, String> files = new HashMap<String, String>();
-    //just for testing....now will create AnimantionXmlConstants later
-    files.put("basic_map.xml", AnimationXmlConstants.BASIC_MAP_XML);
-    
-    for (String filename : files.keySet()) {
-      File file = new File(fragDir, filename);
-      if (!writeXmlFile(file, files.get(filename))) {
-        return false;
-      }
-    }
-     return true;
-  }
-
-  /*
    * Runs ApkBuilder by using the API instead of calling its main method because the main method
    * can call System.exit(1), which will bring down our server.
    */
@@ -1171,13 +1131,10 @@ public final class Compiler {
       // This works when a JDK is installed with the JRE.
       jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
           File.separator + "jarsigner");
-<<<<<<< HEAD
       if (System.getProperty("os.name").startsWith("Windows")) {
         jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
             File.separator + "jarsigner.exe");
       }
-=======
->>>>>>> develop
       if (!jarsignerFile.exists()) {
         LOG.warning("YAIL compiler - could not find jarsigner.");
         err.println("YAIL compiler - could not find jarsigner.");
@@ -1472,10 +1429,6 @@ public final class Compiler {
     }
   }
 
-<<<<<<< HEAD
-  /*
-   *  Loads permissions and information on component libraries and assets.
-=======
   private void loadComponentPermissions() throws IOException, JSONException {
     synchronized (componentPermissions) {
       if (componentPermissions.isEmpty()) {
@@ -1515,13 +1468,8 @@ public final class Compiler {
   }
 
   
-  /**
-   * Loads the names of template jars for each component and stores them in
-   * componentLibraries.
-   *
-   * @throws IOException
-   * @throws JSONException
->>>>>>> develop
+  /*
+   *  Loads permissions and information on component libraries and assets.
    */
   private void loadJsonInfo(ConcurrentMap<String, Set<String>> infoMap, String targetInfo)
       throws IOException, JSONException {
@@ -1562,7 +1510,7 @@ public final class Compiler {
     synchronized (componentTemplates) {
       if (componentTemplates.isEmpty()) {
         String templatesJson = Resources.toString(
-            Compiler.class.getResource(COMPONENT_TMEPLATES), Charsets.UTF_8);
+            Compiler.class.getResource(COMPONENT_TEMPLATES), Charsets.UTF_8);
 
         JSONArray componentsArray = new JSONArray(templatesJson);
         int componentslength = componentsArray.length();
