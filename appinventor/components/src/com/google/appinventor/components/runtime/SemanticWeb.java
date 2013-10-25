@@ -232,7 +232,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
         }
       });
       ((ResultSetRewindable)results).reset();
-      final Collection<Solution> solutions = RdfUtil.resultSetAsCollection( results );
+      final YailList solutions = RdfUtil.resultSetAsYailList( results );
       form.runOnUiThread(new Runnable() {
         public void run() {
           RetrievedResults("SELECT", solutions);
@@ -263,7 +263,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
    * @param bindings A list of bindings satisfying the SPARQL query
    */
   @SimpleEvent
-  public void RetrievedResults(String type, Collection<?> bindings) {
+  public void RetrievedResults(String type, YailList bindings) {
     EventDispatcher.dispatchEvent(this, "RetrievedResults", type, bindings);
   }
 

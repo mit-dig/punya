@@ -612,4 +612,17 @@ public final class RdfUtil {
     }
     return success;
   }
+
+  public static YailList resultSetAsYailList(ResultSet results) {
+    final Collection<Solution> solutions = RdfUtil.resultSetAsCollection( results );
+    final YailList list = new YailList();
+    for ( Solution i : solutions ) {
+      YailList solution = new YailList();
+      for ( VariableBinding j : i ) {
+        solution.add( YailList.makeList( j ) );
+      }
+      list.add( solution );
+    }
+    return list;
+  }
 }
