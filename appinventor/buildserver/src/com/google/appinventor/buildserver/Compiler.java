@@ -267,7 +267,7 @@ public final class Compiler {
   /*
    * Generate the set of Android templates needd by this project.
    */
-  @VisibleForTesting
+/*  @VisibleForTesting
   void generateTemplateNames() {
 	    // Before we can use componentLibraries, we have to call loadComponentLibraries().
 	try {
@@ -286,7 +286,7 @@ public final class Compiler {
 	  templatesNeeded.addAll(componentTemplates.get(componentType));
 	}
 	System.out.println("Templates needed, n= " + templatesNeeded.size());	  
-  }
+  }*/
 
   /*
    * Generate the set of conditionally included libraries needed by this project.
@@ -702,8 +702,8 @@ public final class Compiler {
     // TODO: code for copying all neededTemplates from AppEngine's /WEBINF/template to Android asset folder
     // Move needed templates files to project's asset folder
      
-    compiler.generateTemplateNames(); //after this we have all templateNames used by the components in templatesNeeded
-    compiler.copyTemplatesToAssets();
+//    compiler.generateTemplateNames(); //after this we have all templateNames used by the components in templatesNeeded
+/*    compiler.copyTemplatesToAssets();*/
     
 
     // Create build directory.
@@ -829,18 +829,13 @@ public final class Compiler {
    * Create asset files and copy all needed templates used by the components in this project
    */
 
-  private boolean copyTemplatesToAssets(){
+/*  private boolean copyTemplatesToAssets(){
 	// checkout implementation in IdMap.java and Whiltelist.java
 	// 
 	  
 	LOG.info("The asset dir: " + project.getAssetsDirectory());
  
 	createDirectory(project.getAssetsDirectory()); //make sure we have asset folder created
-
-	// checkout the files can be read in from the resource 
-	// icon = ImageIO.read(Compiler.class.getResource(DEFAULT_ICON));
-//    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(resourcePath)),
-//            file);
 
 	try {
 
@@ -854,22 +849,6 @@ public final class Compiler {
 				" to " + assetFolder.getAbsolutePath() + "/" + templateName);
 	    Files.copy(Resources.newInputStreamSupplier(Compiler.class.getResource(source)),
 	    		  new File(target));
-		
-//		String source = templateFolder + templateName;
-//		String target = assetFolder.getAbsolutePath() + "/" + templateName;
-//
-//
-//	    FileInputStream fileInputStream = new FileInputStream(source);
-//	    FileOutputStream fileOutputStream = new FileOutputStream(target);
-//	    
-//        int bufferSize;
-//        byte[] bufffer = new byte[512];
-//        
-//        while ((bufferSize = fileInputStream.read(bufffer)) > 0) {
-//          fileOutputStream.write(bufffer, 0, bufferSize);
-//        }
-//        fileInputStream.close();
-//        fileOutputStream.close();
 
 	  }
 
@@ -881,7 +860,7 @@ public final class Compiler {
 
 	return true;
 
-  }
+  }*/
   
   /*
    * Creates all the animation xml files.
@@ -1506,7 +1485,7 @@ public final class Compiler {
    * @throws IOException
    * @throws JSONException
    */
-  private void loadComponentTemplateNames() throws IOException, JSONException {
+/*  private void loadComponentTemplateNames() throws IOException, JSONException {
     synchronized (componentTemplates) {
       if (componentTemplates.isEmpty()) {
         String templatesJson = Resources.toString(
@@ -1530,7 +1509,7 @@ public final class Compiler {
         }
       }
     }
-  }
+  }*/
 
 
   /**
