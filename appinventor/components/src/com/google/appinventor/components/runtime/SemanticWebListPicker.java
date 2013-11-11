@@ -37,7 +37,7 @@ import android.util.Log;
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 @UsesLibraries(libraries = "xercesImpl.jar," + "slf4j-android.jar," + 
-    "jena-iri.jar," + "jena-core.jar," + "jena-arq.jar")
+    "jena-interfaces.jar," + "jena-iri.jar," + "jena-core.jar," + "jena-arq.jar")
 public class SemanticWebListPicker extends Picker implements ActivityResultListener, Deleteable, LDComponent {
 
   private static final String LOG_TAG = SemanticWebListPicker.class.getSimpleName();
