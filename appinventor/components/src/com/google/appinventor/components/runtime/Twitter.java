@@ -477,6 +477,16 @@ public final class Twitter extends AndroidNonvisibleComponent implements
   }
 
   /**
+   * Get the image URL back after TweetwithImage uploads it to TwitPic
+   */
+  @SimpleEvent(description = "This event is raised when the a twitter message with a picture "
+          + "has been uploaded via <code>TweetWithImage</code>. "
+          + "the uploaded image URL is in the <code>url</code> variable. ")
+      public String ImageUploaded(final String url) {
+          EventDispatcher.dispatchEvent(this, "ImagedUploaded", url);
+          return url;
+      }
+  /**
    * Tweet with Image, Uploaded to TwitPic
    */
   @SimpleFunction(description = "This sends a tweet as the logged-in user with the "
@@ -506,6 +516,7 @@ public final class Twitter extends AndroidNonvisibleComponent implements
           String url = "";
             if (new File(ImagePath).exists()) {
               url = upload.upload(new File(ImagePath));
+              ImageUploaded(url);
             }
           twitter.updateStatus(status + " " + url);
         } catch (TwitterException e) {
