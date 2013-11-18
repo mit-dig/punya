@@ -9,6 +9,7 @@ import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -34,6 +35,9 @@ import android.view.View;
 @DesignerComponent(version = YaVersion.SEMANTIC_FORM_COMPONENT_VERSION,
     description = "A layout that provides semantic enhancement of captured data.",
     category = ComponentCategory.SEMANTICWEB)
+@UsesLibraries(libraries = "xercesImpl.jar," + 
+    "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
+    "jena-arq.jar")
 @SimpleObject
 public class SemanticForm extends AndroidViewComponent implements Component,
     ComponentContainer {

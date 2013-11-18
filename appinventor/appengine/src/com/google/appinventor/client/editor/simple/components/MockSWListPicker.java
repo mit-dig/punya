@@ -23,5 +23,13 @@ public class MockSWListPicker extends MockButtonBase {
   public MockSWListPicker(SimpleEditor editor) {
     super(editor, TYPE, images.listpicker());
   }
-
+//
+//  @Override
+//  public void onPropertyChange(String propertyName, String newValue) {
+//    super.onPropertyChange(propertyName, newValue);
+//
+//    if (propertyName.equals(PROPERTY_NAME_CONCEPT_URI)) {
+//      setConceptUri(newValue);
+//    }
+//  }
 }

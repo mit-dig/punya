@@ -138,6 +138,8 @@
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/slf4j-log4j12-1.6.4.jar" />
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/xercesImpl-2.10.0.jar" />
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/xml-apis-1.4.01.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/httpclient-4.2.3.jar" />
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/jena/httpcore-4.2.2.jar" />
     <!-- Add any additional server libs that need to be copied -->
     <copy todir="${build.war.dir}/WEB-INF/lib" flatten="true">
       <fileset dir="${appengine.sdk}/lib/user" includes="**/*.jar"/>

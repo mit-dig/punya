@@ -170,8 +170,6 @@ public class DesignToolbar extends Toolbar {
       addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
           new ChangeSettingsAction()));
     }
-    addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
-        new ChangeSettingsAction()));
 
     List<ToolbarItem> connectToItems = Lists.newArrayList();
     addDropDownButton(WIDGET_NAME_CONNECT_TO, MESSAGES.connectToButton(), connectToItems, true);

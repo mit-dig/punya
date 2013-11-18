@@ -55,7 +55,7 @@ import android.util.Log;
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 @UsesLibraries(libraries = "xercesImpl.jar," + 
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
-    "jena-arq.jar," + "jena-interfaces.jar")
+    "jena-arq.jar")
 public class SemanticWeb extends AndroidNonvisibleComponent implements
 		Component {
 
