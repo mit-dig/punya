@@ -288,8 +288,9 @@ OnDestroyListener, OnResumeListener, OnStopListener{
       if (mPipeline.getActiveSensor().containsKey(sensorName)) {
         mPipeline.removeSensorCollection(sensorName);
 
-        //if all sensor collection are removed, then stop foreground
-        if (mPipeline.getActiveSensor().size() == 0 && Launcher.isForeground()){
+        //if all sensor collection are removed, and if there are no more pipeline tasks in funf
+        // then stop foreground
+        if (!mBoundFunfManager.hasRegisteredJobs() && Launcher.isForeground()){
           Log.i(TAG, "make funfManager stop foreground");
           Launcher.stopForeground(mainUIThreadActivity);
 
