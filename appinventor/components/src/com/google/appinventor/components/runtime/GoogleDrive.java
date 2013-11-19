@@ -144,7 +144,7 @@ import edu.mit.media.funf.storage.UploadService;
    * the and remove the schedule task or not. Using lastupload_status to report if successful or not, 
    * if not successful, the error message will placed in the lastupload_report
    */
-  public static final String GOOGLEDRIVE_LASTUPLOAD_TARGET = "gd_lastupload_target"
+  public static final String GOOGLEDRIVE_LASTUPLOAD_TARGET = "gd_lastupload_target";
   public static final String GOOGLEDRIVE_LASTUPLOAD_REPORT = "gd_lastupload_report";
   public static final String GOOGLEDRIVE_LASTUPLOAD_STATUS = "gd_lastupload_status";   
   public static final String GOOGLEDRIVE_LASTUPLOAD_TIME = "gd_lastupload_time";

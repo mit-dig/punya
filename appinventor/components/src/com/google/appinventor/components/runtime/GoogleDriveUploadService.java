@@ -242,7 +242,7 @@ public class GoogleDriveUploadService extends UploadService {
  
       if (successUpload) {
         archive.remove(file);
-        saveStatusLog(true, "success");
+        saveStatusLog(file.getAbsolutePath(), true, "success");
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
         numFileFailures = (numFileFailures == null) ? 1 : numFileFailures + 1;
@@ -257,14 +257,14 @@ public class GoogleDriveUploadService extends UploadService {
 
           Log.i(LogUtil.TAG, "Failed to upload '" + file.getAbsolutePath()
               + "' after 3 attempts.");
-          saveStatusLog(status, error_message);
+          saveStatusLog(file.getAbsolutePath(), status, error_message);
         }
       }
     } else {
       Log.i(LogUtil.TAG,
           "Canceling upload.  Remote archive '" + remoteArchive.getId()
               + "' is not currently available.");
-      saveStatusLog(status, error_message);
+      saveStatusLog(file.getAbsolutePath(), status, error_message);
     }
 
   }
