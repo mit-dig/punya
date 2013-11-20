@@ -112,6 +112,9 @@ public final class Twitter extends AndroidNonvisibleComponent implements
   private final int requestCode;
   private final ComponentContainer container;
   private final Handler handler;
+  
+  // Logging
+  private final String TAG = "Twitter";
 
   // TODO(sharon): twitter4j apparently has an asynchronous interface
   // (AsynchTwitter).
@@ -483,7 +486,7 @@ public final class Twitter extends AndroidNonvisibleComponent implements
           + "has been uploaded via <code>TweetWithImage</code>. "
           + "the uploaded image URL is in the <code>url</code> variable. ")
       public String ImageUploaded(final String url) {
-          EventDispatcher.dispatchEvent(this, "ImagedUploaded", url);
+          EventDispatcher.dispatchEvent(this, "ImageUploaded", url);
           return url;
       }
   /**
@@ -516,7 +519,10 @@ public final class Twitter extends AndroidNonvisibleComponent implements
           String url = "";
             if (new File(ImagePath).exists()) {
               url = upload.upload(new File(ImagePath));
+              Log.i(TAG,"Uploaded picture" + ImagePath + " to Twitpic.");
+              Log.i(TAG,"Twitpic URL is " + url);
               ImageUploaded(url);
+              Log.i(TAG,"ImageUploaded called."); 
             }
           twitter.updateStatus(status + " " + url);
         } catch (TwitterException e) {
