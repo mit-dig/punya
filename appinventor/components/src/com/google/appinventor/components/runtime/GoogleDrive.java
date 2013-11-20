@@ -707,6 +707,16 @@ import edu.mit.media.funf.storage.UploadService;
       "as specified <code>target</code> (can be the file path of a single file or a folder. " +
       "Specify the destination folder in Google Drive in variable <code>GoogleDriveFolder</code>")
   public void UploadData(String target, String GoogleDriveFolder) throws IOException {
+	
+	//TODO: show error message to the user if no authorized
+	boolean isAuthorized = CheckAuthorized();
+	if(!isAuthorized){
+      form.dispatchErrorOccurredEvent(this, "UploadData",
+          ErrorMessages.ERROR_GOOGLEDRIVE_NEEDLOGIN);
+      return;
+	}
+	
+	
     //overwrite gdFolder and save to preference
     this.gdFolder = GoogleDriveFolder;
     final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
@@ -719,12 +729,15 @@ import edu.mit.media.funf.storage.UploadService;
       try { //convert URL string to URI and to real path : file:///sdcard --> /sdcard
         filePath = new java.io.File(new URL(target).toURI()).getAbsolutePath();
       }catch (IllegalArgumentException e) {
+    	Log.i(TAG, "IllegalArgument : " + e.getStackTrace());
         throw new IOException("Unable to determine file path of file url " + target);
       } catch (URISyntaxException e) {
+    	Log.i(TAG, "RISyntaxException error : " + e.getStackTrace());
         e.printStackTrace();
       }
     }
     else {
+      Log.i(TAG, "target : " + target);
       filePath = target;
     }
 
@@ -740,6 +753,15 @@ import edu.mit.media.funf.storage.UploadService;
       "period</code> interval. Save <code>taskName</code> for later reference for removing the task")
   public void AddScheduledTask(String taskName, String target,
                                      String driveFolder, int period){
+	
+	//TODO: show error message to the user if no authorized
+	boolean isAuthorized = CheckAuthorized();
+	if(!isAuthorized){
+      form.dispatchErrorOccurredEvent(this, "UploadData",
+          ErrorMessages.ERROR_GOOGLEDRIVE_NEEDLOGIN);
+      return;
+	}
+	
     if (mPipeline != null) {
 
       mPipeline.addUploadTask(taskName, target, driveFolder, period);
