@@ -1,6 +1,7 @@
 package com.google.appinventor.client.editor.simple.components;
 
 import com.google.appinventor.client.editor.simple.SimpleEditor;
+import com.google.appinventor.components.common.ComponentConstants;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 
 /**
@@ -26,7 +27,7 @@ public class MockSemanticForm extends MockContainer {
    */
   public MockSemanticForm(SimpleEditor editor) {
     super(editor, TYPE, images.semanticForm(), 
-        MockHVArrangementHelper.getLayout());
+        MockHVArrangementHelper.makeLayout(ComponentConstants.LAYOUT_ORIENTATION_VERTICAL));
     myLayout = MockHVArrangementHelper.getLayout();
     rootPanel.setHeight("100%");
     layoutWidget = new AbsolutePanel();
