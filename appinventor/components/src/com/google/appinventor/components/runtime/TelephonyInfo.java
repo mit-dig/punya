@@ -199,6 +199,7 @@ public class TelephonyInfo extends ProbeBase{
     JsonElement dataRequest = null;
 
     dataRequest = getDataRequest(interval, duration, TELEPHONY_PROBE);
+    ((JsonObject) dataRequest).addProperty("hideSensitiveData", privacySafe);
     Log.i(TAG, "Data request: " + dataRequest.toString());
 
     mBoundFunfManager.requestData(listener, dataRequest);
