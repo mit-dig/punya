@@ -430,7 +430,7 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
         "by calling <code>StopScheduleUpload</code>.");
         
-    errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "Error happened with connection or file I/O");
+    errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "Forget to turn on your internet connection?");
     errorMessages.put(ERROR_GOOGLEDRIVE_EXCEPTION, "Something wrong with Google Drive");
     errorMessages.put(ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS, "Invalid Credentials for this app");
     errorMessages.put(ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION, "The authenticated user has not granted the app access to the file");
