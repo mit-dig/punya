@@ -59,7 +59,6 @@ import com.google.appinventor.components.common.YaVersion;
 
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
-import com.google.appinventor.components.runtime.util.OAuth2Helper;
 
 import com.google.appinventor.components.runtime.util.YailList;
 import edu.mit.media.funf.FunfManager;
@@ -119,9 +118,6 @@ import edu.mit.media.funf.storage.UploadService;
   //binding to FunfManager Service
 
   protected FunfManager mBoundFunfManager = null;
-
-  
-  private static final long SCHEDULE_UPLOAD_PERIOD = 7200; //default period for uploading task 
 
 
 
@@ -263,8 +259,7 @@ import edu.mit.media.funf.storage.UploadService;
 
     mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
         FunfManager.class), mConnection, Context.BIND_AUTO_CREATE);
-    Log.i(TAG,
-        "FunfManager is bound, and now we could have register dataRequests");
+
 
 
   }
@@ -274,10 +269,13 @@ import edu.mit.media.funf.storage.UploadService;
 
       // Detach our existing connection.
       mainUIThreadActivity.unbindService(mConnection);
+      mIsBound = false;
     }
   }
 
 
+  
+  
   @Override
   public void onResume() {
     Log.i(TAG, "I got resumed, mIsBound:" + mIsBound);
@@ -295,7 +293,7 @@ import edu.mit.media.funf.storage.UploadService;
   @Override
   public void onDestroy() {
 
-    if (mIsBound) {
+    if (mIsBound && mConnection != null) {
       doUnbindService();
     }
 
@@ -499,8 +497,12 @@ import edu.mit.media.funf.storage.UploadService;
       description = "Checks whether we already have access token already, " +
       		"if so, return True")
   public boolean CheckAuthorized() {
-    String accountName =  accessTokenPair.accountName;
-    String token =  accessTokenPair.accessToken;
+
+    String accountName = sharedPreferences.getString(PREF_ACCOUNT_NAME, "");
+    String token = sharedPreferences.getString(PREF_AUTH_TOKEN, "");
+    
+    Log.i(TAG, "check_account:" + accountName);
+    Log.i(TAG, "check_toekn:" + token);
     if (accountName.isEmpty() || token.isEmpty()) {
       return false;
     }
@@ -515,20 +517,19 @@ import edu.mit.media.funf.storage.UploadService;
   @SimpleFunction(
       description = "Removes Google Drive authorization from this running app instance")
   public void DeAuthorize() {
-    accessTokenPair = null;
-    saveAccessToken(accessTokenPair);
+	final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    sharedPrefsEditor.remove(PREF_ACCOUNT_NAME);
+    sharedPrefsEditor.remove(PREF_AUTH_TOKEN);
+    sharedPrefsEditor.commit();
   } 
   
   private void saveAccessToken(AccessToken accessToken) {
     final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
-    if (accessToken == null) {
-      sharedPrefsEditor.remove(PREF_ACCOUNT_NAME);
-      sharedPrefsEditor.remove(PREF_AUTH_TOKEN);
-    } else {
-      sharedPrefsEditor.putString(PREF_ACCOUNT_NAME, accessToken.accountName);
-      sharedPrefsEditor.putString(PREF_AUTH_TOKEN, accessToken.accessToken);
-      Log.i(TAG, "Save Google Access Token and Account" + accessToken.accountName + ", " + accessToken.accessToken);
-    }
+
+    sharedPrefsEditor.putString(PREF_ACCOUNT_NAME, accessToken.accountName);
+    sharedPrefsEditor.putString(PREF_AUTH_TOKEN, accessToken.accessToken);
+    Log.i(TAG, "Save Google Access Token and Account" + accessToken.accountName + ", " + accessToken.accessToken);
+
     sharedPrefsEditor.commit();
     this.accessTokenPair = accessToken; //update reference to local accessTokenPair
   }
@@ -544,8 +545,8 @@ import edu.mit.media.funf.storage.UploadService;
     }
 }
   private AccessToken retrieveAccessToken() {
-    String accountName = sharedPreferences.getString(OAuth2Helper.PREF_ACCOUNT_NAME, "");
-    String accessToken = sharedPreferences.getString(OAuth2Helper.PREF_AUTH_TOKEN, "");
+    String accountName = sharedPreferences.getString(PREF_ACCOUNT_NAME, "");
+    String accessToken = sharedPreferences.getString(PREF_AUTH_TOKEN, "");
     if (accountName.length() == 0 || accessToken.length() == 0) {
       return new AccessToken("",""); // returning an accessToken with both params empty
     }
@@ -753,7 +754,7 @@ import edu.mit.media.funf.storage.UploadService;
       "period</code> interval. Save <code>taskName</code> for later reference for removing the task")
   public void AddScheduledTask(String taskName, String target,
                                      String driveFolder, int period){
-	
+	Log.i(TAG, "add task: " + taskName);
 	//TODO: show error message to the user if no authorized
 	boolean isAuthorized = CheckAuthorized();
 	if(!isAuthorized){
@@ -783,7 +784,7 @@ import edu.mit.media.funf.storage.UploadService;
 
   @SimpleFunction(description = "Remove a background task for uploading files(s).")
   public void RemoveScheduledTask(String taskName){
-
+	Log.i(TAG, "Remove task:" + taskName);
     if(mPipeline != null){
       mPipeline.removeUploadTask(taskName);
       // if all uploading tasks are removed.
@@ -837,4 +838,20 @@ import edu.mit.media.funf.storage.UploadService;
     return YailList.makeList(arrlist); //if mPipeline is not ready then return an empty list
 
   }
+ 
+  @SimpleFunction(description = "Obtain all the names for current scheduled upload tasks")
+  public YailList GetAllUploadTasks(){
+	
+	if(mPipeline != null){
+	  Log.i(TAG, "mPipeline not null");
+	  Log.i(TAG, "tasks:" + mPipeline.getActiveTasks());
+	  return YailList.makeList(mPipeline.getActiveTasks());
+	} 
+	
+	return YailList.makeList(new ArrayList<Object>());
+  }
+  
+  
+  
+  
 }
