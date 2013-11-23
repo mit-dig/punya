@@ -450,6 +450,12 @@ public final class ErrorMessages {
       "has been disabled on this device.");
     errorMessages.put(ERROR_GOOGLE_PLAY_INVALID, "The version of the Google Play services installed " +
        "on this device is not authentic.");
+         
+    errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "Sensor: %s is not active");
+    errorMessages.put(ERROR_SENSORDB_NOTAVAILABLE, "Sensor: %s is not available");
+    
+    
+    
   }
 
   private ErrorMessages() {
