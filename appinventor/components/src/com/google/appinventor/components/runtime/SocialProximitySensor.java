@@ -33,9 +33,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
  
 
 import edu.mit.media.funf.FunfManager;
+import edu.mit.media.funf.config.RuntimeTypeAdapterFactory;
 import edu.mit.media.funf.json.IJsonObject;
 
 import edu.mit.media.funf.probe.Probe.DataListener;
@@ -96,39 +98,6 @@ public class SocialProximitySensor extends ProbeBase{
 	private int interval;
 	private int duration;
 
-
-
-//	/**
-//	 * Set the length of the interval for a re-occurring probe activity
-//	 */
-//	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "60")
-//	@SimpleProperty
-//	public void SetScheduleInterval(int newInterval) {
-//		if (!enabledSchedule) {
-//			// do nothing
-//		} else {
-//			interval = newInterval;
-//			// register new interval for the schedule to FunfManger
-//			registerDataRequest(newInterval, duration);
-//		}
-//
-//	}
-
-//	/**
-//	 * Indicates the duration of the interval for a re-occurring probe activity
-//	 */
-//	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "30")
-//	@SimpleProperty
-//	public void SetScheduleDuration(int newDuration) {
-//		if (!enabledSchedule) {
-//			// do nothing
-//		} else {
-//			duration = newDuration;
-//			// register new interval for the schedule to FunfManger
-//			registerDataRequest(interval, newDuration);
-//		}
-//
-//	}
 
 	/**
 	 * Indicates whether the user has specified that the sensor should listen
@@ -211,23 +180,28 @@ public class SocialProximitySensor extends ProbeBase{
 			IJsonObject data = (IJsonObject) msg.obj;
 			Log.i(TAG, "Update component's varibles.....");
 			
+
 			macAddress = ((IJsonObject) data.get(BluetoothKeys.DEVICE)).get(
-					"mAddress").getAsString();
+				"mAddress")!= null ?  ((IJsonObject) data.get(BluetoothKeys.DEVICE)).get(
+					"mAddress").getAsString() : ""; 
+					
+			
 			mClass = ((IJsonObject) data.get(BluetoothKeys.CLASS))
-					.get("mClass").getAsInt();
+				.get("mClass") != null? ((IJsonObject) data.get(BluetoothKeys.CLASS))
+					.get("mClass").getAsInt() : 0;
+			
 			deviceName = data.get(BluetoothKeys.NAME).getAsString();
+			
 			rssi = data.get(BluetoothKeys.RSSI).getAsInt();
 			timestamp = data.get(BluetoothKeys.TIMESTAMP).getAsLong();
 
-
-			Log.i(TAG, " before call SocialProximityInfoReceived()");
 			SocialProximityInfoReceived();
-			Log.i(TAG, " after call SocialProximityInfoReceived()");
+
 
 		}
 
 	};
-
+	
 	private DataListener listener = new DataListener() {
 		@Override
 		public void onDataCompleted(IJsonObject completeProbeUri,
@@ -249,13 +223,21 @@ public class SocialProximitySensor extends ProbeBase{
 			 * "android.bluetooth.device.extra.RSSI"
 			 * :-35,"timestamp":1339360144.799}
 			 */
-//			Log.i(TAG, "received Bluetooth sensor info");
+			Log.i(TAG, "received Bluetooth sensor info");
+			Log.i(TAG, "data: " + data);
 //			Log.i(TAG, "TIMESTAMP: " + data.get(BluetoothKeys.TIMESTAMP));
 //			Log.i(TAG, "RSSI: " + data.get(BluetoothKeys.RSSI));
 //			Log.i(TAG, "NAME: " + data.get(BluetoothKeys.NAME));
 //			Log.i(TAG, "CLASS: " + data.get(BluetoothKeys.CLASS));
 //			Log.i(TAG, "MAC_ADDRESS: " + data.get(BluetoothKeys.DEVICE));
+			
+		   
+			if(enabledSaveToDB){
 
+				saveToDB(completeProbeUri, data);
+			}
+
+		  
 			Message msg = myHandler.obtainMessage();
 
 			msg.obj = data;	
@@ -265,6 +247,8 @@ public class SocialProximitySensor extends ProbeBase{
 		}
 
 	};
+	
+	
 
 	private JsonElement getDataRequest(int interval, int duration) {
 		// This will set the schedule to FunfManger for this probe
