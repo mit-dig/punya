@@ -242,7 +242,7 @@ public class GoogleDriveUploadService extends UploadService {
  
       if (successUpload) {
         archive.remove(file);
-        saveStatusLog(true, "success");
+        saveStatusLog(file.getAbsolutePath(), true, "success");
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
         numFileFailures = (numFileFailures == null) ? 1 : numFileFailures + 1;
@@ -257,14 +257,14 @@ public class GoogleDriveUploadService extends UploadService {
 
           Log.i(LogUtil.TAG, "Failed to upload '" + file.getAbsolutePath()
               + "' after 3 attempts.");
-          saveStatusLog(status, error_message);
+          saveStatusLog(file.getAbsolutePath(), status, error_message);
         }
       }
     } else {
       Log.i(LogUtil.TAG,
           "Canceling upload.  Remote archive '" + remoteArchive.getId()
               + "' is not currently available.");
-      saveStatusLog(status, error_message);
+      saveStatusLog(file.getAbsolutePath(), status, error_message);
     }
 
   }
@@ -296,7 +296,7 @@ public class GoogleDriveUploadService extends UploadService {
  
       if(successUpload) {
         Log.i(TAG, "successful upload file to google drive");
-        saveStatusLog(true, "success");
+        saveStatusLog(file.getAbsolutePath(), true, "success");
         //do nothing
       } else {
         Integer numFileFailures = fileFailures.get(file.getName());
@@ -309,12 +309,12 @@ public class GoogleDriveUploadService extends UploadService {
           filesToUpload.offer(new RegularArchiveFile(remoteArchive, file, network));
         } else {
           Log.i(TAG, "Failed to upload '" + file.getAbsolutePath() + "' after 3 attempts.");
-          saveStatusLog(status, error_message);
+          saveStatusLog(file.getAbsolutePath(), status, error_message);
         }
       }
      }else {
       Log.i(TAG, "Canceling upload.  Remote archive '" + remoteArchive.getId() + "' is not currently available.");
-      saveStatusLog(status, error_message);
+      saveStatusLog(file.getAbsolutePath(), status, error_message);
 
     } 
   }
@@ -437,16 +437,16 @@ public class GoogleDriveUploadService extends UploadService {
 
   }
   
-  private void saveStatusLog(boolean status, String message){
+  private void saveStatusLog(String targetFile, boolean status, String message){
     //save to sharedPreference the latest status 
     final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     Date date = new Date();
     String currentDatetime = dateFormat.format(date);
-    
+    sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_TARGET, targetFile);
     sharedPrefsEditor.putBoolean(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, status);
-    sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, message);
+    sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_REPORT, message);
     sharedPrefsEditor.putString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_TIME, currentDatetime);
     
     sharedPrefsEditor.commit();        

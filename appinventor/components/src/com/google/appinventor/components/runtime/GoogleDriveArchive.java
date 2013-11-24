@@ -71,7 +71,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
     
   }
   
-  private com.google.api.services.drive.model.File getGoogleDriveFolder() {
+  private com.google.api.services.drive.model.File getGoogleDriveFolder() throws Exception{
 
     com.google.api.services.drive.model.File folder = null;
     Log.i(TAG, "in getGoogleDriveFolder");
@@ -125,19 +125,20 @@ public class GoogleDriveArchive implements RemoteFileArchive {
   }
   
   
-  private FileList ExcuteQuery(String query){
-  	//this is to search a folder name that is passed in by the caller
-  	//https://developers.google.com/drive/search-parameters
-    Log.i(TAG, "Query: " + query);
-  	FileList files = null;
-      try {
-      	
-      	files =  mService.files().list().setQ(query).execute();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-      return files;
+  private FileList ExcuteQuery(String query) throws Exception {
+	// this is to search a folder name that is passed in by the caller
+	// https://developers.google.com/drive/search-parameters
+	Log.i(TAG, "Query: " + query);
+	FileList files = null;
+	try {
+
+	  files = mService.files().list().setQ(query).execute();
+	} catch (IOException e) {
+	  // TODO Auto-generated catch block
+	  Log.i(TAG, "IOException, network problem?");
+	  throw e;
+	}
+	return files;
   }
 
   private boolean uploadSingleFile(File file) throws Exception {
@@ -309,7 +310,7 @@ public class GoogleDriveArchive implements RemoteFileArchive {
    * @return An authorized service object.
    * @throws Exception 
    */
-  private void getDriveService() {
+  private void getDriveService() throws Exception{
     String mAccountName = this.mAccount;
 
     GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(

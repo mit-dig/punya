@@ -159,6 +159,7 @@ public final class ErrorMessages {
   public static final int ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR = 1905;
   public static final int ERROR_GOOGLEDRIVE_APP_BLACKLIST = 1906;
   public static final int ERROR_GOOGLEDRIVE_HTTP_RESPONSE = 1907;
+  public static final int ERROR_GOOGLEDRIVE_NEEDLOGIN = 1908;
   
   // Please start the next group of error numbers at 2001.
   public static final int ERROR_SENSORDB_NOTAVAILABLE = 2001;
@@ -428,7 +429,14 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_DROPBOX_FILENOTFOUND, "The file to upload was not found.");
     errorMessages.put(ERROR_DROPBOX_NO_TWO_RUNNING_TASKS, "Need to stop previous scheduled task first, " +
         "by calling <code>StopScheduleUpload</code>.");
-    
+        
+    errorMessages.put(ERROR_GOOGLEDRIVE_IO_EXCEPTION, "Forget to turn on your internet connection?");
+    errorMessages.put(ERROR_GOOGLEDRIVE_EXCEPTION, "Something wrong with Google Drive");
+    errorMessages.put(ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS, "Invalid Credentials for this app");
+    errorMessages.put(ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION, "The authenticated user has not granted the app access to the file");
+    errorMessages.put(ERROR_GOOGLEDRIVE_APP_BLACKLIST, "The app is blacklisted as a Google Drive app");
+    errorMessages.put(ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR, "Configuration error on app permission");
+    errorMessages.put(ERROR_GOOGLEDRIVE_NEEDLOGIN, "Need to Authorize the app first?");
     
     errorMessages.put(ERROR_GOOGLE_PLAY_NOT_INSTALLED, "Google Play is not installed/available on this phone");
     errorMessages.put(ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED, "Google Play Service needs update to newest version");
@@ -442,6 +450,12 @@ public final class ErrorMessages {
       "has been disabled on this device.");
     errorMessages.put(ERROR_GOOGLE_PLAY_INVALID, "The version of the Google Play services installed " +
        "on this device is not authentic.");
+         
+    errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "Sensor: %s is not active");
+    errorMessages.put(ERROR_SENSORDB_NOTAVAILABLE, "Sensor: %s is not available");
+    
+    
+    
   }
 
   private ErrorMessages() {
