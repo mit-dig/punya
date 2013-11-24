@@ -472,7 +472,8 @@ public final class RdfUtil {
       return fullUri;
     }
     if(subject.toString().equals(form.BaseURI())) {
-      return null;
+      Log.d(LOG_TAG, "Form did not have URI fields; generating timestamp URI");
+      subject.append(System.currentTimeMillis());
     }
     return subject.toString();
   }
