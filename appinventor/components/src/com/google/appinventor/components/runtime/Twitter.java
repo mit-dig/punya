@@ -112,6 +112,9 @@ public final class Twitter extends AndroidNonvisibleComponent implements
   private final int requestCode;
   private final ComponentContainer container;
   private final Handler handler;
+  
+  // Logging
+  private final String TAG = "Twitter";
 
   // TODO(sharon): twitter4j apparently has an asynchronous interface
   // (AsynchTwitter).
@@ -477,6 +480,16 @@ public final class Twitter extends AndroidNonvisibleComponent implements
   }
 
   /**
+   * Get the image URL back after TweetwithImage uploads it to TwitPic
+   */
+  @SimpleEvent(description = "This event is raised when the a twitter message with a picture "
+          + "has been uploaded via <code>TweetWithImage</code>. "
+          + "the uploaded image URL is in the <code>url</code> variable. ")
+      public void ImageUploaded(final String url) {
+          EventDispatcher.dispatchEvent(this, "ImageUploaded", url);
+          return;
+      }
+  /**
    * Tweet with Image, Uploaded to TwitPic
    */
   @SimpleFunction(description = "This sends a tweet as the logged-in user with the "
@@ -494,6 +507,10 @@ public final class Twitter extends AndroidNonvisibleComponent implements
     }
 
     AsynchUtil.runAsynchronously(new Runnable() {
+      String url = "";
+      String directURL = "";
+      String id = "";
+      
       public void run() {
         try {
           ConfigurationBuilder builder = new ConfigurationBuilder().setMediaProviderAPIKey(TwitPic_API_Key);
@@ -503,9 +520,21 @@ public final class Twitter extends AndroidNonvisibleComponent implements
           builder.setOAuthAccessTokenSecret(accessToken.getTokenSecret());
           Configuration conf = builder.build();
           ImageUpload upload = new ImageUploadFactory(conf).getInstance(MediaProvider.TWITPIC);
-          String url = "";
             if (new File(ImagePath).exists()) {
               url = upload.upload(new File(ImagePath));
+
+              Log.i(TAG,"Uploaded " + ImagePath + " , got " + url + " back.");
+
+              String[] tokens = url.split("/");
+              id = tokens[tokens.length-1];
+              handler.post(new Runnable() {
+                  @Override
+                  public void run() {
+                      directURL = "http://twitpic.com/show/full/" + id;
+                      ImageUploaded(directURL);
+                      Log.i(TAG,"Called ImageUploaded with " + directURL);
+                  }
+              });
             }
           twitter.updateStatus(status + " " + url);
         } catch (TwitterException e) {
