@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import twitter4j.DirectMessage;
 import twitter4j.IDs;
@@ -520,11 +523,20 @@ public final class Twitter extends AndroidNonvisibleComponent implements
           builder.setOAuthAccessTokenSecret(accessToken.getTokenSecret());
           Configuration conf = builder.build();
           ImageUpload upload = new ImageUploadFactory(conf).getInstance(MediaProvider.TWITPIC);
-            if (new File(ImagePath).exists()) {
-              url = upload.upload(new File(ImagePath));
-
-              Log.i(TAG,"Uploaded " + ImagePath + " , got " + url + " back.");
-
+          
+          String[] pathtokens = ImagePath.split("/");
+          String NewImagePath;
+          if (pathtokens[0].equals("file:")) {
+              NewImagePath = new java.io.File(new URL(ImagePath).toURI()).getAbsolutePath();
+              Log.i(TAG,"NewImagePath is " + NewImagePath);
+          } else {
+              NewImagePath = ImagePath;
+          }
+          
+          if (new File(NewImagePath).exists()) {
+              url = upload.upload(new File(NewImagePath));
+              Log.i(TAG,"Uploaded " + NewImagePath + " , got " + url + " back.");
+          
               String[] tokens = url.split("/");
               id = tokens[tokens.length-1];
               handler.post(new Runnable() {
@@ -535,15 +547,20 @@ public final class Twitter extends AndroidNonvisibleComponent implements
                       Log.i(TAG,"Called ImageUploaded with " + directURL);
                   }
               });
-            }
+          }
           twitter.updateStatus(status + " " + url);
         } catch (TwitterException e) {
           form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
               ErrorMessages.ERROR_TWITTER_SET_STATUS_FAILED, e.getMessage());
+        } catch (MalformedURLException e) {
+          form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
+                  ErrorMessages.ERROR_TWITTER_SET_STATUS_FAILED, e.getMessage());
+        } catch (URISyntaxException e) {
+          form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
+                  ErrorMessages.ERROR_TWITTER_SET_STATUS_FAILED, e.getMessage());
         }
       }
     });
-
   }
 
   /**
