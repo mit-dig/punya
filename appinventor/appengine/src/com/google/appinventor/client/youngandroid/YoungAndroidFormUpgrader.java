@@ -267,6 +267,12 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("Player")) {
         srcCompVersion = upgradePlayerProperties(componentProperties, srcCompVersion);
 
+      } else if (componentType.equals("SemanticForm")) {
+        srcCompVersion = upgradeSemanticFormProperties(componentProperties, srcCompVersion);
+
+      } else if (componentType.equals("SemanticWebListPicker")) {
+        srcCompVersion = upgradeSemanticWebListPickerProperties(componentProperties, srcCompVersion);
+
       } else if (componentType.equals("Sound")) {
         srcCompVersion = upgradeSoundProperties(componentProperties, srcCompVersion);
 
@@ -566,6 +572,12 @@ public final class YoungAndroidFormUpgrader {
       // Properties related to this component have now been upgraded to version 2.
       srcCompVersion = 2;
     }
+    if (srcCompVersion < 3) {
+      // The ConceptURI property was renamed to ObjectType.
+      handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
+      // Properties related to this component have now been upgraded to version 3.
+      srcCompVersion = 3;
+    }
     return srcCompVersion;
   }
 
@@ -790,6 +802,12 @@ public final class YoungAndroidFormUpgrader {
       // Properties related to this component have now been upgraded to version 2.
       srcCompVersion = 2;
     }
+    if (srcCompVersion < 3) {
+      // The ConceptURI property was renamed to ObjectType.
+      handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
+      // Properties related to this component have now been upgraded to version 3.
+      srcCompVersion = 3;
+    }
     return srcCompVersion;
   }
 
@@ -837,6 +855,30 @@ public final class YoungAndroidFormUpgrader {
       handlePropertyRename(componentProperties, "IsLooping", "Loop");
       // Properties related to this component have now been upgraded to version  5.
       srcCompVersion = 5;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeSemanticFormProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if ( srcCompVersion < 2 ) {
+      // The BaseURI property was renamed to FormID.
+      handlePropertyRename(componentProperties, "BaseURI", "FormID");
+      // The ConceptURI property was renamed to ObjectType.
+      handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
+      // Properties related to this component have now been upgraded to version 2.
+      srcCompVersion = 2;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeSemanticWebListPickerProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if ( srcCompVersion < 2 ) {
+      // The ConceptURI property was renamed to ObjectType
+      handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
+      // Properties related to this component have now been upgraded to version 2.
+      srcCompVersion = 2;
     }
     return srcCompVersion;
   }
@@ -968,6 +1010,17 @@ public final class YoungAndroidFormUpgrader {
       componentProperties.put("MultiLine", new ClientJsonString("True"));
       // Properties related to this component have now been upgraded to version 4.
       srcCompVersion = 4;
+    }
+    if (srcCompVersion < 5) {
+      // The LDComponent interface was added.
+      // No properties need to be modified to upgrade to version 5.
+      srcCompVersion = 5;
+    }
+    if (srcCompVersion < 6) {
+      // The ConceptURI property was renamed to ObjectType.
+      handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
+      // Properties related to this component have now been upgraded to version 3.
+      srcCompVersion = 6;
     }
     return srcCompVersion;
   }

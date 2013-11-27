@@ -14,7 +14,7 @@ public interface LDComponent {
    * generated from this component.
    * @return
    */
-  public String ConceptURI();
+  public String ObjectType();
 
   /**
    * Sets the ConceptURI used to type entries
@@ -22,7 +22,7 @@ public interface LDComponent {
    * @param uri URI or CURIE of a class on the semantic web,
    * e.g. http://xmlns.com/foaf/0.1/Person or foaf:Person
    */
-  public void ConceptURI(String uri);
+  public void ObjectType(String uri);
 
   /**
    * Returns the PropertyURI used to link the subject
@@ -43,7 +43,7 @@ public interface LDComponent {
    * Gets a value of the field in an appropriate form. For example,
    * checkboxes would return a java.lang.Boolean whereas textboxes
    * return java.lang.String. The SemanticWeb component will combine
-   * type information with the value provided in {@link #ConceptURI()} to
+   * type information with the value provided in {@link #ObjectType()} to
    * generate the appropriate linked data elements. 
    * 
    * @return

@@ -13,6 +13,7 @@ import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.common.SemanticWebConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AlignmentUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil;
@@ -134,7 +135,7 @@ public class SemanticForm extends AndroidViewComponent implements Component,
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
       defaultValue = "")
   @SimpleProperty
-  public void ConceptURI(String uri) {
+  public void ObjectType(String uri) {
     concept = uri;
   }
 
@@ -144,7 +145,7 @@ public class SemanticForm extends AndroidViewComponent implements Component,
    */
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
       description = "Specifies the class of objects created on the Semantic Web using the contents of this form.")
-  public String ConceptURI() {
+  public String ObjectType() {
     return concept;
   }
 
@@ -152,10 +153,10 @@ public class SemanticForm extends AndroidViewComponent implements Component,
    * Sets the Base URI used for generating new subject identifiers
    * @param uri URI ending in # or /
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BASEURI,
-      defaultValue = "")
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BASEURI_AUTOGEN,
+      defaultValue = SemanticWebConstants.DEFAULT_BASE_URI)
   @SimpleProperty
-  public void BaseURI(String uri) {
+  public void FormID(String uri) {
     baseUri = uri;
   }
 
@@ -165,7 +166,7 @@ public class SemanticForm extends AndroidViewComponent implements Component,
    */
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
       description = "Specifies a base URI used for constructing identifiers of objects created by this form.")
-  public String BaseURI() {
+  public String FormID() {
     return baseUri;
   }
 

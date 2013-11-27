@@ -275,9 +275,13 @@ public class YaVersion {
   // - SEMANTIC_FORM_COMPONENT_VERSION was added.
   // - SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION was added.
   // - TEXTBOX_COMPONENT_VERSION was incremented to 5.
-
+  // For YOUNG_ANDROID_VERSION 102:
+  // - EMAILPICKER_COMPONENT_VERSION was incremented to 3.
+  // - PASSWORDTEXTBOX_COMPONENT_VERSION was incremented to 3.
+  // - SEMANTIC_FORM_COMPONENT_VERSION was incremented to 2.
+  // - TEXTBOX_COMPONENT_VERSION was incremented to 6.
   
-  public static final int YOUNG_ANDROID_VERSION = 100;
+  public static final int YOUNG_ANDROID_VERSION = 102;
 
 
   // ............................... Blocks Language Version Number ...............................
@@ -442,7 +446,9 @@ public class YaVersion {
 
   // For EMAILPICKER_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
-  public static final int EMAILPICKER_COMPONENT_VERSION = 2;
+  // For EMAILPICKER_COMPONENT_VERSION 3:
+  // - The ConceptURI property was renamed to ObjectType
+  public static final int EMAILPICKER_COMPONENT_VERSION = 3;
 
   // For FORM_COMPONENT_VERSION 2:
   // - The Screen.Scrollable property was added.
@@ -584,7 +590,9 @@ public class YaVersion {
   public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
-  public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 2;
+  // For PASSWORDTEXTBOX_COMPONENT_VERSION 3
+  // - The ConceptURI property was renamed to ObjectType.
+  public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 3;
 
   public static final int PEDOMETER_COMPONENT_VERSION = 1;
 
@@ -635,7 +643,9 @@ public class YaVersion {
   // - The MultiLine property was added.
   // For TEXTBOX_COMPONENT_VERSION 5:
   // - Implementation of LDComponent was added.
-  public static final int TEXTBOX_COMPONENT_VERSION = 5;
+  // For TEXTBOX_COMPONENT_VERSION 6:
+  // - The ConceptURI property was renamed to ObjectType. 
+  public static final int TEXTBOX_COMPONENT_VERSION = 6;
 
   public static final int TEXTTOSPEECH_COMPONENT_VERSION = 1;
 
@@ -720,7 +730,12 @@ public class YaVersion {
 
   public static final int SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION = 1;
 
-  public static final int SEMANTIC_FORM_COMPONENT_VERSION = 1;
+  // For SEMANTIC_FORM_COMPONENT_VERSION 1:
+  // - Initial version.
+  // For SEMANTIC_FORM_COMPONENT_VERSION 2:
+  // - Renamed BaseURI to Form ID
+  // - Renamed ConceptURI to Object Type
+  public static final int SEMANTIC_FORM_COMPONENT_VERSION = 2;
   
   public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
 

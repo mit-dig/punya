@@ -185,4 +185,9 @@ public class PropertyTypeConstants {
    */
   public static final String PROPERTY_TYPE_BASEURI = "baseuri";
 
+  /**
+   * Base URI for creating semantic web resources with auto-generating timestamp.
+   */
+  public static final String PROPERTY_TYPE_BASEURI_AUTOGEN = "baseuri_autogen";
+
 }

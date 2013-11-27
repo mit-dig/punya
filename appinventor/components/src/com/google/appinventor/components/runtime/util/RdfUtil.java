@@ -281,7 +281,7 @@ public final class RdfUtil {
   public static boolean triplifyComponent(LDComponent component, String subject,
       Model model) {
     Log.d(LOG_TAG, "Triplifying component "+component+" with subject <"+subject+">");
-    final String conceptUri = component.ConceptURI();
+    final String conceptUri = component.ObjectType();
     final String propertyUri = component.PropertyURI();
     // verify that propertyUri is set
     if(propertyUri == null || propertyUri.length() == 0) {
@@ -387,7 +387,7 @@ public final class RdfUtil {
   public static boolean triplifyForm(SemanticForm form, String subject,
       Model model) {
     Log.i(LOG_TAG, "Triplifying form for subject <"+subject+">");
-    String conceptUri = form.ConceptURI();
+    String conceptUri = form.ObjectType();
     if(conceptUri != null && conceptUri.length() != 0) {
       Resource subj = model.getResource(subject);
       Resource obj = model.getResource(conceptUri);
@@ -407,8 +407,8 @@ public final class RdfUtil {
     if(component.Value() == null) {
       return null;
     }
-    Log.v(LOG_TAG, "  concept ? "+component.ConceptURI());
-    if(component.ConceptURI().length() == 0 || component.ConceptURI().startsWith(XSD.getURI())) {
+    Log.v(LOG_TAG, "  concept ? "+component.ObjectType());
+    if(component.ObjectType().length() == 0 || component.ObjectType().startsWith(XSD.getURI())) {
       builder.append(component.Value());
     } else if(component.Value() instanceof String) {
       return (String)component.Value();
@@ -466,12 +466,12 @@ public final class RdfUtil {
     if(form.Subject() != null && form.Subject().length() != 0) {
       return form.Subject();
     }
-    subject.append(form.BaseURI());
+    subject.append(form.FormID());
     String fullUri = processSubfieldForSubject(form, subject);
     if(fullUri != null) {
       return fullUri;
     }
-    if(subject.toString().equals(form.BaseURI())) {
+    if(subject.toString().equals(form.FormID())) {
       Log.d(LOG_TAG, "Form did not have URI fields; generating timestamp URI");
       subject.append(System.currentTimeMillis());
     }

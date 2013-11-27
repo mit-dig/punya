@@ -390,7 +390,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
   @SimpleProperty(
       category = PropertyCategory.APPEARANCE,
       description = "Resource URI that identifies the concept being entered for this field")
-  public String ConceptURI() {
+  public String ObjectType() {
     return conceptUri;
   }
 
@@ -402,7 +402,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
       defaultValue = "")
   @SimpleProperty
-  public void ConceptURI(String uri) {
+  public void ObjectType(String uri) {
     this.conceptUri = uri;
   }
 

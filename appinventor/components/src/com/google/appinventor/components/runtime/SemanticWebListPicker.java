@@ -142,7 +142,7 @@ public class SemanticWebListPicker extends Picker implements ActivityResultListe
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
       description = "The picker will be populated with entities of the specified type.")
   @Override
-  public String ConceptURI() {
+  public String ObjectType() {
     return conceptUri;
   }
 
@@ -150,7 +150,7 @@ public class SemanticWebListPicker extends Picker implements ActivityResultListe
       defaultValue = "")
   @SimpleProperty
   @Override
-  public void ConceptURI(final String uri) {
+  public void ObjectType(final String uri) {
     conceptUri = uri;
     Log.d(LOG_TAG, "Setting concept uri");
     if(endpointUrl != null && !endpointUrl.isEmpty()) {

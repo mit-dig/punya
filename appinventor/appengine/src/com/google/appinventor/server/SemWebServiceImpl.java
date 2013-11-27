@@ -182,7 +182,19 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
       while(rs.hasNext()) {
         // convert the query solution into a more compact representation
         QuerySolution qs = rs.nextSolution();
-        final String label = qs.getLiteral("label").getString();
+        String label = null;
+        if ( qs.getLiteral("label") != null ) {
+          label = qs.getLiteral("label").getString();
+        } else if( qs.get( "label" ) != null ) {
+          label = qs.get( "label" ).toString();
+        } else if( qs.getResource( "uri" ) != null ) {
+          label = qs.getResource( "uri" ).getURI();
+          int idx = Math.max(label.lastIndexOf("/"), label.lastIndexOf("#"));
+          label = label.substring(idx+1);
+        } else {
+          // uri was null so this entry is pretty useless.
+          continue;
+        }
         final String value = qs.getResource("uri").getURI();
         final String prefix = ontologyModel.qnameFor(value);
         log.info(label+","+value+","+prefix);
