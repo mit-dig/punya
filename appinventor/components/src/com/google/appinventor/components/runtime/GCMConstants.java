@@ -27,6 +27,11 @@ public final class GCMConstants {
     public static final String PREFS_GOOGLECLOUDMESSAGING = "googleCloudMessagingPrefs";
     
     /**
+     * When the GCMIntentService registered with the listerners
+     */
+    public static final String GCM_LISTERNERS_READY_MSG = "Listerners are ready!";
+    
+    /**
      * Preference for GCMIntentService
      */
     public static final String PREFS_GCMINTENTSERVICE = "GCMIntentServicePrefs";

@@ -5,6 +5,8 @@
 
 package com.google.appinventor.components.runtime;
 
+import java.util.concurrent.locks.Lock;
+
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -107,6 +109,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     
     protected static final String REG_GCM_TYPE = "reg";
     protected static final String MESSAGE_GCM_TYPE = "message";
+    protected static final String SYS_GCM_TYPE = "system";
+    private static final String REG_SUCCESSED_MSG = "Registered successfully with GCM 3rd party server!";
 
     // the following fields should only be accessed from the UI thread
     private volatile String SERVER_URL = "";
@@ -158,9 +162,29 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     private void checkAndSetPreference() {
         Log.i(TAG, "Checking the preference now, either in or out");
         //check for if there is an exisiting preference for the GCM; if there is, enables the listeners.
-        if(sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "").equals("in")) {
+        String option = sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "");
+        
+        Log.i(TAG, "The option is "+option);
+        if(option.equals("in")) {
             Log.i(TAG,"Enabled the listeners after failure.");
             Enabled(true);
+        }
+    }
+    
+    //recovered whatever are in the receiver event after the app died and GCM came in.
+    private void recoverActions() {
+        Log.i(TAG, "Inside the recover actions.");
+        if (!gcmMessage.equals("")){
+            //The initial message is not empty, fire the corresponding the action.
+            //This happened when the app died, received the notification, tap the app, 
+            //and lose the previous the set actions in the info received.
+            if (gcmMessage.equals(REG_SUCCESSED_MSG)) {
+                Log.i(TAG, "The initial message is not empty, fire the RegInfoReceived() event");
+                RegInfoReceived() ;
+            } else {
+                Log.i(TAG, "The initial message is not empty, fire the GCMInfoReceived() event");
+                GCMInfoReceived();
+            }
         }
     }
     
@@ -233,6 +257,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             registerGCMEvent(context, regListener, REG_GCM_TYPE);
             Log.i(TAG, "Before registerGCMEvent - msgListener");
             registerGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
+            Log.i(TAG, "Before registerGCMEvent - sysListener");
+            registerGCMEvent(context, sysListener, SYS_GCM_TYPE);            
         } else {
             unRegisterGCMEvent(context, regListener, REG_GCM_TYPE);
             unRegisterGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
@@ -331,7 +357,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
      */
     @SimpleEvent
     public void GCMInfoReceived() {
-        Log.i(TAG, "Waiting to receive info from the server.");
+        Log.i(TAG, "Waiting to receive info from the server and the enabled value is "+enabled);
         if (enabled) {
             mainUIThreadActivity.runOnUiThread(new Runnable() {
                 public void run() {
@@ -422,7 +448,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         @Override
         public void onMessageReceived(String msg) {
             // through the event handler
-            Log.i(TAG, "Received one message from the listener");
+            Log.i(TAG, "Received one message from the msg listener");
             Message message = msgHandler.obtainMessage();
             if (msg == null) {
                 msg = "This is a dummy message.";
@@ -445,13 +471,39 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         @Override
         public void onMessageReceived(String msg) {
             // through the event handler
-            Log.i(TAG, "Received one message from the listener");
+            Log.i(TAG, "Received one message from the reg listener");
             Message message = regHandler.obtainMessage();
             if (msg == null) {
                 msg = "This is a dummy message.";
             }
             message.obj = msg;
             regHandler.sendMessage(message);
+        }
+    };
+    
+    final Handler sysHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            String sysMsg = msg.obj.toString();
+            Log.i(TAG,"The system message is "+sysMsg);
+            if(sysMsg.equals(GCMConstants.GCM_LISTERNERS_READY_MSG)) {
+                Log.i(TAG, "We need to recover the actions upon receiving the message.");
+                recoverActions();  
+            }  
+        }
+    };
+    
+    GCMEventListener sysListener = new GCMEventListener() {
+        @Override
+        public void onMessageReceived(String msg) {
+            // through the event handler
+            Log.i(TAG, "Received one message from the sys listener");
+            Message message = sysHandler.obtainMessage();
+            if (msg == null) {
+                msg = "This is a dummy message.";
+            }
+            message.obj = msg;
+            sysHandler.sendMessage(message);
         }
     };
     

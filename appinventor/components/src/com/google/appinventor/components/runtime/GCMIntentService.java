@@ -43,6 +43,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     // Set of listeners for any changes of the form
     final HashSet<GCMEventListener> GCMEventListeners = new HashSet<GCMEventListener>();
     final HashSet<GCMEventListener> GCMRegEventListeners = new HashSet<GCMEventListener>();
+    final HashSet<GCMEventListener> GCMSysEventListeners = new HashSet<GCMEventListener>();
 
     public GCMIntentService() {
         super();
@@ -66,7 +67,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "After creating the GCMIntentService");  
         
         String newMessage = intent.getExtras().getString("gcmMessage");                
-        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
         String optPref;
@@ -159,13 +160,24 @@ public class GCMIntentService extends GCMBaseIntentService {
     // 1. general GCM message 2. registeration finished message
     public void requestGCMMessage(Context context, GCMEventListener listener, String type){
         //add the listener to the list of listerners
-        if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
+        if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE)) {
             GCMEventListeners.add(listener);
-        else{//for registeration type of messages
+        //for registeration type of messages
+        } else if (type.equals(GoogleCloudMessaging.REG_GCM_TYPE)){
             GCMRegEventListeners.add(listener);
-        }
+        } else if (type.equals(GoogleCloudMessaging.SYS_GCM_TYPE)){
+            GCMSysEventListeners.add(listener);
+        } 
         //Save the action into the sharedPreference
         setSharedPreference(context,"in");
+        
+        if(type.equals(GoogleCloudMessaging.SYS_GCM_TYPE)) {
+            for (GCMEventListener sysListener : GCMSysEventListeners) {
+                sysListener.onMessageReceived(GCMConstants.GCM_LISTERNERS_READY_MSG);
+                Log.i(TAG, "The new message is :" + GCMConstants.GCM_LISTERNERS_READY_MSG);
+                Log.i(TAG, "Listener:" + sysListener.toString());
+              } 
+        }
     }
     
     // This is a method for App Inventor's component to option out two types of messages from Google GCM
@@ -176,11 +188,16 @@ public class GCMIntentService extends GCMBaseIntentService {
             if (!GCMEventListeners.isEmpty()){
                 GCMEventListeners.remove(listener);
             }           
-        else{//for registeration type of message
+        else if (type.equals(GoogleCloudMessaging.REG_GCM_TYPE)){
+            //for registeration type of message
             if (!GCMRegEventListeners.isEmpty()){
                 GCMRegEventListeners.remove(listener);
             }
-        }
+        } else if (type.equals(GoogleCloudMessaging.SYS_GCM_TYPE)){
+            if (!GCMSysEventListeners.isEmpty()){
+                GCMSysEventListeners.remove(listener);
+            }
+        } 
         //Save the action into the sharedPreference
         setSharedPreference(context,"out");
     }
@@ -195,7 +212,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     // GCM service.
     private void setSharedPreference(Context context, String pref){
         //save the GCM Message opt in/out preference to sharedPreference for later use
-        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GCMINTENTSERVICE,Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
         final SharedPreferences.Editor sharedPrefsEditor =
