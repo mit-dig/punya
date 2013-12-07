@@ -7,8 +7,6 @@ import android.provider.ContactsContract;
 import android.util.Log;
 
 import android.provider.ContactsContract.CommonDataKinds.Email;
-import android.provider.ContactsContract.CommonDataKinds.Event;
-import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
@@ -61,7 +59,7 @@ public class ContactInfo extends ProbeBase{
   private String emailType = "";
   private String phoneNum = "";
   private String phoneType = "";
-  private String giveName = "";
+  private String givenName = "";
   private String familyName = "";
   private String address = "";
   private String addressType = "";
@@ -153,8 +151,8 @@ public class ContactInfo extends ProbeBase{
 		
 		"contact_id":2210,"display_name":"John Chen","in_visible_group":1,"last_time_contacted":-2023980349,"lookup":"4073i95","photo_id":0,
 		"send_to_voicemail":0,"starred":0,"times_contacted":8,"timestamp":1379908694.689}*/
-	  
-	  ContactInfoReceived();
+	  ContactInfoReceived(givenName, familyName, displayName, phoneNum, phoneType, email, emailType, address,
+          addressType, organizationName, website, notes);
 
 	}
   };	
@@ -271,7 +269,7 @@ public class ContactInfo extends ProbeBase{
 	  "data2":"John","data3":"Chen","data_version":0,"is_primary":0,
 	  "is_super_primary":0,"mimetype":"vnd.android.cursor.item/name","raw_contact_id":2227},*/	
 //	Log.i(TAG, "Here at NameInfo");
-	this.giveName = info.getAsJsonObject().get(StructuredName.GIVEN_NAME) == null ? "" :
+	this.givenName = info.getAsJsonObject().get(StructuredName.GIVEN_NAME) == null ? "" :
 	  info.getAsJsonObject().get(StructuredName.GIVEN_NAME).getAsString();
 	this.familyName = info.getAsJsonObject().get(StructuredName.FAMILY_NAME) == null ? "" :
 	  info.getAsJsonObject().get(StructuredName.FAMILY_NAME).getAsString();
@@ -287,14 +285,20 @@ public class ContactInfo extends ProbeBase{
    * Indicates that the contact info has been received.
    */
   @SimpleEvent
-  public void ContactInfoReceived() {
-	// TODO Auto-generated method stub
+  public void ContactInfoReceived(final String firstName, final String familyName,
+                                  final String displayName, final String phoneNum,
+                                  final String phoneType, final String email,
+                                  final String emailType, final String address,
+                                  final String addressType, final String organizationName,
+                                  final String website, final String notes) {
 	if (enabled || enabledSchedule) {
 
 	  mainUIThreadActivity.runOnUiThread(new Runnable() {
 		public void run() {
 //		  Log.i(TAG, "ContactInfoReceived() is called");
-		  EventDispatcher.dispatchEvent(ContactInfo.this, "ContactInfoReceived");
+		  EventDispatcher.dispatchEvent(ContactInfo.this, "ContactInfoReceived",
+              firstName, familyName, displayName, phoneNum, phoneType, email, emailType,
+              address, addressType, organizationName, website, notes);
 		}
 	  });
 
@@ -326,114 +330,114 @@ public class ContactInfo extends ProbeBase{
 
   }
   
-  /**
-   * The phone number of the contact.
-   */
-  @SimpleProperty(description = "The phone number of the contact.")
-  public String PhoneNumber() {
-	Log.i(TAG, "returning the phone number of a contact: " + this.phoneNum);
-	return this.phoneNum;
-  }
-  
-  /**
-   * The phone number type of the contact.
-   */
-  @SimpleProperty(description = "The phone number of the contact.")
-  public String PhoneNumberType() {
-	Log.i(TAG, "returning the phone number type of a contact: " + this.phoneType);
-	return this.phoneType;
-  }
-	
-  /**
-   * The family name of a contact
-   */
-  @SimpleProperty(description = "The family name of a contact.")
-  public String FamilyName() {
-	Log.i(TAG, "The family name of a contact" + this.familyName);
-	return this.familyName;
-  }
-  
-  /**
-   * The display name of a contact
-   */
-  @SimpleProperty(description = "The display name of a contact.")
-  public String DisplayName() {
-	Log.i(TAG, "The display name of a contact" + this.displayName);
-	return this.displayName;
-  }
-  
-  /**
-   * The first name of a contact
-   */
-  @SimpleProperty(description = "The first name of a contact.")
-  public String FirstName() {
-	Log.i(TAG, "The first name of a contact" + this.giveName);
-	return this.giveName;
-  }
- 
-  /**
-   * The email of a contact
-   */
-  @SimpleProperty(description = "The email of a contact.")
-  public String Email() {
-	Log.i(TAG, "The email of a contact" + this.email);
-	return this.email;
-  } 
-  
-  /**
-   * The email type of a contact
-   */
-  @SimpleProperty(description = "The email type of a contact.")
-  public String EmailType() {
-	Log.i(TAG, "The email type of a contact" + this.emailType);
-	return this.emailType;
-  } 
-  
-  
-  /**
-   * The address of a contact
-   */
-  @SimpleProperty(description = "The address of a contact.")
-  public String Address() {
-	Log.i(TAG, "The address of a contact" + this.address);
-	return this.address;
-  } 
-  
-  /**
-   * The organization of a contact
-   */
-  @SimpleProperty(description = "The organization of a contact.")
-  public String Organization() {
-	Log.i(TAG, "The organization of a contact" + this.organizationName);
-	return this.organizationName;
-  } 
-  
-  /**
-   * The notes about a contact
-   */
-  @SimpleProperty(description = "The notes of a contact.")
-  public String Notes() {
-	Log.i(TAG, "The organization of a contact" + this.notes);
-	return this.notes;
-  } 
-  
-  /**
-   * The website of a contact
-   */
-  @SimpleProperty(description = "The notes of a contact.")
-  public String Website() {
-	Log.i(TAG, "The website of a contact" + this.website);
-	return this.website;
-  } 
-  
-  /**
-   * The address type of a contact
-   */
-  @SimpleProperty(description = "The address type of a contact.")
-  public String AddressType() {
-	Log.i(TAG, "The address of a contact" + addressType);
-	return addressType;
-  } 
+//  /**
+//   * The phone number of the contact.
+//   */
+//  @SimpleProperty(description = "The phone number of the contact.")
+//  public String PhoneNumber() {
+//	Log.i(TAG, "returning the phone number of a contact: " + this.phoneNum);
+//	return this.phoneNum;
+//  }
+//
+//  /**
+//   * The phone number type of the contact.
+//   */
+//  @SimpleProperty(description = "The phone number of the contact.")
+//  public String PhoneNumberType() {
+//	Log.i(TAG, "returning the phone number type of a contact: " + this.phoneType);
+//	return this.phoneType;
+//  }
+//
+//  /**
+//   * The family name of a contact
+//   */
+//  @SimpleProperty(description = "The family name of a contact.")
+//  public String FamilyName() {
+//	Log.i(TAG, "The family name of a contact" + this.familyName);
+//	return this.familyName;
+//  }
+//
+//  /**
+//   * The display name of a contact
+//   */
+//  @SimpleProperty(description = "The display name of a contact.")
+//  public String DisplayName() {
+//	Log.i(TAG, "The display name of a contact" + this.displayName);
+//	return this.displayName;
+//  }
+//
+//  /**
+//   * The first name of a contact
+//   */
+//  @SimpleProperty(description = "The first name of a contact.")
+//  public String FirstName() {
+//	Log.i(TAG, "The first name of a contact" + this.givenName);
+//	return this.givenName;
+//  }
+//
+//  /**
+//   * The email of a contact
+//   */
+//  @SimpleProperty(description = "The email of a contact.")
+//  public String Email() {
+//	Log.i(TAG, "The email of a contact" + this.email);
+//	return this.email;
+//  }
+//
+//  /**
+//   * The email type of a contact
+//   */
+//  @SimpleProperty(description = "The email type of a contact.")
+//  public String EmailType() {
+//	Log.i(TAG, "The email type of a contact" + this.emailType);
+//	return this.emailType;
+//  }
+//
+//
+//  /**
+//   * The address of a contact
+//   */
+//  @SimpleProperty(description = "The address of a contact.")
+//  public String Address() {
+//	Log.i(TAG, "The address of a contact" + this.address);
+//	return this.address;
+//  }
+//
+//  /**
+//   * The organization of a contact
+//   */
+//  @SimpleProperty(description = "The organization of a contact.")
+//  public String Organization() {
+//	Log.i(TAG, "The organization of a contact" + this.organizationName);
+//	return this.organizationName;
+//  }
+//
+//  /**
+//   * The notes about a contact
+//   */
+//  @SimpleProperty(description = "The notes of a contact.")
+//  public String Notes() {
+//	Log.i(TAG, "The organization of a contact" + this.notes);
+//	return this.notes;
+//  }
+//
+//  /**
+//   * The website of a contact
+//   */
+//  @SimpleProperty(description = "The notes of a contact.")
+//  public String Website() {
+//	Log.i(TAG, "The website of a contact" + this.website);
+//	return this.website;
+//  }
+//
+//  /**
+//   * The address type of a contact
+//   */
+//  @SimpleProperty(description = "The address type of a contact.")
+//  public String AddressType() {
+//	Log.i(TAG, "The address of a contact" + addressType);
+//	return addressType;
+//  }
 
   private String getEmailTypeName(int emailTypeConst) {
 	String type = "";

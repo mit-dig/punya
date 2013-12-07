@@ -167,7 +167,7 @@ public class CallLogHistory extends ProbeBase{
 			// get the string representation of call type 
 			type =  getTypeName(data.get(ProbeKeys.CallLogKeys.TYPE).getAsInt());
 
-			CalllogsInfoReceived();
+			CalllogsInfoReceived(date, duration, name, number, numberType, type);
  
 
 		}
@@ -322,14 +322,16 @@ public class CallLogHistory extends ProbeBase{
 	 * Indicates that the calllog info has been received.
 	 */
 	@SimpleEvent
-	public void CalllogsInfoReceived() {
+	public void CalllogsInfoReceived(final long date, final long duration, final String name,
+                                     final String number, final String numberType,
+                                     final String type) {
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "CalllogsInfoReceived() is called");
 					EventDispatcher.dispatchEvent(CallLogHistory.this,
-							"CalllogsInfoReceived");
+							"CalllogsInfoReceived", date, duration, name, number, numberType, type);
 				}
 			});
 
@@ -341,80 +343,80 @@ public class CallLogHistory extends ProbeBase{
 	/**
 	 * Returns hashedName associated with the phone number
 	 */
-	@SimpleProperty(description = "Name associated with the phone number. " +
-			"Return in hashed value if HideSensitiveData is set to True")
-	public String Name(){
-		Log.i(TAG, "returning hashedName: " + name);
-		return name;	
-	}
+//	@SimpleProperty(description = "Name associated with the phone number. " +
+//			"Return in hashed value if HideSensitiveData is set to True")
+//	public String Name(){
+//		Log.i(TAG, "returning hashedName: " + name);
+//		return name;
+//	}
 	
 	/**
 	 * The phone number (hashed) as the user entered it
 	 */
-	@SimpleProperty(description = "The phone number as the user entered it. Return in hashed " +
-			"value if HideSensitiveData is set to True")
-	public String Number(){
-		Log.i(TAG, "returning hashedNumber: " + number);
-		return number;	
-	}
+//	@SimpleProperty(description = "The phone number as the user entered it. Return in hashed " +
+//			"value if HideSensitiveData is set to True")
+//	public String Number(){
+//		Log.i(TAG, "returning hashedNumber: " + number);
+//		return number;
+//	}
 	
 	/**
 	 * The duration of the call in seconds
 	 */
-	@SimpleProperty(description = "The duration of the call in seconds")
-	public int Duration(){
-		Log.i(TAG, "returning duration " + duration);
-		return duration;	
-	}
+//	@SimpleProperty(description = "The duration of the call in seconds")
+//	public int Duration(){
+//		Log.i(TAG, "returning duration " + duration);
+//		return duration;
+//	}
 	
 	/**
 	 * The date the call occured, in milliseconds since the epoch
 	 */
-	@SimpleProperty(description = "The date the call occured, in milliseconds since the epoch")
-	public long	Date(){
-		Log.i(TAG, "returning date " + date);
-		return date;	
-	}
+//	@SimpleProperty(description = "The date the call occured, in milliseconds since the epoch")
+//	public long	Date(){
+//		Log.i(TAG, "returning date " + date);
+//		return date;
+//	}
 	
 	/**
 	 * The cached number label, for a custom number type, 
 	 * associated with the phone number, if it exists.
 	 */
-	@SimpleProperty(description = "The number label, for a custom number type, " +
-			"associated with the phone number, if it exists. Return in hashed value if HideSensitiveData" +
-			"is set to True")
-	public String NumberLabel(){
-		Log.i(TAG, "returning numberLabel: " + numberLabel);
-		return numberLabel;	
-	}
+//	@SimpleProperty(description = "The number label, for a custom number type, " +
+//			"associated with the phone number, if it exists. Return in hashed value if HideSensitiveData" +
+//			"is set to True")
+//	public String NumberLabel(){
+//		Log.i(TAG, "returning numberLabel: " + numberLabel);
+//		return numberLabel;
+//	}
 	
 	/**
 	 * The cached number type (Home, Work, etc) associated 
 	 * with the phone number, if it exists.
 	 */
-	@SimpleProperty(description = "The number type (Home, Work, etc) associated with the phone number. " +
-			"Return in hashed value if HideSensitiveData is set to True")
-	public String NumberType(){
-		Log.i(TAG, "returning numberLabel: " + numberType);
-		return numberType;	
-	}
+//	@SimpleProperty(description = "The number type (Home, Work, etc) associated with the phone number. " +
+//			"Return in hashed value if HideSensitiveData is set to True")
+//	public String NumberType(){
+//		Log.i(TAG, "returning numberLabel: " + numberType);
+//		return numberType;
+//	}
 	
 	/**
 	 * The type of the call (incoming = "1", outgoing = "2" or missed = "3").
 	 */
-	@SimpleProperty(description = "The type of the call " +
-			"(incoming = \"1\", outgoing = \"2\" or missed = \"3\")")
-	public String CallType(){
-		Log.i(TAG, "returning callType: " + type);
-		return type;	
-	}
+//	@SimpleProperty(description = "The type of the call " +
+//			"(incoming = \"1\", outgoing = \"2\" or missed = \"3\")")
+//	public String CallType(){
+//		Log.i(TAG, "returning callType: " + type);
+//		return type;
+//	}
 	
 	/*
 	 * Returns the default interval between each scan for this probe
 	 */
 	@SimpleProperty(description = "The default interval (in seconds) between each scan for this probe")
 	public float DefaultInterval(){
-		
+
 		return SCHEDULE_INTERVAL;
 	}
 	

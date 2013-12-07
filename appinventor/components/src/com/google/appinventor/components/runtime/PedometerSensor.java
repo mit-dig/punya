@@ -97,7 +97,7 @@ public class PedometerSensor extends ProbeBase{
 			timestamp = data.get(PedometerKeys.TIMESTAMP).getAsLong();
 
 			Log.i(TAG, " before call PedometerInfoReceived()");
-			PedometerInfoReceived();
+			PedometerInfoReceived(timestamp);
 			Log.i(TAG, " after call PedometerInfoReceived()");
 
 		}
@@ -131,20 +131,18 @@ public class PedometerSensor extends ProbeBase{
 	 * Indicates that the pedometer(one walking step) info has been received.
 	 */
 	@SimpleEvent
-	public void PedometerInfoReceived(){
+	public void PedometerInfoReceived(final long timestamp){
 		if (enabled || enabledSchedule) {
 			
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "PedometerInfoReceived() is called");
 					EventDispatcher.dispatchEvent(PedometerSensor.this,
-							"PedometerInfoReceived");
+							"PedometerInfoReceived", timestamp);
 				}
 			});
-			
-			
+
 		}
-		
 	}
 	
 	/**
@@ -235,14 +233,14 @@ public class PedometerSensor extends ProbeBase{
 	}
 	
 	
-	/**
-	 * Returns the timestamp of latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	/**
+//	 * Returns the timestamp of latest reading
+//	 */
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 	
 	/*
