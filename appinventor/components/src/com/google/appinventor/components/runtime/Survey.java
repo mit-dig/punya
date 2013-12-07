@@ -92,7 +92,9 @@ import android.util.Log;
 public class Survey extends AndroidViewComponent{
 	
 	public static final String SURVEY_HEADER = "edu.mit.csail.dig.survey";
-    private static final String SURVEY_DBNAME = "__SURVEY_DB__";
+	// The survey data will live in the same database as all the other sensor components
+    private static final String SURVEY_DBNAME = "__SENSOR_DB__";//use the same db as other sensors
+
 
     private static Form mainUI;
 	private SharedPreferences prefs;
