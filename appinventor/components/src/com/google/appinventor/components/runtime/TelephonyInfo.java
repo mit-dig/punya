@@ -53,17 +53,19 @@ public class TelephonyInfo extends ProbeBase{
   
   //telephony fields
   
-  private int callState;
-  private String deviceId;
-  private int deviceSoftwareVersion;
-  private String lineNumber; //this is sensitive data, we return a string a hashed value
-  private String networkOperator;
-  private String networkOperatorName;
-  private String simCountryIso; 
-  private String simOperator;
-  private String simOperatorName;
-  private String simSerialNumber; 
-  private String subscriberId;
+  private int callState = 0;
+  private String deviceId = "";
+  private int deviceSoftwareVersion = 0;
+  private String lineNumber = ""; //this is sensitive data, we return a string a hashed value
+  private String networkOperator = "";
+  private String networkOperatorName = "";
+  private String simCountryIso = "";
+  private String simOperator = "";
+  private String simOperatorName = "";
+  private String simSerialNumber = "";
+  private String subscriberId = "";
+  private String networkCounteryIso  = "";
+  private String voicemailNumber = "";
   
   private final int SCHEDULE_INTERVAL = 604800; //read telephony information every 7 days
   private final int SCHEDULE_DURATION = 15; //scan for 15 seconds everytime
@@ -135,9 +137,11 @@ public class TelephonyInfo extends ProbeBase{
       simOperator = data.get(TelephonyKeys.SIM_OPERATOR).getAsString();
       simSerialNumber = data.get(TelephonyKeys.SIM_SERIAL_NUMBER).getAsString();
       subscriberId = data.get(TelephonyKeys.SUBSCRIBER_ID).getAsString();
+      networkCounteryIso = data.get(TelephonyKeys.NETWORK_COUNTRY_ISO).getAsString();
+      voicemailNumber = data.get(TelephonyKeys.VOICEMAIL_NUMBER).getAsString();
 
       Log.i(TAG, " before call LocationInfoReceived();");
-      TelephonyInfoReceived();
+      TelephonyInfoReceived(deviceId, lineNumber, voicemailNumber, networkOperator, networkOperatorName, networkCounteryIso, simSerialNumber, simOperator);
       Log.i(TAG, " after call LocationInfoReceived();");
       
     }
@@ -148,16 +152,18 @@ public class TelephonyInfo extends ProbeBase{
      */
 
     @SimpleEvent  
-    public void TelephonyInfoReceived() {
-      // TODO Auto-generated method stub
-      // TODO Auto-generated method stub
+    public void TelephonyInfoReceived(final String deviceId, final String lineNumber, final String voicemailNumber,
+                                      final String networkOperator, final String networkOperatorName,
+                                      final String networkCounteryIso, final String simSerialNumber,
+                                      final String simOperator) {
       if (enabled || enabledSchedule) {
         
         mainUIThreadActivity.runOnUiThread(new Runnable() {
           public void run() {
             Log.i(TAG, "TelephonyInfoReceived() is called");
             EventDispatcher.dispatchEvent(TelephonyInfo.this,
-                "TelephonyInfoReceived");
+                "TelephonyInfoReceived", deviceId, lineNumber, voicemailNumber, networkOperator, networkOperatorName,
+                networkCounteryIso, simSerialNumber, simOperator);
           }
         });
         
@@ -206,120 +212,120 @@ public class TelephonyInfo extends ProbeBase{
     
   }
   
-  /**
-   * Returns the latest reading of the call state of telephony
-   */
-  @SimpleProperty(description = "The call state of the phone.")
-  public int CallState() {
-    Log.i(TAG, "returning SSID: " + callState);
-    return callState;
-  }
-  
-  /**
-   * Returns unique device ID, the IMEI for GSM and the MEID or ESN for CDMA phones.
-   */
-  @SimpleProperty(description = "Unique device ID, the IMEI for GSM " +
-  		"and the MEID or ESN for CDMA phones")
-  public String DeviceId() {
-    Log.i(TAG, "returning deviceId: " + deviceId);
-    return deviceId;
-  } 
-  
-  
-  /**
-   * Returns the software version number for the device, 
-   * for example, the IMEI/SV for GSM phones
-   */
-  @SimpleProperty(description = "The software version number for the device")
-  public int deviceSoftwareVersion() {
-    Log.i(TAG, "returning device software version: " + deviceSoftwareVersion);
-    return deviceSoftwareVersion;
-  } 
-  
-  /**
-   * Returns the line number for the device, 
-   * Due to privacy issue, only return the hashed string value 
-   * for the line number. 
-   */
-  @SimpleProperty(description = "The hashed line number for the device")
-  public String LineNumber() {
-    Log.i(TAG, "returning linenumber: " + lineNumber);
-    return lineNumber;
-  } 
-  
-  /**
-   * Returns the The numeric name (MCC+MNC) of current registered operator.
-
-   */
-  @SimpleProperty(description = "The numeric name (MCC+MNC) of current registered operator.")
-  public String NetworkOperator() {
-    Log.i(TAG, "returning network operator: " + networkOperator);
-    return networkOperator;
-  } 
-  
-  /**
-   * Returns the alphabetic name of current registered operator
-   * @return
-   */
-  @SimpleProperty(description = "The alphabetic name of current registered operator.")
-  public String NetworkOperatorName() {
-    Log.i(TAG, "returning networkOperatorName: " + networkOperatorName);
-    return networkOperatorName;
-  }
-  
-  /**
-   * Returns the ISO country code equivalent for the SIM provider's country code.
-   * @return
-   */
-  @SimpleProperty(description = "The ISO country code equivalent for the SIM " +
-  		"provider's country code.")
-  public String SimCountryIso() {
-    Log.i(TAG, "returning simCountryIso: " + simCountryIso);
-    return simCountryIso;
-  }
-  
-  /**
-   * Returns the MCC+MNC (mobile country code + mobile network code) of the provider
-   * of the SIM.
-   * @return
-   */
-  @SimpleProperty(description = "The MCC+MNC (mobile country code + mobile network code)" +
-  		" of the provider of the SIM.")
-  public String SimOperator() {
-    Log.i(TAG, "returning simOperator: " + simOperator);
-    return simOperator;
-  }
-  
-  /**
-   * Returns the Service Provider Name (SPN).
-   * @return
-   */
-  @SimpleProperty(description = "The Service Provider Name (SPN).")
-  public String SimOperatorName() {
-    Log.i(TAG, "returning simCountryIso: " + simOperatorName);
-    return simOperatorName;
-  }
-  
-  
-  /**
-   * Returns the serial number of the SIM, if applicable.
-   * @return
-   */
-  @SimpleProperty(description = "The serial number of the SIM, if applicable.")
-  public String simSerialNumber() {
-    Log.i(TAG, "returning simSerialNumber: " + simSerialNumber);
-    return simSerialNumber;
-  }
-
-  /**
-   * Returns the serial number of the SIM, if applicable.
-   * @return
-   */
-  @SimpleProperty(description = "Tnique subscriber ID, for example, the IMSI for a GSM phone")
-  public String SubscriberId() {
-    Log.i(TAG, "returning subscriberId: " + subscriberId);
-    return subscriberId;
-  }
+//  /**
+//   * Returns the latest reading of the call state of telephony
+//   */
+//  @SimpleProperty(description = "The call state of the phone.")
+//  public int CallState() {
+//    Log.i(TAG, "returning SSID: " + callState);
+//    return callState;
+//  }
+//
+//  /**
+//   * Returns unique device ID, the IMEI for GSM and the MEID or ESN for CDMA phones.
+//   */
+//  @SimpleProperty(description = "Unique device ID, the IMEI for GSM " +
+//  		"and the MEID or ESN for CDMA phones")
+//  public String DeviceId() {
+//    Log.i(TAG, "returning deviceId: " + deviceId);
+//    return deviceId;
+//  }
+//
+//
+//  /**
+//   * Returns the software version number for the device,
+//   * for example, the IMEI/SV for GSM phones
+//   */
+//  @SimpleProperty(description = "The software version number for the device")
+//  public int deviceSoftwareVersion() {
+//    Log.i(TAG, "returning device software version: " + deviceSoftwareVersion);
+//    return deviceSoftwareVersion;
+//  }
+//
+//  /**
+//   * Returns the line number for the device,
+//   * Due to privacy issue, only return the hashed string value
+//   * for the line number.
+//   */
+//  @SimpleProperty(description = "The hashed line number for the device")
+//  public String LineNumber() {
+//    Log.i(TAG, "returning linenumber: " + lineNumber);
+//    return lineNumber;
+//  }
+//
+//  /**
+//   * Returns the The numeric name (MCC+MNC) of current registered operator.
+//
+//   */
+//  @SimpleProperty(description = "The numeric name (MCC+MNC) of current registered operator.")
+//  public String NetworkOperator() {
+//    Log.i(TAG, "returning network operator: " + networkOperator);
+//    return networkOperator;
+//  }
+//
+//  /**
+//   * Returns the alphabetic name of current registered operator
+//   * @return
+//   */
+//  @SimpleProperty(description = "The alphabetic name of current registered operator.")
+//  public String NetworkOperatorName() {
+//    Log.i(TAG, "returning networkOperatorName: " + networkOperatorName);
+//    return networkOperatorName;
+//  }
+//
+//  /**
+//   * Returns the ISO country code equivalent for the SIM provider's country code.
+//   * @return
+//   */
+//  @SimpleProperty(description = "The ISO country code equivalent for the SIM " +
+//  		"provider's country code.")
+//  public String SimCountryIso() {
+//    Log.i(TAG, "returning simCountryIso: " + simCountryIso);
+//    return simCountryIso;
+//  }
+//
+//  /**
+//   * Returns the MCC+MNC (mobile country code + mobile network code) of the provider
+//   * of the SIM.
+//   * @return
+//   */
+//  @SimpleProperty(description = "The MCC+MNC (mobile country code + mobile network code)" +
+//  		" of the provider of the SIM.")
+//  public String SimOperator() {
+//    Log.i(TAG, "returning simOperator: " + simOperator);
+//    return simOperator;
+//  }
+//
+//  /**
+//   * Returns the Service Provider Name (SPN).
+//   * @return
+//   */
+//  @SimpleProperty(description = "The Service Provider Name (SPN).")
+//  public String SimOperatorName() {
+//    Log.i(TAG, "returning simCountryIso: " + simOperatorName);
+//    return simOperatorName;
+//  }
+//
+//
+//  /**
+//   * Returns the serial number of the SIM, if applicable.
+//   * @return
+//   */
+//  @SimpleProperty(description = "The serial number of the SIM, if applicable.")
+//  public String simSerialNumber() {
+//    Log.i(TAG, "returning simSerialNumber: " + simSerialNumber);
+//    return simSerialNumber;
+//  }
+//
+//  /**
+//   * Returns the serial number of the SIM, if applicable.
+//   * @return
+//   */
+//  @SimpleProperty(description = "Tnique subscriber ID, for example, the IMSI for a GSM phone")
+//  public String SubscriberId() {
+//    Log.i(TAG, "returning subscriberId: " + subscriberId);
+//    return subscriberId;
+//  }
   
   
   
