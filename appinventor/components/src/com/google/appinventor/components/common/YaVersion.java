@@ -280,8 +280,10 @@ public class YaVersion {
   // - PASSWORDTEXTBOX_COMPONENT_VERSION was incremented to 3.
   // - SEMANTIC_FORM_COMPONENT_VERSION was incremented to 2.
   // - TEXTBOX_COMPONENT_VERSION was incremented to 6.
+  // For YOUNG_ANDROID_VERSION 103:
+  // - SEMANTIC_FORM_COMPONENT_VERSION is renamed to LINKED_DATA_FORM_COMPONENT_VERSION
   
-  public static final int YOUNG_ANDROID_VERSION = 102;
+  public static final int YOUNG_ANDROID_VERSION = 103;
 
 
   // ............................... Blocks Language Version Number ...............................
@@ -735,7 +737,9 @@ public class YaVersion {
   // For SEMANTIC_FORM_COMPONENT_VERSION 2:
   // - Renamed BaseURI to Form ID
   // - Renamed ConceptURI to Object Type
-  public static final int SEMANTIC_FORM_COMPONENT_VERSION = 2;
+  // For LINKED_DATA_FORM_COMPONENT_VERSION 3:
+  // - Renamed Semantic Form to Linked Data Form
+  public static final int LINKED_DATA_FORM_COMPONENT_VERSION = 3;
   
   public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
 

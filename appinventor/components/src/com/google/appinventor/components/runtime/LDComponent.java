@@ -53,7 +53,7 @@ public interface LDComponent {
   /**
    * Returns whether or not the value of this field should be used
    * to identify the subject of a Semantic Form.
-   * @see SemanticForm
+   * @see LinkedDataForm
    * @return
    */
   public boolean SubjectIdentifier();

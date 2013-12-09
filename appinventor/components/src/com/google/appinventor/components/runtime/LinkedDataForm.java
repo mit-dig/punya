@@ -24,7 +24,7 @@ import android.util.Log;
 import android.view.View;
 
 /**
- * Semantic Form provides a layout in which contained form elements will be
+ * Linked Data Form provides a layout in which contained form elements will be
  * used to generate structured data. This form is used in conjunction with
  * the SemanticWeb and LinkedData components.
  * 
@@ -33,17 +33,17 @@ import android.view.View;
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
-@DesignerComponent(version = YaVersion.SEMANTIC_FORM_COMPONENT_VERSION,
-    description = "A layout that provides semantic enhancement of captured data.",
+@DesignerComponent(version = YaVersion.LINKED_DATA_FORM_COMPONENT_VERSION,
+    description = "A layout that provides linked data enhancement of captured data.",
     category = ComponentCategory.SEMANTICWEB)
 @UsesLibraries(libraries = "xercesImpl.jar," + 
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")
 @SimpleObject
-public class SemanticForm extends AndroidViewComponent implements Component,
+public class LinkedDataForm extends AndroidViewComponent implements Component,
     ComponentContainer {
 
-  private static final String LOG_TAG = SemanticForm.class.getSimpleName();
+  private static final String LOG_TAG = LinkedDataForm.class.getSimpleName();
   /**
    * Stores a reference to the parent activity.
    */
@@ -73,10 +73,10 @@ public class SemanticForm extends AndroidViewComponent implements Component,
   private boolean inverse;
 
   /**
-   * Creates a new semantic form in the specified container.
+   * Creates a new linked data form in the specified container.
    * @param container
    */
-  public SemanticForm(ComponentContainer container) {
+  public LinkedDataForm(ComponentContainer container) {
     super(container);
     context = container.$context();
     layout = new LinearLayout(context,
@@ -90,7 +90,7 @@ public class SemanticForm extends AndroidViewComponent implements Component,
     concept = "";
     baseUri = "";
     property = "";
-    Log.d(LOG_TAG, "Created semantic form");
+    Log.d(LOG_TAG, "Created linked data form");
 
     container.$add(this);
   }
@@ -234,7 +234,7 @@ public class SemanticForm extends AndroidViewComponent implements Component,
 
   @Override
   public Iterator<AndroidViewComponent> iterator() {
-    Log.v(LOG_TAG, "Getting iterator for Semantic Form. size = "+components.size());
+    Log.v(LOG_TAG, "Getting iterator for Linked Data Form. size = "+components.size());
     return components.iterator();
   }
 

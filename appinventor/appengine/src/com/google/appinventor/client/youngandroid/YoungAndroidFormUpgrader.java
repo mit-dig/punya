@@ -267,8 +267,8 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("Player")) {
         srcCompVersion = upgradePlayerProperties(componentProperties, srcCompVersion);
 
-      } else if (componentType.equals("SemanticForm")) {
-        srcCompVersion = upgradeSemanticFormProperties(componentProperties, srcCompVersion);
+      } else if (componentType.equals("LinkedDataForm")) {
+        srcCompVersion = upgradeLinkedDataFormProperties(componentProperties, srcCompVersion);
 
       } else if (componentType.equals("SemanticWebListPicker")) {
         srcCompVersion = upgradeSemanticWebListPickerProperties(componentProperties, srcCompVersion);
@@ -859,7 +859,7 @@ public final class YoungAndroidFormUpgrader {
     return srcCompVersion;
   }
 
-  private static int upgradeSemanticFormProperties(Map<String, JSONValue> componentProperties,
+  private static int upgradeLinkedDataFormProperties(Map<String, JSONValue> componentProperties,
       int srcCompVersion) {
     if ( srcCompVersion < 2 ) {
       // The BaseURI property was renamed to FormID.

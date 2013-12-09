@@ -309,8 +309,8 @@ public final class SimpleComponentDescriptor {
         return new MockSurvey(editor);  
     } else if (name.equals(MockGoogleMap.TYPE)){
       return new MockGoogleMap(editor);
-    } else if (name.equals(MockSemanticForm.TYPE)) {
-      return new MockSemanticForm(editor);
+    } else if (name.equals(MockLinkedDataForm.TYPE)) {
+      return new MockLinkedDataForm(editor);
     } else if (name.equals(MockSWListPicker.TYPE)) {
       return new MockSWListPicker(editor);
     } else if (name.equals(MockGoogleMap.TYPE)){

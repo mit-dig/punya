@@ -463,7 +463,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
    * @return
    */
   @SimpleFunction
-  public boolean TriplifyFormInModel(SemanticForm form) {
+  public boolean TriplifyFormInModel(LinkedDataForm form) {
     try {
       return RdfUtil.triplifyForm(form, RdfUtil.generateSubjectForForm(form), model);
     } catch(Exception e) {
@@ -541,7 +541,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   @SimpleFunction
-  public String SubjectURIForForm(final SemanticForm form) {
+  public String SubjectURIForForm(final LinkedDataForm form) {
     return RdfUtil.generateSubjectForForm(form);
   }
 

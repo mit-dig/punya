@@ -31,7 +31,7 @@ import android.util.Log;
 import com.google.appinventor.components.runtime.AndroidViewComponent;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.LDComponent;
-import com.google.appinventor.components.runtime.SemanticForm;
+import com.google.appinventor.components.runtime.LinkedDataForm;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -333,8 +333,8 @@ public final class RdfUtil {
   private static boolean triplifyContainerOrForm(ComponentContainer container, String subject,
       Model model) {
     for(AndroidViewComponent i : container) {
-      if(i instanceof SemanticForm) {
-        SemanticForm nestedForm = (SemanticForm)i;
+      if(i instanceof LinkedDataForm) {
+        LinkedDataForm nestedForm = (LinkedDataForm)i;
         if(nestedForm.PropertyURI() == null || nestedForm.PropertyURI().length() == 0) {
           Log.w(LOG_TAG, "Found nested semantic form without a PropertyURI set");
           continue;
@@ -378,13 +378,13 @@ public final class RdfUtil {
   }
 
   /**
-   * Given a semantic form, turn any nested components (including other {@link SemanticForm}s) into
+   * Given a semantic form, turn any nested components (including other {@link LinkedDataForm}s) into
    * an RDF graph contained within the given model.
    * @param form Semantic Form used to generate an RDF graph
    * @param subject URI used to represent the subject of the graph
    * @param model Model to contain the resulting RDF graph
    */
-  public static boolean triplifyForm(SemanticForm form, String subject,
+  public static boolean triplifyForm(LinkedDataForm form, String subject,
       Model model) {
     Log.i(LOG_TAG, "Triplifying form for subject <"+subject+">");
     String conceptUri = form.ObjectType();
@@ -434,7 +434,7 @@ public final class RdfUtil {
     for(AndroidViewComponent i : container) {
       Log.v(LOG_TAG, "  i = " + i);
       // semantic forms mark the start of a new instance, skip them.
-      if(i instanceof SemanticForm) {
+      if(i instanceof LinkedDataForm) {
         continue;
       }
       // handle nested elements (e.g. developer puts a LDComponent inside an
@@ -461,7 +461,7 @@ public final class RdfUtil {
    * @return A URI if the operation was completed successfully or null if no
    * valid elements were found with SubjectIdentifier set to true
    */
-  public static String generateSubjectForForm(final SemanticForm form) {
+  public static String generateSubjectForForm(final LinkedDataForm form) {
     StringBuilder subject = new StringBuilder();
     if(form.Subject() != null && form.Subject().length() != 0) {
       return form.Subject();
