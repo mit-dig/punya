@@ -285,7 +285,8 @@ public class YaVersion {
   // - SEMANTIC_FORM_COMPONENT_VERSION is renamed to LINKED_DATA_FORM_COMPONENT_VERSION
   // - SemanticWeb Component is renamed to LinkedData Component
   // - SEMANTIC_WEB_COMPONENT_VERSION is renamed to LINKED_DATA_COMPONENT_VERSION
-  
+  // - SemanticListPicker Component is renamed to LinkedDataListPicker Component
+  // - SEMANTIC_LISTPICKER_COMPONENT_VERSION is renamed to LINKED_DATA_LISTPICKER_COMPONENT_VERSION
   public static final int YOUNG_ANDROID_VERSION = 103;
 
 
@@ -734,8 +735,10 @@ public class YaVersion {
   public static final int LINKED_DATA_COMPONENT_VERSION = 2;
   
   public static final int LD_COMPONENT_VERSION = 1;
-
-  public static final int SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION = 1;
+  
+  // For LINKED_DATA_LISTPICKER_COMPONENT_VERSION_2:
+  // - Renamed SemanticWebListPicker to LinkedDataListPicker
+  public static final int LINKED_DATA_LISTPICKER_COMPONENT_VERSION = 2;
 
   // For SEMANTIC_FORM_COMPONENT_VERSION 1:
   // - Initial version.

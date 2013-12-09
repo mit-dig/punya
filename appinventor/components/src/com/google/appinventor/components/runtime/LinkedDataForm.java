@@ -35,7 +35,7 @@ import android.view.View;
  */
 @DesignerComponent(version = YaVersion.LINKED_DATA_FORM_COMPONENT_VERSION,
     description = "A layout that provides linked data enhancement of captured data.",
-    category = ComponentCategory.SEMANTICWEB)
+    category = ComponentCategory.LINKEDDATA)
 @UsesLibraries(libraries = "xercesImpl.jar," + 
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")

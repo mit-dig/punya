@@ -8,19 +8,19 @@ import com.google.appinventor.client.editor.simple.SimpleEditor;
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
-public class MockSWListPicker extends MockButtonBase {
+public class MockLinkedDataListPicker extends MockButtonBase {
 
   /**
    * Component type name.
    */
-  public static final String TYPE = "SemanticWebListPicker";
+  public static final String TYPE = "LinkedDataListPicker";
 
   /**
    * Creates a new MockSWListPicker component.
    * 
    * @param editor  editor of source file the component belogs to
    */
-  public MockSWListPicker(SimpleEditor editor) {
+  public MockLinkedDataListPicker(SimpleEditor editor) {
     super(editor, TYPE, images.listpicker());
   }
 //

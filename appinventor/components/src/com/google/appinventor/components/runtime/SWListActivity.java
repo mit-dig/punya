@@ -16,7 +16,7 @@ import android.widget.ListView;
 
 /**
  * Activity that presents the list of entities from the SemanticWebListPicker
- * @see SemanticWebListPicker
+ * @see LinkedDataListPicker
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
@@ -81,11 +81,11 @@ public class SWListActivity extends ListActivity {
     super.onCreate(savedInstanceState);
 
     Intent myIntent = getIntent();
-    if (myIntent.hasExtra(SemanticWebListPicker.SWLIST_ACTIVITY_ANIM_TYPE)) {
-      closeAnim = myIntent.getStringExtra(SemanticWebListPicker.SWLIST_ACTIVITY_ANIM_TYPE);
+    if (myIntent.hasExtra(LinkedDataListPicker.SWLIST_ACTIVITY_ANIM_TYPE)) {
+      closeAnim = myIntent.getStringExtra(LinkedDataListPicker.SWLIST_ACTIVITY_ANIM_TYPE);
     }
-    if (myIntent.hasExtra(SemanticWebListPicker.SWLIST_ACTIVITY_ARG_NAME)) {
-      items = getIntent().getParcelableArrayListExtra(SemanticWebListPicker.SWLIST_ACTIVITY_ARG_NAME);
+    if (myIntent.hasExtra(LinkedDataListPicker.SWLIST_ACTIVITY_ARG_NAME)) {
+      items = getIntent().getParcelableArrayListExtra(LinkedDataListPicker.SWLIST_ACTIVITY_ARG_NAME);
       setListAdapter(new ArrayAdapter<LabeledUri>(this, android.R.layout.simple_list_item_1, items));
       getListView().setTextFilterEnabled(true);
     } else {
@@ -109,9 +109,9 @@ public class SWListActivity extends ListActivity {
   public void onListItemClick(ListView lv, View v, int position, long id) {
     Intent resultIntent = new Intent();
     LabeledUri selectedItem = (LabeledUri) getListView().getItemAtPosition(position);
-    resultIntent.putExtra(SemanticWebListPicker.SWLIST_ACTIVITY_RESULT_LABEL, selectedItem.label);
-    resultIntent.putExtra(SemanticWebListPicker.SWLIST_ACTIVITY_RESULT_URI, selectedItem.uri);
-    resultIntent.putExtra(SemanticWebListPicker.SWLIST_ACTIVITY_RESULT_INDEX, position + 1);
+    resultIntent.putExtra(LinkedDataListPicker.SWLIST_ACTIVITY_RESULT_LABEL, selectedItem.label);
+    resultIntent.putExtra(LinkedDataListPicker.SWLIST_ACTIVITY_RESULT_URI, selectedItem.uri);
+    resultIntent.putExtra(LinkedDataListPicker.SWLIST_ACTIVITY_RESULT_INDEX, position + 1);
     closeAnim = selectedItem.label;
     setResult(RESULT_OK, resultIntent);
     finish();

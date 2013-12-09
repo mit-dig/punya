@@ -22,7 +22,7 @@ public enum ComponentCategory{
   LEGOMINDSTORMS("LEGO\u00AE MINDSTORMS\u00AE"),
   MAPVIZ("Map & Visualization"),
   CLOUDSTORAGE("Cloud Storage"),
-  SEMANTICWEB("Semantic Web"),
+  LINKEDDATA("Linked Data"),
   MISC("Other stuff"),
   EXPERIMENTAL("Not ready for prime time"),
   //OBSOLETE("Old stuff"),// removed to remove old stuff from the menu

@@ -456,8 +456,8 @@ public final class RdfUtil {
   }
 
   /**
-   * Given a semantic form, try to generate a subject URI from nested elements.
-   * @param form Semantic form to generate a URI for
+   * Given a linked data form, try to generate a subject URI from nested elements.
+   * @param form Linked Data form to generate a URI for
    * @return A URI if the operation was completed successfully or null if no
    * valid elements were found with SubjectIdentifier set to true
    */

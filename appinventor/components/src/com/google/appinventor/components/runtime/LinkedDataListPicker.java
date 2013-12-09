@@ -31,16 +31,16 @@ import android.util.Log;
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
-@DesignerComponent(version = YaVersion.SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION,
-    category = ComponentCategory.SEMANTICWEB,
+@DesignerComponent(version = YaVersion.LINKED_DATA_LISTPICKER_COMPONENT_VERSION,
+    category = ComponentCategory.LINKEDDATA,
     description = "")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 @UsesLibraries(libraries = "xercesImpl.jar," + "slf4j-android.jar," + 
     "jena-iri.jar," + "jena-core.jar," + "jena-arq.jar")
-public class SemanticWebListPicker extends Picker implements ActivityResultListener, Deleteable, LDComponent {
+public class LinkedDataListPicker extends Picker implements ActivityResultListener, Deleteable, LDComponent {
 
-  private static final String LOG_TAG = SemanticWebListPicker.class.getSimpleName();
+  private static final String LOG_TAG = LinkedDataListPicker.class.getSimpleName();
   private static final String SWLIST_ACTIVITY_CLASS = SWListActivity.class.getName();
   static final String SWLIST_ACTIVITY_ARG_NAME = SWLIST_ACTIVITY_CLASS + ".list";
   static final String SWLIST_ACTIVITY_RESULT_URI = SWLIST_ACTIVITY_CLASS + ".selectionUri";
@@ -58,7 +58,7 @@ public class SemanticWebListPicker extends Picker implements ActivityResultListe
   private final Form form;
   private volatile boolean initialized = false;
 
-  public SemanticWebListPicker(ComponentContainer container) {
+  public LinkedDataListPicker(ComponentContainer container) {
     super(container);
     Log.d(LOG_TAG, "Constructing SemanticWebListPicker");
     selectionUri = "";
