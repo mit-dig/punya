@@ -46,7 +46,7 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import android.util.Log;
 
-@DesignerComponent(version = YaVersion.SEMANTIC_WEB_COMPONENT_VERSION,
+@DesignerComponent(version = YaVersion.LINKED_DATA_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
     category = ComponentCategory.SEMANTICWEB,
     nonVisible = true,
@@ -56,11 +56,11 @@ import android.util.Log;
 @UsesLibraries(libraries = "xercesImpl.jar," + 
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")
-public class SemanticWeb extends AndroidNonvisibleComponent implements
+public class LinkedData extends AndroidNonvisibleComponent implements
 		Component {
 
   /* constants for convenience */
-  private static final String LOG_TAG = "SemanticWeb";
+  private static final String LOG_TAG = "LinkedData";
   private static final String RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
   private static final String RDFS_NS = "http://www.w3.org/2000/01/rdf-schema#";
   private static final String OWL_NS = "http://www.w3.org/2002/07/owl#";
@@ -76,7 +76,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   /** baseURL is used for constructing URIs of new objects **/
   private String baseURL;
 
-  public SemanticWeb(ComponentContainer container) {
+  public LinkedData(ComponentContainer container) {
 	  super(container.$form());
 	  endpointURL = "http://dbpedia.org/sparql";
 	  baseURL = "http://example.com/";
@@ -198,7 +198,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Execute a SPARQL query on the set EndpointURL of this semantic web component.
+   * Execute a SPARQL query on the set EndpointURL of this Linked Data component.
    * Currently only supports SELECT queries, and converts all integer types into Long
    * and decimal types into Double.
    * @param query Query text to execute
@@ -247,7 +247,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
    * This event is raised after a SPARQL engine finishes processing a query
    * and the client has received the results, but before those results have
    * been processed into objects so that they may be used in conjunction with
-   * other semantic web-enabled components.
+   * other linked-data-enabled components.
    * @param type
    * @param contents
    */
@@ -269,7 +269,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
 
   /**
    * Event raised when a SPARQL query to be executed is not supported
-   * by the Semantic Web component.
+   * by the Linked Data component.
    */
   @SimpleEvent
   public void UnsupportedQueryType() {
@@ -457,8 +457,8 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Takes a SemanticForm component and converts it and any nested elements into
-   * triples within the model encapsulated by this SemanticWeb component.
+   * Takes a LinkedDataForm component and converts it and any nested elements into
+   * triples within the model encapsulated by this LinkedData component.
    * @param form
    * @return
    */
@@ -498,7 +498,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Publishes the model represented by the Semantic Web component to the
+   * Publishes the model represented by the  LinkedData component to the
    * RDF graph store represented by EndpointURL using the given graph URI.
    * @param graph
    */
@@ -520,7 +520,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * This event is raised when the Semantic Web component fails to publish a
+   * This event is raised when the LinkedData component fails to publish a
    * graph to a remote SPARQL endpoint.
    * @param graph
    * @param error
@@ -606,7 +606,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Attempts to insert the statements contained within this Semantic Web
+   * Attempts to insert the statements contained within this Linked Data
    * component into the endpoint with an optional graph.
    * @param graph Empty string for the default graph, otherwise a valid URI
    * @param noResolveUpdate true if the component should attempt to resolve the

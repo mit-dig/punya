@@ -2,7 +2,7 @@ package com.google.appinventor.components.runtime;
 
 /**
  * LDComponent is used to mark {@link AndroidViewComponent}s that provide
- * linked data features to developers. It is used by the {@link SemanticWeb}
+ * linked data features to developers. It is used by the {@link LinkedData}
  * component to generate linked data from forms.
  * 
  * @author Evan Patton <ewpatton@gmail.com>
@@ -10,14 +10,14 @@ package com.google.appinventor.components.runtime;
  */
 public interface LDComponent {
   /**
-   * Returns the ConceptURI used to type entries
+   * Returns the ObjectType used to type entries
    * generated from this component.
    * @return
    */
   public String ObjectType();
 
   /**
-   * Sets the ConceptURI used to type entries
+   * Sets the ObjectType used to type entries
    * generated from this component.
    * @param uri URI or CURIE of a class on the semantic web,
    * e.g. http://xmlns.com/foaf/0.1/Person or foaf:Person

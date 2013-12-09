@@ -26,9 +26,9 @@ import android.view.View;
 /**
  * Linked Data Form provides a layout in which contained form elements will be
  * used to generate structured data. This form is used in conjunction with
- * the SemanticWeb and LinkedData components.
+ * the LinkedData component.
  * 
- * @see SemanticWeb
+ * @see LinkedData
  * @see LinkedDataStore
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
