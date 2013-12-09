@@ -5,14 +5,14 @@ import com.google.appinventor.components.common.ComponentConstants;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 
 /**
- * Provides a mock component for modeling a semantic form in the app inventor's
+ * Provides a mock component for modeling a linked data form in the app inventor's
  * client interface. 
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
-public class MockSemanticForm extends MockContainer {
+public class MockLinkedDataForm extends MockContainer {
   public static final String PROPERTY_NAME_CONCEPTURI = "ConceptURI";
-  public static final String TYPE = "SemanticForm";
+  public static final String TYPE = "LinkedDataForm";
   
   protected MockHVLayout myLayout;
   
@@ -22,10 +22,10 @@ public class MockSemanticForm extends MockContainer {
   protected String conceptUri = "";
 
   /**
-   * Creates a new mock SemanticForm for the AI client interface.
+   * Creates a new mock LinkedDataForm for the AI client interface.
    * @param editor
    */
-  public MockSemanticForm(SimpleEditor editor) {
+  public MockLinkedDataForm(SimpleEditor editor) {
     super(editor, TYPE, images.semanticForm(), 
         MockHVArrangementHelper.makeLayout(ComponentConstants.LAYOUT_ORIENTATION_VERTICAL));
     myLayout = MockHVArrangementHelper.getLayout();

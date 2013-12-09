@@ -280,8 +280,14 @@ public class YaVersion {
   // - PASSWORDTEXTBOX_COMPONENT_VERSION was incremented to 3.
   // - SEMANTIC_FORM_COMPONENT_VERSION was incremented to 2.
   // - TEXTBOX_COMPONENT_VERSION was incremented to 6.
-  
-  public static final int YOUNG_ANDROID_VERSION = 102;
+  // For YOUNG_ANDROID_VERSION 103:
+  // - SemanticForm Component is renamed to LinkedDataForm Component
+  // - SEMANTIC_FORM_COMPONENT_VERSION is renamed to LINKED_DATA_FORM_COMPONENT_VERSION
+  // - SemanticWeb Component is renamed to LinkedData Component
+  // - SEMANTIC_WEB_COMPONENT_VERSION is renamed to LINKED_DATA_COMPONENT_VERSION
+  // - SemanticListPicker Component is renamed to LinkedDataListPicker Component
+  // - SEMANTIC_LISTPICKER_COMPONENT_VERSION is renamed to LINKED_DATA_LISTPICKER_COMPONENT_VERSION
+  public static final int YOUNG_ANDROID_VERSION = 103;
 
 
   // ............................... Blocks Language Version Number ...............................
@@ -724,18 +730,25 @@ public class YaVersion {
   
   public static final int DROPBOX_COMPONENT_VERSION = 1;
 
-  public static final int SEMANTIC_WEB_COMPONENT_VERSION = 1;
+  // For LINKED_DATA_COMPONENT_VERSION_2:
+  // - Renamed SemanticWeb component to LinkedData component
+  public static final int LINKED_DATA_COMPONENT_VERSION = 2;
   
-  public static final int LINKED_DATA_COMPONENT_VERSION = 1;
-
-  public static final int SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION = 1;
+  public static final int LD_COMPONENT_VERSION = 1;
+  
+  // For LINKED_DATA_LISTPICKER_COMPONENT_VERSION_2:
+  // - Renamed SemanticWebListPicker to LinkedDataListPicker
+  public static final int LINKED_DATA_LISTPICKER_COMPONENT_VERSION = 2;
 
   // For SEMANTIC_FORM_COMPONENT_VERSION 1:
   // - Initial version.
   // For SEMANTIC_FORM_COMPONENT_VERSION 2:
   // - Renamed BaseURI to Form ID
   // - Renamed ConceptURI to Object Type
-  public static final int SEMANTIC_FORM_COMPONENT_VERSION = 2;
+  // For LINKED_DATA_FORM_COMPONENT_VERSION 3:
+  // - Renamed Semantic Form to Linked Data Form
+
+  public static final int LINKED_DATA_FORM_COMPONENT_VERSION = 3;
   
   public static final int GOOGLE_DRIVE_COMPONENT_VERSION = 1;
 

@@ -46,9 +46,9 @@ import com.hp.hpl.jena.vocabulary.RDF;
 
 import android.util.Log;
 
-@DesignerComponent(version = YaVersion.SEMANTIC_WEB_COMPONENT_VERSION,
+@DesignerComponent(version = YaVersion.LINKED_DATA_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
-    category = ComponentCategory.SEMANTICWEB,
+    category = ComponentCategory.LINKEDDATA,
     nonVisible = true,
     iconName = "images/semanticWeb.png")
 @SimpleObject
@@ -56,11 +56,11 @@ import android.util.Log;
 @UsesLibraries(libraries = "xercesImpl.jar," + 
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")
-public class SemanticWeb extends AndroidNonvisibleComponent implements
+public class LinkedData extends AndroidNonvisibleComponent implements
 		Component {
 
   /* constants for convenience */
-  private static final String LOG_TAG = "SemanticWeb";
+  private static final String LOG_TAG = "LinkedData";
   private static final String RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
   private static final String RDFS_NS = "http://www.w3.org/2000/01/rdf-schema#";
   private static final String OWL_NS = "http://www.w3.org/2002/07/owl#";
@@ -76,7 +76,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   /** baseURL is used for constructing URIs of new objects **/
   private String baseURL;
 
-  public SemanticWeb(ComponentContainer container) {
+  public LinkedData(ComponentContainer container) {
 	  super(container.$form());
 	  endpointURL = "http://dbpedia.org/sparql";
 	  baseURL = "http://example.com/";
@@ -134,77 +134,13 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Requests a file containing a SPARQL query from a remote server.
-   * 
-   * @param uri URI identifying a file containing a SPARQL query.
-   */
-  @SimpleFunction
-  public void RetrieveQueryFromURI(final String uri) {
-    final Runnable call = new Runnable() {
-      public void run() { retrieveQueryFromURI(uri); }
-    };
-    AsynchUtil.runAsynchronously(call);
-  }
-
-  // We retrieve the query text from the specified URI here.
-  private void retrieveQueryFromURI(String uri) {
-    AsyncCallbackPair<String> myCallback = new AsyncCallbackPair<String>() {
-      public void onSuccess(final String result) {
-        if(result == null) {
-          form.runOnUiThread(new Runnable() {
-            public void run() {
-              WebServiceError("The Web server did not send back a valid response.");
-            }
-          });
-        } else {
-          form.runOnUiThread(new Runnable() {
-            public void run() {
-              RetrievedQuery(result);
-            }
-          });
-        }
-      }
-      public void onFailure(final String message) {
-        form.runOnUiThread(new Runnable() {
-          public void run() {
-            WebServiceError(message);
-          }
-        });
-        return;
-      }
-    };
-    WebServiceUtil.getInstance().getCommand(uri, null, null, myCallback);
-    return;
-  }
-
-  /**
-   * Indicates that a RetrieveQuery request has succeeded.
-   * 
-   * @param queryText The query text at the original URI.
-   */
-  @SimpleEvent
-  public void RetrievedQuery(String queryText) {
-    EventDispatcher.dispatchEvent(this, "RetrievedQuery", queryText);
-  }
-
-  /**
-   * Indicates that the communication with the Web service signaled an error
-   * 
-   * @param message the error message
-   */
-  @SimpleEvent
-  public void WebServiceError(String message) {
-    EventDispatcher.dispatchEvent(this, "WebServiceError", message);
-  }
-
-  /**
-   * Execute a SPARQL query on the set EndpointURL of this semantic web component.
+   * Execute a SPARQL query on the set EndpointURL of this Linked Data component.
    * Currently only supports SELECT queries, and converts all integer types into Long
    * and decimal types into Double.
    * @param query Query text to execute
    */
   @SimpleFunction
-  public void ExecuteQuery(final String query) {
+  public void ExecuteSPARQLQuery(final String query) {
     final Runnable call = new Runnable() {
       public void run() { executeQuery(query); }
     };
@@ -247,7 +183,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
    * This event is raised after a SPARQL engine finishes processing a query
    * and the client has received the results, but before those results have
    * been processed into objects so that they may be used in conjunction with
-   * other semantic web-enabled components.
+   * other linked-data-enabled components.
    * @param type
    * @param contents
    */
@@ -269,7 +205,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
 
   /**
    * Event raised when a SPARQL query to be executed is not supported
-   * by the Semantic Web component.
+   * by the Linked Data component.
    */
   @SimpleEvent
   public void UnsupportedQueryType() {
@@ -277,14 +213,36 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Loads the contents of the specified path into
-   * the referent model.
-   * @param model Model created using {@link #OpenModel()}
-   * @param path Path to a file containing semantic web data (can be local or HTTP)
+   * Read contents of the specified path (local or remote) into the referent model.
+   * Note the implementation is identical to ReadDataFromLocal
+   * @param path Path to a file containing linked data
    * @return
    */
   @SimpleFunction
-  public boolean LoadModel(String path) {
+  public boolean ReadDataFromWeb(String path) {
+    try {
+      String type = "RDF/XML";
+      if(path.endsWith(".n3")) {
+        type = "N3";
+      } else if(path.endsWith(".ttl")) {
+        type = "TURTLE";
+      }
+      model.read(path, type);
+    } catch(Exception e) {
+      Log.w(LOG_TAG, "Unable to read model.", e);
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Read contents of the specified path (local or remote) into the referent model.
+   * Note the implementation is identical to ReadDataFromWeb
+   * @param path Path to a file containing linked data
+   * @return
+   */
+  @SimpleFunction
+  public boolean ReadDataFromLocal(String path) {
     try {
       String type = "RDF/XML";
       if(path.endsWith(".n3")) {
@@ -301,33 +259,13 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Adds a triple to the given model.
-   * @param model Model reference created using {@link #OpenModel()}
-   * @param subject URI or CURIE representing the subject of the triple
-   * @param predicate URI or CURIE representing the predicate of the triple
-   * @param object URI or CURIE representing the object of the triple
-   */
-  @SimpleFunction
-  public void AddObjectTriple(String subject, String predicate, String object) {
-    if(predicate.equals("a")) {
-      predicate = RDF.type.getURI();
-    }
-    Resource s,o;
-    Property p;
-    s = model.getResource(model.expandPrefix(subject));
-    p = model.getProperty(model.expandPrefix(predicate));
-    o = model.getResource(model.expandPrefix(object));
-    model.add(s, p, o);
-  }
-
-  /**
    * Saves the model to the given path on the file system.
    * @param model Model reference created using {@link #OpenModel()}
    * @param path Path to a local file where the model will be written
    * @return
    */
   @SimpleFunction
-  public boolean SaveModel(String path) {
+  public boolean WriteDataToLocal(String path) {
     try {
       String type = "RDF/XML";
       if(path.endsWith(".n3")) {
@@ -345,99 +283,6 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Sets an arbitrary number of (prefix,uri) pairs in the
-   * model that will be used for expanding CURIEs used when
-   * adding data to the model.
-   * @param namespaces A list of pairs mapping prefixes to URIs
-   * @see #SetNamespace(String, String)
-   */
-  @SimpleFunction
-  public void SetNamespaces(YailList namespaces) {
-    @SuppressWarnings("rawtypes")
-    Iterator i = namespaces.iterator();
-    while( i.hasNext() ) {
-      try {
-        YailList pair = (YailList) i.next();
-        if( pair.length() != 2 ) {
-          continue;
-        }
-        final String ns = (String) pair.get(0);
-        final String uri = (String) pair.get(1);
-        SetNamespace( ns, uri );
-      } catch( ClassCastException e ) {
-        // not a nested list...
-      }
-    }
-  }
-
-  /**
-   * Sets a prefix to a specific URI
-   * @param prefix Valid prefix in XML or Turtle
-   * @param uri URI to substitute for the given prefix
-   */
-  @SimpleFunction
-  public void SetNamespace(String prefix, String uri) {
-    if( prefix == null || uri == null ) {
-      return;
-    }
-    model.setNsPrefix(prefix, uri);
-  }
-
-  /**
-   * Lists all of the instances in this model (i.e. all URIs minus Classes and Properties)
-   * @param model Model reference obtained from {@link #OpenModel()}
-   * @return A list of instance URIs in the model
-   */
-  @SimpleFunction
-  public YailList ListInstances(String model) {
-    YailList items = new YailList();
-    /*
-    Model m = models.get(model);
-    if( m != null ) {
-      Iterator<Individual> i = m.listIndividuals();
-      while( i.hasNext() ) {
-        items.add( i.next().getURI() );
-      }
-    }
-    */
-    return items;
-  }
-
-  /**
-   * Retrieves the values for a specific subject,predicate pair in the model.
-   * @param model Model reference obtained from {@link #OpenModel()}
-   * @param subject URI or CURIE representing the subject
-   * @param property URI or CURIE representing the predicate
-   * @return A list of (type, value) pairs where type is either "uri" or "literal" to
-   * indicate whether the value should be interpreted as another node in the graph
-   * or as a fixed literal.
-   */
-  @SimpleFunction
-  public YailList ValuesForProperty(String subject, String property) {
-    YailList values = new YailList();
-    Resource s = model.getResource( model.expandPrefix( subject ) );
-    Property p = model.getProperty( model.expandPrefix( property ) );
-    StmtIterator i = model.listStatements( s, p, (RDFNode) null );
-    while( i.hasNext() ) {
-      Statement stmt = i.next();
-      YailList response = new YailList();
-      try {
-        Resource r = stmt.getResource();
-        response.add( "uri" );
-        response.add( r.getURI() );
-      } catch(Exception e) {
-        Literal l = stmt.getLiteral();
-        response.add( "literal" );
-        response.add( l.getValue() );
-      }
-      if( response.length() == 2 ) {
-        values.add( response );
-      }
-    }
-    return values;
-  }
-
-  /**
    * Takes a component implementing the LDComponent interface and uses the properties defined
    * there to insert a triple into the model using the given subject.
    * @param component An AndroidViewComponent with a PropertyURI defined
@@ -446,7 +291,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
    * @return true if the component was successfully converted into a triple, otherwise false
    */
   @SimpleFunction
-  public boolean TriplifyComponentInModel(Component component, String subject) {
+  public boolean AddDataFromComponent(Component component, String subject) {
     // check that we can proceed
     Class<?> clazz = component.getClass();
     if ( !LDComponent.class.isAssignableFrom(clazz) ) {
@@ -457,13 +302,13 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Takes a SemanticForm component and converts it and any nested elements into
-   * triples within the model encapsulated by this SemanticWeb component.
+   * Takes a LinkedDataForm component and converts it and any nested elements into
+   * triples within the model encapsulated by this LinkedData component.
    * @param form
    * @return
    */
   @SimpleFunction
-  public boolean TriplifyFormInModel(SemanticForm form) {
+  public boolean AddDataFromLinkedDataForm(LinkedDataForm form) {
     try {
       return RdfUtil.triplifyForm(form, RdfUtil.generateSubjectForForm(form), model);
     } catch(Exception e) {
@@ -477,13 +322,13 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       if(RdfUtil.publishGraph(uri, model)) {
         form.runOnUiThread(new Runnable() {
           public void run() {
-            PublishedGraph(graph);
+              FinishedWritingDataToWeb(graph);
           }
         });
       } else {
         form.runOnUiThread(new Runnable() {
           public void run() {
-            FailedToPublishGraph(graph, "See log for details.");
+              FailedToWriteDataToWeb(graph, "See log for details.");
           }
         });
       }
@@ -491,19 +336,20 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       form.runOnUiThread(new Runnable() {
         public void run() {
           Log.w(LOG_TAG, "Unable to publish graph.", e);
-          FailedToPublishGraph(graph, e.getLocalizedMessage());
+          FailedToWriteDataToWeb(graph, e.getLocalizedMessage());
         }
       });
     }
   }
 
   /**
-   * Publishes the model represented by the Semantic Web component to the
+   * Write the model represented by the LinkedData component to the
    * RDF graph store represented by EndpointURL using the given graph URI.
+   * Any existing triples will get replaced?
    * @param graph
    */
   @SimpleFunction
-  public void PublishModel(final String graph) {
+  public void WriteDataToWeb(final String graph) {
     try {
       URI part = new URI(null, null, "rdf-graph-store", "graph="+graph, null);
       final URI uri = URI.create(EndpointURL()).resolve(part);
@@ -515,19 +361,19 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       AsynchUtil.runAsynchronously(call);
     } catch (URISyntaxException e) {
       Log.w(LOG_TAG, "Unable to generate RDF Graph Store URL.", e);
-      FailedToPublishGraph(graph, "Invalid endpoint URI. See log for details.");
+      FailedToWriteDataToWeb(graph, "Invalid endpoint URI. See log for details.");
     }
   }
 
   /**
-   * This event is raised when the Semantic Web component fails to publish a
+   * This event is raised when the LinkedData component fails to publish a
    * graph to a remote SPARQL endpoint.
    * @param graph
    * @param error
    */
   @SimpleEvent
-  public void FailedToPublishGraph(String graph, String error) {
-    EventDispatcher.dispatchEvent(this, "FailedToPublishGraph", graph, error);
+  public void FailedToWriteDataToWeb(String graph, String error) {
+    EventDispatcher.dispatchEvent(this, "FailedToWriteDataToWeb", graph, error);
   }
 
   /**
@@ -536,49 +382,8 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
    * @param graph
    */
   @SimpleEvent
-  public void PublishedGraph(String graph) {
-    EventDispatcher.dispatchEvent(this, "PublishedGraph", graph);
-  }
-
-  @SimpleFunction
-  public String SubjectURIForForm(final SemanticForm form) {
-    return RdfUtil.generateSubjectForForm(form);
-  }
-
-  @SimpleFunction
-  public String ResultsToSimpleJSON(final YailList results) {
-    StringBuilder sb = new StringBuilder("[");
-    for(int i = 0; i < results.size(); i++) {
-      YailList solution = (YailList) results.getObject( i );
-      if(i > 0) {
-        sb.append(",");
-      }
-      sb.append("{");
-      for(int j = 0; j < solution.size(); j++) {
-        YailList binding = (YailList) solution.getObject( j );
-        String varName = binding.getString( 0 );
-        Object varValue = binding.getObject( 1 );
-        if( j != 0 ) {
-          sb.append(",");
-        }
-        sb.append("\"");
-        sb.append(varName);
-        sb.append("\":");
-        if(isPrimitiveOrWrapper(varValue.getClass())) {
-          sb.append(varValue);
-        } else {
-          sb.append("\"");
-          sb.append(varValue);
-          sb.append("\"");
-        }
-        sb.append("");
-      }
-      sb.append("}");
-    }
-    sb.append("]");
-    String result = sb.toString();
-    Log.d(LOG_TAG, "JSON = " + result);
-    return result;
+  public void FinishedWritingDataToWeb(String graph) {
+    EventDispatcher.dispatchEvent(this, "FinishedWritingDataToWeb", graph);
   }
 
   @SuppressWarnings("unchecked")
@@ -590,23 +395,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
   }
 
   /**
-   * Decodes URL-encoded text (see RFC 3986) into the original UTF-8 string.
-   * @param text
-   * @return URL-decoded version of text unless text doesn't contain valid
-   * percent-encoded UTF-8 characters, in which case it returns the original
-   * text.
-   */
-  @SimpleFunction
-  public String URLDecodeText(final String text) {
-    try {
-      return URLDecoder.decode(text, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      return text;
-    }
-  }
-
-  /**
-   * Attempts to insert the statements contained within this Semantic Web
+   * Attempts to insert the statements contained within this Linked Data
    * component into the endpoint with an optional graph.
    * @param graph Empty string for the default graph, otherwise a valid URI
    * @param noResolveUpdate true if the component should attempt to resolve the
@@ -614,7 +403,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
    * directly to {@link #endpointURL()}.
    */
   @SimpleFunction
-  public void InsertModelStatementsIntoEndpoint(final String graph, boolean noResolveUpdate) {
+  public void AddDataToWeb(final String graph, boolean noResolveUpdate) {
     try {
       URI part = new URI(null, null, "update", null, null);
       URI base = URI.create(EndpointURL());
@@ -627,7 +416,7 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       AsynchUtil.runAsynchronously(call);
     } catch (URISyntaxException e) {
       Log.w(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
-      FailedToInsertGraph(graph, "Invalid endpoint URI. See log for details.");
+      FailedToAddDataToWeb(graph, "Invalid endpoint URI. See log for details.");
     }
   }
 
@@ -636,13 +425,13 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       if(RdfUtil.insertData(uri, model, graph.length() == 0 ? null : graph)) {
         form.runOnUiThread(new Runnable() {
           public void run() {
-            InsertedModelIntoGraph(graph);
+            FinishedAddingDataToWeb(graph);
           }
         });
       } else {
         form.runOnUiThread(new Runnable() {
           public void run() {
-            FailedToInsertGraph(graph, "See log for details.");
+            FailedToAddDataToWeb(graph, "See log for details.");
           }
         });
       }
@@ -650,19 +439,19 @@ public class SemanticWeb extends AndroidNonvisibleComponent implements
       form.runOnUiThread(new Runnable() {
         public void run() {
           Log.w(LOG_TAG, "Unable to publish graph.", e);
-          FailedToInsertGraph(graph, e.getLocalizedMessage());
+          FailedToAddDataToWeb(graph, e.getLocalizedMessage());
         }
       });
     }
   }
 
   @SimpleEvent
-  public void FailedToInsertGraph(String graph, String error) {
+  public void FailedToAddDataToWeb(String graph, String error) {
     EventDispatcher.dispatchEvent(this, "FailedToInsertGraph", graph, error);
   }
 
   @SimpleEvent
-  public void InsertedModelIntoGraph(String graph) {
+  public void FinishedAddingDataToWeb(String graph) {
     EventDispatcher.dispatchEvent(this, "InsertedModelIntoGraph", graph);
   }
 
