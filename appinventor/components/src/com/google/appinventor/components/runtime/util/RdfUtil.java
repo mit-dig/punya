@@ -614,6 +614,99 @@ public final class RdfUtil {
     return success;
   }
 
+  /**
+   * Performs a SPARQL 1.1 Update DELETE DATA operation on a remote triple
+   * store by deleting the triples in <i>model</i> into the optionally named
+   * graph <i>graph</i>
+   * @param uri URI for the endpoint
+   * @param model RDF model containing the data to be deleted from the endpoint
+   * @param graph Optional graph URI to delete data from. Pass null to delete
+   * from the default graph.
+   * @return true on success, false otherwise.
+   */
+  public static boolean deleteData(URI uri, Model model, String graph) {
+    boolean success = false;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    model.write(baos, "TTL");
+    Log.d(LOG_TAG, "Byte array size: "+baos.size());
+    // get model contents in turtle
+    String contents = null;
+    try {
+      contents = baos.toString("UTF-8");
+    } catch(UnsupportedEncodingException e) {
+      Log.e(LOG_TAG, "Unable to encode query.", e);
+      return false;
+    }
+    baos = null;
+    Log.d(LOG_TAG, "Model: "+contents);
+    // remove PREFIX statements and move them before a delete data block
+    Pattern prefixPattern = Pattern.compile("@prefix[ \t]+([^:]*:)[ \t]+<([^>]+)>[ \t]+.[ \t\r\n]+", Pattern.CASE_INSENSITIVE);
+    Matcher matcher = prefixPattern.matcher(contents);
+    StringBuffer prefixes = new StringBuffer();
+    StringBuffer sb = new StringBuffer("DELETE DATA { ");
+    if(graph != null && graph.length() != 0) {
+      sb.append("GRAPH <"+graph+"> { ");
+    }
+    sb.append("\r\n");
+    while(matcher.find()) {
+      prefixes.append("PREFIX ");
+      prefixes.append(matcher.group(1));
+      prefixes.append(" <");
+      prefixes.append(matcher.group(2));
+      prefixes.append(">\r\n");
+      matcher.appendReplacement(sb, "");
+    }
+    matcher.appendTail(sb);
+    prefixes.append(sb);
+    if(graph != null && graph.length() != 0) {
+      prefixes.append("}\r\n");
+    }
+    prefixes.append("}\r\n");
+    sb = null;
+    HttpURLConnection conn = null;
+    Log.i(LOG_TAG, "Sending update to server:");
+    Log.d(LOG_TAG, prefixes.toString());
+    try {
+      conn = (HttpURLConnection) uri.toURL().openConnection();
+      conn.setDoInput(true);
+      conn.setDoOutput(true);
+      conn.setRequestMethod("POST");
+      conn.setRequestProperty("Content-Length", Integer.toString(prefixes.length()));
+      conn.setRequestProperty("Content-Type", "application/sparql-update");
+      conn.setRequestProperty("Accept", "*/*");
+      String userInfo = uri.getUserInfo();
+      if(userInfo != null && userInfo.length() != 0) {
+        if(!userInfo.contains(":")) {
+          userInfo = userInfo + ":";
+        }
+        String encodedInfo = Base64.encodeToString(userInfo.getBytes("UTF-8"), Base64.NO_WRAP).trim();
+        Log.d(LOG_TAG, "Authorization = "+encodedInfo);
+        conn.setRequestProperty("Authorization", "Basic "+encodedInfo);
+      }
+      conn.connect();
+      OutputStream os = conn.getOutputStream();
+      PrintStream ps = new PrintStream(os);
+      ps.print(prefixes);
+      ps.close();
+      int status = conn.getResponseCode();
+      Log.d(LOG_TAG, "HTTP Status = " + status);
+      if(status == 200) {
+        success = true;
+      } else if(status >= 400) {
+        success = false;
+        Log.w(LOG_TAG, "HTTP status for update was "+status);
+      }
+      conn.disconnect();
+    } catch (MalformedURLException e) {
+      Log.w(LOG_TAG, "Unable to insert triples due to malformed URL.");
+    } catch (ProtocolException e) {
+      Log.w(LOG_TAG, "Unable to perform HTTP POST to given URI.", e);
+    } catch (IOException e) {
+      Log.w(LOG_TAG, "Unable to insert triples due to communication issue.", e);
+    }
+    return success;
+  }
+  
   public static YailList resultSetAsYailList(ResultSet results) {
     final Collection<Solution> solutions = RdfUtil.resultSetAsCollection( results );
     final List<YailList> list = new ArrayList<YailList>();

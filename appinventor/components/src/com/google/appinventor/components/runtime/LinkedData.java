@@ -447,12 +447,96 @@ public class LinkedData extends AndroidNonvisibleComponent implements
 
   @SimpleEvent
   public void FailedToAddDataToWeb(String graph, String error) {
-    EventDispatcher.dispatchEvent(this, "FailedToInsertGraph", graph, error);
+    EventDispatcher.dispatchEvent(this, "FailedToAddDataToWeb", graph, error);
   }
 
   @SimpleEvent
   public void FinishedAddingDataToWeb(String graph) {
-    EventDispatcher.dispatchEvent(this, "InsertedModelIntoGraph", graph);
+    EventDispatcher.dispatchEvent(this, "FinishedAddingDataToWeb", graph);
   }
 
+  /**
+   * Attempts to delete the statements contained within this Linked Data
+   * component from the endpoint with an optional graph.
+   * @param graph Empty string for the default graph, otherwise a valid URI
+   * @param noResolveUpdate true if the component should attempt to resolve the
+   * update URL relative to {@link #EndpointURL()}, false will send the query
+   * directly to {@link #endpointURL()}.
+   */
+  @SimpleFunction
+  public void DeleteDataFromWeb(final String graph, boolean noResolveUpdate) {
+    try {
+      URI part = new URI(null, null, "update", null, null);
+      URI base = URI.create(EndpointURL());
+      final URI uri = noResolveUpdate ? base : base.resolve(part);
+      Runnable call = new Runnable() {
+        public void run() {
+          doDeleteModel(uri, graph);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (URISyntaxException e) {
+      Log.w(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
+      FailedToDeleteDataFromWeb(graph, "Invalid endpoint URI. See log for details.");
+    }
+  }
+
+  private void doDeleteModel(final URI uri, final String graph) {
+    try {
+      if(RdfUtil.deleteData(uri, model, graph.length() == 0 ? null : graph)) {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+              FinishedDeletingDataFromWeb(graph);
+          }
+        });
+      } else {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+              FailedToDeleteDataFromWeb(graph, "See log for details.");
+          }
+        });
+      }
+    } catch(final Exception e) {
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          Log.w(LOG_TAG, "Unable to publish graph.", e);
+          FailedToDeleteDataFromWeb(graph, e.getLocalizedMessage());
+        }
+      });
+    }
+  }
+
+  @SimpleEvent
+  public void FailedToDeleteDataFromWeb(String graph, String error) {
+    EventDispatcher.dispatchEvent(this, "FailedToDeleteDataFromWeb", graph, error);
+  }
+
+  @SimpleEvent
+  public void FinishedDeletingDataFromWeb(String graph) {
+    EventDispatcher.dispatchEvent(this, "FinishedDeletingDataFromWeb", graph);
+  }
+  
+  /**
+   * Deletes all data from the referent model
+   */
+  @SimpleFunction
+  public void DeleteDataFromLocal() {
+    try {
+      model.removeAll();
+      FinishedDeletingDataFromLocal();
+    } catch (Exception e) {
+      Log.w(LOG_TAG, "Unable to delete data from model", e);
+      FailedToDeleteDataFromLocal();
+    }
+  }
+  
+  @SimpleEvent
+  public void FailedToDeleteDataFromLocal() {
+    EventDispatcher.dispatchEvent(this, "FailedToDeleteDataFromLocal");
+  }
+
+  @SimpleEvent
+  public void FinishedDeletingDataFromLocal() {
+    EventDispatcher.dispatchEvent(this, "FinishedDeletingDataFromLocal");
+  }
 }
