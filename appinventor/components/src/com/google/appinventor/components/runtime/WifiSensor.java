@@ -227,15 +227,16 @@ public class WifiSensor extends ProbeBase{
 	 * Indicates that the Wifi sensor info has been received.
 	 */
 	@SimpleEvent
-	public void WifiInfoReceived(final long timestamp, final String bssid, final int level, final int frequency,
-                               final String capabilities) {
+	public void WifiInfoReceived(final long timestamp, final String bssid, final String ssid,
+                                 final int level, final int frequency, final String capabilities) {
+
     if (enabled || enabledSchedule) {
 			
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "WifiInfoReceived() is called");
 					EventDispatcher.dispatchEvent(WifiSensor.this,
-							"WifiInfoReceived", timestamp, bssid, level, frequency, capabilities);
+							"WifiInfoReceived", timestamp, bssid, ssid, level, frequency, capabilities);
 				}
 			});
 			
