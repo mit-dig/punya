@@ -115,10 +115,8 @@ public class WifiSensor extends ProbeBase{
 			level = data.get(WifiKeys.LEVEL).getAsInt();
 			timestamp = data.get(WifiKeys.TIMESTAMP).getAsLong();
 
+			WifiInfoReceived(timestamp, bssid, ssid, level, frequency, capabilities);
 
-			Log.i(TAG, " before call WifiInfoReceived()");
-			WifiInfoReceived();
-			Log.i(TAG, " after call WifiInfoReceived()");
 
 		}
 
@@ -168,50 +166,50 @@ public class WifiSensor extends ProbeBase{
 
 	};
 	
-	/**
-	 * Returns the latest reading of the BSSID of a wireless AP
-	 */
-	@SimpleProperty(description = "The address of the access point.")
-	public String BSSID() {
-		Log.i(TAG, "returning BSSID: " + bssid);
-		return bssid;
-	}
-	
-	/**
-	 * Returns the latest reading of the SSID of a wireless AP
-	 */
-	@SimpleProperty(description = "The network nam of the access point.")
-	public String SSID() {
-		Log.i(TAG, "returning SSID: " + ssid);
-		return ssid;
-	}
-	
-	/**
-	 * Returns the latest reading of the capabilities of a wireless AP
-	 */
-	@SimpleProperty(description = "Describes the authentication, key management, and encryption schemes supported by the access point.")
-	public String Capabilities() {
-		Log.i(TAG, "returning capbilities: " + capabilities);
-		return capabilities;
-	}
-	
-	/**
-	 * Returns the latest reading of the signal level of a wireless AP
-	 */
-	@SimpleProperty(description = "The detected signal level in dBm.")
-	public int Level() {
-		Log.i(TAG, "returning level: " + level);
-		return level;
-	}
-	
-	/**
-	 * Returns the timestamp of the latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	/**
+//	 * Returns the latest reading of the BSSID of a wireless AP
+//	 */
+//	@SimpleProperty(description = "The address of the access point.")
+//	public String BSSID() {
+//		Log.i(TAG, "returning BSSID: " + bssid);
+//		return bssid;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the SSID of a wireless AP
+//	 */
+//	@SimpleProperty(description = "The network nam of the access point.")
+//	public String SSID() {
+//		Log.i(TAG, "returning SSID: " + ssid);
+//		return ssid;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the capabilities of a wireless AP
+//	 */
+//	@SimpleProperty(description = "Describes the authentication, key management, and encryption schemes supported by the access point.")
+//	public String Capabilities() {
+//		Log.i(TAG, "returning capbilities: " + capabilities);
+//		return capabilities;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the signal level of a wireless AP
+//	 */
+//	@SimpleProperty(description = "The detected signal level in dBm.")
+//	public int Level() {
+//		Log.i(TAG, "returning level: " + level);
+//		return level;
+//	}
+//
+//	/**
+//	 * Returns the timestamp of the latest reading
+//	 */
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 	
 	
@@ -229,14 +227,16 @@ public class WifiSensor extends ProbeBase{
 	 * Indicates that the Wifi sensor info has been received.
 	 */
 	@SimpleEvent
-	public void WifiInfoReceived() {
-		if (enabled || enabledSchedule) {
+	public void WifiInfoReceived(final long timestamp, final String bssid, final String ssid,
+                                 final int level, final int frequency, final String capabilities) {
+
+    if (enabled || enabledSchedule) {
 			
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "WifiInfoReceived() is called");
 					EventDispatcher.dispatchEvent(WifiSensor.this,
-							"WifiInfoReceived");
+							"WifiInfoReceived", timestamp, bssid, ssid, level, frequency, capabilities);
 				}
 			});
 			

@@ -96,7 +96,7 @@ public class ActivityProbeSensor extends ProbeBase{
 
 
 			Log.i(TAG, " before call ActivityInfoReceived()");
-			ActivityInfoReceived();
+			ActivityInfoReceived(timestamp, activityLevel);
 			Log.i(TAG, " after call ActivityInfoReceived()");
 
 		}
@@ -174,14 +174,14 @@ public class ActivityProbeSensor extends ProbeBase{
 	 * Indicates that the activity info has been received.
 	 */
 	@SimpleEvent
-	public void ActivityInfoReceived(){
+	public void ActivityInfoReceived(final long timestamp, final String activityLevel){
 		if (enabled || enabledSchedule) {
 			
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "ActivityInfoReceived() is called");
 					EventDispatcher.dispatchEvent(ActivityProbeSensor.this,
-							"ActivityInfoReceived");
+							"ActivityInfoReceived", timestamp, activityLevel);
 				}
 			});
 			
@@ -210,20 +210,20 @@ public class ActivityProbeSensor extends ProbeBase{
 	/**
 	 * Returns the latest reading of the activity level of one interval
 	 */
-	@SimpleProperty(description = "The activity level of the interval.")
-	public String ActivityLevel() {
-		Log.i(TAG, "returning activityLevel: " + activityLevel);
-		return activityLevel;
-	}
+//	@SimpleProperty(description = "The activity level of the interval.")
+//	public String ActivityLevel() {
+//		Log.i(TAG, "returning activityLevel: " + activityLevel);
+//		return activityLevel;
+//	}
 	
 	/**
 	 * Returns the timestamp of latest reading 
 	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 	/*
 	 * Returns the default interval between each scan for this probe

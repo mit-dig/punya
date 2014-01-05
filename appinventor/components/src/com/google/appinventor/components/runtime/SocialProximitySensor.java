@@ -195,7 +195,13 @@ public class SocialProximitySensor extends ProbeBase{
 			rssi = data.get(BluetoothKeys.RSSI).getAsInt();
 			timestamp = data.get(BluetoothKeys.TIMESTAMP).getAsLong();
 
-			SocialProximityInfoReceived();
+//      private String macAddress; // maps to android.bluetooth.device.extra.DEVICE
+//      private String deviceName; // maps android.bluetooth.device.extra.NAME
+//      private int rssi; // android.bluetooth.device.extra.RSSI
+//      private int mClass; // android.bluetooth.device.extra.CLASS
+//      private float timestamp;
+
+			SocialProximityInfoReceived(timestamp, deviceName, macAddress, rssi, mClass);
 
 
 		}
@@ -339,73 +345,75 @@ public class SocialProximitySensor extends ProbeBase{
 	 * some people dont' know their activity name. Who knows how to use adb cat?
 	 */
 	
-	@SimpleFunction(description = "Get app's main activity name")
-	public String GetAppName(){
-		String appName = mainUIThreadActivity.getClass().getName();
-		return appName;
-	}
-	
-	
-	/**
-	 * Returns the latest reading of the mac address about another device in
-	 * proximity
-	 */
-	@SimpleProperty
-	public String DeviceMacAddress() {
-		Log.i(TAG, "returning macAddress: " + macAddress);
-		return macAddress;
-	}
-
-	/**
-	 * Returns the latest reading of the name about another device in proximity
-	 */
-	@SimpleProperty
-	public String DeviceName() {
-		Log.i(TAG, "returning device name: " + deviceName);
-		return deviceName;
-	}
-
-	/**
-	 * Returns the latest reading of the rssi about another device in proximity
-	 */
-	@SimpleProperty(description = "Bluetooth Received Signal Strength Indication (RSSI) could indicate how close is the device")
-	public int DeviceRSSI() {
-		Log.i(TAG, "returning RSSI: " + rssi);
-		return rssi;
-	}
-
-	/**
-	 * Returns the latest reading of the mClass about another device in
-	 * proximity
-	 */
-	@SimpleProperty(description = "Bluetooth Class is useful as a hint to roughly describe a device. http://developer.android.com/reference/android/bluetooth/BluetoothClass.html")
-	public int DeviceClass() {
-		Log.i(TAG, "returning mClass: " + mClass);
-		return mClass;
-	}
-	
-	/**
-	 * Returns the timestamp of the latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	@SimpleFunction(description = "Get app's main activity name")
+//	public String GetAppName(){
+//		String appName = mainUIThreadActivity.getClass().getName();
+//		return appName;
+//	}
+//
+//
+//	/**
+//	 * Returns the latest reading of the mac address about another device in
+//	 * proximity
+//	 */
+//	@SimpleProperty
+//	public String DeviceMacAddress() {
+//		Log.i(TAG, "returning macAddress: " + macAddress);
+//		return macAddress;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the name about another device in proximity
+//	 */
+//	@SimpleProperty
+//	public String DeviceName() {
+//		Log.i(TAG, "returning device name: " + deviceName);
+//		return deviceName;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the rssi about another device in proximity
+//	 */
+//	@SimpleProperty(description = "Bluetooth Received Signal Strength Indication (RSSI) could indicate how close is the device")
+//	public int DeviceRSSI() {
+//		Log.i(TAG, "returning RSSI: " + rssi);
+//		return rssi;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the mClass about another device in
+//	 * proximity
+//	 */
+//	@SimpleProperty(description = "Bluetooth Class is useful as a hint to roughly describe a device. http://developer.android.com/reference/android/bluetooth/BluetoothClass.html")
+//	public int DeviceClass() {
+//		Log.i(TAG, "returning mClass: " + mClass);
+//		return mClass;
+//	}
+//
+//	/**
+//	 * Returns the timestamp of the latest reading
+//	 */
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 
 	/**
 	 * Indicates that the proximity sensor info has been received.
 	 */
 	@SimpleEvent
-	public void SocialProximityInfoReceived() {
+	public void SocialProximityInfoReceived(final float timestamp, final String deviceName, final String macAddress,
+                                          final int rssi, final int mClass) {
+
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "SocialProximityInfoReceived() is called");
 					EventDispatcher.dispatchEvent(SocialProximitySensor.this,
-							"SocialProximityInfoReceived");
+							"SocialProximityInfoReceived", timestamp, deviceName, macAddress, rssi, mClass);
 				}
 			});
 

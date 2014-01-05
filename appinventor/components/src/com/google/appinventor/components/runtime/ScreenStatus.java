@@ -103,7 +103,7 @@ public class ScreenStatus extends ProbeBase{
 			
 			
 			Log.i(TAG, " before call ApplicationsInfoReceived()");
-			ScreenInfoReceived();
+			ScreenInfoReceived(timestamp, screen_on);
 			Log.i(TAG, " after call ApplicationsInfoReceived()");
 
 		}
@@ -158,14 +158,14 @@ public class ScreenStatus extends ProbeBase{
 	 * Indicates that the running applications info has been received.
 	 */
 	@SimpleEvent
-	public void ScreenInfoReceived() {
+	public void ScreenInfoReceived(final long timestamp, final boolean screenOn) {
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "ScreenInfoReceived() is called");
 					EventDispatcher.dispatchEvent(ScreenStatus.this,
-							"ScreenInfoReceived");
+							"ScreenInfoReceived", timestamp, screenOn);
 				}
 			});
 
@@ -173,23 +173,23 @@ public class ScreenStatus extends ProbeBase{
 
 	}
 	
-	/**
-	 * Returns whether the screen is currently on
-	 */
-	@SimpleProperty(description = "The status of whether the screen on or not.")
-	public boolean ScreenOn() {
-		Log.i(TAG, "returning screen_on: " + screen_on);
-		return screen_on;
-	}
-	
-	/**
-	 * Returns the timestamp of latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	/**
+//	 * Returns whether the screen is currently on
+//	 */
+//	@SimpleProperty(description = "The status of whether the screen on or not.")
+//	public boolean ScreenOn() {
+//		Log.i(TAG, "returning screen_on: " + screen_on);
+//		return screen_on;
+//	}
+//
+//	/**
+//	 * Returns the timestamp of latest reading
+//	 */
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 	/*
 	 * Returns the default interval between each scan for this probe

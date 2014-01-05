@@ -192,7 +192,15 @@ public class SmsHistory extends ProbeBase{
 			// get the string representation of sms type
 			type = getTypeName(data.get(ProbeKeys.SmsKeys.TYPE).getAsInt());
 
-			SmsInfoReceived();
+
+//      //fields in the returned json
+//      private String address; 		//phone number associated with message
+//      private String body;
+//      private long date; 				//The date that the message was sent or received
+//      private String type; 			// http://stackoverflow.com/questions/8447735/android-sms-type-constants
+//      private boolean read; 			//whether the sms message is read or not
+
+			SmsInfoReceived(date, address, body, type, read);
 
 		}
 
@@ -341,14 +349,14 @@ public class SmsHistory extends ProbeBase{
 	 * Indicates that the calllog info has been received.
 	 */
 	@SimpleEvent
-	public void SmsInfoReceived() {
+	public void SmsInfoReceived(final long date, final String address, final String body, final String type, final boolean read) {
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "SmsInfoReceived() is called");
 					EventDispatcher.dispatchEvent(SmsHistory.this,
-							"SmsInfoReceived");
+							"SmsInfoReceived", date, address, body, type, read);
 				}
 			});
 
@@ -356,55 +364,55 @@ public class SmsHistory extends ProbeBase{
 
 	}
 
-	/**
-	 * The phone number associated with message. (hashed for privacy reason)
-	 */
-	@SimpleProperty(description = "The  address (phone number) associated with message. If HideSensitiveData is set " +
-			"to True then hashed values will be returned for privacy reason.")
-	public String Address(){
-		Log.i(TAG, "returning address of the message: " + address);
-		return address;	
-	}
-
-
-	/**
-	 * The body of the message.  
-	 */
-	@SimpleProperty(description = "The  body of the message. If HideSensitiveData is set " +
-      "to True then hashed values will be returned for privacy reason.")
-	public String Body(){
-		Log.i(TAG, "returning address of the message: " + address);
-		return body;	
-	}
-
-
-	/**
-	 * The date the sms was sent or received, in milliseconds since the epoch
-	 */
-	@SimpleProperty(description = "The date the sms was sent or received, in milliseconds since the epoch")
-	public long	Date(){
-		Log.i(TAG, "returning date " + date);
-		return date;	
-	}
-
-
-	/**
-	 * The type of the message 
-	 */
-	@SimpleProperty(description = "The type of the message " )
-	public String MessageType(){
-		Log.i(TAG, "returning message: " + type);
-		return type;	
-	}
-
-	/**
-	 * Indicate whether the message is read or not
-	 */
-	@SimpleProperty(description = "Indicate whether the message is read or not " )
-	public boolean Read(){
-		Log.i(TAG, "returning message: " + read);
-		return read;	
-	}
+//	/**
+//	 * The phone number associated with message. (hashed for privacy reason)
+//	 */
+//	@SimpleProperty(description = "The  address (phone number) associated with message. If HideSensitiveData is set " +
+//			"to True then hashed values will be returned for privacy reason.")
+//	public String Address(){
+//		Log.i(TAG, "returning address of the message: " + address);
+//		return address;
+//	}
+//
+//
+//	/**
+//	 * The body of the message.
+//	 */
+//	@SimpleProperty(description = "The  body of the message. If HideSensitiveData is set " +
+//      "to True then hashed values will be returned for privacy reason.")
+//	public String Body(){
+//		Log.i(TAG, "returning address of the message: " + address);
+//		return body;
+//	}
+//
+//
+//	/**
+//	 * The date the sms was sent or received, in milliseconds since the epoch
+//	 */
+//	@SimpleProperty(description = "The date the sms was sent or received, in milliseconds since the epoch")
+//	public long	Date(){
+//		Log.i(TAG, "returning date " + date);
+//		return date;
+//	}
+//
+//
+//	/**
+//	 * The type of the message
+//	 */
+//	@SimpleProperty(description = "The type of the message " )
+//	public String MessageType(){
+//		Log.i(TAG, "returning message: " + type);
+//		return type;
+//	}
+//
+//	/**
+//	 * Indicate whether the message is read or not
+//	 */
+//	@SimpleProperty(description = "Indicate whether the message is read or not " )
+//	public boolean Read(){
+//		Log.i(TAG, "returning message: " + read);
+//		return read;
+//	}
 
 	/*
 	 * Returns the default interval between each scan for this probe

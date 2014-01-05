@@ -116,7 +116,7 @@ public class BatterySensor extends ProbeBase{
 			level = data.get(ProbeKeys.BatteryKeys.LEVEL).getAsInt();
 	
 			Log.i(TAG, " before call BatteryInfoReceived()");
-			BatteryInfoReceived();
+			BatteryInfoReceived(timestamp, scale, level);
 			Log.i(TAG, " after call BatteryInfoReceived()");
 
 		}
@@ -166,14 +166,14 @@ public class BatterySensor extends ProbeBase{
 	 * Indicates that the battery status info has been received.
 	 */
 	@SimpleEvent
-	public void BatteryInfoReceived() {
+	public void BatteryInfoReceived(final long timestamp, final int scale, final int level) {
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "BatteryInfoReceived() is called");
 					EventDispatcher.dispatchEvent(BatterySensor.this,
-							"BatteryInfoReceived");
+							"BatteryInfoReceived", timestamp, scale, level);
 				}
 			});
 
@@ -184,29 +184,29 @@ public class BatterySensor extends ProbeBase{
 	/**
 	 * Returns the current battery level, from 0 to Scale()
 	 */
-	@SimpleProperty(description = "the current battery level of the device")
-	public int Level() {
-		Log.i(TAG, "returning level: " + level);
-		return level;
-	}
+//	@SimpleProperty(description = "the current battery level of the device")
+//	public int Level() {
+//		Log.i(TAG, "returning level: " + level);
+//		return level;
+//	}
 	
 	/**
 	 * Returns the timestamp of latest reading 
 	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 	/**
 	 * Returns the battery SCALE, integer containing the maximum battery level
 	 */
-	@SimpleProperty(description = "Battery SCALE, integer containing the maximum battery level")
-	public int Scale() {
-		Log.i(TAG, "returning bettery scale: " + scale);
-		return scale;
-	}
+//	@SimpleProperty(description = "Battery SCALE, integer containing the maximum battery level")
+//	public int Scale() {
+//		Log.i(TAG, "returning bettery scale: " + scale);
+//		return scale;
+//	}
 	
 	
 	
