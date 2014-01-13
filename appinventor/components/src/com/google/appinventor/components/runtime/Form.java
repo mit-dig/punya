@@ -225,6 +225,16 @@ public class Form extends FragmentActivity
         startupValueForGCM = startIntent.getStringExtra(ARGUMENT_GCM); 
     }
     
+    /*
+     * Added by Fuming Shih
+     * We can have extras values that are intented for the survey components
+     */
+    if (startIntent != null && startIntent.hasExtra(ARGUMENT_SURVEY)){
+      Log.i(LOG_TAG, "SurveyIntentValue:"+startIntent.getStringExtra(ARGUMENT_SURVEY));
+      startupValueForSurvey = startIntent.getStringExtra(ARGUMENT_SURVEY); 
+  }
+    
+    
     // Add application components to the form
     $define();
 
