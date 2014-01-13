@@ -418,7 +418,8 @@ public class Survey extends AndroidViewComponent{
 	private static void close(String result){
 		Log.i(TAG, "before closing the Activity" );
 
-		mainUI.finishActivityWithTextResult(result);
+		//mainUI.finishActivityWithTextResult(result);
+		mainUI.finish();
 	}
 	
 	/*
