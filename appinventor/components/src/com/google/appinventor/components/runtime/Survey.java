@@ -118,6 +118,8 @@ public class Survey extends AndroidViewComponent{
 	private  String surveyGroup = "";
 	private  ArrayList<String> options = new ArrayList<String>();
 	private  String initValues = "";
+	private boolean isRecovered = false;
+	private String styleFromIntent = "";
 	
 	// for data uploading config.
   private Calendar calendar = Calendar.getInstance(Locale.getDefault());
@@ -223,7 +225,7 @@ public class Survey extends AndroidViewComponent{
 			}
 			
 			this.options = arrOptions;
-
+			this.styleFromIntent = values.get("style").getAsString();
 			Log.i(TAG, "Survey component got created");
 		}
 
@@ -324,8 +326,19 @@ public class Survey extends AndroidViewComponent{
 			this.style = TEXTBOX;
 
 		}
+		
+		// currently SetStyle() is called after the constructor to assign 
+		// this.style from the value that is set in app inventor's designer 
+		// and it will overwrite the intent's value. 
+		// The code below is a quick workaround to force-write again, what's passed
+		// from the intent
+		if(!this.initValues.isEmpty() && !this.isRecovered){
+		  this.style = this.styleFromIntent;
+		}
+		
 
 	}
+	
 	
 	@SimpleProperty()
 	public void SetQuestion(String question){
