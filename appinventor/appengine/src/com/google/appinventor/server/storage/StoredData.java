@@ -150,6 +150,13 @@ public class StoredData {
     // The Blobstore path to use to get the data from Blobstore
     String blobstorePath;
 
+    // Is this file stored in the Google Cloud Store (GCS). If it is the gcsName will contain the
+    // GCS file name (sans bucket).
+    boolean isGCS;
+
+    // The GCS filename, sans bucket name
+    String gcsName;
+
     // File settings
     String settings;
   }
@@ -187,4 +194,32 @@ public class StoredData {
     @Id Long id;
     @Indexed public String emailLower;
   }
+
+  @Unindexed
+  static final class FeedbackData {
+    @Id Long id;
+    public String notes;
+    public String foundIn;
+    public String faultData;
+    public String comments;
+    public String datestamp;
+    public String email;
+    public String projectId;
+  }
+
+  // NonceData -- A unique (and obscure) nonce is used to map between
+  // the nonce string and a userId and projectId. This is used to provide
+  // for unauthenticated download of an APK file. Nonces are timestamped
+  // both to provide a way to clean them up and to expire the APK downloads.
+
+  @Unindexed
+  static final class NonceData {
+    @Id Long id;
+    @Indexed public String nonce;
+    public String userId;
+    public long projectId;
+    @Indexed
+    public Date timestamp;
+  }
+
 }

@@ -77,7 +77,12 @@ public interface ProjectServiceAsync {
   /**
    * @see ProjectService#loadraw(long, String)
    */
+
   void loadraw(long projectId, String fileId, AsyncCallback<byte []> callback);
+  /**
+   * @see ProjectService#loadraw2(long, String)
+   */
+  void loadraw2(long projectId, String fileId, AsyncCallback<String> callback);
 
   /**
    * @see ProjectService#load(List)
@@ -95,9 +100,9 @@ public interface ProjectServiceAsync {
   void save(List<FileDescriptorWithContent> filesAndContent, AsyncCallback<Long> callback);
 
   /**
-   * @see ProjectService#build(long, String)
+   * @see ProjectService#build(long, String, String)
    */
-  void build(long projectId, String target, AsyncCallback<RpcResult> callback);
+  void build(long projectId, String nonce, String target, AsyncCallback<RpcResult> callback);
 
   /**
    * @see ProjectService#getBuildResult(long, String)

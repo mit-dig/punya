@@ -54,7 +54,7 @@ import edu.mit.media.funf.storage.NameValueDatabaseService;
 
  */
 @DesignerComponent(version = YaVersion.SENSORDB_COMPONENT_VERSION, description = "Non-visible component that provides methods to backup and upload "
-		+ "sensor db on the phone.", category = ComponentCategory.BASIC, nonVisible = true, iconName = "images/tinyDB.png")
+		+ "sensor db on the phone.", category = ComponentCategory.STORAGE, nonVisible = true, iconName = "images/tinyDB.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE, "
 		+ "android.permission.ACCESS_NETWORK_STATE, " //for funf 

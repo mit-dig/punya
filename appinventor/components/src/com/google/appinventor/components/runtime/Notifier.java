@@ -6,10 +6,14 @@
 package com.google.appinventor.components.runtime;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.SdkLevel;
 
@@ -50,8 +54,20 @@ import android.widget.Toast;
 //TODO(halabelson): Figure out how/if these dialogs should deal with onPause.
 
 @DesignerComponent(version = YaVersion.NOTIFIER_COMPONENT_VERSION,
-    category = ComponentCategory.MISC,
-    description = "Component that creates alert messages, popup dialogs, and log entries.",
+    category = ComponentCategory.USERINTERFACE,
+    description = "The Notifier component displays alert messages and creates Android log entries " +
+                "through the following methods: " +
+        "<ul>" +
+        "<li> ShowMessageDialog: user must dismiss the message by pressing a button.</li>" +
+        "<li> ShowChooseDialog: displays two buttons to let the user choose one of two responses, " +
+        "for example, yes or no, after which the AfterChoosing event is raised.</li>" +
+        "<li> ShowTextDialog: lets the user enter text in response to the message, after " +
+        "which the AfterTextInput event is raised. " +
+        "<li> ShowAlert: displays an alert that goes away by itself after a short time.</li>" +
+        "<li> LogError: logs an error message to the Android log. </li>" +
+        "<li> LogInfo: logs an info message to the Android log.</li>" +
+        "<li> LogWarning: logs a warning message to the Android log.</li>" +
+        "</ul>",
     nonVisible = true,
     iconName = "images/notifier.png")
 @SimpleObject
@@ -61,6 +77,15 @@ public final class Notifier extends AndroidNonvisibleComponent implements Compon
   private static final String LOG_TAG = "Notifier";
   private final Activity activity;
   private final Handler handler;
+
+  //Length of Notifier message display
+  private int notifierLength = Component.TOAST_LENGTH_LONG;
+
+  // Notifier background color
+  private int backgroundColor = Color.DKGRAY;
+
+  // Notifier text color
+  private int textColor = Color.WHITE;
 
   /**
    * Creates a new Notifier component.
@@ -74,7 +99,7 @@ public final class Notifier extends AndroidNonvisibleComponent implements Compon
   }
 
   /**
-   * Display an alert dialog with a single button
+   * Display an alert dialog with a single button that dismisses the alert.
    *
    * @param message the text in the alert box
    * @param title the title for the alert box
@@ -243,6 +268,63 @@ public final class Notifier extends AndroidNonvisibleComponent implements Compon
       }
     });
   }
+
+  /**
+   * Specifies the length of time that the alert is shown -- either "short" or "long".
+   *
+   * @param length  Length of time that an alert is visible
+   */
+  @DesignerProperty(
+      editorType = PropertyTypeConstants.PROPERTY_TYPE_TOAST_LENGTH,
+      defaultValue = Component.TOAST_LENGTH_LONG + "")
+  @SimpleProperty(
+      userVisible = false)
+  public void NotifierLength(int length){
+    notifierLength = length;
+  }
+
+  @SimpleProperty(
+      description="specifies the length of time that the alert is shown -- either \"short\" or \"long\".",
+      category = PropertyCategory.APPEARANCE)
+  public int NotifierLength() {
+    return notifierLength;
+  }
+
+  /**
+   * Specifies the letr's background color.
+   *
+   * @param argb  background RGB color with alpha
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
+      defaultValue = Component.DEFAULT_VALUE_COLOR_DKGRAY)
+  @SimpleProperty(description="Specifies the alert's background color.")
+  public void BackgroundColor(int argb) {
+    backgroundColor = argb;
+  }
+
+  /**
+   * Returns the alert's text color.
+   *
+   * @return  text RGB color with alpha
+   */
+  @SimpleProperty(description = "Specifies the alert's text color.",
+      category = PropertyCategory.APPEARANCE)
+  public int TextColor() {
+    return textColor;
+  }
+
+  /**
+   * Specifies the alert's text color.
+   *
+   * @param argb  text RGB color with alpha
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
+      defaultValue = Component.DEFAULT_VALUE_COLOR_WHITE)
+  @SimpleProperty
+  public void TextColor(int argb) {
+    textColor = argb;
+  }
+
   // show a toast using a TextView, which allows us to set the
   // font size.  The default toast is too small.
   private void toastNow (String message) {
@@ -253,11 +335,11 @@ public final class Notifier extends AndroidNonvisibleComponent implements Compon
     // I (hal) can't figure it out.
     int fontsize = (SdkLevel.getLevel() >= SdkLevel.LEVEL_ICE_CREAM_SANDWICH)
         ? 22 : 15;
-    Toast toast = Toast.makeText(activity, message, Toast.LENGTH_LONG);
+    Toast toast = Toast.makeText(activity, message, notifierLength);
     toast.setGravity(Gravity.CENTER, toast.getXOffset() / 2, toast.getYOffset() / 2);
     TextView textView = new TextView(activity);
-    textView.setBackgroundColor(Color.DKGRAY);
-    textView.setTextColor(Color.WHITE);
+    textView.setBackgroundColor(backgroundColor);
+    textView.setTextColor(textColor);
     textView.setTextSize(fontsize);
     Typeface typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
     textView.setTypeface(typeface);
@@ -272,7 +354,7 @@ public final class Notifier extends AndroidNonvisibleComponent implements Compon
    *
    * @param message the error message
    */
-  @SimpleFunction
+  @SimpleFunction(description = "Writes an error message to the Android log.")
   public void LogError(String message) {
     Log.e(LOG_TAG, message);
   }
@@ -282,7 +364,7 @@ public final class Notifier extends AndroidNonvisibleComponent implements Compon
    *
    * @param message the warning message
    */
-  @SimpleFunction
+  @SimpleFunction(description = "Writes a warning message to the Android log.")
   public void LogWarning(String message) {
     Log.w(LOG_TAG, message);
   }
@@ -292,7 +374,7 @@ public final class Notifier extends AndroidNonvisibleComponent implements Compon
    *
    * @param message the information message
    */
-  @SimpleFunction
+  @SimpleFunction(description = "Writes an information message to the Android log.")
   public void LogInfo(String message) {
     Log.i(LOG_TAG, message);
   }

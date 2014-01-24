@@ -101,6 +101,8 @@ public final class ErrorMessages {
   public static final int ERROR_SCREEN_INVALID_ANIMATION = 905;
   // Canvas errors
   public static final int ERROR_CANVAS_BITMAP_ERROR = 1001;
+  public static final int ERROR_CANVAS_WIDTH_ERROR = 1002;
+  public static final int ERROR_CANVAS_HEIGHT_ERROR = 1003;
   // Web errors
   public static final int ERROR_WEB_UNABLE_TO_GET = 1101;
   public static final int ERROR_WEB_UNSUPPORTED_ENCODING = 1102;
@@ -137,46 +139,51 @@ public final class ErrorMessages {
 
   // Repl Communication Errors
   public static final int ERROR_REPL_SECURITY_ERROR = 1801;
-
-  // Dropbox errors 
-  public static final int ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET = 1810;
-  public static final int ERROR_DROPBOX_EXCEPTION = 1811;
-  public static final int ERROR_DROPBOX_UNLINKED = 1812;
-  public static final int ERROR_DROPBOX_FILESIZE = 1813;
-  public static final int ERROR_DROPBOX_PARTIALFILE = 1814;
-  public static final int ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE = 1815;
-  public static final int ERROR_DROPBOX_IO = 1816;
-  public static final int ERROR_DROPBOX_FILENOTFOUND = 1817;
-  public static final int ERROR_DROPBOX_NO_TWO_RUNNING_TASKS = 1818;
-  
-  // CallLog/smslog errors
-  public static final int ERROR_DATE_FORMAT = 1840;
-
-  public static final int ERROR_GOOGLEDRIVE_EXCEPTION = 1901;
-  public static final int ERROR_GOOGLEDRIVE_IO_EXCEPTION = 1902;
-  public static final int ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS = 1903;
-  public static final int ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION = 1904;
-  public static final int ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR = 1905;
-  public static final int ERROR_GOOGLEDRIVE_APP_BLACKLIST = 1906;
-  public static final int ERROR_GOOGLEDRIVE_HTTP_RESPONSE = 1907;
-  public static final int ERROR_GOOGLEDRIVE_NEEDLOGIN = 1908;
+  //AccelerometerSensor Errors
+  public static final int ERROR_BAD_VALUE_FOR_ACCELEROMETER_SENSITIVITY = 1901;
   
   // Please start the next group of error numbers at 2001.
-  public static final int ERROR_SENSORDB_NOTAVAILABLE = 2001;
-  public static final int ERROR_SENSORDB_NOTACTIVE = 2002;
+  
+  // below is error messages only for fuming_wei sensor and cloud compoents
+  // Dropbox errors 
+  public static final int ERROR_DROPBOX_BLANK_APP_KEY_OR_SECRET = 11810;
+  public static final int ERROR_DROPBOX_EXCEPTION = 11811;
+  public static final int ERROR_DROPBOX_UNLINKED = 11812;
+  public static final int ERROR_DROPBOX_FILESIZE = 11813;
+  public static final int ERROR_DROPBOX_PARTIALFILE = 1814;
+  public static final int ERROR_DROPBOX_SERVER_INSUFFICIENT_STORAGE = 11815;
+  public static final int ERROR_DROPBOX_IO = 11816;
+  public static final int ERROR_DROPBOX_FILENOTFOUND = 11817;
+  public static final int ERROR_DROPBOX_NO_TWO_RUNNING_TASKS = 11818;
+  
+  // CallLog/smslog errors
+  public static final int ERROR_DATE_FORMAT = 11840;
+
+  public static final int ERROR_GOOGLEDRIVE_EXCEPTION = 11901;
+  public static final int ERROR_GOOGLEDRIVE_IO_EXCEPTION = 11902;
+  public static final int ERROR_GOOGLEDRIVE_INVALID_CREDENTIALS = 11903;
+  public static final int ERROR_GOOGLEDRIVE_NOT_GRANT_PERMISSION = 11904;
+  public static final int ERROR_GOOGLEDRIVE_APP_CONFIG_ERROR = 11905;
+  public static final int ERROR_GOOGLEDRIVE_APP_BLACKLIST = 11906;
+  public static final int ERROR_GOOGLEDRIVE_HTTP_RESPONSE = 11907;
+  public static final int ERROR_GOOGLEDRIVE_NEEDLOGIN = 11908;
+  
+  // Please start the next group of error numbers at 2001.
+  public static final int ERROR_SENSORDB_NOTAVAILABLE = 12001;
+  public static final int ERROR_SENSORDB_NOTACTIVE = 12002;
 
   // Please start the next group of error numbers at 1901.
   
   // Please start the next group of error numbers at 2010.
-  public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 2010;
-  public static final int ERROR_GOOGLE_PLAY_NOT_INSTALLED = 2011;
-  public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 2012;
-  public static final int ERROR_GOOGLE_MAP_MARKER_NOT_EXIST = 2013;
-  public static final int ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED = 2014;
-  public static final int ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST = 2015;
-  public static final int ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED = 2016;
-  public static final int ERROR_GOOGLE_PLAY_DISABLED = 2017;
-  public static final int ERROR_GOOGLE_PLAY_INVALID = 2018;
+  public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 12010;
+  public static final int ERROR_GOOGLE_PLAY_NOT_INSTALLED = 12011;
+  public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 12012;
+  public static final int ERROR_GOOGLE_MAP_MARKER_NOT_EXIST = 12013;
+  public static final int ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED = 12014;
+  public static final int ERROR_GOOGLE_MAP_CIRCLE_NOT_EXIST = 12015;
+  public static final int ERROR_GOOGLE_PLAY_SERVICE_UPDATE_REQUIRED = 12016;
+  public static final int ERROR_GOOGLE_PLAY_DISABLED = 12017;
+  public static final int ERROR_GOOGLE_PLAY_INVALID = 12018;
 
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
@@ -346,6 +353,8 @@ public final class ErrorMessages {
         "Bad value for screen open/close animation: %s");
     // Canvas errors
     errorMessages.put(ERROR_CANVAS_BITMAP_ERROR, "Error getting Canvas contents to save");
+    errorMessages.put(ERROR_CANVAS_WIDTH_ERROR, "Canvas width cannot be set to non-positive number");
+    errorMessages.put(ERROR_CANVAS_HEIGHT_ERROR, "Canvas height cannot be set to non-positive number");
     // Web errors
     errorMessages.put(ERROR_WEB_UNABLE_TO_GET,
         "Unable to get a response with the specified URL: %s");
@@ -404,8 +413,11 @@ public final class ErrorMessages {
       "Text Receiving should be either 1, 2 or 3.");
     errorMessages.put(ERROR_REPL_SECURITY_ERROR,
       "Security Error Receiving Blocks from Browser.");
-    
- // CallLogs history errors
+    //AccelerometerSensor errors
+    errorMessages.put(ERROR_BAD_VALUE_FOR_ACCELEROMETER_SENSITIVITY,
+       "The value -- %s -- provided for AccelerometerSensor's sensitivity was bad. " +
+       "The only legal values are 1, 2, or 3.");
+    //CallLogs history errors
     errorMessages.put(ERROR_DATE_FORMAT,
       "The date string has wrong format, please refer to the documentation of the setting method again.");
     
@@ -454,8 +466,6 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "Sensor: %s is not active");
     errorMessages.put(ERROR_SENSORDB_NOTAVAILABLE, "Sensor: %s is not available");
     
-    
-    
   }
 
   private ErrorMessages() {
@@ -466,3 +476,4 @@ public final class ErrorMessages {
     return String.format(format, messageArgs);
   }
 }
+

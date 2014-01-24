@@ -527,10 +527,15 @@ public class BlockSaveFile {
   private int upgradeAccelerometerSensorBlocks(int blkCompVersion, String componentName) {
     if (blkCompVersion < 2) {
       // The AccelerometerSensor.MinimumInterval property was added.
-          // No blocks need to be modified to upgrade to version 2.
-          blkCompVersion = 2;
+      // No blocks need to be modified to upgrade to version 2.
+      blkCompVersion = 2;
     }
-        return blkCompVersion;
+    if (blkCompVersion < 3) {
+      // The AccelerometerSensor.Sensitivity property was added.
+      // No blocks need to be modified to upgrade to version 3.
+      blkCompVersion = 3;
+    }
+    return blkCompVersion;
   }
 
   private int upgradeActivityStarterBlocks(int blkCompVersion, String componentName) {
@@ -952,6 +957,10 @@ public class BlockSaveFile {
       // Added ShowFilterBar property
       blkCompVersion = 7;
     }
+    if (blkCompVersion < 8) {
+      // Added title property
+      blkCompVersion = 8;
+    }
     return blkCompVersion;
   }
 
@@ -1115,6 +1124,11 @@ public class BlockSaveFile {
       }
 
       blkCompVersion = 2;
+    }
+    if (blkCompVersion < 3) {
+      // The BackgroundColor, TextColor, and NotifierLength options were added.
+      // Defaults are set, so no blocks need to be modified to upgrade to version 3.
+      blkCompVersion = 3;
     }
     return blkCompVersion;
   }
