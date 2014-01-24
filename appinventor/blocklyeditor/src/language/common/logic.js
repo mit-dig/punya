@@ -41,9 +41,8 @@ Blockly.Language.logic_boolean = {
     this.appendCollapsedInput().appendTitle(Blockly.LANG_LOGIC_BOOLEAN_TRUE, 'COLLAPSED_TEXT');
   },
   helpUrl : function() {
-    var op = thisBlock.getTitleValue('BOOL');
+    var op = this.getTitleValue('BOOL');
     return Blockly.Language.logic_boolean.HELPURLS[op];},
-  onchange: Blockly.WarningHandler.checkErrors,
   typeblock: [{
     translatedName: Blockly.LANG_LOGIC_BOOLEAN_TRUE,
     dropDown: {
@@ -95,7 +94,6 @@ Blockly.Language.logic_false = {
   helpUrl : function() {
     var op = this.getTitleValue('BOOL');
     return Blockly.Language.logic_boolean.HELPURLS[op];},
-  onchange: Blockly.WarningHandler.checkErrors,
   prepareCollapsedText: function(){
     var titleFromOperator = Blockly.FieldDropdown.lookupOperator(
         Blockly.Language.logic_boolean.OPERATORS, this.getTitleValue('BOOL'));
@@ -114,7 +112,6 @@ Blockly.Language.logic_negate = {
     this.setTooltip(Blockly.LANG_LOGIC_NEGATE_TOOLTIP);
     this.appendCollapsedInput().appendTitle('not', 'COLLAPSED_TEXT');
   },
-  onchange: Blockly.WarningHandler.checkErrors,
   typeblock: [{ translatedName:Blockly.LANG_LOGIC_NEGATE_INPUT_NOT }]
 };
 
@@ -140,7 +137,6 @@ Blockly.Language.logic_compare = {
     this.appendCollapsedInput().appendTitle(
         Blockly.FieldDropdown.lookupOperator(this.OPERATORS, this.getTitleValue('OP')), 'COLLAPSED_TEXT');
   },
-  onchange: Blockly.WarningHandler.checkErrors,
   //TODO (user) compare has not been internationalized yet
   // Potential clash with Math =, so using 'logic equal' for now
   typeblock: [{ translatedName: 'logic equal' }],
@@ -184,10 +180,9 @@ Blockly.Language.logic_operation = {
     this.appendCollapsedInput().appendTitle('and', 'COLLAPSED_TEXT');
   },
   helpUrl: function() {
-      var op = thisBlock.getTitleValue('OP');
+      var op = this.getTitleValue('OP');
       return Blockly.Language.logic_operation.HELPURLS[op];
     },
-  onchange: Blockly.WarningHandler.checkErrors,
   typeblock: [{
     translatedName: Blockly.LANG_LOGIC_OPERATION_AND,
     dropDown: {
@@ -240,10 +235,9 @@ Blockly.Language.logic_or = {
     this.appendCollapsedInput().appendTitle('or', 'COLLAPSED_TEXT');
   },
   helpUrl: function() {
-      var op = thisBlock.getTitleValue('OP');
+      var op = this.getTitleValue('OP');
       return Blockly.Language.logic_operation.HELPURLS[op];
     },
-  onchange: Blockly.WarningHandler.checkErrors,
   prepareCollapsedText: function(){
     var titleFromOperator = Blockly.FieldDropdown.lookupOperator(
         Blockly.Language.logic_operation.OPERATORS, this.getTitleValue('OP'));

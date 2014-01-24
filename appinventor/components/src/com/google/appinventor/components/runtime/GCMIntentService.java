@@ -33,6 +33,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     // notification
     private static final String ARGUMENT_GCM = "APP_INVENTOR_GCM";
+    private static final String GCM_MESSAGE_PLAYLOAD_KEY = "gcmMessage";
     private Notification notification;
     private PendingIntent mContentIntent;
     private NotificationManager mNM;
@@ -56,6 +57,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "Received message");        
         Log.i(TAG, "The context is"+context.toString());
         mainUIThreadContext = context;
+        String newMessage;
         
         PACKAGE_NAME = mainUIThreadContext.getPackageName();
         Log.i(TAG,"The package name is "+PACKAGE_NAME+".");
@@ -66,7 +68,13 @@ public class GCMIntentService extends GCMBaseIntentService {
         mNM = (NotificationManager) mainUIThreadContext.getSystemService(ns);
         Log.i(TAG, "After creating the GCMIntentService");  
         
-        String newMessage = intent.getExtras().getString("gcmMessage");                
+
+        if (!intent.getExtras().containsKey(GCM_MESSAGE_PLAYLOAD_KEY)) {
+        	newMessage = "Error: This message didn't contain the gcmMessage field in the extras.";
+        } else {
+            newMessage = intent.getExtras().getString(GCM_MESSAGE_PLAYLOAD_KEY); 
+        }
+
         sharedPreferences = context.getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
         Log.i(TAG, "The shared preference is "+sharedPreferences.toString()); 
         
@@ -159,24 +167,17 @@ public class GCMIntentService extends GCMBaseIntentService {
     // This is a method for App Inventor's component to receive two types of messages from Google GCM
     // 1. general GCM message 2. registeration finished message
     public void requestGCMMessage(Context context, GCMEventListener listener, String type){
-        //add the listener to the list of listerners
-        if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE)) {
-            GCMEventListeners.add(listener);
-        //for registeration type of messages
-        } else if (type.equals(GoogleCloudMessaging.REG_GCM_TYPE)){
-            GCMRegEventListeners.add(listener);
-        } else if (type.equals(GoogleCloudMessaging.SYS_GCM_TYPE)){
-            GCMSysEventListeners.add(listener);
-        } 
-        //Save the action into the sharedPreference
-        setSharedPreference(context,"in");
-        
-        if(type.equals(GoogleCloudMessaging.SYS_GCM_TYPE)) {
-            for (GCMEventListener sysListener : GCMSysEventListeners) {
-                sysListener.onMessageReceived(GCMConstants.GCM_LISTERNERS_READY_MSG);
-                Log.i(TAG, "The new message is :" + GCMConstants.GCM_LISTERNERS_READY_MSG);
-                Log.i(TAG, "Listener:" + sysListener.toString());
-              } 
+        if((!GCMEventListeners.contains(listener))&&(!GCMEventListeners.contains(listener))){
+            Log.i(TAG, "No listener registered."); 
+            //add the listener to the list of listerners
+            if(type.equals(GoogleCloudMessaging.MESSAGE_GCM_TYPE))
+                GCMEventListeners.add(listener);
+            else{//for registeration type of messages
+                GCMRegEventListeners.add(listener);
+            }
+            //Save the action into the sharedPreference
+            setSharedPreference(context,"in");
+            Log.i(TAG, "After the requestGCMMessage"); 
         }
     }
     

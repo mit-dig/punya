@@ -226,7 +226,8 @@ Blockly.Yail.getComponentInitializationString = function(formName, componentName
   var code = Blockly.Yail.YAIL_INITIALIZE_COMPONENTS;
   code += " " + Blockly.Yail.YAIL_QUOTE + formName;
   for (var i = 0, cName; cName = componentNames[i]; i++) {  // TODO: will we get non-component fields this way?
-    code = code + " " + Blockly.Yail.YAIL_QUOTE + cName;
+    if (cName != formName)                                  // Avoid duplicate initialization of the form
+      code = code + " " + Blockly.Yail.YAIL_QUOTE + cName;
   }
   code = code + ")";
   return code;
@@ -371,7 +372,7 @@ Blockly.Yail.getPropertySetterString = function(componentName, componentType, pr
     componentName + Blockly.Yail.YAIL_SPACER + Blockly.Yail.YAIL_QUOTE + propertyName + 
     Blockly.Yail.YAIL_SPACER;
   var propType = Blockly.Yail.YAIL_QUOTE + 
-    Blockly.Component.getPropertyType(componentType, propertyName);
+    Blockly.ComponentTypes[componentType].properties[propertyName].type;
   var value = Blockly.Yail.getPropertyValueString(propertyValue, propType);
   code = code.concat(value + Blockly.Yail.YAIL_SPACER + propType + Blockly.Yail.YAIL_CLOSE_BLOCK);
   return code;
@@ -490,10 +491,11 @@ Blockly.Yail.quotifyForREPL = function(s) {
  */
 
 Blockly.Yail.quote_ = function(string) {
-  // TODO: This is a quick hack.  Replace with goog.string.quote
-  string = string.replace(/\"/g, '\\"')
-                 .replace(/'/g, '\\\'');
-  return '"' + string + '"';
+  string = Blockly.Yail.quotifyForREPL(string);
+  if (!string) {                // quotifyForREPL can return null for
+    string = '""';              // empty string
+  }
+  return string;
 };
 
 /**

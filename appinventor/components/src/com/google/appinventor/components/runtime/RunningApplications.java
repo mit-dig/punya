@@ -4,6 +4,8 @@
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 package com.google.appinventor.components.runtime;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -35,8 +37,8 @@ public class RunningApplications extends ProbeBase{
 	private final String RUNNINGAPPLICATIONS_PROBE = "edu.mit.media.funf.probe.builtin.RunningApplicationsProbe";
 	private RunningApplicationsProbe probe;
 	
-	private String runningPackage = null;
-	private String runningClass = null;
+	private String runningPackage = "";
+	private String runningClass = "";
 	private long timestamp;
 	
 	//default settings for schedule 
@@ -113,18 +115,31 @@ public class RunningApplications extends ProbeBase{
 			runningClass = mComponent.get("mClass").getAsString();
 			runningPackage = mComponent.get("mPackage").getAsString();
 			timestamp = data.get(ProbeKeys.ActivityKeys.TIMESTAMP).getAsLong();
-			
+
+      String appName = getAppName(runningPackage);
 			
 			Log.i(TAG, " before call ApplicationsInfoReceived()");
-			AppsInfoReceived();
+			AppsInfoReceived(timestamp, appName, runningClass, runningPackage);
 			Log.i(TAG, " after call ApplicationsInfoReceived()");
 
 		}
 
-	};	
-	
- 
- 
+	};
+
+  private String getAppName(String packageName){
+
+    final PackageManager pm = mBoundFunfManager.getPackageManager();
+    ApplicationInfo ai;
+    try {
+      ai = pm.getApplicationInfo(packageName, 0);
+    } catch (final PackageManager.NameNotFoundException e) {
+      ai = null;
+    }
+    final String applicationName = (String) (ai != null ? pm.getApplicationLabel(ai) : "(unknown)");
+    return applicationName;
+
+  }
+
 	
 	public RunningApplications(ComponentContainer container) {
 		
@@ -195,14 +210,15 @@ public class RunningApplications extends ProbeBase{
 	 * Indicates that the running applications info has been received.
 	 */
 	@SimpleEvent
-	public void AppsInfoReceived() {
+	public void AppsInfoReceived(final long timestamp, final String appName,
+                               final String className, final String packageName) {
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "AppsInfoReceived() is called");
 					EventDispatcher.dispatchEvent(RunningApplications.this,
-							"AppsInfoReceived");
+							"AppsInfoReceived", timestamp, appName, className, packageName);
 				}
 			});
 
@@ -210,34 +226,34 @@ public class RunningApplications extends ProbeBase{
 
 	}
 	
-	/**
-	 * Returns the latest reading of package name of the running app
-	 */
-	@SimpleProperty(description = "The activity level of the interval.")
-	public String PackageName() {
-		Log.i(TAG, "returning packageName: " + runningPackage);
-		return runningPackage;
-	}
-	
-	
-	/**
-	 * Returns the latest reading of the executing (java)class name of the running app
-	 */
-	@SimpleProperty(description = "The activity level of the interval.")
-	public String ClassName() {
-		Log.i(TAG, "returning className: " + runningClass);
-		return runningClass;
-	}
-	
-	
-	/**
-	 * Returns the timestamp of latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	/**
+//	 * Returns the latest reading of package name of the running app
+//	 */
+//	@SimpleProperty(description = "The activity level of the interval.")
+//	public String PackageName() {
+//		Log.i(TAG, "returning packageName: " + runningPackage);
+//		return runningPackage;
+//	}
+//
+//
+//	/**
+//	 * Returns the latest reading of the executing (java)class name of the running app
+//	 */
+//	@SimpleProperty(description = "The activity level of the interval.")
+//	public String ClassName() {
+//		Log.i(TAG, "returning className: " + runningClass);
+//		return runningClass;
+//	}
+//
+//
+//	/**
+//	 * Returns the timestamp of latest reading
+//	 */
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 	/*
 	 * Returns the default interval between each scan for this probe

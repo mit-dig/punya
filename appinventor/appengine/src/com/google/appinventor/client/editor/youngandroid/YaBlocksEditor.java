@@ -349,6 +349,21 @@ public final class YaBlocksEditor extends FileEditor
     // Nothing to do after blocks are saved.
   }
 
+  public static String getComponentInfo(String typeName) {
+    return COMPONENT_DATABASE.getTypeDescription(typeName);
+  }
+
+  public static String getComponentsJSONString() {
+    return COMPONENT_DATABASE.getComponentsJSONString();
+  }
+
+  public static String getComponentInstanceTypeName(String formName, String instanceName) {
+      //use form name to get blocks editor
+      YaBlocksEditor blocksEditor = formToBlocksEditor.get(formName);
+      //get type name from form editor
+      return blocksEditor.myFormEditor.getComponentInstanceTypeName(instanceName);
+  }
+
   public void addComponent(String typeName, String instanceName, String uuid) {
     if (componentUuids.add(uuid)) {
       String typeDescription = COMPONENT_DATABASE.getTypeDescription(typeName);
@@ -536,8 +551,8 @@ public final class YaBlocksEditor extends FileEditor
    * Start up the Repl (call into the Blockly.ReplMgr via the BlocklyPanel.
    */
   @Override
-  public void startRepl(Boolean alreadyRunning, Boolean forEmulator) {
-    blocksArea.startRepl(alreadyRunning, forEmulator);
+  public void startRepl(boolean alreadyRunning, boolean forEmulator, boolean forUsb) {
+    blocksArea.startRepl(alreadyRunning, forEmulator, forUsb);
   }
 
 }

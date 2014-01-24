@@ -33,9 +33,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
  
 
 import edu.mit.media.funf.FunfManager;
+import edu.mit.media.funf.config.RuntimeTypeAdapterFactory;
 import edu.mit.media.funf.json.IJsonObject;
 
 import edu.mit.media.funf.probe.Probe.DataListener;
@@ -96,39 +98,6 @@ public class SocialProximitySensor extends ProbeBase{
 	private int interval;
 	private int duration;
 
-
-
-//	/**
-//	 * Set the length of the interval for a re-occurring probe activity
-//	 */
-//	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "60")
-//	@SimpleProperty
-//	public void SetScheduleInterval(int newInterval) {
-//		if (!enabledSchedule) {
-//			// do nothing
-//		} else {
-//			interval = newInterval;
-//			// register new interval for the schedule to FunfManger
-//			registerDataRequest(newInterval, duration);
-//		}
-//
-//	}
-
-//	/**
-//	 * Indicates the duration of the interval for a re-occurring probe activity
-//	 */
-//	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "30")
-//	@SimpleProperty
-//	public void SetScheduleDuration(int newDuration) {
-//		if (!enabledSchedule) {
-//			// do nothing
-//		} else {
-//			duration = newDuration;
-//			// register new interval for the schedule to FunfManger
-//			registerDataRequest(interval, newDuration);
-//		}
-//
-//	}
 
 	/**
 	 * Indicates whether the user has specified that the sensor should listen
@@ -211,23 +180,34 @@ public class SocialProximitySensor extends ProbeBase{
 			IJsonObject data = (IJsonObject) msg.obj;
 			Log.i(TAG, "Update component's varibles.....");
 			
+
 			macAddress = ((IJsonObject) data.get(BluetoothKeys.DEVICE)).get(
-					"mAddress").getAsString();
+				"mAddress")!= null ?  ((IJsonObject) data.get(BluetoothKeys.DEVICE)).get(
+					"mAddress").getAsString() : ""; 
+					
+			
 			mClass = ((IJsonObject) data.get(BluetoothKeys.CLASS))
-					.get("mClass").getAsInt();
+				.get("mClass") != null? ((IJsonObject) data.get(BluetoothKeys.CLASS))
+					.get("mClass").getAsInt() : 0;
+			
 			deviceName = data.get(BluetoothKeys.NAME).getAsString();
+			
 			rssi = data.get(BluetoothKeys.RSSI).getAsInt();
 			timestamp = data.get(BluetoothKeys.TIMESTAMP).getAsLong();
 
+//      private String macAddress; // maps to android.bluetooth.device.extra.DEVICE
+//      private String deviceName; // maps android.bluetooth.device.extra.NAME
+//      private int rssi; // android.bluetooth.device.extra.RSSI
+//      private int mClass; // android.bluetooth.device.extra.CLASS
+//      private float timestamp;
 
-			Log.i(TAG, " before call SocialProximityInfoReceived()");
-			SocialProximityInfoReceived();
-			Log.i(TAG, " after call SocialProximityInfoReceived()");
+			SocialProximityInfoReceived(timestamp, deviceName, macAddress, rssi, mClass);
+
 
 		}
 
 	};
-
+	
 	private DataListener listener = new DataListener() {
 		@Override
 		public void onDataCompleted(IJsonObject completeProbeUri,
@@ -249,13 +229,21 @@ public class SocialProximitySensor extends ProbeBase{
 			 * "android.bluetooth.device.extra.RSSI"
 			 * :-35,"timestamp":1339360144.799}
 			 */
-//			Log.i(TAG, "received Bluetooth sensor info");
+			Log.i(TAG, "received Bluetooth sensor info");
+			Log.i(TAG, "data: " + data);
 //			Log.i(TAG, "TIMESTAMP: " + data.get(BluetoothKeys.TIMESTAMP));
 //			Log.i(TAG, "RSSI: " + data.get(BluetoothKeys.RSSI));
 //			Log.i(TAG, "NAME: " + data.get(BluetoothKeys.NAME));
 //			Log.i(TAG, "CLASS: " + data.get(BluetoothKeys.CLASS));
 //			Log.i(TAG, "MAC_ADDRESS: " + data.get(BluetoothKeys.DEVICE));
+			
+		   
+			if(enabledSaveToDB){
 
+				saveToDB(completeProbeUri, data);
+			}
+
+		  
 			Message msg = myHandler.obtainMessage();
 
 			msg.obj = data;	
@@ -265,6 +253,8 @@ public class SocialProximitySensor extends ProbeBase{
 		}
 
 	};
+	
+	
 
 	private JsonElement getDataRequest(int interval, int duration) {
 		// This will set the schedule to FunfManger for this probe
@@ -355,73 +345,75 @@ public class SocialProximitySensor extends ProbeBase{
 	 * some people dont' know their activity name. Who knows how to use adb cat?
 	 */
 	
-	@SimpleFunction(description = "Get app's main activity name")
-	public String GetAppName(){
-		String appName = mainUIThreadActivity.getClass().getName();
-		return appName;
-	}
-	
-	
-	/**
-	 * Returns the latest reading of the mac address about another device in
-	 * proximity
-	 */
-	@SimpleProperty
-	public String DeviceMacAddress() {
-		Log.i(TAG, "returning macAddress: " + macAddress);
-		return macAddress;
-	}
-
-	/**
-	 * Returns the latest reading of the name about another device in proximity
-	 */
-	@SimpleProperty
-	public String DeviceName() {
-		Log.i(TAG, "returning device name: " + deviceName);
-		return deviceName;
-	}
-
-	/**
-	 * Returns the latest reading of the rssi about another device in proximity
-	 */
-	@SimpleProperty(description = "Bluetooth Received Signal Strength Indication (RSSI) could indicate how close is the device")
-	public int DeviceRSSI() {
-		Log.i(TAG, "returning RSSI: " + rssi);
-		return rssi;
-	}
-
-	/**
-	 * Returns the latest reading of the mClass about another device in
-	 * proximity
-	 */
-	@SimpleProperty(description = "Bluetooth Class is useful as a hint to roughly describe a device. http://developer.android.com/reference/android/bluetooth/BluetoothClass.html")
-	public int DeviceClass() {
-		Log.i(TAG, "returning mClass: " + mClass);
-		return mClass;
-	}
-	
-	/**
-	 * Returns the timestamp of the latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	@SimpleFunction(description = "Get app's main activity name")
+//	public String GetAppName(){
+//		String appName = mainUIThreadActivity.getClass().getName();
+//		return appName;
+//	}
+//
+//
+//	/**
+//	 * Returns the latest reading of the mac address about another device in
+//	 * proximity
+//	 */
+//	@SimpleProperty
+//	public String DeviceMacAddress() {
+//		Log.i(TAG, "returning macAddress: " + macAddress);
+//		return macAddress;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the name about another device in proximity
+//	 */
+//	@SimpleProperty
+//	public String DeviceName() {
+//		Log.i(TAG, "returning device name: " + deviceName);
+//		return deviceName;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the rssi about another device in proximity
+//	 */
+//	@SimpleProperty(description = "Bluetooth Received Signal Strength Indication (RSSI) could indicate how close is the device")
+//	public int DeviceRSSI() {
+//		Log.i(TAG, "returning RSSI: " + rssi);
+//		return rssi;
+//	}
+//
+//	/**
+//	 * Returns the latest reading of the mClass about another device in
+//	 * proximity
+//	 */
+//	@SimpleProperty(description = "Bluetooth Class is useful as a hint to roughly describe a device. http://developer.android.com/reference/android/bluetooth/BluetoothClass.html")
+//	public int DeviceClass() {
+//		Log.i(TAG, "returning mClass: " + mClass);
+//		return mClass;
+//	}
+//
+//	/**
+//	 * Returns the timestamp of the latest reading
+//	 */
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 
 	/**
 	 * Indicates that the proximity sensor info has been received.
 	 */
 	@SimpleEvent
-	public void SocialProximityInfoReceived() {
+	public void SocialProximityInfoReceived(final float timestamp, final String deviceName, final String macAddress,
+                                          final int rssi, final int mClass) {
+
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "SocialProximityInfoReceived() is called");
 					EventDispatcher.dispatchEvent(SocialProximitySensor.this,
-							"SocialProximityInfoReceived");
+							"SocialProximityInfoReceived", timestamp, deviceName, macAddress, rssi, mClass);
 				}
 			});
 

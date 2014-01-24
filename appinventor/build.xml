@@ -18,6 +18,19 @@
     <ant inheritAll="false" useNativeBasedir="true" dir="common"/>
     <ant inheritAll="false" useNativeBasedir="true" dir="buildserver"/>
     <ant inheritAll="false" useNativeBasedir="true" dir="components"/>
+    <ant inheritAll="false" useNativeBasedir="true" dir="buildserver" target="PlayApp"/>
+  </target>
+
+  <target name="noplay">
+    <ant inheritAll="false" useNativeBasedir="true" dir="appengine"/>
+    <ant inheritAll="false" useNativeBasedir="true" dir="blocklyeditor"/>
+    <ant inheritAll="false" useNativeBasedir="true" dir="common"/>
+    <ant inheritAll="false" useNativeBasedir="true" dir="buildserver"/>
+    <ant inheritAll="false" useNativeBasedir="true" dir="components"/>
+  </target>
+
+  <target name="installplay">
+    <ant inheritAll="false" useNativeBasedir="true" dir="buildserver" target="installplay"/>
   </target>
 
   <target name="RunLocalBuildServer">
@@ -34,6 +47,11 @@
 
   <target name="Blockly">
     <ant inheritAll="false" useNativeBasedir="true" dir="appengine" target="CopyBlocklyToBuildWar"/>
+  </target>
+
+  <!-- Convenient target for just running the blockly related tests -->
+  <target name="BlocklyTest">
+    <ant inheritAll="false" useNativeBasedir="true" dir="blocklyeditor" target="tests"/>
   </target>
 
   <target name="tests">
@@ -83,8 +101,7 @@
         <pathelement location="lib/keyczar/keyczar-0.66-080111-java-1.6.jar" />
         <pathelement location="lib/objectify-3.0/objectify-3.0.jar" />
         <pathelement location="lib/tablelayout/TableLayout-jdk1.5-2007-04-21.jar" />
-        <pathelement location="lib/twitter/twitter4j-core-3.0.3.jar" />
-         <pathelement location="lib/jena/jena-core-2.10.0.jar" />
+        <pathelement location="lib/jena/jena-core-2.10.0.jar" />
         <pathelement location="lib/jena/jena-arq-2.10.0.jar" />
         <pathelement location="lib/jena/jena-iri-0.9.5.jar" />
         <pathelement location="lib/jena/jena-larq-1.0.1-SNAPSHOT.jar" />
@@ -94,9 +111,10 @@
         <pathelement location="lib/jena/xercesLite.jar" />
         <pathelement location="lib/jena/slf4j-android-1.6.1-RC1.jar" />
         <pathelement location="lib/jena/httpclient-4.2.3.jar" />
-        <pathelement location="lib/jena/httpcore-4.2.2.jar" />
-        <pathelement location="lib/twitter/twitter4j-media-support-3.0.3.jar" />
- 
+        <pathelement location="lib/jena/httpcore-4.2.2.jar" /> 
+        <pathelement location="lib/twitter/twitter4j-core-3.0.5.jar" />
+        <pathelement location="lib/twitter/twitter4j-media-support-3.0.5.jar" />
+
         <pathelement location="lib/QRGenerator/core.jar" />
         <pathelement location="lib/QRGenerator/javase.jar" />
         <fileset dir="buildserver/lib" includes="**/*.jar"/>

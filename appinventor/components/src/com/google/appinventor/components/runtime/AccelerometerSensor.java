@@ -15,6 +15,7 @@ import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -45,22 +46,22 @@ import java.util.Queue;
  */
 // TODO(user): ideas - event for knocking
 @DesignerComponent(version = YaVersion.ACCELEROMETERSENSOR_COMPONENT_VERSION,
-    description = "<p>Non-visible component that can detect shaking and " +
+    description = "Non-visible component that can detect shaking and " +
     "measure acceleration approximately in three dimensions using SI units " +
-    "(m/s<sup>2</sup>).  The components are: <ul>" +
+    "(m/s<sup>2</sup>).  The components are: <ul>\n" +
     "<li> <strong>xAccel</strong>: 0 when the phone is at rest on a flat " +
     "     surface, positive when the phone is tilted to the right (i.e., " +
     "     its left side is raised), and negative when the phone is tilted " +
-    "     to the left (i.e., its right size is raised).</li> " +
+    "     to the left (i.e., its right size is raised).</li>\n " +
     "<li> <strong>yAccel</strong>: 0 when the phone is at rest on a flat " +
     "     surface, positive when its bottom is raised, and negative when " +
-    "     its top is raised. </li> " +
+    "     its top is raised. </li>\n " +
     "<li> <strong>zAccel</strong>: Equal to -9.8 (earth's gravity in meters per " +
     "     second per second when the device is at rest parallel to the ground " +
     "     with the display facing up, " +
     "     0 when perpindicular to the ground, and +9.8 when facing down.  " +
     "     The value can also be affected by accelerating it with or against " +
-    "     gravity. </li></ul></p> ",
+    "     gravity. </li></ul>",
     category = ComponentCategory.SENSORS,
     nonVisible = true,
     iconName = "images/accelerometersensor.png")
@@ -68,8 +69,10 @@ import java.util.Queue;
 public class AccelerometerSensor extends AndroidNonvisibleComponent
     implements OnStopListener, OnResumeListener, SensorComponent, SensorEventListener, Deleteable {
 
-  // Shake threshold - derived by trial
-  private static final double SHAKE_THRESHOLD = 8.0;
+  // Shake thresholds - derived by trial
+  private static final double weakShakeThreshold = 5.0;
+  private static final double moderateShakeThreshold = 13.0;
+  private static final double strongShakeThreshold = 20.0;
 
   // Cache for shake detection
   private static final int SENSOR_CACHE_SIZE = 10;
@@ -84,15 +87,17 @@ public class AccelerometerSensor extends AndroidNonvisibleComponent
 
   private int accuracy;
 
+  private int sensitivity;
+
   // Sensor manager
   private final SensorManager sensorManager;
 
   // Indicates whether the accelerometer should generate events
   private boolean enabled;
-  
+
   //Specifies the minimum time interval between calls to Shaking()
   private int minimumInterval;
-  
+
   //Specifies the time when Shaking() was last called
   private long timeLastShook;
 
@@ -113,8 +118,10 @@ public class AccelerometerSensor extends AndroidNonvisibleComponent
     accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     startListening();
     MinimumInterval(400);
+    Sensitivity(Component.ACCELEROMETER_SENSITIVITY_MODERATE);
   }
-  
+
+
   /**
    * Returns the minimum interval required between calls to Shaking(),
    * in milliseconds.
@@ -128,7 +135,7 @@ public class AccelerometerSensor extends AndroidNonvisibleComponent
   public int MinimumInterval() {
     return minimumInterval;
   }
-  
+
   /**
    * Specifies the minimum interval required between calls to Shaking(),
    * in milliseconds.
@@ -144,6 +151,44 @@ public class AccelerometerSensor extends AndroidNonvisibleComponent
   }
 
   /**
+   * Returns a number that encodes how sensitive the AccelerometerSensor is.
+   * The choices are: 1 = weak, 2 = moderate, 3 = strong.
+   *
+   * @return  one of {@link Component#ACCELEROMETER_SENSITIVITY_WEAK},
+   *          {@link Component#ACCELEROMETER_SENSITIVITY_MODERATE} or
+   *          {@link Component#ACCELEROMETER_SENSITIVITY_STRONG}
+   */
+  @SimpleProperty(
+      category = PropertyCategory.APPEARANCE,
+      description = "A number that encodes how sensitive the accelerometer is. " +
+              "The choices are: 1 = weak, 2 = moderate, " +
+              " 3 = strong.")
+  public int Sensitivity() {
+    return sensitivity;
+  }
+
+  /**
+   * Specifies the sensitivity of the accelerometer
+   * and checks that the argument is a legal value.
+   *
+   * @param sensitivity one of {@link Component#ACCELEROMETER_SENSITIVITY_WEAK},
+   *          {@link Component#ACCELEROMETER_SENSITIVITY_MODERATE} or
+   *          {@link Component#ACCELEROMETER_SENSITIVITY_STRONG}
+   *
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ACCELEROMETER_SENSITIVITY,
+      defaultValue = Component.ACCELEROMETER_SENSITIVITY_MODERATE + "")
+  @SimpleProperty
+  public void Sensitivity(int sensitivity) {
+    if ((sensitivity == 1) || (sensitivity == 2) || (sensitivity == 3)) {
+      this.sensitivity = sensitivity;
+    } else {
+      form.dispatchErrorOccurredEvent(this, "Sensitivity",
+          ErrorMessages.ERROR_BAD_VALUE_FOR_ACCELEROMETER_SENSITIVITY, sensitivity);
+    }
+  }
+
+  /**
    * Indicates the acceleration changed in the X, Y, and/or Z dimensions.
    */
   @SimpleEvent
@@ -155,7 +200,7 @@ public class AccelerometerSensor extends AndroidNonvisibleComponent
     addToSensorCache(X_CACHE, xAccel);
     addToSensorCache(Y_CACHE, yAccel);
     addToSensorCache(Z_CACHE, zAccel);
-    
+
     long currentTime = System.currentTimeMillis();
 
     //Checks whether the phone is shaking and the minimum interval
@@ -295,7 +340,15 @@ public class AccelerometerSensor extends AndroidNonvisibleComponent
 
     average /= cache.size();
 
-    return Math.abs(average - currentValue) > SHAKE_THRESHOLD;
+    if (Sensitivity() == 1) { //sensitivity is weak
+      return Math.abs(average - currentValue) > strongShakeThreshold;
+    } else if (Sensitivity() == 2) { //sensitivity is moderate
+      return ((Math.abs(average - currentValue) > moderateShakeThreshold)
+        && (Math.abs(average - currentValue) < strongShakeThreshold));
+    } else { //sensitivity is strong
+      return ((Math.abs(average - currentValue) > weakShakeThreshold)
+        && (Math.abs(average - currentValue) < moderateShakeThreshold));
+    }
   }
 
   // SensorListener implementation

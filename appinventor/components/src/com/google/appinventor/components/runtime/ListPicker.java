@@ -23,9 +23,10 @@ import android.content.Intent;
  * A button allowing a user to select one among a list of text strings.
  *
  * @author sharon@google.com (Sharon Perl)
+ * @author M. Hossein Amerkashi (kkashi01@gmail.com)
  */
 @DesignerComponent(version = YaVersion.LISTPICKER_COMPONENT_VERSION,
-    category = ComponentCategory.BASIC,
+    category = ComponentCategory.USERINTERFACE,
     description = "<p>A button that, when clicked on, displays a list of " +
     "texts for the user to choose among. The texts can be specified through " +
     "the Designer or Blocks Editor by setting the " +
@@ -33,7 +34,8 @@ import android.content.Intent;
     "concatenation (for example, <em>choice 1, choice 2, choice 3</em>) or " +
     "by setting the <code>Elements</code> property to a List in the Blocks " +
     "editor.</p>" +
-    "<p>Other properties affect the appearance of the button " +
+    "<p>Setting property ShowFilterBar to true, will make the list searchable.  " +
+    "Other properties affect the appearance of the button " +
     "(<code>TextAlignment</code>, <code>BackgroundColor</code>, etc.) and " +
     "whether it can be clicked on (<code>Enabled</code>).</p>")
 @SimpleObject
@@ -44,10 +46,16 @@ public class ListPicker extends Picker implements ActivityResultListener, Delete
   static final String LIST_ACTIVITY_RESULT_NAME = LIST_ACTIVITY_CLASS + ".selection";
   static final String LIST_ACTIVITY_RESULT_INDEX = LIST_ACTIVITY_CLASS + ".index";
   static final String LIST_ACTIVITY_ANIM_TYPE = LIST_ACTIVITY_CLASS + ".anim";
+  static final String LIST_ACTIVITY_SHOW_SEARCH_BAR = LIST_ACTIVITY_CLASS + ".search";
+  static final String LIST_ACTIVITY_TITLE = LIST_ACTIVITY_CLASS + ".title";
 
   private YailList items;
   private String selection;
   private int selectionIndex;
+  private boolean showFilter =false;
+  private static final boolean DEFAULT_ENABLED = false;
+  private String title = "";    // The Title to display the List Picker with
+                                // if left blank, the App Name is used instead
 
   /**
    * Create a new ListPicker component.
@@ -96,6 +104,19 @@ public class ListPicker extends Picker implements ActivityResultListener, Delete
     selectionIndex = 0;
   }
 
+  @DesignerProperty(
+    editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+    defaultValue = DEFAULT_ENABLED ? "True" : "False")  @SimpleProperty
+  public void ShowFilterBar(boolean showFilter) {
+    this.showFilter = showFilter;
+  }
+
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+    description = "Returns current state of ShowFilterBar indicating if " +
+    "Search Filter Bar will be displayed on ListPicker or not")
+  public boolean ShowFilterBar() {
+    return showFilter;
+  }
   /**
    * Selection index property getter method.
    */
@@ -174,11 +195,38 @@ public class ListPicker extends Picker implements ActivityResultListener, Delete
     }
   }
 
+  /**
+   * Title property getter method.
+   *
+   * @return  list picker caption
+   */
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
+  public String Title() {
+    return title;
+  }
+
+  /**
+   * Title property setter method: sets a new caption for the list picker in the
+   * list picker activity's title bar.
+   *
+   * @param title  new list picker caption
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
+      defaultValue = "")
+  @SimpleProperty
+  public void Title(String title) {
+    this.title = title;
+  }
+
   @Override
   public Intent getIntent() {
     Intent intent = new Intent();
     intent.setClassName(container.$context(), LIST_ACTIVITY_CLASS);
     intent.putExtra(LIST_ACTIVITY_ARG_NAME, items.toStringArray());
+    intent.putExtra(LIST_ACTIVITY_SHOW_SEARCH_BAR, String.valueOf(showFilter)); //convert to string
+    if (!title.equals("")) {
+      intent.putExtra(LIST_ACTIVITY_TITLE, title);
+    }
     // Get the current Form's opening transition anim type,
     // and pass it to the list picker activity. For consistency,
     // the closing animation will be the same (but in reverse)

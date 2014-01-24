@@ -162,32 +162,13 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     private void checkAndSetPreference() {
         Log.i(TAG, "Checking the preference now, either in or out");
         //check for if there is an exisiting preference for the GCM; if there is, enables the listeners.
-        String option = sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "");
-        
-        Log.i(TAG, "The option is "+option);
-        if(option.equals("in")) {
+        if(sharedPreferences.getString(GCMConstants.PREFS_GCM_MESSAGE, "").equals("in")) {
             Log.i(TAG,"Enabled the listeners after failure.");
             Enabled(true);
         }
     }
     
-    //recovered whatever are in the receiver event after the app died and GCM came in.
-    private void recoverActions() {
-        Log.i(TAG, "Inside the recover actions.");
-        if (!gcmMessage.equals("")){
-            //The initial message is not empty, fire the corresponding the action.
-            //This happened when the app died, received the notification, tap the app, 
-            //and lose the previous the set actions in the info received.
-            if (gcmMessage.equals(REG_SUCCESSED_MSG)) {
-                Log.i(TAG, "The initial message is not empty, fire the RegInfoReceived() event");
-                RegInfoReceived() ;
-            } else {
-                Log.i(TAG, "The initial message is not empty, fire the GCMInfoReceived() event");
-                GCMInfoReceived();
-            }
-        }
-    }
-    
+
     private String retrieveRegId() {
         String reg_id = sharedPreferences.getString(REG_ID_TAG, "");
         if (reg_id.length() == 0 ) {
@@ -256,9 +237,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             Log.i(TAG, "Before registerGCMEvent - regListener");
             registerGCMEvent(context, regListener, REG_GCM_TYPE);
             Log.i(TAG, "Before registerGCMEvent - msgListener");
-            registerGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
-            Log.i(TAG, "Before registerGCMEvent - sysListener");
-            registerGCMEvent(context, sysListener, SYS_GCM_TYPE);            
+            registerGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);          
         } else {
             unRegisterGCMEvent(context, regListener, REG_GCM_TYPE);
             unRegisterGCMEvent(context, msgListener, MESSAGE_GCM_TYPE);
@@ -478,32 +457,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             }
             message.obj = msg;
             regHandler.sendMessage(message);
-        }
-    };
-    
-    final Handler sysHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            String sysMsg = msg.obj.toString();
-            Log.i(TAG,"The system message is "+sysMsg);
-            if(sysMsg.equals(GCMConstants.GCM_LISTERNERS_READY_MSG)) {
-                Log.i(TAG, "We need to recover the actions upon receiving the message.");
-                recoverActions();  
-            }  
-        }
-    };
-    
-    GCMEventListener sysListener = new GCMEventListener() {
-        @Override
-        public void onMessageReceived(String msg) {
-            // through the event handler
-            Log.i(TAG, "Received one message from the sys listener");
-            Message message = sysHandler.obtainMessage();
-            if (msg == null) {
-                msg = "This is a dummy message.";
-            }
-            message.obj = msg;
-            sysHandler.sendMessage(message);
         }
     };
     

@@ -46,7 +46,7 @@ import edu.mit.media.funf.time.TimeUnit;
 		description = "Return information of recent calls. A wrapper around Android.Calllog.Calls " +
 				"(see http://developer.android.com/reference/android/provider/CallLog.Calls.html). " +
 				"Could specifiy \"afterDate\" parameter to only read calllog information after that date. " +
-				"Some of the returning fields (name, number, numberType, numberLabel) are hashed " +
+				"Some of the returning fields (name, number, numberType, numberLabel) can be returned as hashed " +
 				"for privacy reasons" , 
 		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/calllogProbe.png")
 @SimpleObject
@@ -126,35 +126,48 @@ public class CallLogHistory extends ProbeBase{
 	final Handler myHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-
+			//When sensitive is set to true. Funf will generate all hashed values for all the fields, 
+			// including those that are empty (e.g. numberLabel); 
+			// But if we set to true, then we have to take care of those empty values ourselves.
 			IJsonObject data = (IJsonObject) msg.obj;
 			Log.i(TAG, "Update component's varibles.....");
 			
-			
-			String hashedName = data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
-			String hashedNumber = data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
-			String hashedNnumberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
-			String haseddNumberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
-			
-			JsonObject nameJson = jsonParser.parse(hashedName).getAsJsonObject();
-			JsonObject numberJson = jsonParser.parse(hashedNumber).getAsJsonObject();
-			JsonObject numberTypeJson = jsonParser.parse(hashedNnumberType).getAsJsonObject();
-			JsonObject numberLabelJson = jsonParser.parse(haseddNumberLabel).getAsJsonObject();
-			
-			
-			name = nameJson.get("ONE_WAY_HASH").getAsString();
-			number = numberJson.get("ONE_WAY_HASH").getAsString();
-			numberType = numberTypeJson.get("ONE_WAY_HASH").getAsString();
-			numberLabel = numberLabelJson.get("ONE_WAY_HASH").getAsString();
-			
+			if(privacySafe){
+		     String hashedName = data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
+		     String hashedNumber = data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
+		     String hashedNnumberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
+		     String haseddNumberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
+			   
+		     JsonObject nameJson = jsonParser.parse(hashedName).getAsJsonObject();
+		     JsonObject numberJson = jsonParser.parse(hashedNumber).getAsJsonObject();
+		     JsonObject numberTypeJson = jsonParser.parse(hashedNnumberType).getAsJsonObject();
+		     JsonObject numberLabelJson = jsonParser.parse(haseddNumberLabel).getAsJsonObject();
+		     
+		     name = nameJson.get("ONE_WAY_HASH").getAsString();
+		     number = numberJson.get("ONE_WAY_HASH").getAsString();
+		     numberType = numberTypeJson.get("ONE_WAY_HASH").getAsString();
+		     numberLabel = numberLabelJson.get("ONE_WAY_HASH").getAsString();
+
+			}else{
+			  //clear text will be returned
+			  name= data.get(ProbeKeys.CallLogKeys.NAME) == null ? "" :
+				  data.get(ProbeKeys.CallLogKeys.NAME).getAsString();
+			  number = data.get(ProbeKeys.CallLogKeys.NUMBER) == null ? "" :
+				  data.get(ProbeKeys.CallLogKeys.NUMBER).getAsString();
+			  numberType = data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE) == null ? "":
+				  data.get(ProbeKeys.CallLogKeys.NUMBER_TYPE).getAsString();
+			  numberLabel = data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL) == null ? "":
+				  data.get(ProbeKeys.CallLogKeys.NUMBER_LABEL).getAsString();
+
+			}
+
 			date = data.get(ProbeKeys.CallLogKeys.DATE).getAsLong();
 			duration = data.get(ProbeKeys.CallLogKeys.DURATION).getAsInt();
 			
 			// get the string representation of call type 
 			type =  getTypeName(data.get(ProbeKeys.CallLogKeys.TYPE).getAsInt());
-		
-  
-			CalllogsInfoReceived();
+
+			CalllogsInfoReceived(date, duration, name, number, numberType, type);
  
 
 		}
@@ -257,17 +270,16 @@ public class CallLogHistory extends ProbeBase{
 		JsonObject newConfig = null;
 		if (this.enabled != enabled)
 			this.enabled = enabled;
-
+		newConfig = new JsonObject();
 		if (enabled) {
 
 			if (afterDate != 0) { // recreate json config
-				newConfig = new JsonObject();
-
 				newConfig.addProperty("afterDate", this.afterDate);
-				probe = gson.fromJson(newConfig, CallLogProbe.class);
 			}
-
-			probe.registerListener(listener);
+			
+	    newConfig.addProperty("hideSensitiveData", privacySafe);
+	    probe = gson.fromJson(newConfig, CallLogProbe.class);
+		probe.registerListener(listener);
 
 			Log.i(TAG, "run-once config:" + newConfig);
 		} else {
@@ -297,13 +309,12 @@ public class CallLogHistory extends ProbeBase{
 		if (afterDate != 0)
 			((JsonObject) dataRequest).addProperty("afterDate", afterDate);
 
+		((JsonObject) dataRequest).addProperty("hideSensitiveData", privacySafe);
 		Log.i(TAG, "CallLog request: " + dataRequest.toString());
 
 		mBoundFunfManager.requestData(listener, dataRequest);
 		
-		
-		
-		
+
 		
 	}
 
@@ -311,14 +322,16 @@ public class CallLogHistory extends ProbeBase{
 	 * Indicates that the calllog info has been received.
 	 */
 	@SimpleEvent
-	public void CalllogsInfoReceived() {
+	public void CalllogsInfoReceived(final long date, final long duration, final String name,
+                                     final String number, final String numberType,
+                                     final String type) {
 		if (enabled || enabledSchedule) {
 
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "CalllogsInfoReceived() is called");
 					EventDispatcher.dispatchEvent(CallLogHistory.this,
-							"CalllogsInfoReceived");
+							"CalllogsInfoReceived", date, duration, name, number, numberType, type);
 				}
 			});
 
@@ -330,77 +343,80 @@ public class CallLogHistory extends ProbeBase{
 	/**
 	 * Returns hashedName associated with the phone number
 	 */
-	@SimpleProperty(description = "Name (hashed format) associated with the phone number")
-	public String HashedName(){
-		Log.i(TAG, "returning hashedName: " + name);
-		return name;	
-	}
+//	@SimpleProperty(description = "Name associated with the phone number. " +
+//			"Return in hashed value if HideSensitiveData is set to True")
+//	public String Name(){
+//		Log.i(TAG, "returning hashedName: " + name);
+//		return name;
+//	}
 	
 	/**
 	 * The phone number (hashed) as the user entered it
 	 */
-	@SimpleProperty(description = "The phone number (hashed format) as the user entered it.")
-	public String HashedNumber(){
-		Log.i(TAG, "returning hashedNumber: " + number);
-		return number;	
-	}
+//	@SimpleProperty(description = "The phone number as the user entered it. Return in hashed " +
+//			"value if HideSensitiveData is set to True")
+//	public String Number(){
+//		Log.i(TAG, "returning hashedNumber: " + number);
+//		return number;
+//	}
 	
 	/**
 	 * The duration of the call in seconds
 	 */
-	@SimpleProperty(description = "The duration of the call in seconds")
-	public int Duration(){
-		Log.i(TAG, "returning duration " + duration);
-		return duration;	
-	}
+//	@SimpleProperty(description = "The duration of the call in seconds")
+//	public int Duration(){
+//		Log.i(TAG, "returning duration " + duration);
+//		return duration;
+//	}
 	
 	/**
 	 * The date the call occured, in milliseconds since the epoch
 	 */
-	@SimpleProperty(description = "The date the call occured, in milliseconds since the epoch")
-	public long	Date(){
-		Log.i(TAG, "returning date " + date);
-		return date;	
-	}
+//	@SimpleProperty(description = "The date the call occured, in milliseconds since the epoch")
+//	public long	Date(){
+//		Log.i(TAG, "returning date " + date);
+//		return date;
+//	}
 	
 	/**
 	 * The cached number label, for a custom number type, 
 	 * associated with the phone number, if it exists.
 	 */
-	@SimpleProperty(description = "The number label (hashed format), for a custom number type, " +
-			"associated with the phone number, if it exists.")
-	public String NumberLabel(){
-		Log.i(TAG, "returning numberLabel: " + numberLabel);
-		return numberLabel;	
-	}
+//	@SimpleProperty(description = "The number label, for a custom number type, " +
+//			"associated with the phone number, if it exists. Return in hashed value if HideSensitiveData" +
+//			"is set to True")
+//	public String NumberLabel(){
+//		Log.i(TAG, "returning numberLabel: " + numberLabel);
+//		return numberLabel;
+//	}
 	
 	/**
 	 * The cached number type (Home, Work, etc) associated 
 	 * with the phone number, if it exists.
 	 */
-	@SimpleProperty(description = "The number type (Home, Work, etc) associated with the phone number, " +
-			"but in hashed format")
-	public String NumberType(){
-		Log.i(TAG, "returning numberLabel: " + numberType);
-		return numberType;	
-	}
+//	@SimpleProperty(description = "The number type (Home, Work, etc) associated with the phone number. " +
+//			"Return in hashed value if HideSensitiveData is set to True")
+//	public String NumberType(){
+//		Log.i(TAG, "returning numberLabel: " + numberType);
+//		return numberType;
+//	}
 	
 	/**
 	 * The type of the call (incoming = "1", outgoing = "2" or missed = "3").
 	 */
-	@SimpleProperty(description = "The type of the call " +
-			"(incoming = \"1\", outgoing = \"2\" or missed = \"3\")")
-	public String CallType(){
-		Log.i(TAG, "returning callType: " + type);
-		return type;	
-	}
+//	@SimpleProperty(description = "The type of the call " +
+//			"(incoming = \"1\", outgoing = \"2\" or missed = \"3\")")
+//	public String CallType(){
+//		Log.i(TAG, "returning callType: " + type);
+//		return type;
+//	}
 	
 	/*
 	 * Returns the default interval between each scan for this probe
 	 */
 	@SimpleProperty(description = "The default interval (in seconds) between each scan for this probe")
 	public float DefaultInterval(){
-		
+
 		return SCHEDULE_INTERVAL;
 	}
 	

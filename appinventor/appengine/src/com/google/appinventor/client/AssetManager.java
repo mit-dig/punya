@@ -13,6 +13,7 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetN
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetsFolder;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectServiceAsync;
+import com.google.appinventor.shared.util.Base64Util;
 import com.google.appinventor.client.output.OdeLog;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -78,13 +79,13 @@ public final class AssetManager implements ProjectChangeListener {
 
   private void readIn(ProjectNode node) {
     final String fileId = node.getFileId();
-    Ode.getInstance().getProjectService().loadraw(projectId, fileId,
-      new AsyncCallback<byte[]>() {
+    Ode.getInstance().getProjectService().loadraw2(projectId, fileId,
+      new AsyncCallback<String>() {
         @Override
-          public void onSuccess(byte [] data) {
+          public void onSuccess(String data) {
           AssetInfo assetInfo = new AssetInfo();
           assetInfo.fileId = fileId;
-          assetInfo.fileContent = data;
+          assetInfo.fileContent = Base64Util.decodeLines(data);
           assetInfo.loaded = false; // Set to true when it is loaded to the repl
           assets.put(fileId, assetInfo);
           if (DEBUG)
@@ -114,6 +115,19 @@ public final class AssetManager implements ProjectChangeListener {
     if (INSTANCE == null)
       return;
     INSTANCE.refreshAssets1(formName);
+  }
+
+  public static void reset(String formName) {
+    if (INSTANCE == null)
+      return;
+    INSTANCE.reset1(formName);
+  }
+
+  public void reset1(String formName) {
+    OdeLog.log("AssetManager: formName = " + formName + " received reset.");
+    for (AssetInfo a: assets.values()) {
+      a.loaded = false;
+    }
   }
 
   @Override
@@ -146,10 +160,12 @@ public final class AssetManager implements ProjectChangeListener {
   private static native void exportMethodsToJavascript() /*-{
     $wnd.AssetManager_refreshAssets =
       $entry(@com.google.appinventor.client.AssetManager::refreshAssets(Ljava/lang/String;));
+    $wnd.AssetManager_reset =
+      $entry(@com.google.appinventor.client.AssetManager::reset(Ljava/lang/String;));
   }-*/;
 
   private static native boolean doPutAsset(String formName, String filename, byte[] content) /*-{
     return $wnd.Blocklies[formName].ReplMgr.putAsset(filename, content);
-    }-*/;
+  }-*/;
 
 }

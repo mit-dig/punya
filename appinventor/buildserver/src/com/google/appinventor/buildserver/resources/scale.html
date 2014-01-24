@@ -18,9 +18,12 @@
                 {
                     var response = $('#slider').val();
                     saveSurvey.saveResponse(response.toString());
-                    saveSurvey.closeApp();
-
                 }
+            function formCancel(){
+                    var response = "N/A";
+                    saveSurvey.saveResponse(response);
+
+            }
         </script>
     </head>
     <body>
@@ -33,7 +36,7 @@
             </div>-->
             <div data-role="content">
                 <h1 id="_txt_qt">
-                    Question_content
+                    Question
                 </h1>
                 <div data-role="fieldcontain">
                     <fieldset data-role="controlgroup">
@@ -44,6 +47,7 @@
                     </fieldset>
                 </div>
                 <input id="_btn_submit" onclick="formSubmit()" value="Submit" type="submit" />
+                <input id="_btn_cancel" onclick="formCancel()" value="Withdraw" type="submit" />
             </div>
         </div>
         <script>

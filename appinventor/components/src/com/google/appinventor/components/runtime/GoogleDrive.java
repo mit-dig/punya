@@ -3,18 +3,18 @@ package com.google.appinventor.components.runtime;
 
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.ProgressDialog;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +41,9 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
+
+import com.google.api.services.drive.model.ParentReference;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -56,12 +59,11 @@ import com.google.appinventor.components.common.YaVersion;
 
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
-import com.google.appinventor.components.runtime.util.OAuth2Helper;
-import com.google.gson.JsonElement;
 
+import com.google.appinventor.components.runtime.util.YailList;
 import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.Launcher;
-import edu.mit.media.funf.Schedule;
+
 import edu.mit.media.funf.pipeline.Pipeline;
 import edu.mit.media.funf.storage.UploadService;
 
@@ -87,15 +89,13 @@ import edu.mit.media.funf.storage.UploadService;
    "google-http-client-gson-beta-14.jar, " +
    "google-play-services.jar," +
    "funf.jar")
-public class GoogleDrive extends AndroidNonvisibleComponent
-implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStopListener, OnDestroyListener{
+  public class GoogleDrive extends AndroidNonvisibleComponent
+      implements ActivityResultListener, Component, OnResumeListener, OnStopListener, OnDestroyListener{
   
   private static final String TAG = "GoogleDrive";
 
   protected boolean mIsBound = false;
-  public static final String GOOGLEDRIVE_PIPE_NAME = "googledrive";
-  private final int pipeId;
-  private static final AtomicInteger snextGoogleDriveID = new AtomicInteger(1);
+
   
   private final ComponentContainer container;
   private final Handler handler;
@@ -113,33 +113,34 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
   ////////////////
   private String gdFolder;
+  private String gdFolder_id;
   
-  //binding to GoogleDriveUploadService and FunfManager Service
-  
-  protected GoogleDriveUploadService mBoundGDService= null;
+  //binding to FunfManager Service
+
   protected FunfManager mBoundFunfManager = null;
-  protected static final String ACTION_UPLOAD_DATA = "UPLOAD_DATA";
-  
-  private static final long SCHEDULE_UPLOAD_PERIOD = 7200; //default period for uploading task 
-  // for periodic upload
-  private boolean enablePeriodicUploadFolder = false;
-  private String uploadTarget = null;
+
 
 
   private AccessToken accessTokenPair;
   
-  private long upload_period;
+
   private boolean wifiOnly = false;
   
   private static Drive service;
   private GoogleAccountCredential credential;
-  
+
+
+  private GoogleDrivePipeline mPipeline = null;
+  private final String pipelineName = GoogleDrivePipeline.pipelineName;
+
+
   /*
    * Because we run the upload service on the background periodically, we need a way to understand if there's 
    * anything wrong with the background work (e.g. network problem, quota exceed,..etc) and decide to terminate
    * the and remove the schedule task or not. Using lastupload_status to report if successful or not, 
    * if not successful, the error message will placed in the lastupload_report
    */
+  public static final String GOOGLEDRIVE_LASTUPLOAD_TARGET = "gd_lastupload_target";
   public static final String GOOGLEDRIVE_LASTUPLOAD_REPORT = "gd_lastupload_report";
   public static final String GOOGLEDRIVE_LASTUPLOAD_STATUS = "gd_lastupload_status";   
   public static final String GOOGLEDRIVE_LASTUPLOAD_TIME = "gd_lastupload_time";
@@ -148,12 +149,13 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-      // TODO Auto-generated method stub
       if(key.equals(GOOGLEDRIVE_LASTUPLOAD_STATUS)){
         boolean status = sharedPreferences.getBoolean(GOOGLEDRIVE_LASTUPLOAD_STATUS, true);
-        String log = sharedPreferences.getString(GOOGLEDRIVE_LASTUPLOAD_REPORT, "");
+        String report = sharedPreferences.getString(GOOGLEDRIVE_LASTUPLOAD_REPORT, "");
+        String uploadTarget = sharedPreferences.getString(GOOGLEDRIVE_LASTUPLOAD_TARGET, "");
+        String time = sharedPreferences.getString(GOOGLEDRIVE_LASTUPLOAD_TIME, "");
 
-        ServiceStatusChanged(status, log);
+        ServiceStatusChanged(uploadTarget, status, report, time);
       }
       
     }
@@ -166,8 +168,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
       mBoundFunfManager = ((FunfManager.LocalBinder) service)
           .getManager();
-      
-      registerSelfToFunfManager(); 
+
+      //after the component is bound to funfManager, we can get or create the GoogleDrivePipeline
+      mPipeline = (GoogleDrivePipeline)getOrCreatePipeline();
+
       mIsBound = true;
       Log.i(TAG, "Bound to FunfManager");
 
@@ -180,6 +184,37 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
     }
   };
+
+
+  /*
+ * create a pipleline by giving a json configuration to FunfManger,
+ * and get back the handle
+ */
+  private Pipeline getOrCreatePipeline() {
+    // try to get the pipeline, if not create a pipeline configuration here
+    //<string name="mainPipelineConfig">{"@type":"edu.mit.dig.funftest.MainPipeline"}</string>
+    // try
+
+    Log.i(TAG, "Try to get pipeline from FunfMananger:" + mBoundFunfManager.toString());
+    Pipeline pipeline = mBoundFunfManager.getRegisteredPipeline(pipelineName);
+
+
+    if(pipeline == null){
+      Log.i(TAG, "We don't have the pipeline name:" + pipelineName + " ,try to create a new one");
+      String pipeConfigStr = "{\"@type\":\"com.google.appinventor.components.runtime.GoogleDrivePipeline\"}";
+
+      // add to funfManager by calling this new function, it will create Pipeline and register to FunfManger
+      // note that if you createPipeline, it will automatically be registered with the manager
+      mBoundFunfManager.createPipeline(pipelineName, pipeConfigStr);
+      Log.i(TAG, "just created pipeline with name:" + pipelineName);
+      return mBoundFunfManager.getRegisteredPipeline(pipelineName);
+
+    }
+
+    return pipeline;
+
+  }
+
   
   /*
    * GoogleDrive component, similar to the dropbox component, will be bound to two services 
@@ -188,30 +223,26 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
    */
   
   public GoogleDrive(ComponentContainer container) {
-    // TODO Auto-generated constructor stub
+
     super(container.$form());
     this.container = container;
     handler = new Handler();
     sharedPreferences = container.$context().getSharedPreferences(PREFS_GOOGLEDRIVE, Context.MODE_PRIVATE);
+    // subscribe to preference changes, we use this to communicate for background service status changes
+    // user can use serviceStatusChanged() event to obtain status of
+    sharedPreferences.registerOnSharedPreferenceChangeListener(bgServiceStatuslistener);
     accessTokenPair = retrieveAccessToken();
     mainUIThreadActivity = container.$context();
     Log.i(TAG, "Package name:" + mainUIThreadActivity.getApplicationContext().getPackageName());
-//    // start a FunfManager Service
-//    Intent i = new Intent(mainUIThreadActivity, FunfManager.class);
-//    mainUIThreadActivity.startService(i);
 
-    // bind to FunfManger (in case the user wants to set up the
-    // schedule)
     if (!Launcher.isLaunched()) {
       Log.i(TAG, "firstTime launching funManger");
       Launcher.launch(mainUIThreadActivity);
     }
 
-    pipeId = generatePipelineId(); // generate pipelineID for each new Google Drive instance.
-    // it's possible that the user has two GoogleDrive instance in two different screen
 
     doBindService();
-    this.upload_period = GoogleDrive.SCHEDULE_UPLOAD_PERIOD;
+
     REQUEST_CHOOSE_ACCOUNT = form.registerForActivityResult(this);
     REQUEST_AUTHORIZE = form.registerForActivityResult(this);
 
@@ -228,39 +259,25 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
     mainUIThreadActivity.bindService(new Intent(mainUIThreadActivity,
         FunfManager.class), mConnection, Context.BIND_AUTO_CREATE);
-    Log.i(TAG,
-        "FunfManager is bound, and now we could have register dataRequests");
+
 
 
   }
   
   void doUnbindService() {
     if (mIsBound) {
-      // first unregister Pipeline action
-      unregisterPipelineActions();
-      // unregister self
-      mBoundFunfManager.unregisterPipeline(GOOGLEDRIVE_PIPE_NAME + pipeId);
+
       // Detach our existing connection.
       mainUIThreadActivity.unbindService(mConnection);
+      mIsBound = false;
     }
   }
+
+
   
   
-  public void unregisterPipelineActions() {
-    // TODO Auto-generated method stub
-     mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);   
-    
-  }
-
-  private static int generatePipelineId(){
-    return snextGoogleDriveID.incrementAndGet();
-
-  }
-
-
   @Override
   public void onResume() {
-    // TODO Auto-generated method stub
     Log.i(TAG, "I got resumed, mIsBound:" + mIsBound);
     
   }
@@ -271,41 +288,17 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
   }
 
-  @Override
-  public void onCreate(FunfManager manager) {
-    // FunfManager manager
-    // This function will run once whenever FunfManager.registerPipeline() is called
-    //do nothing for now
-    
-    
-  }
+
 
   @Override
   public void onDestroy() {
-    // TODO Auto-generated method stub
 
-    if (mIsBound) {
+    if (mIsBound && mConnection != null) {
       doUnbindService();
     }
 
   }
 
-  @Override
-  public void onRun(String action, JsonElement config) {
-    // TODO Auto-generated method stub
-    if (ACTION_UPLOAD_DATA.equals(action)) {
-      // Do something else
-      if (uploadTarget != null){
-        uploadService(uploadTarget);
-      }
-      SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd HH:mm:ss");
-      Date date = new Date();
-      String currentDatetime = dateFormat.format(date);
-      Log.i(TAG, "Run pipe's action UPLOAD_DATA at:" + System.currentTimeMillis() + "," + currentDatetime);
-
-    }   
-  	
-  }
 
   @Override
   public void resultReturned(int requestCode, int resultCode, Intent data) {
@@ -338,13 +331,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
       }
 
      
-    }/// testing code///
-//    if(requestCode == REQUEST_CAPTURE){
-//      if (resultCode == Activity.RESULT_OK){
-//        saveFileToDrive();
-//
-//      }
-//    }
+    }
   }
   
 /*
@@ -405,16 +392,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
     Log.i(TAG, "call isAuthorized");
     EventDispatcher.dispatchEvent(this, "IsAuthorized");
   }
-  
-  /*
-   * After we bind to FunfManger, we have to register self to Funf as a Pipeline. 
-   * This is for later to be wakened up and do previously registered actions 
-   */
-  private void registerSelfToFunfManager(){
-    Log.i(TAG, "register this class as a Pipeline to FunfManger: "+ GOOGLEDRIVE_PIPE_NAME + pipeId);
-    mBoundFunfManager.registerPipeline(GOOGLEDRIVE_PIPE_NAME + pipeId, this);
-    
-  }
+
 
   /**
    * Indicates whether the user has specified that the component could only 
@@ -429,6 +407,10 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
     if (this.wifiOnly != wifiOnly)
       this.wifiOnly = wifiOnly;
 
+    if(mPipeline!=null){
+
+      mPipeline.setWifiOnly(this.wifiOnly);
+    }
   }
   
   /**
@@ -439,6 +421,49 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
   		" use either Wifi or 3G/4G dataservice, whichever is available")
   public boolean WifiOnly() {
     return wifiOnly;
+  }
+    
+  /**
+   * Copy the public master app scripts
+   */
+  @SimpleFunction(description = "Copy the master app scripts to your Google Drive root. It" +
+  		"will return true if successful, otherwise false.")
+  public void CopyFile(String googleDocId) {
+	final String id = googleDocId;
+    AsynchUtil.runAsynchronously(new Runnable() {
+      public void run() {
+	    File copiedFile = new File();
+	    copiedFile.setMimeType("application/vnd.google-apps.folder");
+	    copiedFile.setParents(
+	            Arrays.asList(new ParentReference().setId(gdFolder_id)));
+	    try {
+	      service.files().copy(id, copiedFile).execute();
+	    } catch (IOException e) {
+	      System.out.println("An error occurred: " + e);
+	    }
+      }
+    });
+  }
+  
+  /**
+   * Copy the public master app scripts
+   */
+  @SimpleFunction(description = "Create a folder witht the given name.")
+  public void CreateFolder(String folderName) {
+	final String FolderName = folderName;
+    AsynchUtil.runAsynchronously(new Runnable() {
+      public void run() {
+	    File body = new File();
+	    body.setTitle(FolderName);
+	    body.setMimeType("application/vnd.google-apps.folder");
+	    try {
+	    	File folder = service.files().insert(body).execute();
+	    	gdFolder_id = folder.getId();
+	    } catch (IOException e) {
+	      System.out.println("An error occurred: " + e);
+	    }
+      }
+    });
   }
   
   /**
@@ -472,8 +497,12 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
       description = "Checks whether we already have access token already, " +
       		"if so, return True")
   public boolean CheckAuthorized() {
-    String accountName =  accessTokenPair.accountName;
-    String token =  accessTokenPair.accessToken;
+
+    String accountName = sharedPreferences.getString(PREF_ACCOUNT_NAME, "");
+    String token = sharedPreferences.getString(PREF_AUTH_TOKEN, "");
+    
+    Log.i(TAG, "check_account:" + accountName);
+    Log.i(TAG, "check_toekn:" + token);
     if (accountName.isEmpty() || token.isEmpty()) {
       return false;
     }
@@ -488,20 +517,19 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
   @SimpleFunction(
       description = "Removes Google Drive authorization from this running app instance")
   public void DeAuthorize() {
-    accessTokenPair = null;
-    saveAccessToken(accessTokenPair);
+	final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    sharedPrefsEditor.remove(PREF_ACCOUNT_NAME);
+    sharedPrefsEditor.remove(PREF_AUTH_TOKEN);
+    sharedPrefsEditor.commit();
   } 
   
   private void saveAccessToken(AccessToken accessToken) {
     final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
-    if (accessToken == null) {
-      sharedPrefsEditor.remove(PREF_ACCOUNT_NAME);
-      sharedPrefsEditor.remove(PREF_AUTH_TOKEN);
-    } else {
-      sharedPrefsEditor.putString(PREF_ACCOUNT_NAME, accessToken.accountName);
-      sharedPrefsEditor.putString(PREF_AUTH_TOKEN, accessToken.accessToken);
-      Log.i(TAG, "Save Google Access Token and Account" + accessToken.accountName + ", " + accessToken.accessToken);
-    }
+
+    sharedPrefsEditor.putString(PREF_ACCOUNT_NAME, accessToken.accountName);
+    sharedPrefsEditor.putString(PREF_AUTH_TOKEN, accessToken.accessToken);
+    Log.i(TAG, "Save Google Access Token and Account" + accessToken.accountName + ", " + accessToken.accessToken);
+
     sharedPrefsEditor.commit();
     this.accessTokenPair = accessToken; //update reference to local accessTokenPair
   }
@@ -517,8 +545,8 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
     }
 }
   private AccessToken retrieveAccessToken() {
-    String accountName = sharedPreferences.getString(OAuth2Helper.PREF_ACCOUNT_NAME, "");
-    String accessToken = sharedPreferences.getString(OAuth2Helper.PREF_AUTH_TOKEN, "");
+    String accountName = sharedPreferences.getString(PREF_ACCOUNT_NAME, "");
+    String accessToken = sharedPreferences.getString(PREF_AUTH_TOKEN, "");
     if (accountName.length() == 0 || accessToken.length() == 0) {
       return new AccessToken("",""); // returning an accessToken with both params empty
     }
@@ -558,7 +586,7 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
   
   
   /*
-   * Upload a file to Google Drive, using AsyncTask
+   * Upload a file to Google Drive once, using AsyncTask
    */
   
 //  new QueryProcessorV1(activity).execute(query);
@@ -571,22 +599,14 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
   private class AsyncUploader extends AsyncTask<String, Void, Boolean>{
     private static final String TAG = "AysncUploader";
     private final Activity activity; // The main list activity
-    private final ProgressDialog dialog;
     
     AsyncUploader(Activity activity) {
       this.activity = activity;
-      dialog = new ProgressDialog(activity);
       
-    }
-    @Override
-    protected void onPreExecute() {
-      dialog.setMessage("Uploading file...");
-      dialog.show();
     }
 
     @Override
     protected Boolean doInBackground(String... params) {
-      // TODO Auto-generated method stub
       Log.i(TAG, "Starting doInBackground " + params[0]);
       String filepath = params[0];
       boolean uploadResult = false;
@@ -618,9 +638,21 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
       // if no exception happened during the Google Drive uploading event, then
       // just call
       // uploadDone event, else throw exception
-        dialog.dismiss();
+
         UploadDone(resultSuccessful);
     } 
+  }
+
+  /**
+   * Indicates when the upload task has been successful done.
+   */
+  @SimpleEvent(description =
+      "This event is raised after the program calls " +
+          "<code>UploadData</code> if the upload task was done. Use this indicator" +
+          "to tell the user that the upload task is finished")
+  public void UploadDone(boolean successful) {
+    Log.i(TAG, "uploadDone");
+    EventDispatcher.dispatchEvent(this, "UploadDone", successful);
   }
   
   // this is the helper function called within the Uploader AsyncTask
@@ -667,134 +699,159 @@ implements ActivityResultListener, Component, Pipeline, OnResumeListener, OnStop
 
   }
 
-  /**
-   * Indicates when the upload task has been successful done.
-   */
-  @SimpleEvent(description =
-               "This event is raised after the program calls " +
-               "<code>UploadData</code> if the upload task was done.")
-  public void UploadDone(boolean successful) {
-    Log.i(TAG, "uploadDone");
-    EventDispatcher.dispatchEvent(this, "UploadDone", successful);
-  }
-  
-  // this function will be used for schedule task
-  private void uploadService(String archiveName){
-    Log.i(TAG, "Start uploadService...");
-    Intent i = new Intent(mainUIThreadActivity, getUploadServiceClass());
-    i.putExtra(UploadService.ARCHIVE_ID, archiveName);
-    i.putExtra(GoogleDrive.GD_FOLDER, this.gdFolder);
-    i.putExtra(GoogleDriveUploadService.FILE_TYPE, GoogleDriveUploadService.REGULAR_FILE);
-    i.putExtra(UploadService.REMOTE_ARCHIVE_ID, GoogleDriveArchive.GOOGLEDRIVE_ID);
-    i.putExtra(UploadService.NETWORK,(this.wifiOnly) ? UploadService.NETWORK_WIFI_ONLY
-          : UploadService.NETWORK_ANY);
-    mainUIThreadActivity.startService(i);
 
-  }
-  
-  
-  
+
   /*
-   * Upload a file to Google Drive
+   * Upload a file to Google Drive once
    */
-  @SimpleFunction(description = "Uploads the file(s)" +
-      "(as specified with its filepath) to Google Drive folder. ")
-      
-  public void UploadData(String filepath) throws IOException {
+  @SimpleFunction(description = "Upload the file(s)" +
+      "as specified <code>target</code> (can be the file path of a single file or a folder. " +
+      "Specify the destination folder in Google Drive in variable <code>GoogleDriveFolder</code>")
+  public void UploadData(String target, String GoogleDriveFolder) throws IOException {
+	
+	//TODO: show error message to the user if no authorized
+	boolean isAuthorized = CheckAuthorized();
+	if(!isAuthorized){
+      form.dispatchErrorOccurredEvent(this, "UploadData",
+          ErrorMessages.ERROR_GOOGLEDRIVE_NEEDLOGIN);
+      return;
+	}
+	
+	
+    //overwrite gdFolder and save to preference
+    this.gdFolder = GoogleDriveFolder;
+    final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
+    sharedPrefsEditor.putString(GoogleDrive.GD_FOLDER , this.gdFolder);
+    sharedPrefsEditor.commit();
+    ///////////
 
     String filePath = "";
-    if(filepath.startsWith("file:")){
-      try { //convert URL string to URI and to real path : file:///sdcard --> /sdcard 
-        filePath = new java.io.File(new URL(filepath).toURI()).getAbsolutePath();
+    if(target.startsWith("file:")){
+      try { //convert URL string to URI and to real path : file:///sdcard --> /sdcard
+        filePath = new java.io.File(new URL(target).toURI()).getAbsolutePath();
       }catch (IllegalArgumentException e) {
-        throw new IOException("Unable to determine file path of file url " + filepath);
+    	Log.i(TAG, "IllegalArgument : " + e.getStackTrace());
+        throw new IOException("Unable to determine file path of file url " + target);
       } catch (URISyntaxException e) {
-        // TODO Auto-generated catch block
+    	Log.i(TAG, "RISyntaxException error : " + e.getStackTrace());
         e.printStackTrace();
       }
     }
     else {
-      filePath = filepath;
+      Log.i(TAG, "target : " + target);
+      filePath = target;
     }
-    
+
     //try using AsyncTask
-    
+
     new AsyncUploader(mainUIThreadActivity).execute(filePath);
 
   }
-  
-  
-  /*
-   * Start and set interval for a re-occurring upload activity for uploading
-   * file in a folder to Google Drive
-   */
-  @SimpleFunction(description = "Enable upload scheduled task based on specified filepath "
-      + "of a folder locally in parameter <code>folderPath</code>. " 
-      + "One use case is to upload all the save photos"
-      + "in some SD folder periodically. The parameter <code>period</code> is in second.")
-  public void ScheduleUpload(String folderPath, long period) {
 
-    // will throw an exception if try to startPeriodUpload when there's one
-    // on-going schedule Task
- 
-      this.enablePeriodicUploadFolder = true;
-      this.upload_period = period;
-      this.uploadTarget = folderPath;
+  @SimpleFunction(description = "Add a background task for uploading file(s) to Google Drive. " +
+      "The task will upload the file(s) that is specified in <code>target</code> to " +
+      "the Google drive folder specified in <code>driveFolder</code> with every <code>" +
+      "period</code> interval. Save <code>taskName</code> for later reference for removing the task")
+  public void AddScheduledTask(String taskName, String target,
+                                     String driveFolder, int period){
+	Log.i(TAG, "add task: " + taskName);
+	//TODO: show error message to the user if no authorized
+	boolean isAuthorized = CheckAuthorized();
+	if(!isAuthorized){
+      form.dispatchErrorOccurredEvent(this, "UploadData",
+          ErrorMessages.ERROR_GOOGLEDRIVE_NEEDLOGIN);
+      return;
+	}
+	
+    if (mPipeline != null) {
 
-      Schedule uploadPeriod = new Schedule.BasicSchedule(
-          BigDecimal.valueOf(this.upload_period), BigDecimal.ZERO, false, false);
+      mPipeline.addUploadTask(taskName, target, driveFolder, period);
 
-      mBoundFunfManager.registerPipelineAction(this, ACTION_UPLOAD_DATA,
-          uploadPeriod);
+      // make the service on the foreground
+      if (!Launcher.isForeground()) {
+        Log.i(TAG, "make funfManager in the foreground....");
+        Launcher.startForeground(mainUIThreadActivity);
+
+      }
+    } else {
+      Log.d(TAG,
+          "AddScheduledTask, pipeline is null, funf is killed by the system.");
+
+    }
 
   }
-  
-  
-  @SimpleProperty (description = "Indicates whether there exists any schedule upload task")
-  public boolean ScheduleUploadEnabled(){
-    return this.enablePeriodicUploadFolder;
-  }
-  
-  
-  /*
-   * Stop the current running schedule task. 
-   */
-  @SimpleFunction(description = "Stop the schedule upload task")
-  public void StopScheduleUpload(){
-    this.enablePeriodicUploadFolder = false;
 
-    mBoundFunfManager.unregisterPipelineAction(this, ACTION_UPLOAD_DATA);
-     
+
+  @SimpleFunction(description = "Remove a background task for uploading files(s).")
+  public void RemoveScheduledTask(String taskName){
+	Log.i(TAG, "Remove task:" + taskName);
+    if(mPipeline != null){
+      mPipeline.removeUploadTask(taskName);
+      // if all uploading tasks are removed.
+
+      if (!mBoundFunfManager.hasRegisteredJobs()){
+        Log.i(TAG, "make funfManager stop being foreground");
+        Launcher.stopForeground(mainUIThreadActivity);
+      }
+    } else{
+      Log.d(TAG,
+          "RemoveScheduledTask, pipeline is null, funf is killed by the system.");
+
+    }
+
   }
+
   
   /*
    * Give the component an event listener that gives the recent status and log of the background service
    */
-  @SimpleEvent(description = "This event is raised when upload service status has changed." +
-  		" If successful, <code>successful</code> will return true, else it returns false" +
+  @SimpleEvent(description = "This event is raised when background upload tasks status for a <target>" +
+      " has changed. If successful, <code>successful</code> will return true, else it returns false" +
   		" and <code>log</code> returns the error messages")
 
-  public void ServiceStatusChanged(boolean successful, String log) {
-    Log.i(TAG, "ServiceStatusChanged:" + successful + ", " + log);
-    EventDispatcher.dispatchEvent(this, "ServiceStatusChanged", successful, log);
-  }
-  
-  @SimpleFunction(description = "Get the status of the status of the most recent schedule upload task")
-  public boolean GetScheduleTaskStatus() {
-    return sharedPreferences.getBoolean(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS, true);
-    
-  }
-  
-  @SimpleFunction(description = "Get the message log of the most recent schedule upload task")
-  public String GetScheduleTaskLog(){
-    return sharedPreferences.getString(GoogleDrive.GOOGLEDRIVE_LASTUPLOAD_STATUS , "");
-    
-  }
-  
-  @SimpleFunction(description = "Get the finished datetime of the last uploading task")
-  public String GetScheduleTaskTime(){
-    return sharedPreferences.getString(GOOGLEDRIVE_LASTUPLOAD_TIME, "");
+  public void ServiceStatusChanged(String target, boolean successful, String log, String time) {
+    Log.i(TAG, "ServiceStatusChanged, target:" + target + ", " + successful + ", " + log);
+    EventDispatcher.dispatchEvent(this, "ServiceStatusChanged", target, successful, log, time);
   }
 
+
+  /*
+   * Getters for task info using taskName
+   */
+  @SimpleFunction(description = "Obtain the information for a upload task that's running in the background." +
+      "Will return a list containing the target, google drive folder, and period of the upload task. If the specified task " +
+      "does not exist then the return list will be empty")
+  public YailList GetUploadTaskInfo(String taskName){
+    List<Object> arrlist = new ArrayList<Object>();
+
+    if(mPipeline != null){
+      String targetFile = mPipeline.getUploadTarget(taskName);
+      if(targetFile.isEmpty())
+        return  YailList.makeList(arrlist);
+      String gdFolder = mPipeline.getUploadGoogleDriveFolder(taskName);
+      int period = mPipeline.getUploadPeriod(taskName);
+      arrlist.add(targetFile);
+      arrlist.add(gdFolder);
+      arrlist.add(period);
+
+    }
+    return YailList.makeList(arrlist); //if mPipeline is not ready then return an empty list
+
+  }
+ 
+  @SimpleFunction(description = "Obtain all the names for current scheduled upload tasks")
+  public YailList GetAllUploadTasks(){
+	
+	if(mPipeline != null){
+	  Log.i(TAG, "mPipeline not null");
+	  Log.i(TAG, "tasks:" + mPipeline.getActiveTasks());
+	  return YailList.makeList(mPipeline.getActiveTasks());
+	} 
+	
+	return YailList.makeList(new ArrayList<Object>());
+  }
+  
+  
+  
   
 }

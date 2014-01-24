@@ -60,6 +60,7 @@ import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.runtime.util.SensorDbUtil;
 
 //import com.google.appinventor.server.flags.Flag;
 import com.google.gson.Gson;
@@ -93,7 +94,7 @@ public abstract class ProbeBase extends AndroidNonvisibleComponent implements
 SensorComponent, OnDestroyListener{
   protected boolean enabled = false; // run once
   protected boolean enabledSchedule = false; // run periodically
-  
+  boolean privacySafe = false; // by default sensitive values clear text
   
   private final String TAG = "ProbeBase";
   /*
@@ -125,8 +126,9 @@ SensorComponent, OnDestroyListener{
   
   // save to db
   protected boolean enabledSaveToDB = false; //local for each probe
+  private String exportPath;
+  private String exportFormat;
   
-//  private boolean logToFile = true;
   
   
   private Calendar calendar = Calendar.getInstance(Locale.getDefault());
@@ -197,6 +199,10 @@ SensorComponent, OnDestroyListener{
     String ns = Context.NOTIFICATION_SERVICE;
     mNM = (NotificationManager) mainUIThreadActivity.getSystemService(ns);
     Log.i(TAG, "created notification manager");
+    exportPath =  new File(Environment.getExternalStorageDirectory(), form.getPackageName()) + 
+		File.separator + "export";
+    exportFormat = NameValueDatabaseService.EXPORT_CSV; // set the exporting format as csv by default
+
 
   }
   
@@ -256,6 +262,27 @@ SensorComponent, OnDestroyListener{
   }
 
 
+  /**
+   * Set whether the returned values will be privacy safe (hashed) or not
+   */
+  
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
+  @SimpleProperty(description = "If set to True, then sensitive values will be hashed. Note that for some" +
+  		" application, only hashed values will be good enough. It's not necessary to read clear " +
+  		"text of user information which can cause some privacy issues.")
+  public void HideSensitiveData(boolean hideSensitive){
+    
+    this.privacySafe = hideSensitive;
+  
+  }
+  
+  /**
+   * Indicates whether the returned values will be privacy safe (hashed) or not
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public boolean HideSensitiveData() {
+    return privacySafe;
+  }
   
   /**
    * Set the length of the interval for a re-occurring probe activity. 
@@ -318,14 +345,9 @@ SensorComponent, OnDestroyListener{
   }
   
   
-  
-  public static final String PROBE_BASE_NAME = "SensorData";
-
-//  public Class<? extends UploadService> getUploadServiceClass() {
-//    return HttpsUploadService.class;
-//  }
-
-  
+  // This is used as the database name for all the sensor components that 
+  // extends probebase
+  public static final String PROBE_BASE_NAME = SensorDbUtil.DB_NAME;  
   
   public static SharedPreferences getSystemPrefs(Context context) {
     // TODO Auto-generated method stub
@@ -359,6 +381,37 @@ SensorComponent, OnDestroyListener{
 
   }
   
+  
+  /**
+   * Export the Sensor Database (SensorData as the name for the sqlite db on Android) as
+   * csv file(s) or JSON file(s). Each type of sensor data in the database
+   * will be export it as one file.
+   * The export path is under SDcard/packageName/export/
+   */
+  @SimpleFunction(description = "Export all sensor data as CSV files")
+  public void ExportSensorDB( ){
+    Log.i(TAG, "Exporting DB as CSV files");
+    Log.i(TAG, "exporting data...at: " + System.currentTimeMillis());
+
+    Bundle b = new Bundle();
+    b.putString(NameValueDatabaseService.DATABASE_NAME_KEY, SensorDbUtil.DB_NAME);
+    b.putString(NameValueDatabaseService.EXPORT_KEY, this.exportFormat);
+    Intent i = new Intent(mBoundFunfManager, NameValueDatabaseService.class);
+    i.setAction(DatabaseService.ACTION_EXPORT);
+    i.putExtras(b);
+    mBoundFunfManager.startService(i);
+  }
+
+
+  @SimpleFunction(description = "Get the path of the foler to which " +
+  		"sensor db are exported")
+  public String ExportFolderPath() {
+	// the real export path is exportPath + "/" + exportformat
+	Log.i(TAG, "exportpath:" + this.exportPath + File.separator
+		+ this.exportFormat);
+	return this.exportPath + File.separator + this.exportFormat;
+
+  }
 
   
   

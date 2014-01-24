@@ -17,8 +17,6 @@
             function formSubmit(){
                     var response = allAns.join();
                     saveSurvey.saveResponse(response);
-                    
-                    saveSurvey.closeApp();
 
                 }
 
@@ -38,6 +36,11 @@
                     $('#checkboxes1 input').click(updateAns);
        
                 });
+
+            function formCancel(){
+                var response = "N/A";
+                saveSurvey.saveResponse(response);
+            }
         </script>
 
     </head>
@@ -51,7 +54,7 @@
             </div>-->
             <div data-role="content">
                 <h1 id="_txt_qt">
-                    Question_content
+                    Question
                 </h1>
                 <div id="checkboxes1" data-role="fieldcontain">
                     <fieldset data-role="controlgroup" data-type="vertical">
@@ -77,6 +80,7 @@
                     </fieldset>
                 </div>
                 <input id="_btn_submit" onclick="formSubmit()" value="Submit" type="submit" />
+                <input id="_btn_cancel" onclick="formCancel()" value="Withdraw" type="submit" />
             </div>
         </div>
         <script>

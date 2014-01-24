@@ -123,8 +123,8 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/dropbox.png", images.dropbox());
     bundledImages.put("images/survey.png", images.survey());
     bundledImages.put("images/googledrive.png", images.googledrive());   
-
     bundledImages.put("images/semanticWeb.png", images.semanticWeb());
+    bundledImages.put("images/contactInfo.png", images.contactInfo());
 
     imagesInitialized = true;
   }

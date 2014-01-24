@@ -577,7 +577,6 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/googledrive.png")
   ImageResource googledrive();
   
-
   /**
    * Designer palette item: Semantic Web Component
    */
@@ -589,4 +588,12 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/semanticForm.png")
   ImageResource semanticForm();
+
+  /**
+   * Designer item: ContactInfo component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/people.png")
+  ImageResource contactInfo();
+
 }

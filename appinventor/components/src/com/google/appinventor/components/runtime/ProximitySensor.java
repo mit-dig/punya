@@ -127,9 +127,9 @@ public class ProximitySensor extends ProbeBase{
 			else {
 				phoneIsCloseToObj = false;
 			}
-//			Log.i(TAG, " before call ProximityInfoReceived()");
-			ProximityInfoReceived();
-//			Log.i(TAG, " after call ProximityInfoReceived()");
+
+			ProximityInfoReceived(phoneIsCloseToObj);
+
 			
 
 		}
@@ -197,20 +197,20 @@ public class ProximitySensor extends ProbeBase{
 	/**
 	 * Returns the latest reading of the device's proximity to another object.
 	 */
-	@SimpleProperty
-	public boolean PhoneIsCloseToObject() {
-		return phoneIsCloseToObj;
-	}
-	
+//	@SimpleProperty
+//	public boolean PhoneIsCloseToObject() {
+//		return phoneIsCloseToObj;
+//	}
+//
 	/**
 	 * Indicates that the proximity sensor info has been received.
 	 */
 	@SimpleEvent
-	public void ProximityInfoReceived(){
+	public void ProximityInfoReceived(final boolean phoneIsCloseToObj){
 		if (enabled) {
 		  mainUIThreadActivity.runOnUiThread(new Runnable() {
 		    public void run(){
-		    	EventDispatcher.dispatchEvent(ProximitySensor.this, "ProximityInfoReceived");
+		    	EventDispatcher.dispatchEvent(ProximitySensor.this, "ProximityInfoReceived", phoneIsCloseToObj);
 			}
 		  });
 		}

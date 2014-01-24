@@ -49,15 +49,15 @@ import java.io.IOException;
  * @author halabelson@google.com (Hal Abelson)
  */
 @DesignerComponent(version = YaVersion.PLAYER_COMPONENT_VERSION,
-    description = "<p>Multimedia component that plays audio or video and " +
+    description = "Multimedia component that plays audio or video and " +
     "controls phone vibration.  The name of a multimedia field is " +
     "specified in the <code>Source</code> property, which can be set in " +
     "the Designer or in the Blocks Editor.  The length of time for a " +
     "vibration is specified in the Blocks Editor in milliseconds " +
-    "(thousandths of a second).</p>" +
-    "<p>For legal sound and video formats, see " +
+    "(thousandths of a second).\n" +
+    "<p>For supported sound and video formats, see " +
     "<a href=\"http://developer.android.com/guide/appendix/media-formats.html\"" +
-    " target=\"_blank\">Android Supported Media Formats</a>.</p>" +
+    " target=\"_blank\">Android Supported Media Formats</a>.</p>\n" +
     "<p>If you will only be playing sound files and vibrating, not using " +
     "video, this component is best for long sound files, such as songs, " +
     "while the <code>Sound</code> component is more efficient for short " +
@@ -68,16 +68,14 @@ import java.io.IOException;
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.VIBRATE, android.permission.INTERNET")
 public final class Player extends AndroidNonvisibleComponent
-    implements Component, OnCompletionListener, OnDestroyListener, Deleteable {
+    implements Component, OnCompletionListener, OnPauseListener, OnResumeListener, OnDestroyListener, OnStopListener, Deleteable {
 
-  private static final boolean DEBUG = false;
-  
-  private MediaPlayer mp;
+  private MediaPlayer player;
   private final Vibrator vibe;
 
   private int playerState;
   private String sourcePath;
-  
+
   // determines if playing should loop
   private boolean loop;
 
@@ -86,11 +84,12 @@ public final class Player extends AndroidNonvisibleComponent
    * adequate, given this API:
    * 0: player initial state
    * 1: player prepared but not started
-   * 2: player started or paused
+   * 2: player is playing
+   * 3: player was playing and is now paused
    * The allowable transitions are:
-   * Start: must be called in state 1 or 2, results in state 2
-   * Pause: must be called in state 2, results in state 2
-   * Stop: must be called in state 1 or 2, results in state 1
+   * Start: must be called in state 1, 2, or 3, results in state 2
+   * Pause: must be called in state 2, results in state 3
+   * Stop: must be called in state 1, 2 or 3, results in state 1
    * We can simplify this to remove state 0 and use a simple boolean after we're
    * more confident that there are no start-up problems.
    */
@@ -105,6 +104,9 @@ public final class Player extends AndroidNonvisibleComponent
     sourcePath = "";
     vibe = (Vibrator) form.getSystemService(Context.VIBRATOR_SERVICE);
     form.registerForOnDestroy(this);
+    form.registerForOnResume(this);
+    form.registerForOnPause(this);
+    form.registerForOnStop(this);
     // Make volume buttons control media, not ringer.
     form.setVolumeControlStream(AudioManager.STREAM_MUSIC);
     loop = false;
@@ -134,45 +136,38 @@ public final class Player extends AndroidNonvisibleComponent
     sourcePath = (path == null) ? "" : path;
 
     // Clear the previous MediaPlayer.
-    if (playerState == 1 || playerState == 2) {
-      mp.stop();
+    if (playerState == 1 || playerState == 2 || playerState == 3) {
+      player.stop();
+      playerState = 0;
     }
-    playerState = 0;
-    if (mp != null) {
-      mp.release();
-      mp = null;
+    if (player != null) {
+      player.release();
+      player = null;
     }
 
     if (sourcePath.length() > 0) {
-      if (DEBUG) {
-        Log.i("Player", "Source path is " + sourcePath);
-      }
-      mp = new MediaPlayer();
-      mp.setOnCompletionListener(this);
+      player = new MediaPlayer();
+      player.setOnCompletionListener(this);
 
       try {
-        MediaUtil.loadMediaPlayer(mp, form, sourcePath);
+        MediaUtil.loadMediaPlayer(player, form, sourcePath);
 
       } catch (IOException e) {
-        mp.release();
-        mp = null;
+        player.release();
+        player = null;
         form.dispatchErrorOccurredEvent(this, "Source",
             ErrorMessages.ERROR_UNABLE_TO_LOAD_MEDIA, sourcePath);
         return;
       }
 
-      mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      if (DEBUG) {
-        Log.i("Player", "Successfully loaded source path " + sourcePath);
-      }
+      player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-      // The Simple API is set up so that the user never has
-      // to call prepare.
+      // The Simple API is set up so that the user never has to call prepare.
       prepare();
       // Player should now be in state 1. (If prepare failed, we are in state 0.)
     }
   }
-  
+
   /**
    * Reports whether the media is playing.
    */
@@ -181,7 +176,7 @@ public final class Player extends AndroidNonvisibleComponent
       category = PropertyCategory.BEHAVIOR)
   public boolean IsPlaying() {
     if (playerState == 1 || playerState == 2) {
-      return mp.isPlaying();
+      return player.isPlaying();
     }
     return false;
   }
@@ -190,7 +185,7 @@ public final class Player extends AndroidNonvisibleComponent
    * Reports whether the playing should loop.
    */
   @SimpleProperty(
-      description = 
+      description =
       "If true, the player will loop when it plays. Setting Loop while the player " +
       "is playing will affect the current playing.",
       category = PropertyCategory.BEHAVIOR)
@@ -209,8 +204,8 @@ public final class Player extends AndroidNonvisibleComponent
   @SimpleProperty
   public void Loop(boolean shouldLoop) {
     // set the desired looping right now if the player is prepared.
-    if (playerState == 1 || playerState == 2) {
-       mp.setLooping(shouldLoop);
+    if (playerState == 1 || playerState == 2 || playerState == 3) {
+       player.setLooping(shouldLoop);
     }
     // even if the player is not prepared, it will be set according to
     // Loop the next time it is started
@@ -228,14 +223,11 @@ public final class Player extends AndroidNonvisibleComponent
   @SimpleProperty(
       description = "Sets the volume to a number between 0 and 100")
   public void Volume(int vol) {
-    if (playerState == 1 || playerState == 2) {
+    if (playerState == 1 || playerState == 2 || playerState == 3) {
       if (vol > 100 || vol < 0) {
         throw new IllegalArgumentError("Volume must be set to a number between 0 and 100");
       }
-      mp.setVolume(((float) vol)/100, ((float) vol)/100);
-      if (DEBUG) {
-        Log.i("Player", "Volume is " + String.valueOf(vol));
-      }
+      player.setVolume(((float) vol) / 100, ((float) vol) / 100);
     }
   }
 
@@ -245,12 +237,9 @@ public final class Player extends AndroidNonvisibleComponent
    */
   @SimpleFunction
   public void Start() {
-    if (DEBUG) {
-      Log.i("Player", "Calling Start -- State=" + playerState);
-    }
-    if (playerState == 1 || playerState == 2) {
-      mp.setLooping(loop);
-      mp.start();
+    if (playerState == 1 || playerState == 2 || playerState == 3) {
+      player.setLooping(loop);
+      player.start();
       playerState = 2;
       // Player should now be in state 2
     }
@@ -261,13 +250,14 @@ public final class Player extends AndroidNonvisibleComponent
    */
   @SimpleFunction
   public void Pause() {
-    if (DEBUG) {
-      Log.i("Player", "Calling Pause -- State=" + playerState);
-    }
+    if (player == null) return; //Do nothing if the player is not
+    boolean wasPlaying = player.isPlaying();
     if (playerState == 2) {
-      mp.pause();
-      playerState = 2;
-      // Player should now be in state 2.
+      player.pause();
+      if (wasPlaying) {
+        playerState = 3;
+        // Player should now be in state 3.
+      }
     }
   }
 
@@ -276,13 +266,10 @@ public final class Player extends AndroidNonvisibleComponent
    */
   @SimpleFunction
   public void Stop() {
-    if (DEBUG) {
-      Log.i("Player", "Calling Stop -- State=" + playerState);
-    }
-    if (playerState == 1 || playerState == 2) {
-      mp.stop();
+    if (playerState == 1 || playerState == 2 || playerState == 3) {
+      player.stop();
       prepare();
-      mp.seekTo(0);
+      player.seekTo(0);
       // Player should now be in state 1. (If prepare failed, we are in state 0.)
     }
   }
@@ -303,26 +290,21 @@ public final class Player extends AndroidNonvisibleComponent
   }
 
   private void prepare() {
-    // This should be called only after mp.stop() or directly after
+    // This should be called only after player.stop() or directly after
     // initialization
     try {
-      mp.prepare();
+      player.prepare();
       playerState = 1;
-      if (DEBUG) {
-        Log.i("Player", "Successfully prepared");
-      }
-
     } catch (IOException ioe) {
-      mp.release();
-      mp = null;
+      player.release();
+      player = null;
       playerState = 0;
       form.dispatchErrorOccurredEvent(this, "Source",
           ErrorMessages.ERROR_UNABLE_TO_PREPARE_MEDIA, sourcePath);
     }
   }
- 
-  // OnCompletionListener implementation
 
+  // OnCompletionListener implementation
   @Override
   public void onCompletion(MediaPlayer m) {
     Completed();
@@ -333,21 +315,42 @@ public final class Player extends AndroidNonvisibleComponent
    */
   @SimpleEvent
   public void Completed() {
-    if (DEBUG) {
-      Log.i("Player", "Calling Completed -- State=" + playerState);
-    }
     EventDispatcher.dispatchEvent(this, "Completed");
   }
-  
-  // OnDestroyListener implementation
 
+  // OnResumeListener implementation
+  @Override
+  public void onResume() {
+    if (playerState == 3) {
+      Start();
+    }
+  }
+
+  // OnPauseListener implementation
+
+  @Override
+  public void onPause() {
+    if (player == null) return; //Do nothing if the player is not ready
+    if (player.isPlaying()) {
+      Pause();
+    }
+  }
+
+  @Override
+  public void onStop() {
+    if (player == null) return; //Do nothing if the player is not
+    if (player.isPlaying()) {
+      Pause();
+    }
+  }
+
+  // OnDestroyListener implementation
   @Override
   public void onDestroy() {
     prepareToDie();
   }
 
   // Deleteable implementation
-
   @Override
   public void onDelete() {
     prepareToDie();
@@ -355,13 +358,13 @@ public final class Player extends AndroidNonvisibleComponent
 
   private void prepareToDie() {
     // TODO(lizlooney) - add descriptively named constants for these magic numbers.
-    if (playerState == 1 || playerState == 2) {
-      mp.stop();
+    if (playerState != 0) {
+      player.stop();
     }
     playerState = 0;
-    if (mp != null) {
-      mp.release();
-      mp = null;
+    if (player != null) {
+      player.release();
+      player = null;
     }
     vibe.cancel();
   }

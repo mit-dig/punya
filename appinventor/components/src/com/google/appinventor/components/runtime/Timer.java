@@ -50,7 +50,7 @@ import com.google.appinventor.components.common.PropertyTypeConstants;
  * 
  */
 
-@DesignerComponent(version = YaVersion.TIMER_COMPONENT_VERSION, description = "Non-visible component that provides a timer to schedule actions", category = ComponentCategory.BASIC, nonVisible = true, iconName = "images/timer.png")
+@DesignerComponent(version = YaVersion.TIMER_COMPONENT_VERSION, description = "Non-visible component that provides a timer to schedule actions", category = ComponentCategory.USERINTERFACE, nonVisible = true, iconName = "images/timer.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.VIBRATE, "
 	+ "android.permission.WAKE_LOCK")

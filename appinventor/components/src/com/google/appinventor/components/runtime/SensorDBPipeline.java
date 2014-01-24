@@ -441,7 +441,8 @@ public class SensorDBPipeline implements Pipeline, DataListener{
     ((JsonObject) dataRequest).addProperty("@type",
         probeName);
     if (probeName.equals("edu.mit.media.funf.probe.builtin.SmsProbe")
-        || probeName.equals("edu.mit.media.funf.probe.builtin.CallLogProbe")) {
+        || probeName.equals("edu.mit.media.funf.probe.builtin.CallLogProbe") 
+        || probeName.equals("edu.mit.media.funf.probe.builtin.TelephonyProbe")) {
       ((JsonObject) dataRequest).addProperty("hideSensitiveData", hideSensitiveData);
     }
 

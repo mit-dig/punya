@@ -195,6 +195,7 @@ public final class Compiler {
   private Set<String> nativeLibrariesNeeded; // Set of component native libraries
   private Set<String> assetsNeeded; // Set of component assets
   private File libsDir; // The directory that will contain any native libraries for packaging
+  private String dexCacheDir;
 
 
   /*
@@ -425,7 +426,7 @@ public final class Compiler {
       // that before we can set the targetSdkVersion to 4 here.
 
       // out.write("  <uses-sdk android:targetSdkVersion=\"4\" />\n");
-      //out.write("  <uses-sdk android:targetSdkVersion=\"10\" />\n");
+      // out.write("  <uses-sdk android:targetSdkVersion=\"8\" />\n");
 
 
       out.write("  <application ");
@@ -462,7 +463,9 @@ public final class Compiler {
         // TODO:  Check that this doesn't screw up other components.  Also, it might be
         // better to do this programmatically when the NearField component is created, rather
         // than here in the manifest.
-        out.write("android:launchMode=\"singleTask\" ");
+        if (componentTypes.contains("NearField") && !isForWireless && isMain) {
+          out.write("android:launchMode=\"singleTask\" ");
+        }
 
         out.write("android:windowSoftInputMode=\"stateHidden\" ");
         out.write("android:configChanges=\"orientation|keyboardHidden\">\n");
@@ -477,7 +480,7 @@ public final class Compiler {
         }
         out.write("      </intent-filter>\n");
 
-        if (componentTypes.contains("NearField") && !isForWireless) {
+        if (componentTypes.contains("NearField") && !isForWireless && isMain) {
           //  make the form respond to NDEF_DISCOVERED
           //  this will trigger the form's onResume method
           //  For now, we're handling text/plain only,but we can add more and make the Nearfield
@@ -572,29 +575,6 @@ public final class Compiler {
 	    out.write("</receiver>\n");
 	  }
 
-    //  Add the FUNF probe services
-    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
-    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
-    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.ProximitySensorProbe\"></service>\n");
-    //  out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BluetoothProbe\"></service>\n");
-
-    // new version of configurations to include in the manifest.xml. Now need not include each probe individually, 
-    // but just include the FunfManager service
-    // Broadcast receiver for all funf related component  
-    if(librariesNeeded.contains("funf.jar")){
-      out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
-    // out.write("<meta-data android:name=\"main\" android:value=\"{\"@type\": \"com.google.appinventor.components.runtime.sensorDBPipeline\"}\"/>\n");
-      out.write(" </service>\n");  
-      out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
-      out.write("    <intent-filter>\n");
-      out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
-      out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
-      out.write("        <action android:name=\"android.intent.action.DOCK_EVENT\" />\n");
-      out.write("        <action android:name=\"android.intent.action.ACTION_SCREEN_ON\" />\n");
-      out.write("        <action android:name=\"android.intent.action.USER_PRESENT\" />\n");
-      out.write("    </intent-filter>\n");
-      out.write("</receiver>\n");
-    }
 	  
 
 	  //add UploadServices and DataBaseService
@@ -687,12 +667,12 @@ public final class Compiler {
   public static boolean compile(Project project, Set<String> componentTypes,
                                 PrintStream out, PrintStream err, PrintStream userErrors,
                                 boolean isForRepl, boolean isForWireless, String keystoreFilePath,
-                                int childProcessRam) throws IOException, JSONException {
+                                int childProcessRam, String dexCacheDir) throws IOException, JSONException {
     long start = System.currentTimeMillis();
 
     // Create a new compiler instance for the compilation
     Compiler compiler = new Compiler(project, componentTypes, out, err, userErrors, isForRepl, isForWireless,
-                                     childProcessRam);
+                                     childProcessRam, dexCacheDir);
 
     // Get names of component-required libraries and assets.
     compiler.generateLibraryNames();
@@ -779,6 +759,12 @@ public final class Compiler {
     // Android guy suggested an alternate approach of shipping the kawa runtime .dex file as
     // data with the application and then creating a new DexClassLoader using that .dex file
     // and with the original app class loader as the parent of the new one.
+    // TODONE(zhuowei): Now using the new Android DX tool to merge dex files
+    // Needs to specify a writable cache dir on the command line that persists after shutdown
+    // Each pre-dexed file is identified via its MD5 hash (since the standard Android SDK's
+    // method of identifying via a hash of the path won't work when files
+    // are copied into temporary storage) and processed via a hacked up version of
+    // Android SDK's Dex Ant task
     File tmpDir = createDirectory(buildDir, "tmp");
     String dexedClasses = tmpDir.getAbsolutePath() + File.separator + "classes.dex";
     if (!compiler.runDx(classesDir, dexedClasses)) {
@@ -962,7 +948,7 @@ public final class Compiler {
   @VisibleForTesting
   Compiler(Project project, Set<String> componentTypes, PrintStream out, PrintStream err,
            PrintStream userErrors, boolean isForRepl, boolean isForWireless,
-           int childProcessMaxRam) {
+           int childProcessMaxRam, String dexCacheDir) {
     this.project = project;
     this.componentTypes = componentTypes;
     this.out = out;
@@ -971,6 +957,7 @@ public final class Compiler {
     this.isForRepl = isForRepl;
     this.isForWireless = isForWireless;
     this.childProcessRamMb = childProcessMaxRam;
+    this.dexCacheDir = dexCacheDir;
   }
 
   /*
@@ -1062,7 +1049,7 @@ public final class Compiler {
       long start = System.currentTimeMillis();
       // Capture Kawa compiler stderr. The ODE server parses out the warnings and errors and adds
       // them to the protocol buffer for logging purposes. (See
-      // YoungAndroidProjectBuilder.processCompilerOutout.
+      // buildserver/ProjectBuilder.processCompilerOutout.
       ByteArrayOutputStream kawaOutputStream = new ByteArrayOutputStream();
       boolean kawaSuccess;
       synchronized (SYNC_KAWA_OR_DX) {
@@ -1226,40 +1213,36 @@ public final class Compiler {
   }
 
   private boolean runDx(File classesDir, String dexedClasses) {
-    int mx = childProcessRamMb - 200;
-
-    List<String> commandLineList = new ArrayList<String>();
-    commandLineList.add(System.getProperty("java.home") + "/bin/java");
-    commandLineList.add("-mx" + mx + "M");
-    commandLineList.add("-jar");
-    commandLineList.add(getResource(DX_JAR));
-    commandLineList.add("--dex");
-    commandLineList.add("--positions=lines");
-    commandLineList.add("--output=" + dexedClasses);
-    commandLineList.add(classesDir.getAbsolutePath());
-    commandLineList.add(getResource(SIMPLE_ANDROID_RUNTIME_JAR));
-    commandLineList.add(getResource(KAWA_RUNTIME));
-    commandLineList.add(getResource(ACRA_RUNTIME));
+    List<File> inputList = new ArrayList<File>();
+    inputList.add(classesDir); //this is a directory, and won't be cached into the dex cache
+    inputList.add(new File(getResource(SIMPLE_ANDROID_RUNTIME_JAR)));
+    inputList.add(new File(getResource(KAWA_RUNTIME)));
+    inputList.add(new File(getResource(ACRA_RUNTIME)));
 
     // Add libraries to command line arguments
     System.out.println("Libraries needed command line n = " + librariesNeeded.size());
     for (String library : librariesNeeded) {
-      commandLineList.add(getResource(RUNTIME_FILES_DIR + library));
+      inputList.add(new File(getResource(RUNTIME_FILES_DIR + library)));
     }
 
-    System.out.println("Libraries command line = " + commandLineList);
+    DexExecTask dexTask = new DexExecTask();
+    dexTask.setExecutable(getResource(DX_JAR));
+    dexTask.setOutput(dexedClasses);
+    dexTask.setChildProcessRamMb(childProcessRamMb);
+    if (dexCacheDir == null) {
+      dexTask.setDisableDexMerger(true);
+    } else {
+      createDirectory(new File(dexCacheDir));
+      dexTask.setDexedLibs(dexCacheDir);
+    }
 
-    // Convert command line to an array
-    String[] dxCommandLine = new String[commandLineList.size()];
-    commandLineList.toArray(dxCommandLine);
-
-   long startDx = System.currentTimeMillis();
+    long startDx = System.currentTimeMillis();
     // Using System.err and System.out on purpose. Don't want to pollute build messages with
     // tools output
     boolean dxSuccess;
     synchronized (SYNC_KAWA_OR_DX) {
       setProgress(50);
-      dxSuccess = Execution.execute(null, dxCommandLine, System.out, System.err);
+      dxSuccess = dexTask.execute(inputList);
       setProgress(75);
     }
     if (!dxSuccess) {

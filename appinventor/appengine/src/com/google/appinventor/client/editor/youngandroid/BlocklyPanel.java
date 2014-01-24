@@ -8,12 +8,24 @@ package com.google.appinventor.client.editor.youngandroid;
 import static com.google.appinventor.client.Ode.MESSAGES;
 
 import com.google.appinventor.client.DesignToolbar;
+import com.google.appinventor.client.TopToolbar;
 import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.common.collect.Maps;
+import com.google.appinventor.components.common.YaVersion;
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+
+import com.google.appinventor.components.common.YaVersion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,7 +108,7 @@ public class BlocklyPanel extends HTMLPanel {
   // My form name
   private String formName;
 
-  public static Boolean isWarningVisible = false;
+  public static boolean isWarningVisible = false;
 
   public BlocklyPanel(String formName) {
     super(EDITOR_HTML.replace("FORM_NAME", formName));
@@ -115,6 +127,11 @@ public class BlocklyPanel extends HTMLPanel {
    */
   public static void initUi() {
     exportMethodsToJavascript();
+    // Tell the blockly world about companion versions.
+    setPreferredCompanion(YaVersion.PREFERRED_COMPANION, YaVersion.COMPANION_UPDATE_URL);
+    for (int i = 0; i < YaVersion.ACCEPTABLE_COMPANIONS.length; i++) {
+      addAcceptableCompanion(YaVersion.ACCEPTABLE_COMPANIONS[i]);
+    }
   }
 
   /*
@@ -419,6 +436,10 @@ public class BlocklyPanel extends HTMLPanel {
     // indication that we are going to reinit the blocks editor the next
     // time it is shown.
     OdeLog.log("BlocklyEditor: prepared for reinit for form " + formName);
+    // Call doResetYail which will stop the timer that is polling the phone. It is important
+    // that it be stopped to avoid a race condition where the last timer on this form fires
+    // while the new form is loading.
+    doResetYail(formName);
     // Get blocks content before putting anything in the componentOps map since an entry in
     // the componentOps map is taken as an indication that the blocks area has not initialized yet.
     pendingBlocksContentMap.put(formName, getBlocksContent());
@@ -527,8 +548,8 @@ public class BlocklyPanel extends HTMLPanel {
     blocklyWorkspaceChanged(formName);
   }
 
-  public void startRepl(Boolean alreadyRunning, Boolean forEmulator) { // Start the Repl
-    doStartRepl(formName, alreadyRunning, forEmulator);
+  public void startRepl(boolean alreadyRunning, boolean forEmulator, boolean forUsb) { // Start the Repl
+    doStartRepl(formName, alreadyRunning, forEmulator, forUsb);
   }
 
   public static boolean checkIsAdmin() {
@@ -545,10 +566,117 @@ public class BlocklyPanel extends HTMLPanel {
   }
 
   public static void indicateDisconnect() {
-    DesignToolbar.indicateDisconnect();
+    TopToolbar.indicateDisconnect();
+    DesignToolbar.clearScreens();
+  }
+
+  public static boolean pushScreen(String newScreen) {
+    return DesignToolbar.pushScreen(newScreen);
+  }
+
+  public static void popScreen() {
+    DesignToolbar.popScreen();
+  }
+
+  // The code below (4 methods worth) is for creating a GWT dialog box
+  // from the blockly code. See the comment in replmgr.js for more
+  // information.
+
+  /**
+   * Create a Dialog Box. We call this from Javascript (blockly) to
+   * display a dialog box.  We do this here because we can get calls
+   * from the blocklyframe when it is not visible.  Because we are in
+   * the parent window, we can display dialogs that will be visible
+   * even when the blocklyframe is not visible.
+   * @param title Title for the Dialog Box
+   * @param mess The message to display
+   * @param buttonName The string to display in the "OK" button.
+   * @param size 0 or 1. 0 makes a smaller box 1 makes a larger box.
+   * @param callback an opague JavaScriptObject that contains the
+   *        callback function provided by the Javascript code.
+   * @return The created dialog box.
+   */
+
+  public static DialogBox createDialog(String title, String mess, String buttonName, int size, final JavaScriptObject callback) {
+    final DialogBox dialogBox = new DialogBox();
+    dialogBox.setStylePrimaryName("ode-DialogBox");
+    dialogBox.setText(title);
+    if (size == 0) {
+      dialogBox.setHeight("150px");
+    } else {
+      dialogBox.setHeight("400px");
+    }
+    dialogBox.setWidth("400px");
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(true);
+    dialogBox.center();
+    VerticalPanel DialogBoxContents = new VerticalPanel();
+    HTML message = new HTML(mess);
+    message.setStyleName("DialogBox-message");
+    SimplePanel holder = new SimplePanel();
+    Button ok = new Button(buttonName);
+    ok.addClickListener(new ClickListener() {
+        public void onClick(Widget sender) {
+          doCallBack(callback);
+        }
+      });
+    holder.add(ok);
+    DialogBoxContents.add(message);
+    DialogBoxContents.add(holder);
+    dialogBox.setWidget(DialogBoxContents);
+    dialogBox.show();
+    return dialogBox;
+  }
+
+  /**
+   * Hide a dialog box. This function is here so it can be called from
+   * the blockly code. We cannot call "hide" directly from the blockly
+   * code because when this code is compiled, the "hide" method disappears!
+   * @param dialog The dialogbox to hide.
+   */
+
+  public static void HideDialog(DialogBox dialog) {
+    dialog.hide();
+  }
+
+  public static void SetDialogContent(DialogBox dialog, String mess) {
+    HTML html = (HTML) ((VerticalPanel)dialog.getWidget()).getWidget(0);
+    html.setHTML(mess);
+  }
+
+  public static String getComponentInfo(String typeName) {
+    return YaBlocksEditor.getComponentInfo(typeName);
+  }
+
+  public static String getComponentsJSONString() {
+    return YaBlocksEditor.getComponentsJSONString();
+  }
+
+  public static String getComponentInstanceTypeName(String formName,String instanceName) {
+    return YaBlocksEditor.getComponentInstanceTypeName(formName,instanceName);
+  }
+
+  public static int getYaVersion() {
+    return YaVersion.YOUNG_ANDROID_VERSION;
+  }
+  public static int getBlocksLanguageVersion() {
+    return YaVersion.BLOCKS_LANGUAGE_VERSION;
+  }
+
+  public static String getQRCode(String inString) {
+    return doQRCode(currentForm, inString);
   }
 
   // ------------ Native methods ------------
+
+  /**
+   * Take a Javascript function, embedded in an opague JavaScriptObject,
+   * and call it.
+   * @param callback the Javascript callback.
+   */
+  private static native void doCallBack(JavaScriptObject callback) /*-{
+    callback.call();
+  }-*/;
 
   private static native void exportMethodsToJavascript() /*-{
     $wnd.BlocklyPanel_initBlocksArea =
@@ -564,6 +692,27 @@ public class BlocklyPanel extends HTMLPanel {
     $wnd.BlocklyPanel_indicateDisconnect =
       $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::indicateDisconnect());
     // Note: above lines are longer than 100 chars but I'm not sure whether they can be split
+    $wnd.BlocklyPanel_pushScreen =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::pushScreen(Ljava/lang/String;));
+    $wnd.BlocklyPanel_popScreen =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::popScreen());
+    $wnd.BlocklyPanel_createDialog =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::createDialog(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILcom/google/gwt/core/client/JavaScriptObject;));
+    $wnd.BlocklyPanel_hideDialog =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::HideDialog(Lcom/google/gwt/user/client/ui/DialogBox;));
+    $wnd.BlocklyPanel_setDialogContent =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::SetDialogContent(Lcom/google/gwt/user/client/ui/DialogBox;Ljava/lang/String;));
+    $wnd.BlocklyPanel_getComponentInstanceTypeName =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getComponentInstanceTypeName(Ljava/lang/String;Ljava/lang/String;));
+    $wnd.BlocklyPanel_getComponentInfo =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getComponentInfo(Ljava/lang/String;));
+    $wnd.BlocklyPanel_getComponentsJSONString =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getComponentsJSONString());
+    $wnd.BlocklyPanel_getYaVersion=
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getYaVersion());
+    $wnd.BlocklyPanel_getBlocksLanguageVersion=
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getBlocksLanguageVersion());
+
   }-*/;
 
   private native void initJS() /*-{
@@ -574,7 +723,7 @@ public class BlocklyPanel extends HTMLPanel {
 
   private static native void doAddComponent(String formName, String typeDescription,
       String instanceName, String uid) /*-{
-    $wnd.Blocklies[formName].Component.add(typeDescription, instanceName, uid);
+    $wnd.Blocklies[formName].Component.add(instanceName, uid);
   }-*/;
 
   private static native void doRemoveComponent(String formName, String typeName,
@@ -648,8 +797,8 @@ public class BlocklyPanel extends HTMLPanel {
     }
   }-*/;
 
-  public static native void doStartRepl(String formName, Boolean alreadyRunning, Boolean forEmulator) /*-{
-    $wnd.Blocklies[formName].ReplMgr.startRepl(alreadyRunning, forEmulator);
+  public static native void doStartRepl(String formName, boolean alreadyRunning, boolean forEmulator, boolean forUsb) /*-{
+    $wnd.Blocklies[formName].ReplMgr.startRepl(alreadyRunning, forEmulator, forUsb);
   }-*/;
 
   public static native void doRenderBlockly(String formName) /*-{
@@ -662,6 +811,27 @@ public class BlocklyPanel extends HTMLPanel {
 
   public static native void doCheckWarnings(String formName) /*-{
     $wnd.Blocklies[formName].WarningHandler.checkAllBlocksForWarningsAndErrors();
+  }-*/;
+
+  public static native String getCompVersion() /*-{
+    return $wnd.PREFERRED_COMPANION;
+  }-*/;
+
+  static native void setPreferredCompanion(String comp, String url) /*-{
+    $wnd.PREFERRED_COMPANION = comp;
+    $wnd.COMPANION_UPDATE_URL = url;
+  }-*/;
+
+  static native void addAcceptableCompanion(String comp) /*-{
+    if ($wnd.ACCEPTABLE_COMPANIONS === null ||
+        $wnd.ACCEPTABLE_COMPANIONS === undefined) {
+      $wnd.ACCEPTABLE_COMPANIONS = [];
+    }
+    $wnd.ACCEPTABLE_COMPANIONS.push(comp);
+  }-*/;
+
+  static native String doQRCode(String formName, String inString) /*-{
+    return $wnd.Blocklies[formName].ReplMgr.makeqrcode(inString);
   }-*/;
 
 }

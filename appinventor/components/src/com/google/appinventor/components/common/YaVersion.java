@@ -230,65 +230,74 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 79:
   // - GOOGLECLOUDMESSAGING_COMPONENT_VERSION was incremented to 1
   // For YOUNG_ANDROID_VERSION 80:
+  // - LISTPICKER_COMPONENT_VERSION was incremented to 7.
+  // For YOUNG_ANDROID_VERSION 81:
+  // - NOTIFIER_COMPONENT_VERSION was incremented to 3.
+  // For YOUNG_ANDROID_VERSION 82:
+  // - ACCELEROMETERSENSOR_COMPONENT_VERSION was incremented to 3.
+  // For YOUNG_ANDROID_VERSION 83:
+  // - LISTPICKER_COMPONENT_VERSION was incremented to 8.
   // - FORM_COMPONENT_VERSION was incremented to 11.
-  // For YOUNG_ANDROID_VERSION 81;
-  // - The Google Map component was added
-  // For YOUNG_ANDROID_VERSION 82;
-  // - The Wifi Sensor component was added
-  // For YOUNG_ANDROID_VERSION 83;
-  // - The proximity sensor component was added
   // For YOUNG_ANDROID_VERSION 84;
-  // - The social proximity sensor component was added
+  // - The Google Map component was added
   // For YOUNG_ANDROID_VERSION 85;
-  // - The activity probe sensor component was added
+  // - The Wifi Sensor component was added
   // For YOUNG_ANDROID_VERSION 86;
-  // - The batter probe sensor component was added
+  // - The proximity sensor component was added
   // For YOUNG_ANDROID_VERSION 87;
-  // - The calllog probe component was added
+  // - The social proximity sensor component was added
   // For YOUNG_ANDROID_VERSION 88;
+  // - The activity probe sensor component was added
+  // For YOUNG_ANDROID_VERSION 89;
+  // - The batter probe sensor component was added
+  // For YOUNG_ANDROID_VERSION 90;
+  // - The calllog probe component was added
+  // For YOUNG_ANDROID_VERSION 91;
   // - The celltower probe component was added
-  // FOR YOUNG_ANDROID_VERSION 89;
-  // - The light sensor component was added
-  // FOR YOUNG_ANDROID_VERSION 90;
-  // - The location probe sensor component was added
   // FOR YOUNG_ANDROID_VERSION 91;
-  // - THe pedometer sensor component was added
-  // FOR YOUNG_ANDROID_VERSION 92;
-  // - The Running application probe component was added
+  // - The light sensor component was added
   // FOR YOUNG_ANDROID_VERSION 93;
+  // - The location probe sensor component was added
+  // FOR YOUNG_ANDROID_VERSION 94;
+  // - THe pedometer sensor component was added
+  // FOR YOUNG_ANDROID_VERSION 95;
+  // - The Running application probe component was added
+  // FOR YOUNG_ANDROID_VERSION 96;
   // - The Screen probe component was added
-  // FOR YOUNG_ANDROID_VRESION 94;
+  // FOR YOUNG_ANDROID_VRESION 97;
   // - The SMS log probe component was added
-  // FOR YOUNG_ANDROID_VERSION 95
-  // - The Telephony probe component was added
-  // FOR YOUNG_ANDROID_VERSION 96
-  // - The Timer component was added
-  // FOR YOUNG_ANDROID_VERSION 97
-  // - The Dropbox component was added
   // FOR YOUNG_ANDROID_VERSION 98
-  // - The SensorDB component was added
+  // - The Telephony probe component was added
   // FOR YOUNG_ANDROID_VERSION 99
-  // - The Survey component was added
+  // - The Timer component was added
   // FOR YOUNG_ANDROID_VERSION 100
+  // - The Dropbox component was added
+  // FOR YOUNG_ANDROID_VERSION 101
+  // - The SensorDB component was added
+  // FOR YOUNG_ANDROID_VERSION 102
+  // - The Survey component was added
+  // FOR YOUNG_ANDROID_VERSION 103
   // - The Google Drive component was added
-  // For YOUNG_ANDROID_VERSION 101:
+  // FOR YOUNG_ANDROID_VERSION 104
+  // - The Contact info component was added
+  // For YOUNG_ANDROID_VERSION 105:
   // - SEMANTIC_FORM_COMPONENT_VERSION was added.
   // - SEMANTIC_WEB_LISTPICKER_COMPONENT_VERSION was added.
   // - TEXTBOX_COMPONENT_VERSION was incremented to 5.
-  // For YOUNG_ANDROID_VERSION 102:
+  // For YOUNG_ANDROID_VERSION 106:
   // - EMAILPICKER_COMPONENT_VERSION was incremented to 3.
   // - PASSWORDTEXTBOX_COMPONENT_VERSION was incremented to 3.
   // - SEMANTIC_FORM_COMPONENT_VERSION was incremented to 2.
   // - TEXTBOX_COMPONENT_VERSION was incremented to 6.
-  // For YOUNG_ANDROID_VERSION 103:
+  // For YOUNG_ANDROID_VERSION 107:
   // - SemanticForm Component is renamed to LinkedDataForm Component
   // - SEMANTIC_FORM_COMPONENT_VERSION is renamed to LINKED_DATA_FORM_COMPONENT_VERSION
   // - SemanticWeb Component is renamed to LinkedData Component
   // - SEMANTIC_WEB_COMPONENT_VERSION is renamed to LINKED_DATA_COMPONENT_VERSION
   // - SemanticListPicker Component is renamed to LinkedDataListPicker Component
   // - SEMANTIC_LISTPICKER_COMPONENT_VERSION is renamed to LINKED_DATA_LISTPICKER_COMPONENT_VERSION
-  public static final int YOUNG_ANDROID_VERSION = 103;
-
+  public static final int YOUNG_ANDROID_VERSION = 107;
+ 
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -360,7 +369,9 @@ public class YaVersion {
   // - AccelerometerSensor.MinimumInterval property was added.
   // - AccelerometerSensor.AccelerationChanged method was modified to wait for
   //   the minimum interval to elapse before calling a shaking event when necessary.
-  public static final int ACCELEROMETERSENSOR_COMPONENT_VERSION = 2;
+  //For ACCELEROMETERSENSOR_COMPONENT_VERSION 3:
+  // - AccelerometerSensor.Sensitivty property was added.
+  public static final int ACCELEROMETERSENSOR_COMPONENT_VERSION = 3;
 
   // For ACTIVITYSTARTER_COMPONENT_VERSION 2:
   // - The ActivityStarter.DataType, ActivityStarter.ResultType, and ActivityStarter.ResultUri
@@ -549,7 +560,12 @@ public class YaVersion {
   // For LISTPICKER_COMPONENT_VERSION 6:
   // - The getIntent method was modified to provide the ListPickerActivity
   //   with the parent Form's open screen animation.
-  public static final int LISTPICKER_COMPONENT_VERSION = 6;
+  // For LISTPICKER_COMPONENT_VERSION 7:
+  // - Added ShowFilterBar property
+  // For LISTPICKER_COMPONENT_VERSION 8:
+  // - Added title property
+
+  public static final int LISTPICKER_COMPONENT_VERSION = 8;
 
   // For LOCATIONSENSOR_COMPONENT_VERSION 2:
   // - The TimeInterval and DistanceInterval properties were added.
@@ -560,7 +576,9 @@ public class YaVersion {
 
   // For NOTIFIER_COMPONENT_VERSION 2:
   // - To ShowChooseDialog and ShowTextDialog, new arg was added to indicate if dialog is cancelable
-  public static final int NOTIFIER_COMPONENT_VERSION = 2;
+  // For NOTIFIER_COMPONENT_VERSION 3:
+  // - Added NotifierColor, TextColor and NotifierLength options
+  public static final int NOTIFIER_COMPONENT_VERSION = 3;
 
   // For ORIENTATIONSENSOR_COMPONENT_VERSION = 2:
   // - The Yaw property was renamed to Azimuth.
@@ -593,7 +611,7 @@ public class YaVersion {
   public static final int PEDOMETERSENSOR_COMPONENT_VERSION = 1;
   public static final int SURVEY_COMPONENT_VERSION = 1;
   public static final int TELEPHONY_COMPONENT_VERSION = 1;
-  public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
+
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 3
@@ -734,7 +752,35 @@ public class YaVersion {
   // - Renamed SemanticWeb component to LinkedData component
   public static final int LINKED_DATA_COMPONENT_VERSION = 2;
   
+
   public static final int LD_COMPONENT_VERSION = 1;
+
+  // Companion Versions and Update Information
+
+  // The PREFERRED_COMPANION is displayed to the end-user if
+  // they ask (via the Help->About menu) and if they are told
+  // that they need to update their companion
+  //
+  // ACCEPTABLE_COMPANIONS is a list of Companion VersionNames
+  // which are usable with this version of the system.
+  //
+  // COMPANION_UPDATE_URL is the URL used by the Companion
+  // Update Mechanism to find the Companion to download.
+  // Note: This new Companion needs to be signed by the same
+  // key as the Companion it is replacing, as the Package Manager
+  // is invoked from the running Companion.
+
+  public static final String PREFERRED_COMPANION = "2.12ai2zx1";
+  public static final String COMPANION_UPDATE_URL = "";
+  public static final String [] ACCEPTABLE_COMPANIONS = { "2.08ai2", "2.07nb9zx1", "2.07nb9", "2.08ai2zx1", "2.09ai2", "2.09ai2zx1", "2.10ai2", "2.10ai2zx1", "2.11ai2", "2.11ai2zx1", "2.12ai2", "2.12ai2zx1" };
+
+  // Splash Screen Values
+  public static final int SPLASH_SURVEY = 1;
+  
+  // For GOOGLECLOUDMESSAGING_COMPONENT_VERSION 1:
+  // - Initial version.
+  public static final int GOOGLECLOUDMESSAGING_COMPONENT_VERSION = 1;
+
   
   // For LINKED_DATA_LISTPICKER_COMPONENT_VERSION_2:
   // - Renamed SemanticWebListPicker to LinkedDataListPicker
@@ -763,7 +809,9 @@ public class YaVersion {
   public static final int SMSLOGHISTORY_COMPONENT_VERSION = 1;
 
   public static final int  SENSORDB_COMPONENT_VERSION = 1;
-  
+    
+  public static final int CONTACTINFO_COMPONENT_VERSION = 1;	
+
 
 
 }

@@ -114,9 +114,8 @@ public class LocationProbeSensor extends ProbeBase{
 			timestamp = data.get(LocationKeys.TIMESTAMP).getAsLong();
 			mProvider = data.get("mProvider").getAsString();
 
-
 			Log.i(TAG, " before call LocationInfoReceived();");
-			LocationInfoReceived();
+			LocationInfoReceived(timestamp, mLatitude, mLongitude, mAccuracy, mProvider);
 			Log.i(TAG, " after call LocationInfoReceived();");
 
 		}
@@ -131,22 +130,23 @@ public class LocationProbeSensor extends ProbeBase{
 	* Indicates that the Location info has been received.
 	*/
 	@SimpleEvent	
-	public void LocationInfoReceived() {
-			// TODO Auto-generated method stub
+	public void LocationInfoReceived(final long timestamp, final double mLatitude,
+                                     final double mLongitude, final float mAccuracy,
+                                     final String mProvider) {
+
 		if (enabled || enabledSchedule) {
 			
 			mainUIThreadActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					Log.i(TAG, "LocationInfoReceived() is called");
 					EventDispatcher.dispatchEvent(LocationProbeSensor.this,
-							"LocationInfoReceived");
+							"LocationInfoReceived", timestamp, mLatitude, mLongitude,
+                            mAccuracy, mProvider);
 				}
 			});
-			
-			
+
 		}	
-		
-		
+
 	}
 	
 	
@@ -373,50 +373,50 @@ public class LocationProbeSensor extends ProbeBase{
 		
 	}
 	
-	  /**
-	   * The most recent available accuracy value.  If no value is available,
-	   * 0 will be returned.
-	   */
-	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-	  public double Accuracy() {
-	    return mAccuracy;
-	  }
-
-	  /**
-	   * The most recent available longitude value.  If no value is available,
-	   * 0 will be returned.
-	   */
-	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-	  public double Longitude() {
-	    return mLongitude;
-	  }
-
-	  /**
-	   * The most recently available latitude value.  If no value is available,
-	   * 0 will be returned.
-	   */
-	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-	  public double Latitude() {
-	      return mLatitude;
-	  }
-	  
-	  /**
-	   * The type of the provider.  If no value is available,
-	   * "" will be returned.
-	   */
-	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-	  public String Provider() {
-	      return mProvider;
-	  }
-	
-	/**
-	 * Returns the timestamp of latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
+//	  /**
+//	   * The most recent available accuracy value.  If no value is available,
+//	   * 0 will be returned.
+//	   */
+//	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+//	  public double Accuracy() {
+//	    return mAccuracy;
+//	  }
+//
+//	  /**
+//	   * The most recent available longitude value.  If no value is available,
+//	   * 0 will be returned.
+//	   */
+//	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+//	  public double Longitude() {
+//	    return mLongitude;
+//	  }
+//
+//	  /**
+//	   * The most recently available latitude value.  If no value is available,
+//	   * 0 will be returned.
+//	   */
+//	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+//	  public double Latitude() {
+//	      return mLatitude;
+//	  }
+//
+//	  /**
+//	   * The type of the provider.  If no value is available,
+//	   * "" will be returned.
+//	   */
+//	  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+//	  public String Provider() {
+//	      return mProvider;
+//	  }
+//
+//	/**
+//	 * Returns the timestamp of latest reading
+//	 */
+//	@SimpleProperty(description = "The timestamp of this sensor event.")
+//	public float Timestamp() {
+//		Log.i(TAG, "returning timestamp: " + timestamp);
+//		return timestamp;
+//	}
 	
 	/*
 	 * Returns the default interval between each scan for this probe

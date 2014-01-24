@@ -3,9 +3,9 @@
 <!-- The contents of a blocks editor iframe in App Inventor -->
 <html>
   <head>
-    <script type="text/javascript" src="closure-library-20120710-r2029/closure/goog/base.js"></script>
+    <script type="text/javascript" src="closure-library/closure/goog/base.js"></script>
     <link type="text/css" rel="stylesheet" href="media/blockly.css">
-    <link type="text/css" rel="stylesheet" href="closure-library-20120710-r2029/closure/goog/css/dialog.css">
+    <link type="text/css" rel="stylesheet" href="closure-library/closure/goog/css/dialog.css">
     <script type="text/javascript" src="blockly-all.js"></script>
     <style>
       html, body {
@@ -22,24 +22,26 @@
       font: normal 13px Arial, sans-serif;
       position: absolute;
       background: #fff;
-	  border: 1px solid #666;
-	  -moz-box-shadow: 2px 2px 2px rgba(102, 102, 102, .4);
-	  -webkit-box-shadow: 2px 2px 2px rgba(102, 102, 102, .4);
-	  width: 300px;
-	}
+      border: 1px solid #666;
+      -moz-box-shadow: 2px 2px 2px rgba(102, 102, 102, .4);
+      -webkit-box-shadow: 2px 2px 2px rgba(102, 102, 102, .4);
+      width: 300px;
+      height: 294px;
+      overflow: auto;
+    }
     .ac-row {
       cursor: pointer;
-	  padding: .4em;
-	}
+      padding: .4em;
+    }
     .ac-highlighted {
-	  font-weight: bold;
-	}
+      font-weight: bold;
+    }
     .ac-active {
-	  background-color: #b2b4bf;
-	}
+      background-color: #b2b4bf;
+    }
     #ai_type_block {
-	  position: absolute;
-	}
+      position: absolute;
+    }
     </style>
 
     <script type="text/javascript">
@@ -55,9 +57,12 @@
         }
         window.parent.Blocklies[formName] = Blockly;
         Blockly.ReplMgr.formName = formName; <!-- So we can tell the AssetManager which form we are on. -->
-        if (window.parent.ReplState === undefined)
+        if (window.parent.ReplState === undefined) {
           window.parent.ReplState = new Blockly.ReplStateObj(); // There should be one of these for the whole system
+        }
+        window.parent.ReplState.phoneState = {}; <!-- Reset the phone state when we are reloaded -->
         Blockly.BlocklyEditor.startup(document.body, formName);
+        Blockly.ComponentTypes.populateTypes();
         window.parent.BlocklyPanel_initBlocksArea(formName);
         window.parent.BlocklyPanel_checkWarningState(formName);
       }
@@ -67,7 +72,7 @@
     <div id="ai_type_block" style="display:none">
       <p>
         <input id="ac_input_text" />
-	  </p>
-	</div>
+      </p>
+    </div>
   </body>
 </html>

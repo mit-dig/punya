@@ -24,7 +24,7 @@ public final class GCMConstants {
     /**
      * Preference for the Google Cloud Messaging
      */
-    public static final String PREFS_GOOGLECLOUDMESSAGING = "googleCloudMessagingPrefs";
+    public static final String PREFS_GOOGLECLOUDMESSAGING = "GoogleCloudMessagingPrefs";
     
     /**
      * When the GCMIntentService registered with the listerners

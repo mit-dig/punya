@@ -3,6 +3,9 @@
 // Copyright 2011-2012 MIT, All rights reserved
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 
+// ***********************************************
+// If we're not going to go this route with onDestroy, then at least get rid of the DEBUG flag.
+
 package com.google.appinventor.components.runtime;
 
 import java.io.IOException;
@@ -30,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
@@ -42,7 +46,7 @@ import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
-import com.google.appinventor.components.annotations.SimpleFunction;
+
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
@@ -55,6 +59,7 @@ import com.google.appinventor.components.runtime.collect.Lists;
 import com.google.appinventor.components.runtime.collect.Maps;
 import com.google.appinventor.components.runtime.collect.Sets;
 import com.google.appinventor.components.runtime.util.AlignmentUtil;
+import com.google.appinventor.components.runtime.util.AnimationUtil;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.FullScreenVideoUtil;
 import com.google.appinventor.components.runtime.util.JsonUtil;
@@ -62,7 +67,6 @@ import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.OnInitializeListener;
 import com.google.appinventor.components.runtime.util.SdkLevel;
 import com.google.appinventor.components.runtime.util.ViewUtil;
-import com.google.appinventor.components.annotations.UsesLibraries;
 
 
 /**
@@ -75,7 +79,7 @@ import com.google.appinventor.components.annotations.UsesLibraries;
  *
  */
 @DesignerComponent(version = YaVersion.FORM_COMPONENT_VERSION,
-    category = ComponentCategory.ARRANGEMENTS,
+    category = ComponentCategory.LAYOUT,
     description = "Top-level component containing all other components in the program",
     showOnPalette = false)
 @SimpleObject
@@ -84,9 +88,6 @@ import com.google.appinventor.components.annotations.UsesLibraries;
 public class Form extends FragmentActivity
     implements Component, ComponentContainer, HandlesEventDispatching {
   private static final String LOG_TAG = "Form";
-  
-  // *** set this back to false after review
-  private static final boolean DEBUG = true;
 
   private static final String RESULT_NAME = "APP_INVENTOR_RESULT";
 
@@ -148,7 +149,7 @@ public class Form extends FragmentActivity
   private final Set<OnResumeListener> onResumeListeners = Sets.newHashSet();
   private final Set<OnPauseListener> onPauseListeners = Sets.newHashSet();
   private final Set<OnDestroyListener> onDestroyListeners = Sets.newHashSet();
-  
+
   // AppInventor lifecycle: listeners for the Initialize Event
   private final Set<OnInitializeListener> onInitializeListeners = Sets.newHashSet();
 
@@ -342,32 +343,32 @@ public class Form extends FragmentActivity
       });
     }
   }
-//
-//  /*
-//   * Here we override the hardware back button, just to make sure
-//   * that the closing screen animation is applied. (In API level
-//   * 5, we can simply override the onBackPressed method rather
-//   * than bothering with onKeyDown)
-//   */
-//  @Override
-//  public boolean onKeyDown(int keyCode, KeyEvent event) {
-//    if (keyCode == KeyEvent.KEYCODE_BACK) {      
-//      if (!BackPressed()) {
-//        boolean handled = super.onKeyDown(keyCode, event);
-//        AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
-//        return handled;
-//      } else {
-//        return true;
-//      }      
-//    }
-//    return super.onKeyDown(keyCode, event);
-//  }
-//
-//  @SimpleEvent(description = "Device back button pressed.")
-//  public boolean BackPressed() {
-//    return EventDispatcher.dispatchEvent(this, "BackPressed");
-//  }
-  
+ 
+  /*
+   * Here we override the hardware back button, just to make sure
+   * that the closing screen animation is applied. (In API level
+   * 5, we can simply override the onBackPressed method rather
+   * than bothering with onKeyDown)
+   */
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
+      if (!BackPressed()) {
+        boolean handled = super.onKeyDown(keyCode, event);
+        AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
+        return handled;
+      } else {
+        return true;
+      }
+    }
+    return super.onKeyDown(keyCode, event);
+  }
+
+  @SimpleEvent(description = "Device back button pressed.")
+  public boolean BackPressed() {
+    return EventDispatcher.dispatchEvent(this, "BackPressed");
+  }
+
   // onActivityResult should be triggered in only two cases:
   // (1) The result is for some other component in the app, not this Form itself
   // (2) This page started another page, and that page is closing, and passing
@@ -403,15 +404,11 @@ public class Form extends FragmentActivity
   // functionName is a string to include in the error message that will be shown
   // if the JSON decoding fails
   private  static Object decodeJSONStringForForm(String jsonString, String functionName) {
-    if (DEBUG) {
-      Log.i(LOG_TAG, "decodeJSONStringForForm -- decoding JSON representation:" + jsonString);
-    }
+    Log.i(LOG_TAG, "decodeJSONStringForForm -- decoding JSON representation:" + jsonString);
     Object valueFromJSON = "";
     try {
       valueFromJSON = JsonUtil.getObjectFromJson(jsonString);
-      if (DEBUG) {
-        Log.i(LOG_TAG, "decodeJSONStringForForm -- got decoded JSON:" + valueFromJSON.toString());
-      }
+      Log.i(LOG_TAG, "decodeJSONStringForForm -- got decoded JSON:" + valueFromJSON.toString());
     } catch (JSONException e) {
       activeForm.dispatchErrorOccurredEvent(activeForm, functionName,
           // showing the start value here will produce an ugly error on the phone, but it's
@@ -464,11 +461,11 @@ public class Form extends FragmentActivity
   public void registerForOnResume(OnResumeListener component) {
     onResumeListeners.add(component);
   }
-  
+
   /**
    * An app can register to be notified when App Inventor's Initialize
    * block has fired.  They will be called in Initialize().
-   * 
+   *
    * @param component
    */
   public void registerForOnInitialize(OnInitializeListener component) {
@@ -606,12 +603,12 @@ public class Form extends FragmentActivity
         if (frameLayout != null && frameLayout.getWidth() != 0 && frameLayout.getHeight() != 0) {
           EventDispatcher.dispatchEvent(Form.this, "Initialize");
           screenInitialized = true;
-          
+
           //  Call all apps registered to be notified when Initialize Event is dispatched
           for (OnInitializeListener onInitializeListener : onInitializeListeners) {
             onInitializeListener.onInitialize();
           }
-          
+
         } else {
           // Try again later.
           androidUIHandler.post(this);
@@ -803,9 +800,9 @@ public class Form extends FragmentActivity
   /**
    * The requested screen orientation. Commonly used values are
       unspecified (-1), landscape (0), portrait (1), sensor (4), and user (2).  " +
-      "See the Android developer documentation for ActivityInfo.Screen_Orientation for the " + 
+      "See the Android developer documentation for ActivityInfo.Screen_Orientation for the " +
       "complete list of possible settings.
-   * 
+   *
    * ScreenOrientation property getter method.
    *
    * @return  screen orientation
@@ -813,7 +810,7 @@ public class Form extends FragmentActivity
   @SimpleProperty(category = PropertyCategory.APPEARANCE,
       description = "The requested screen orientation. Commonly used values are" +
       " unspecified (-1), landscape (0), portrait (1), sensor (4), and user (2).  " +
-      "See the Android developer docuemntation for ActivityInfo.Screen_Orientation for the " + 
+      "See the Android developer docuemntation for ActivityInfo.Screen_Orientation for the " +
       "complete list of possible settings.")
   public String ScreenOrientation() {
     switch (getRequestedOrientation()) {
@@ -1081,7 +1078,7 @@ public class Form extends FragmentActivity
    * @return  width property used by the layout
    */
   @SimpleProperty(category = PropertyCategory.APPEARANCE)
-  public int set() {
+  public int Width() {
     return frameLayout.getWidth();
   }
 
@@ -1161,15 +1158,11 @@ public class Form extends FragmentActivity
   // if the JSON encoding fails
   private static String jsonEncodeForForm(Object value, String functionName) {
     String jsonResult = "";
-    if (DEBUG) {
-      Log.i(LOG_TAG, "jsonEncodeForForm -- creating JSON representation:" + value.toString());
-    }
+    Log.i(LOG_TAG, "jsonEncodeForForm -- creating JSON representation:" + value.toString());
     try {
       // TODO(hal): check that this is OK for raw strings
       jsonResult = JsonUtil.getJsonRepresentation(value);
-      if (DEBUG) {
-        Log.i(LOG_TAG, "jsonEncodeForForm -- got JSON representation:" + jsonResult);
-      }
+      Log.i(LOG_TAG, "jsonEncodeForForm -- got JSON representation:" + jsonResult);
     } catch (JSONException e) {
       activeForm.dispatchErrorOccurredEvent(activeForm, functionName,
           // showing the bad value here will produce an ugly error on the phone, but it's
@@ -1182,10 +1175,8 @@ public class Form extends FragmentActivity
   @SimpleEvent(description = "Event raised when another screen has closed and control has " +
       "returned to this screen.")
   public void OtherScreenClosed(String otherScreenName, Object result) {
-    if (DEBUG) {
-      Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " + 
-          otherScreenName + ", result = " + result.toString());
-    }
+    Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " +
+        otherScreenName + ", result = " + result.toString());
     EventDispatcher.dispatchEvent(this, "OtherScreenClosed", otherScreenName, result);
   }
 
@@ -1518,31 +1509,6 @@ public class Form extends FragmentActivity
   public synchronized Bundle fullScreenVideoAction(int action, VideoPlayer source, Object data) {
     return fullScreenVideoUtil.performAction(action, source, data);
   }
-  
-  
-  
-  /*
-   * Added by Fuming to prevent AI user accidently kill activity that runs and binds to Background service
-   * @see android.app.Activity#onBackPressed()
-   */
-  @Override
-  public void onBackPressed() {
-    Toast toast = null;
-	if (this.lastBackPressTime < System.currentTimeMillis() - 4000) {
-      toast = Toast.makeText(this, "Press back again will kill the activity! Try press Home button", 4000);
-      toast.show();
-      this.lastBackPressTime = System.currentTimeMillis();
-    } else {
-      if (toast != null) {
-      toast.cancel();
-    }
-    super.onBackPressed();
-   }
-  }
-  
-//  public ViewGroup getView(){
-//    return viewLayout.getLayoutManager();
-//  }
   
   
 

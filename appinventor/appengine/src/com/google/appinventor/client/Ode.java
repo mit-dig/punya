@@ -27,6 +27,7 @@ import com.google.appinventor.client.explorer.project.ProjectManagerEventAdapter
 import com.google.appinventor.client.explorer.youngandroid.ProjectToolbar;
 import com.google.appinventor.client.jsonp.JsonpConnection;
 import com.google.appinventor.client.output.OdeLog;
+import com.google.appinventor.client.settings.Settings;
 import com.google.appinventor.client.settings.user.UserSettings;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.boxes.Box;
@@ -34,6 +35,7 @@ import com.google.appinventor.client.widgets.boxes.ColumnLayout;
 import com.google.appinventor.client.widgets.boxes.ColumnLayout.Column;
 import com.google.appinventor.client.widgets.boxes.WorkAreaPanel;
 import com.google.appinventor.common.version.AppInventorFeatures;
+import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.rpc.GetMotdService;
 import com.google.appinventor.shared.rpc.GetMotdServiceAsync;
 import com.google.appinventor.shared.rpc.ServerLayout;
@@ -76,6 +78,7 @@ import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -87,6 +90,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import java.util.Random;
 
 /**
  * Main entry point for Ode. Defines the startup UI elements in
@@ -121,6 +126,11 @@ public class Ode implements EntryPoint {
 
   // User information
   private User user;
+
+  // Nonce Information
+  private String nonce;
+
+  private Random random = new Random(); // For generating random nonce
 
   // Collection of projects
   private ProjectManager projectManager;
@@ -163,6 +173,7 @@ public class Ode implements EntryPoint {
   private VerticalPanel structureAndAssets;
   private ProjectToolbar projectToolbar;
   private DesignToolbar designToolbar;
+  private TopToolbar topToolbar;
   // Popup that indicates that an asynchronous request is pending. It is visible
   // initially, and will be hidden automatically after the first RPC completes.
   private static RpcStatusPopup rpcStatusPopup;
@@ -254,6 +265,7 @@ public class Ode implements EntryPoint {
    */
   public void switchToProjectsView() {
     currentView = PROJECTS;
+    getTopToolbar().updateFileMenuButtons(currentView);
     deckPanel.showWidget(projectsTabIndex);
   }
 
@@ -264,6 +276,7 @@ public class Ode implements EntryPoint {
     // Only show designer if there is a current editor.
     // ***** THE DESIGNER TAB DOES NOT DISPLAY CORRECTLY IF THERE IS NO CURRENT EDITOR. *****
     currentView = DESIGNER;
+    getTopToolbar().updateFileMenuButtons(currentView);
     if (currentFileEditor != null) {
       deckPanel.showWidget(designTabIndex);
     } else {
@@ -355,6 +368,7 @@ public class Ode implements EntryPoint {
       }
       assetManager.loadAssets(project.getProjectId());
     }
+    getTopToolbar().updateFileMenuButtons(1);
   }
 
   /**
@@ -460,6 +474,13 @@ public class Ode implements EntryPoint {
       }
     };
 
+    // The call below begins an asynchronous read of the user's settings
+    // When the settings are finished reading, various settings parsers
+    // will be called on the returned JSON object. They will call various
+    // other functions in this module, including openPreviousProject (the
+    // previous project ID is stored in the settings) as well as the splash
+    // screen displaying functions below.
+    //
     // TODO(user): ODE makes too many RPC requests at startup time. Currently
     // we do 3 RPCs + 1 per project + 1 per open file. We should bundle some of
     // those with each other or with the initial HTML transfer.
@@ -514,6 +535,8 @@ public class Ode implements EntryPoint {
         }
       }
     };
+
+    deckPanel.setAnimationEnabled(true);
     deckPanel.sinkEvents(Event.ONCONTEXTMENU);
     deckPanel.setStyleName("ode-DeckPanel");
 
@@ -533,6 +556,25 @@ public class Ode implements EntryPoint {
     // Design tab
     VerticalPanel dVertPanel = new VerticalPanel();
     dVertPanel.setWidth("100%");
+    dVertPanel.setHeight("100%");
+
+    // Add the Code Navigation arrow
+//    switchToBlocksButton = new VerticalPanel();
+//    switchToBlocksButton.setVerticalAlignment(VerticalPanel.ALIGN_MIDDLE);
+//    switchToBlocksButton.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+//    switchToBlocksButton.setStyleName("ode-NavArrow");
+//    switchToBlocksButton.add(new Image(RIGHT_ARROW_IMAGE_URL));
+//    switchToBlocksButton.setWidth("25px");
+//    switchToBlocksButton.setHeight("100%");
+
+    // Add the Code Navigation arrow
+//    switchToDesignerButton = new VerticalPanel();
+//    switchToDesignerButton.setVerticalAlignment(VerticalPanel.ALIGN_MIDDLE);
+//    switchToDesignerButton.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+//    switchToDesignerButton.setStyleName("ode-NavArrow");
+//    switchToDesignerButton.add(new Image(LEFT_ARROW_IMAGE_URL));
+//    switchToDesignerButton.setWidth("25px");
+//    switchToDesignerButton.setHeight("100%");
 
     designToolbar = new DesignToolbar();
     dVertPanel.add(designToolbar);
@@ -540,13 +582,16 @@ public class Ode implements EntryPoint {
     workColumns = new HorizontalPanel();
     workColumns.setWidth("100%");
 
+    //workColumns.add(switchToDesignerButton);
+
     Box palletebox = PaletteBox.getPaletteBox();
-    palletebox.setWidth("225px");
+    palletebox.setWidth("222px");
     workColumns.add(palletebox);
 
     Box viewerbox = ViewerBox.getViewerBox();
     workColumns.add(viewerbox);
     workColumns.setCellWidth(viewerbox, "97%");
+    workColumns.setCellHeight(viewerbox, "97%");
 
     structureAndAssets = new VerticalPanel();
     structureAndAssets.setVerticalAlignment(VerticalPanel.ALIGN_TOP);
@@ -559,11 +604,11 @@ public class Ode implements EntryPoint {
     workColumns.add(structureAndAssets);
 
     Box propertiesbox = PropertiesBox.getPropertiesBox();
-    propertiesbox.setWidth("210px");
+    propertiesbox.setWidth("222px");
     workColumns.add(propertiesbox);
-
+    //switchToBlocksButton.setHeight("650px");
+    //workColumns.add(switchToBlocksButton);
     dVertPanel.add(workColumns);
-
     designTabIndex = deckPanel.getWidgetCount();
     deckPanel.add(dVertPanel);
 
@@ -624,14 +669,17 @@ public class Ode implements EntryPoint {
     mainPanel.setCellHeight(deckPanel, "100%");
     mainPanel.setCellWidth(deckPanel, "100%");
 
+//    mainPanel.add(switchToDesignerButton, DockPanel.WEST);
+//    mainPanel.add(switchToBlocksButton, DockPanel.EAST);
+
     //Commenting out for now to gain more space for the blocks editor
-    //mainPanel.add(statusPanel, DockPanel.SOUTH);
+    mainPanel.add(statusPanel, DockPanel.SOUTH);
     mainPanel.setSize("100%", "100%");
     RootPanel.get().add(mainPanel);
 
     // There is no sure-fire way of preventing people from accidentally navigating away from ODE
     // (e.g. by hitting the Backspace key). What we do need though is to make sure that people will
-    // not lose any work because of this. We hook into the window closing event to detect the
+    // not lose any work because of this. We hook into the window closing  event to detect the
     // situation.
     Window.addWindowClosingHandler(new Window.ClosingHandler() {
       @Override
@@ -639,24 +687,6 @@ public class Ode implements EntryPoint {
         onClosing();
       }
     });
-
-    if (AppInventorFeatures.showSplashScreen()) {
-      createWelcomeDialog(true);
-    } else {
-      getProjectService().getProjects(new AsyncCallback<long[]>() {
-          @Override
-          public void onSuccess(long [] projectIds) {
-            if (projectIds.length == 0) {
-              createNoProjectsDialog(true);
-            }
-          }
-
-          @Override
-          public void onFailure(Throwable projectIds) {
-            OdeLog.elog("Could not get project list");
-          }
-        });
-    }
 
     setupMotd();
   }
@@ -734,6 +764,26 @@ public class Ode implements EntryPoint {
    */
   public DesignToolbar getDesignToolbar() {
     return designToolbar;
+  }
+
+  /**
+   * Returns the design tool bar.
+   *
+   * @return  {@link DesignToolbar}
+   */
+  public TopToolbar getTopToolbar() {
+    return topToolbar;
+  }
+
+  /**
+   * Set the location of the topToolBar. Called from
+   * TopPanel(). We need a way to find it because the
+   * blockly code needs to interact with the Connect-To
+   * dropdown when a connection to a companion terminates.
+   */
+
+  public void setTopToolbar(TopToolbar toolbar) {
+    topToolbar = toolbar;
   }
 
   /**
@@ -922,7 +972,7 @@ public class Ode implements EntryPoint {
     // Create the UI elements of the DialogBox
     final DialogBox dialogBox = new DialogBox(true);
     dialogBox.setStylePrimaryName("ode-DialogBox");
-    dialogBox.setText("Welcome to App Inventor!");
+    dialogBox.setText("Welcome to App Inventor 2!");
 
     Grid mainGrid = new Grid(2, 2);
     mainGrid.getCellFormatter().setAlignment(0,
@@ -950,26 +1000,33 @@ public class Ode implements EntryPoint {
         HasHorizontalAlignment.ALIGN_LEFT,
         HasVerticalAlignment.ALIGN_MIDDLE);
 
-    Label messageChunk1 = new Label("You don't have any projects yet."
-        + " To learn how to use App Inventor, click the \"Learn\" item"
-        + " at the top of the window; or to start your first project, click "
-        + " the \"New\" button at the upper left of the window.");
+    Label messageChunk1 = new HTML("<p>You don't have any projects in App Inventor 2 yet. " +
+      "To learn how to use App Inventor, click the \"Guide\" " +
+      "link at the upper right of the window; or to start your first project, " +
+      "click the \"New\" button at the upper left of the window.</p>\n<p>" +
+      "<strong>Where did my projects go?</strong> " +
+      "If you had projects but now they're missing, " +
+      "you are probably looking for App Inventor version 1. " +
+      "It's still available here: " +
+      "<a href=\"http://beta.appinventor.mit.edu\" target=\"_blank\">beta.appinventor.mit.edu</a></p>\n");
+
+
     messageChunk1.setWidth("23em");
     Label messageChunk2 = new Label("Happy Inventing!");
 
     // Add the elements to the grids and DialogBox.
     messageGrid.setWidget(0, 0, messageChunk1);
     messageGrid.setWidget(1, 0, messageChunk2);
-
     mainGrid.setWidget(0, 0, dialogImage);
     mainGrid.setWidget(0, 1, messageGrid);
 
     dialogBox.setWidget(mainGrid);
-
     dialogBox.center();
+
     if (showDialog) {
       dialogBox.show();
     }
+
     return dialogBox;
   }
 
@@ -1017,9 +1074,12 @@ public class Ode implements EntryPoint {
     DialogBoxContents.add(message);
     DialogBoxContents.add(holder);
     dialogBox.setWidget(DialogBoxContents);
-    dialogBox.show();
+    if (showDialog) {
+      dialogBox.show();
+    }
     return dialogBox;
   }
+
 
 
   /* Gets the default parameters from SemWebConstants.properties
@@ -1040,5 +1100,146 @@ public class Ode implements EntryPoint {
   public SemWebServiceAsync getSemanticWebService() {
     return semwebService;
   }
+
+
+  /**
+   * Show a Survey Splash Screen to the user if they have not previously
+   * acknowledged it.
+   */
+  private void showSurveySplash() {
+    // Create the UI elements of the DialogBox
+    final DialogBox dialogBox = new DialogBox(false, true); // DialogBox(autohide, modal)
+    dialogBox.setStylePrimaryName("ode-DialogBox");
+    dialogBox.setText("Welcome to App Inventor!");
+    dialogBox.setHeight("200px");
+    dialogBox.setWidth("600px");
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(true);
+    dialogBox.center();
+    VerticalPanel DialogBoxContents = new VerticalPanel();
+    HTML message = new HTML("<h2>Please fill out a short voluntary survey so that we can learn more about our users and improve MIT App Inventor.</h2>");
+    message.setStyleName("DialogBox-message");
+    FlowPanel holder = new FlowPanel();
+    Button takesurvey = new Button("Take Survey Now");
+    takesurvey.addClickListener(new ClickListener() {
+        public void onClick(Widget sender) {
+          dialogBox.hide();
+          // Update Splash Settings here
+          userSettings.getSettings(SettingsConstants.SPLASH_SETTINGS).
+            changePropertyValue(SettingsConstants.SPLASH_SETTINGS_SHOWSURVEY,
+              "" + YaVersion.SPLASH_SURVEY);
+          userSettings.saveSettings(null);
+          takeSurvey();         // Open survey in a new window
+          maybeShowSplash();
+        }
+      });
+    holder.add(takesurvey);
+    Button latersurvey = new Button("Take Survey Later");
+    latersurvey.addClickListener(new ClickListener() {
+        public void onClick(Widget sender) {
+          dialogBox.hide();
+          maybeShowSplash();
+        }
+      });
+    holder.add(latersurvey);
+    Button neversurvey = new Button("Never Take Survey");
+    neversurvey.addClickListener(new ClickListener() {
+        public void onClick(Widget sender) {
+          dialogBox.hide();
+          // Update Splash Settings here
+          Settings settings =
+            userSettings.getSettings(SettingsConstants.SPLASH_SETTINGS);
+          settings.changePropertyValue(SettingsConstants.SPLASH_SETTINGS_SHOWSURVEY,
+            "" + YaVersion.SPLASH_SURVEY);
+          String declined = settings.getPropertyValue(SettingsConstants.SPLASH_SETTINGS_DECLINED);
+          if (declined == null) declined = ""; // Shouldn't happen
+          if (declined != "") declined += ",";
+          declined += "" + YaVersion.SPLASH_SURVEY; // Record that we declined this survey
+          settings.changePropertyValue(SettingsConstants.SPLASH_SETTINGS_DECLINED, declined);
+          userSettings.saveSettings(null);
+          maybeShowSplash();
+        }
+      });
+    holder.add(neversurvey);
+    DialogBoxContents.add(message);
+    DialogBoxContents.add(holder);
+    dialogBox.setWidget(DialogBoxContents);
+    dialogBox.show();
+  }
+
+  private void maybeShowSplash() {
+    if (AppInventorFeatures.showSplashScreen()) {
+      createWelcomeDialog(true);
+    } else {
+      getProjectService().getProjects(new AsyncCallback<long[]>() {
+          @Override
+            public void onSuccess(long [] projectIds) {
+            if (projectIds.length == 0) {
+              createNoProjectsDialog(true);
+            }
+          }
+
+          @Override
+            public void onFailure(Throwable projectIds) {
+            OdeLog.elog("Could not get project list");
+          }
+        });
+    }
+  }
+
+  // Display the Survey and/or Normal Splash Screens
+  // (if enabled). This function is called out of SplashSettings.java
+  // after the userSettings object is loaded (above) and parsed.
+  public void showSplashScreens() {
+    boolean showSplash = false;
+    if (AppInventorFeatures.showSurveySplashScreen()) {
+      int nvalue = 0;
+      String value = userSettings.getSettings(SettingsConstants.SPLASH_SETTINGS).
+        getPropertyValue(SettingsConstants.SPLASH_SETTINGS_SHOWSURVEY);
+      if (value != null) {
+        nvalue = Integer.parseInt(value);
+      }
+      if (nvalue < YaVersion.SPLASH_SURVEY) {
+        showSurveySplash();
+      } else {
+        showSplash = true;
+      }
+    } else {
+      showSplash = true;
+    }
+    if (showSplash) {
+      maybeShowSplash();
+    }
+  }
+
+  /**
+   * generateNonce() -- Generate a unique String value
+   * this value is used to reference a built APK without
+   * requiring explicit authentication.
+   *
+   * @return nonce
+   */
+  public String generateNonce() {
+    int v = random.nextInt(1000000);
+    nonce = Integer.toString(v, 36); // Base 36 string
+    return nonce;
+  }
+
+  /*
+   * getNonce() -- return a previously generated nonce.
+   *
+   * @return nonce
+   */
+  public String getNonce() {
+    return nonce;
+  }
+
+  // Native code to open a new window (or tab) to display the
+  // desired survey. The value below "http://web.mit.edu" is just
+  // a plug value. You should insert your own as appropriate.
+  private native void takeSurvey() /*-{
+    $wnd.open("http://web.mit.edu");
+  }-*/;
+
 
 }

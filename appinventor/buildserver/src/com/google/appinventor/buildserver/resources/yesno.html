@@ -13,13 +13,18 @@
         <script src="jquery.mobile.min.js">
         </script>
         <script>
-            function formSubmit()
-                {
+            function formSubmit(){
                     var response = $('input:radio[name="ans"]:checked').val();
                     saveSurvey.saveResponse(response);
                     saveSurvey.closeApp();
 
-                }
+            }
+
+            function formCancel(){
+                var response = "N/A";
+                saveSurvey.saveResponse(response);
+
+            }
         </script>
     </head>
     <body>
@@ -32,28 +37,25 @@
             </div>-->
             <div data-role="content">
                 <h1 id="_txt_qt">
-                    Question_content
+                    Question
                 </h1>
                 <div data-role="fieldcontain">
                     <fieldset data-role="controlgroup" data-type="vertical">
                         <legend>
                             Choose:
                         </legend>
-                        <input id="radio2" name="ans" value="radio1" type="radio" />
-                        <label for="radio2">
+                        <input id="radio1" name="ans" value="radio1" type="radio" />
+                        <label for="radio1">
                             Yes
                         </label>
-                        <input id="radio4" name="ans" value="radio4" type="radio" />
-                        <label for="radio4">
+                        <input id="radio2" name="ans" value="radio2" type="radio" />
+                        <label for="radio2">
                             No
-                        </label>
-                        <input id="radio5" name="ans" value="radio5" type="radio" />
-                        <label for="radio5">
-                            Decline
                         </label>
                     </fieldset>
                 </div>
                 <input value="Submit" onclick="formSubmit()" type="submit" />
+                <input id="_btn_cancel" onclick="formCancel()" value="Withdraw" type="submit" />
             </div>
         </div>
         <script>
