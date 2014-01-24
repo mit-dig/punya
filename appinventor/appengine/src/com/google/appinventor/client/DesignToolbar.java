@@ -7,6 +7,7 @@ package com.google.appinventor.client;
 
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
+import com.google.appinventor.client.editor.SettingsEditor;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
 import com.google.appinventor.client.explorer.commands.AddFormCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
@@ -18,6 +19,7 @@ import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
+import com.google.appinventor.client.explorer.project.Project;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.Command;
@@ -98,6 +100,7 @@ public class DesignToolbar extends Toolbar {
   private static final String WIDGET_NAME_SCREENS_DROPDOWN = "ScreensDropdown";
   private static final String WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR = "SwitchToBlocksEditor";
   private static final String WIDGET_NAME_SWITCH_TO_FORM_EDITOR = "SwitchToFormEditor";
+  private static final String WIDGET_NAME_SETTINGS = "Settings";
 
   // Enum for type of view showing in the design tab
   public enum View {
@@ -146,6 +149,8 @@ public class DesignToolbar extends Toolbar {
           new AddFormAction()));
       addButton(new ToolbarItem(WIDGET_NAME_REMOVEFORM, MESSAGES.removeFormButton(),
           new RemoveFormAction()));
+      addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
+          new ChangeSettingsAction()));
     }
 
     addButton(new ToolbarItem(WIDGET_NAME_SWITCH_TO_FORM_EDITOR,
@@ -433,6 +438,15 @@ public class DesignToolbar extends Toolbar {
   public DesignProject getCurrentProject() {
     return currentProject;
   }
+  
+  private class ChangeSettingsAction implements Command {
+    @Override
+    public void execute() {
+    ProjectRootNode projectRootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
+    Project p = Ode.getInstance().getProjectManager().getProject(projectRootNode);
+    new SettingsEditor(p).show();
+    }
+}
 
 
 }

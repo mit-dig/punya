@@ -1260,5 +1260,14 @@ public interface OdeMessages extends Messages {
   "<br /> The compiler error output was <br /> {0}.")
   @Description("Compilation error, with error message.")
   String unableToCompile(String errorMesssage);
+  
+  @DefaultMessage("The URI {0} does not end in a # or /")
+  @Description("Exception message used when a URI entered by the user does not end in an appropriate character.")
+  String notABaseUri(String uri);
+    
+  @DefaultMessage("Settings")
+  @Description("Change the project settings")
+  String changeSettingsButton();
+  
 
 }
