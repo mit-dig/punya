@@ -203,6 +203,8 @@ public class DexExecTask  {
         if (mVerbose) {
             commandLineList.add("--verbose");
         }
+        commandLineList.add("--force-jumbo");
+        commandLineList.add("--no-optimize");
 
         commandLineList.add("--output=" + output);
 
