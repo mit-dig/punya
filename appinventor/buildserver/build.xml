@@ -136,8 +136,8 @@
     <copy toFile="${classes.files.dir}/google-api-client-android2-beta.jar" file="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android2-beta.jar" file="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/jena-core.jar" file="${lib.dir}/jena/jena-core-2.10.0.jar" />
-    <copy toFile="${classes.files.dir}/jena-arq.jar" file="${lib.dir}/jena/jena-arq-2.10.0.jar" />
+    <copy toFile="${classes.files.dir}/jena-core.jar" file="${lib.dir}/jena/jena-core-2.10.0-android.jar" />
+    <copy toFile="${classes.files.dir}/jena-arq.jar" file="${lib.dir}/jena/jena-arq-2.10.0-android.jar" />
     <copy toFile="${classes.files.dir}/jena-iri.jar" file="${lib.dir}/jena/jena-iri-0.9.5.jar" />
     <!--
     <copy toFile="${classes.files.dir}/jena-interfaces.jar" file="${lib.dir}/jena/jena-interfaces-2.10.0.jar" />
