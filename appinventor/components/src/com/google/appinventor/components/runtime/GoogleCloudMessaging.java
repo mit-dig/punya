@@ -186,6 +186,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         }
         sharedPrefsEditor.commit();
       }
+    
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public String RegId(){
+      String reg_id = retrieveRegId();
+      return reg_id;
+    }
 
     @Override
     public void onDestroy() {
