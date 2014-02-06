@@ -178,6 +178,10 @@ public final class ErrorMessages {
   public static final int ERROR_GOOGLE_PLAY_DISABLED = 2017;
   public static final int ERROR_GOOGLE_PLAY_INVALID = 2018;
 
+  // for Google Cloud Messaging
+  public static final int ERROR_GCM_APPSERVER_INVALID = 2019;
+  
+  
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
   static {
@@ -453,6 +457,7 @@ public final class ErrorMessages {
          
     errorMessages.put(ERROR_SENSORDB_NOTACTIVE, "Sensor: %s is not active");
     errorMessages.put(ERROR_SENSORDB_NOTAVAILABLE, "Sensor: %s is not available");
+    errorMessages.put(ERROR_GCM_APPSERVER_INVALID, "Cannot connect to GCM app server");
     
     
     
