@@ -287,8 +287,10 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                                 // unregistered callback upon completion, but
                                 // GCMIntentService.onUnregistered() will ignore it.
                                 GCMRegistrar.unregister(form);
-                                form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "Register",
-                                        500, "Please check the server/connection.");
+//                                form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "Register",
+//                                        500, "Please check the server/connection.");
+                                //TODO: need to add a error message..
+                                Log.i("TAG", "some one dies....and cause us to die...");
                             }
                         }
                     }
