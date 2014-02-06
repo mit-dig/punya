@@ -120,7 +120,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
 
     private String gcmMessage = "";
     
-    private String regId="";
     private static final String REG_ID_TAG = "RegistrationId";
     private final SharedPreferences sharedPreferences;
 
@@ -134,7 +133,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         context = container.$context();
         mainUIThreadActivity = container.$context();
         sharedPreferences = container.$context().getSharedPreferences(GCMConstants.PREFS_GOOGLECLOUDMESSAGING,Context.MODE_PRIVATE);
-        regId = retrieveRegId();
         
         // get Notification Manager
         String ns = Context.NOTIFICATION_SERVICE;
@@ -165,21 +163,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     }
     
     private String retrieveRegId() {
-        String reg_id = sharedPreferences.getString(REG_ID_TAG, "");
-        if (reg_id.length() == 0 ) {
-          return "";
-        }
-        return reg_id;
-      }
-    
-    private void saveRegId(String reg_id) {
-        final SharedPreferences.Editor sharedPrefsEditor = sharedPreferences.edit();
-        if (regId == null) {
-          sharedPrefsEditor.remove(REG_ID_TAG);
-        } else {
-          sharedPrefsEditor.putString(REG_ID_TAG, reg_id);
-        }
-        sharedPrefsEditor.commit();
+        String regId = GCMRegistrar.getRegistrationId(form);  
+        return regId;
       }
 
     @Override
@@ -191,6 +176,11 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
           doUnbindService();
           Log.i(TAG, "In the onDestroy method, after the doUnbindService method.");
         }
+    }
+    
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public String RegId() {
+        return retrieveRegId();
     }
 
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
@@ -298,8 +288,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                 }
             }
         });
-        regId = GCMRegistrar.getRegistrationId(form);
-        Log.i(TAG,"The regId is "+regId);
     }
     
     /**
@@ -310,6 +298,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         
         AsynchUtil.runAsynchronously(new Runnable() {
             public void run() {
+                final String regId = GCMRegistrar.getRegistrationId(form);     
                 try {
                     Enabled(false);
                     Log.i(TAG, "after remove the Regid: "+regId);
@@ -317,7 +306,6 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                     Log.i(TAG, "after unregister from the GCMServerUtilities");
                     GCMRegistrar.unregister(form);
                     Log.i(TAG, "after unregister from the GCMRegistrar");
-                    saveRegId(null);
                     return;
                 } catch (Exception e) {
                     Log.i(TAG, "within the exception of UnRegister");
