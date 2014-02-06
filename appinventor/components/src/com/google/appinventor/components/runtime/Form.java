@@ -3,6 +3,9 @@
 // Copyright 2011-2012 MIT, All rights reserved
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 
+// ***********************************************
+// If we're not going to go this route with onDestroy, then at least get rid of the DEBUG flag.
+
 package com.google.appinventor.components.runtime;
 
 import java.io.IOException;
@@ -71,7 +74,7 @@ import com.google.appinventor.components.runtime.util.ViewUtil;
  *
  */
 @DesignerComponent(version = YaVersion.FORM_COMPONENT_VERSION,
-    category = ComponentCategory.ARRANGEMENTS,
+    category = ComponentCategory.LAYOUT,
     description = "Top-level component containing all other components in the program",
     showOnPalette = false)
 @SimpleObject
@@ -80,9 +83,6 @@ import com.google.appinventor.components.runtime.util.ViewUtil;
 public class Form extends FragmentActivity
     implements Component, ComponentContainer, HandlesEventDispatching {
   private static final String LOG_TAG = "Form";
-
-  // *** set this back to false after review
-  private static final boolean DEBUG = true;
 
   private static final String RESULT_NAME = "APP_INVENTOR_RESULT";
 
@@ -141,7 +141,7 @@ public class Form extends FragmentActivity
   private final Set<OnResumeListener> onResumeListeners = Sets.newHashSet();
   private final Set<OnPauseListener> onPauseListeners = Sets.newHashSet();
   private final Set<OnDestroyListener> onDestroyListeners = Sets.newHashSet();
-  
+
   // AppInventor lifecycle: listeners for the Initialize Event
   private final Set<OnInitializeListener> onInitializeListeners = Sets.newHashSet();
 
@@ -224,6 +224,16 @@ public class Form extends FragmentActivity
         Log.i(LOG_TAG, "GCMIntentValue:"+startIntent.getStringExtra(ARGUMENT_GCM));
         startupValueForGCM = startIntent.getStringExtra(ARGUMENT_GCM); 
     }
+    
+    /*
+     * Added by Fuming Shih
+     * We can have extras values that are intented for the survey components
+     */
+    if (startIntent != null && startIntent.hasExtra(ARGUMENT_SURVEY)){
+      Log.i(LOG_TAG, "SurveyIntentValue:"+startIntent.getStringExtra(ARGUMENT_SURVEY));
+      startupValueForSurvey = startIntent.getStringExtra(ARGUMENT_SURVEY); 
+  }
+    
     
     // Add application components to the form
     $define();
@@ -320,14 +330,14 @@ public class Form extends FragmentActivity
    */
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {      
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
       if (!BackPressed()) {
         boolean handled = super.onKeyDown(keyCode, event);
         AnimationUtil.ApplyCloseScreenAnimation(this, closeAnimType);
         return handled;
       } else {
         return true;
-      }      
+      }
     }
     return super.onKeyDown(keyCode, event);
   }
@@ -336,7 +346,7 @@ public class Form extends FragmentActivity
   public boolean BackPressed() {
     return EventDispatcher.dispatchEvent(this, "BackPressed");
   }
-  
+
   // onActivityResult should be triggered in only two cases:
   // (1) The result is for some other component in the app, not this Form itself
   // (2) This page started another page, and that page is closing, and passing
@@ -372,15 +382,11 @@ public class Form extends FragmentActivity
   // functionName is a string to include in the error message that will be shown
   // if the JSON decoding fails
   private  static Object decodeJSONStringForForm(String jsonString, String functionName) {
-    if (DEBUG) {
-      Log.i(LOG_TAG, "decodeJSONStringForForm -- decoding JSON representation:" + jsonString);
-    }
+    Log.i(LOG_TAG, "decodeJSONStringForForm -- decoding JSON representation:" + jsonString);
     Object valueFromJSON = "";
     try {
       valueFromJSON = JsonUtil.getObjectFromJson(jsonString);
-      if (DEBUG) {
-        Log.i(LOG_TAG, "decodeJSONStringForForm -- got decoded JSON:" + valueFromJSON.toString());
-      }
+      Log.i(LOG_TAG, "decodeJSONStringForForm -- got decoded JSON:" + valueFromJSON.toString());
     } catch (JSONException e) {
       activeForm.dispatchErrorOccurredEvent(activeForm, functionName,
           // showing the start value here will produce an ugly error on the phone, but it's
@@ -433,11 +439,11 @@ public class Form extends FragmentActivity
   public void registerForOnResume(OnResumeListener component) {
     onResumeListeners.add(component);
   }
-  
+
   /**
    * An app can register to be notified when App Inventor's Initialize
    * block has fired.  They will be called in Initialize().
-   * 
+   *
    * @param component
    */
   public void registerForOnInitialize(OnInitializeListener component) {
@@ -575,12 +581,12 @@ public class Form extends FragmentActivity
         if (frameLayout != null && frameLayout.getWidth() != 0 && frameLayout.getHeight() != 0) {
           EventDispatcher.dispatchEvent(Form.this, "Initialize");
           screenInitialized = true;
-          
+
           //  Call all apps registered to be notified when Initialize Event is dispatched
           for (OnInitializeListener onInitializeListener : onInitializeListeners) {
             onInitializeListener.onInitialize();
           }
-          
+
         } else {
           // Try again later.
           androidUIHandler.post(this);
@@ -773,9 +779,9 @@ public class Form extends FragmentActivity
   /**
    * The requested screen orientation. Commonly used values are
       unspecified (-1), landscape (0), portrait (1), sensor (4), and user (2).  " +
-      "See the Android developer documentation for ActivityInfo.Screen_Orientation for the " + 
+      "See the Android developer documentation for ActivityInfo.Screen_Orientation for the " +
       "complete list of possible settings.
-   * 
+   *
    * ScreenOrientation property getter method.
    *
    * @return  screen orientation
@@ -783,7 +789,7 @@ public class Form extends FragmentActivity
   @SimpleProperty(category = PropertyCategory.APPEARANCE,
       description = "The requested screen orientation. Commonly used values are" +
       " unspecified (-1), landscape (0), portrait (1), sensor (4), and user (2).  " +
-      "See the Android developer docuemntation for ActivityInfo.Screen_Orientation for the " + 
+      "See the Android developer docuemntation for ActivityInfo.Screen_Orientation for the " +
       "complete list of possible settings.")
   public String ScreenOrientation() {
     switch (getRequestedOrientation()) {
@@ -1132,15 +1138,11 @@ public class Form extends FragmentActivity
   // if the JSON encoding fails
   private static String jsonEncodeForForm(Object value, String functionName) {
     String jsonResult = "";
-    if (DEBUG) {
-      Log.i(LOG_TAG, "jsonEncodeForForm -- creating JSON representation:" + value.toString());
-    }
+    Log.i(LOG_TAG, "jsonEncodeForForm -- creating JSON representation:" + value.toString());
     try {
       // TODO(hal): check that this is OK for raw strings
       jsonResult = JsonUtil.getJsonRepresentation(value);
-      if (DEBUG) {
-        Log.i(LOG_TAG, "jsonEncodeForForm -- got JSON representation:" + jsonResult);
-      }
+      Log.i(LOG_TAG, "jsonEncodeForForm -- got JSON representation:" + jsonResult);
     } catch (JSONException e) {
       activeForm.dispatchErrorOccurredEvent(activeForm, functionName,
           // showing the bad value here will produce an ugly error on the phone, but it's
@@ -1153,10 +1155,8 @@ public class Form extends FragmentActivity
   @SimpleEvent(description = "Event raised when another screen has closed and control has " +
       "returned to this screen.")
   public void OtherScreenClosed(String otherScreenName, Object result) {
-    if (DEBUG) {
-      Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " +
-          otherScreenName + ", result = " + result.toString());
-    }
+    Log.i(LOG_TAG, "Form " + formName + " OtherScreenClosed, otherScreenName = " +
+        otherScreenName + ", result = " + result.toString());
     EventDispatcher.dispatchEvent(this, "OtherScreenClosed", otherScreenName, result);
   }
 

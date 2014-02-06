@@ -124,6 +124,17 @@ public interface ProjectService extends RemoteService {
   byte[] loadraw(long projectId, String fileId);
 
   /**
+   * Loads the file information associated with a node in the project tree. The
+   * actual return value is the raw file contents encoded as base64.
+   *
+   * @param projectId  project ID
+   * @param fileId  project node whose source should be loaded
+   *
+   * @return  raw file content as base64
+   */
+  String loadraw2(long projectId, String fileId);
+
+  /**
    * Loads the contents of multiple files.
    *
    * @param files  list containing file descriptor of files to be loaded
@@ -156,11 +167,12 @@ public interface ProjectService extends RemoteService {
    * Invokes a build command for the project on the back-end.
    *
    * @param projectId  project ID
+   * @param nonce used to access the built project -- random string
    * @param target  build target (optional, implementation dependent)
    *
    * @return  results of invoking the build command
    */
-  RpcResult build(long projectId, String target);
+  RpcResult build(long projectId, String nonce, String target);
 
   /**
    * Gets the result of a build command for the project from the back-end.

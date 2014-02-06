@@ -11,6 +11,7 @@ import com.google.appinventor.shared.rpc.project.NewProjectParameters;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.user.User;
 import com.google.appinventor.shared.storage.StorageUtil;
+import com.google.appinventor.shared.util.Base64Util;
 
 import java.util.List;
 
@@ -160,6 +161,20 @@ public abstract class CommonProjectService {
   }
 
   /**
+   * Loads the raw content of the associated file, base 64 encodes it
+   * and returns the resulting base64 encoded string.
+   *
+   * @param userId the userid
+   * @param projectId the project root node ID
+   * @param fileId project node whose content is to be downloaded
+   * @param the file contents encoded in base64
+   */
+  public String loadraw2(String userId, long projectId, String fileId) {
+    byte [] filedata = storageIo.downloadRawFile(userId, projectId, fileId);
+    return Base64Util.encodeLines(filedata);
+  }
+
+  /**
    * Saves the content of the file associated with a node in the project tree.
    *
    * @param userId the user id
@@ -180,11 +195,12 @@ public abstract class CommonProjectService {
    *
    * @param user the User that owns the {@code projectId}.
    * @param projectId  project id to be built
+   * @param nonce -- random string used to find finished APK
    * @param target  build target (optional, implementation dependent)
    *
    * @return  build results
    */
-  public abstract RpcResult build(User user, long projectId, String target);
+  public abstract RpcResult build(User user, long projectId, String nonce, String target);
 
   /**
    * Gets the result of a build command for the project.

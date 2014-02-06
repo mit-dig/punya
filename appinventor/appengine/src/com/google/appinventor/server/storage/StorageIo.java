@@ -6,11 +6,13 @@
 package com.google.appinventor.server.storage;
 
 import com.google.appinventor.shared.rpc.Motd;
+import com.google.appinventor.shared.rpc.Nonce;
 import com.google.appinventor.shared.rpc.project.Project;
 import com.google.appinventor.shared.rpc.project.ProjectSourceZip;
 import com.google.appinventor.shared.rpc.user.User;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -418,5 +420,14 @@ public interface StorageIo {
   void storeIpAddressByKey(String key, String ipAddress);
 
   boolean checkWhiteList(String email);
+
+  void storeFeedback(final String notes, final String foundIn, final String faultData,
+    final String comments, final String datestamp, final String email, final String projectId);
+
+  Nonce getNoncebyValue(String nonceValue);
+  void storeNonce(final String nonceValue, final String userId, final long projectId);
+
+  // Cleanup expired nonces
+  void cleanupNonces();
 
 }
