@@ -41,7 +41,7 @@ public final class GCMServerUtilities {
     private static final int BACKOFF_MILLI_SECONDS = 2000;
     private static final Random random = new Random();
     
-    private static final String TAG = "ServerUtilities";
+    private static final String TAG = "GCMServerUtilities";
     //URL for webapp from Google App Scripts (GAS)
     private static final String GAS_BASE = "https://script.google.com/macros";
     
@@ -110,9 +110,21 @@ public final class GCMServerUtilities {
      */
     static void unregister(final Context context, final String regId, String SERVER_URL) {
         Log.i(TAG, "unregistering device (regId = " + regId + ")");
-        String serverUrl = SERVER_URL + "/unregister";
+        
+        String serverUrl;
         Map<String, String> params = new HashMap<String, String>();
         params.put("regId", regId);
+        
+        // If the webapp is from GAS, we need to add redirect url extension to the params because Google
+        // does not allow that.
+        if(SERVER_URL.contains(GAS_BASE)){
+        	serverUrl = SERVER_URL;
+        	params.put("type", "unregister");
+        }        
+        else {
+        	serverUrl = SERVER_URL + "/unregister";
+        }
+        
         try {
             Log.i(TAG,"Before post method, the params is "+params.toString());
             post(serverUrl, params);
