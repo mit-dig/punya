@@ -550,11 +550,11 @@ public final class RdfUtil {
     Pattern prefixPattern = Pattern.compile("@prefix[ \t]+([^:]*:)[ \t]+<([^>]+)>[ \t]+.[ \t\r\n]+", Pattern.CASE_INSENSITIVE);
     Matcher matcher = prefixPattern.matcher(contents);
     StringBuffer prefixes = new StringBuffer();
-    StringBuffer sb = new StringBuffer("INSERT DATA { ");
+    StringBuffer sb = new StringBuffer();
     if(graph != null && graph.length() != 0) {
       sb.append("GRAPH <"+graph+"> { ");
     }
-    sb.append("\r\n");
+    //sb.append("\r\n");
     while(matcher.find()) {
       prefixes.append("PREFIX ");
       prefixes.append(matcher.group(1));
@@ -568,7 +568,7 @@ public final class RdfUtil {
     if(graph != null && graph.length() != 0) {
       prefixes.append("}\r\n");
     }
-    prefixes.append("}\r\n");
+    //prefixes.append("}\r\n");
     sb = null;
     HttpURLConnection conn = null;
     Log.i(LOG_TAG, "Sending update to server:");
@@ -578,9 +578,9 @@ public final class RdfUtil {
       conn.setDoInput(true);
       conn.setDoOutput(true);
       conn.setRequestMethod("POST");
-      conn.setRequestProperty("Content-Length", Integer.toString(prefixes.length()));
-      conn.setRequestProperty("Content-Type", "application/sparql-update");
-      conn.setRequestProperty("Accept", "*/*");
+      //conn.setRequestProperty("Content-Length", Integer.toString(prefixes.length()));
+      conn.setRequestProperty("Content-Type", "text/plain; charset=UTF-8");
+      //conn.setRequestProperty("Accept", "*/*");
       String userInfo = uri.getUserInfo();
       if(userInfo != null && userInfo.length() != 0) {
         if(!userInfo.contains(":")) {
