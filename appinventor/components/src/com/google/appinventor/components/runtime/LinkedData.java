@@ -438,7 +438,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     } catch(final Exception e) {
       form.runOnUiThread(new Runnable() {
         public void run() {
-          Log.w(LOG_TAG, "Unable to publish graph.", e);
+          Log.w(LOG_TAG, "Unable to insert data to graph.", e);
           FailedToAddDataToWeb(graph, e.getLocalizedMessage());
         }
       });
@@ -453,6 +453,56 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   @SimpleEvent
   public void FinishedAddingDataToWeb(String graph) {
     EventDispatcher.dispatchEvent(this, "FinishedAddingDataToWeb", graph);
+  }
+  
+  /**
+   * Attempts to feed the statements contained within this Linked Data
+   * component into the endpoint (most likely CSPARQL).
+   */
+  @SimpleFunction
+  public void FeedDataToWeb() throws URISyntaxException {
+    final URI uri = URI.create(EndpointURL());
+    Runnable call = new Runnable() {
+      public void run() {
+        doFeedModel(uri);
+      }
+    };
+    AsynchUtil.runAsynchronously(call);
+  }
+  
+  private void doFeedModel(final URI uri) {
+    try {
+      if(RdfUtil.feedData(uri, model)) {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+            FinishedFeedingDataToWeb();
+          }
+        });
+      } else {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+            FailedToFeedDataToWeb("See log for details.");
+          }
+        });
+      }
+    } catch(final Exception e) {
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          Log.w(LOG_TAG, "Unable to feed data to web.", e);
+          FailedToFeedDataToWeb(e.getLocalizedMessage());
+        }
+      });
+    }
+  }
+
+  @SimpleEvent
+  public void FailedToFeedDataToWeb(String error) {
+    EventDispatcher.dispatchEvent(this, "FailedToFeedDataToWeb", error);
+  }
+
+  @SimpleEvent
+  public void FinishedFeedingDataToWeb() {
+    EventDispatcher.dispatchEvent(this, "FinishedFeedingDataToWeb");
   }
 
   /**

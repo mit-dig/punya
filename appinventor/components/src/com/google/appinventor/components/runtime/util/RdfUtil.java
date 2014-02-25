@@ -550,11 +550,11 @@ public final class RdfUtil {
     Pattern prefixPattern = Pattern.compile("@prefix[ \t]+([^:]*:)[ \t]+<([^>]+)>[ \t]+.[ \t\r\n]+", Pattern.CASE_INSENSITIVE);
     Matcher matcher = prefixPattern.matcher(contents);
     StringBuffer prefixes = new StringBuffer();
-    StringBuffer sb = new StringBuffer();
+    StringBuffer sb = new StringBuffer("INSERT DATA { ");
     if(graph != null && graph.length() != 0) {
       sb.append("GRAPH <"+graph+"> { ");
     }
-    //sb.append("\r\n");
+    sb.append("\r\n");
     while(matcher.find()) {
       prefixes.append("PREFIX ");
       prefixes.append(matcher.group(1));
@@ -568,7 +568,7 @@ public final class RdfUtil {
     if(graph != null && graph.length() != 0) {
       prefixes.append("}\r\n");
     }
-    //prefixes.append("}\r\n");
+    prefixes.append("}\r\n");
     sb = null;
     HttpURLConnection conn = null;
     Log.i(LOG_TAG, "Sending update to server:");
@@ -718,5 +718,68 @@ public final class RdfUtil {
       list.add( YailList.makeList( solution ) );
     }
     return YailList.makeList( list );
+  }
+  
+  /**
+   * Performs a POST to a remote CSPARQL Engine feed
+   * @param uri URI for the endpoint
+   * @param model RDF model to send to the endpoint
+   * @return true on success, false otherwise.
+   */
+  public static boolean feedData(URI uri, Model model) {
+    boolean success = false;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    model.write(baos, "TTL");
+    Log.d(LOG_TAG, "Byte array size: "+baos.size());
+    // get model contents in turtle
+    String contents = null;
+    try {
+      contents = baos.toString("UTF-8");
+    } catch(UnsupportedEncodingException e) {
+      Log.e(LOG_TAG, "Unable to encode query.", e);
+      return false;
+    }
+    baos = null;
+    
+    HttpURLConnection conn = null;
+    Log.i(LOG_TAG, "Sending update to server:");
+    Log.d(LOG_TAG, contents);
+    try {
+      conn = (HttpURLConnection) uri.toURL().openConnection();
+      conn.setDoInput(true);
+      conn.setDoOutput(true);
+      conn.setRequestMethod("POST");
+      conn.setRequestProperty("Content-Type", "text/plain; charset=UTF-8");
+      String userInfo = uri.getUserInfo();
+      if(userInfo != null && userInfo.length() != 0) {
+        if(!userInfo.contains(":")) {
+          userInfo = userInfo + ":";
+        }
+        String encodedInfo = Base64.encodeToString(userInfo.getBytes("UTF-8"), Base64.NO_WRAP).trim();
+        Log.d(LOG_TAG, "Authorization = "+encodedInfo);
+        conn.setRequestProperty("Authorization", "Basic "+encodedInfo);
+      }
+      conn.connect();
+      OutputStream os = conn.getOutputStream();
+      PrintStream ps = new PrintStream(os);
+      ps.print(contents);
+      ps.close();
+      int status = conn.getResponseCode();
+      Log.d(LOG_TAG, "HTTP Status = " + status);
+      if(status == 200) {
+        success = true;
+      } else if(status >= 400) {
+        success = false;
+        Log.w(LOG_TAG, "HTTP status for update was "+status);
+      }
+      conn.disconnect();
+    } catch (MalformedURLException e) {
+      Log.w(LOG_TAG, "Unable to insert triples due to malformed URL.");
+    } catch (ProtocolException e) {
+      Log.w(LOG_TAG, "Unable to perform HTTP POST to given URI.", e);
+    } catch (IOException e) {
+      Log.w(LOG_TAG, "Unable to insert triples due to communication issue.", e);
+    }
+    return success;
   }
 }
