@@ -595,5 +595,12 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/people.png")
   ImageResource contactInfo();
+  
+  /**
+   * Designer item: Pebble component in designer
+   * 
+   */
+  @Source("com/google/appinventor/images/pebble.png")
+  ImageResource pebbleSmartWatch();
 
 }

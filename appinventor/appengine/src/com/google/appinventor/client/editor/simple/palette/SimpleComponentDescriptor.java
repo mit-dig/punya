@@ -125,6 +125,7 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/googledrive.png", images.googledrive());   
     bundledImages.put("images/semanticWeb.png", images.semanticWeb());
     bundledImages.put("images/contactInfo.png", images.contactInfo());
+    bundledImages.put("images/pebble.png", images.pebbleSmartWatch());
 
     imagesInitialized = true;
   }

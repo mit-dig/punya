@@ -296,7 +296,8 @@ public class YaVersion {
   // - SEMANTIC_WEB_COMPONENT_VERSION is renamed to LINKED_DATA_COMPONENT_VERSION
   // - SemanticListPicker Component is renamed to LinkedDataListPicker Component
   // - SEMANTIC_LISTPICKER_COMPONENT_VERSION is renamed to LINKED_DATA_LISTPICKER_COMPONENT_VERSION
-  public static final int YOUNG_ANDROID_VERSION = 107;
+  // - The pebbleSmartWatch component was added.
+  public static final int YOUNG_ANDROID_VERSION = 108;
  
 
   // ............................... Blocks Language Version Number ...............................
@@ -812,6 +813,6 @@ public class YaVersion {
     
   public static final int CONTACTINFO_COMPONENT_VERSION = 1;	
 
-
+  public static final int PEBBLESMARTWATCH_COMPONENT_VERSION = 1;	
 
 }
