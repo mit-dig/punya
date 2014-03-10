@@ -26,7 +26,8 @@ import android.util.Log;
     iconName = "images/pebble.png")
 @UsesPermissions(permissionNames = 
         "android.permission.WAKE_LOCK, "
-        +"android.permission.VIBRATE"
+        +"android.permission.BLUETOOTH, "
+        +"android.permission.BLUETOOTH_ADMIN"
         )
 public final class PebbleSmartWatch extends AndroidNonvisibleComponent
         implements Component, OnDestroyListener {
