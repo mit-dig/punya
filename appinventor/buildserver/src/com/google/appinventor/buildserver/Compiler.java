@@ -390,14 +390,15 @@ public final class Compiler {
 
       
       // Google Cloud Messaging
-
-      out.write("<permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
-      out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n"); 
+      if (componentTypes.contains("GoogleCloudMessaging")|| componentTypes.contains("PctMessaging")){
+    	  out.write("<permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
+    	  out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n"); 
+            
+    	  out.write("<permission android:name=\"" + packageName +".permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
+    	  out.write("<uses-permission android:name=\""+ packageName +".permission.C2D_MESSAGE\" />\n"); 
+      }
       
-      out.write("<permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
-      out.write("<uses-permission android:name=\"appinventor.ai_test.GCM.permission.C2D_MESSAGE\" />\n"); 
       
-
       // add permission, and uses-permission, uses-feature specifically for Google Map
       // as stated here https://developers.google.com/maps/documentation/android/start
       if (componentTypes.contains("GoogleMap")){
@@ -514,16 +515,17 @@ public final class Compiler {
       out.write("    </activity>\n");
       
       // Add the Google Cloud Messaging service
+      if (componentTypes.contains("GoogleCloudMessaging")|| componentTypes.contains("PctMessaging")){
       // Declare and use a custom permission so only this application can receive GCM messages:
-      out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");    
-      out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
-      out.write("    <intent-filter>");
-      out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
-      out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
-      String temp787 ="        <category android:name=\""+packageName+"\" />\n"; 
-      out.write(temp787);
-      out.write("    </intent-filter>");
-      out.write("</receiver>");
+    	  out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");    
+    	  out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
+    	  out.write("    <intent-filter>");
+    	  out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
+    	  out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
+    	  out.write("        <category android:name=\""+packageName+"\" />\n"); 
+    	  out.write("    </intent-filter>");
+    	  out.write("</receiver>");
+      }
       
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
