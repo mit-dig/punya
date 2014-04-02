@@ -9,6 +9,8 @@ import com.google.appinventor.client.jquery.AsyncAutoCompleteObjectListHandler;
 import com.google.appinventor.client.jquery.AsyncAutoCompleteOptions;
 import com.google.appinventor.client.jquery.AutoCompletePosition;
 import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.xedge.jquery.client.JQEvent;
@@ -26,7 +28,7 @@ import com.xedge.jquery.ui.client.model.LabelValuePair;
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
-public class SemanticWebPropertyEditor extends PropertyEditor {
+public class SemanticWebPropertyEditor extends PropertyEditor implements ChangeHandler {
 
   /**
    * Enum used to represent the type of search the editor will
@@ -113,11 +115,17 @@ public class SemanticWebPropertyEditor extends PropertyEditor {
     options.setMinLength(3);
     options.setPosition(AutoCompletePosition.create("right top", "right bottom", "none"));
     ui.autocomplete(options);
+    textEdit.addChangeHandler(this);
   }
 
   @Override
   protected void updateValue() {
     textEdit.setText(property.getValue());
+  }
+
+  @Override
+  public void onChange(ChangeEvent arg0) {
+    property.setValue(textEdit.getText());
   }
 
 }
