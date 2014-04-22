@@ -494,6 +494,43 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       });
     }
   }
+            
+            @SimpleFunction
+            public String ResultsToSimpleJSON(final YailList results) {
+                StringBuilder sb = new StringBuilder("[");
+                for(int i = 0; i < results.size(); i++) {
+                    YailList solution = (YailList) results.getObject( i );
+                    if(i > 0) {
+                        sb.append(",");
+                    }
+                    sb.append("{");
+                    for(int j = 0; j < solution.size(); j++) {
+                        YailList binding = (YailList) solution.getObject( j );
+                        String varName = binding.getString( 0 );
+                        Object varValue = binding.getObject( 1 );
+                        if( j != 0 ) {
+                            sb.append(",");
+                        }
+                        sb.append("\"");
+                        sb.append(varName);
+                        sb.append("\":");
+                        if(isPrimitiveOrWrapper(varValue.getClass())) {
+                            sb.append(varValue);
+                        } else {
+                            sb.append("\"");
+                            sb.append(varValue);
+                            sb.append("\"");
+                        }
+                        sb.append("");
+                    }
+                    sb.append("}");
+                }
+                sb.append("]");
+                String result = sb.toString();
+                Log.d(LOG_TAG, "JSON = " + result);
+                return result;
+            }
+
 
   @SimpleEvent
   public void FailedToFeedDataToWeb(String error) {
