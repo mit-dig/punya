@@ -54,6 +54,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
   private boolean isSubject;
   private String conceptUri;
   private String propertyUri;
+  private String relationUri;
   private List<LabeledUri> items;
   private final Form form;
   private volatile boolean initialized = false;
@@ -163,6 +164,19 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     }
   }
 
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "The Linked Data List Picker will query for items based on this relation with the specified 'ObjectType'. Defaults to rdf:type.")
+  public String RelationToObject() {
+    return relationUri;
+  }
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI,
+      defaultValue = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+  @SimpleProperty
+  public void RelationToObject(final String uri) {
+    relationUri = uri;
+  }
+
   private void populateItemsList(final String endpoint, final String conceptUri) {
     Log.d(LOG_TAG, "Populating item list for semantic list picker");
     final String query = "PREFIX dc: <http://purl.org/dc/terms/> " +
@@ -170,7 +184,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
         "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
         "SELECT DISTINCT ?uri (SAMPLE(?lbl) AS ?label) WHERE { " +
-        "?uri a <" + conceptUri + "> " +
+        "?uri <" + relationUri + "> <" + conceptUri + "> " +
         "{ ?uri rdfs:label ?lbl }" +
         //" UNION { ?uri skos:prefLabel ?lbl } " +
         //"UNION { ?uri foaf:name ?lbl } UNION { ?uri dc:title ?lbl } " +

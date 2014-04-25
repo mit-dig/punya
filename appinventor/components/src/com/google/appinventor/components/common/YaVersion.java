@@ -297,6 +297,8 @@ public class YaVersion {
   // - SemanticListPicker Component is renamed to LinkedDataListPicker Component
   // - SEMANTIC_LISTPICKER_COMPONENT_VERSION is renamed to LINKED_DATA_LISTPICKER_COMPONENT_VERSION
   // - The pebbleSmartWatch component was added.
+  // For YOUNG_ANDROID_VERSION 108:
+  // - LINKED_DATA_LISTPICKER_COMPONENT_VERSION was incremented to 3.
   public static final int YOUNG_ANDROID_VERSION = 108;
  
 
@@ -785,7 +787,9 @@ public class YaVersion {
   
   // For LINKED_DATA_LISTPICKER_COMPONENT_VERSION_2:
   // - Renamed SemanticWebListPicker to LinkedDataListPicker
-  public static final int LINKED_DATA_LISTPICKER_COMPONENT_VERSION = 2;
+  // For LINKED_DATA_LISTPICKER_COMPONENT_VERSION_3:
+  // - Added RelationToObject property
+  public static final int LINKED_DATA_LISTPICKER_COMPONENT_VERSION = 3;
 
   // For SEMANTIC_FORM_COMPONENT_VERSION 1:
   // - Initial version.
