@@ -123,6 +123,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     protected Context context;
 
     private String gcmMessage = "";
+    private String phoneNumber = "";
+    
     
     private static final String REG_ID_TAG = "RegistrationId";
     private final SharedPreferences sharedPreferences;
@@ -184,6 +186,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         }
     }
     
+    
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public String phoneNumber() {
+        return phoneNumber;
+    }
+    
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
     public String RegId() {
         return retrieveRegId();
@@ -192,6 +200,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     @SimpleProperty(category = PropertyCategory.BEHAVIOR)
     public String ServerURL() {
         return SERVER_URL;
+    }
+    
+    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
+    @SimpleProperty
+    public void PhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
@@ -253,10 +267,12 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         Log.i(TAG, "Start the registration process");
         Log.i(TAG, "The sender id is " + SENDER_ID);
         Log.i(TAG, "The server URL is " + SERVER_URL);
+        Log.i(TAG, "The phone number is " + phoneNumber);
 
         Enabled(true);
         mBoundGCMIntentService.setSenderID(SENDER_ID);
         mBoundGCMIntentService.setServerURL(SERVER_URL);
+        mBoundGCMIntentService.setPhoneNumber(phoneNumber);
 
         AsynchUtil.runAsynchronously(new Runnable() {
             public void run() {
@@ -274,7 +290,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
                             // It's also necessary to cancel the thread onDestroy(),
                             // hence the use of AsyncTask instead of a raw thread.
 
-                            if (!GCMServerUtilities.register(form, regId,SERVER_URL)) {
+                            if (!GCMServerUtilities.register(form, regId,SERVER_URL, phoneNumber)) {
                                 // At this point all attempts to register with the app
                                 // server failed, so we need to unregister the device
                                 // from GCM - the app will try to register again when

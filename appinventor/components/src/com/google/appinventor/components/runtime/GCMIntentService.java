@@ -27,6 +27,8 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     private String SERVER_URL = "";
     
+    private String phoneNumber = "";
+    
     private SharedPreferences sharedPreferences;
     
     public static String PACKAGE_NAME;
@@ -111,7 +113,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, String registrationId) {
         Log.i(TAG, "Device registered: regId = " + registrationId);
-        boolean success = GCMServerUtilities.register(context, registrationId,SERVER_URL);
+        boolean success = GCMServerUtilities.register(context, registrationId,SERVER_URL, phoneNumber);
         if(success){
             for (GCMEventListener listener : GCMRegEventListeners) {
                 listener.onMessageReceived("Registered successfully with GCM 3rd party server!");
@@ -229,6 +231,10 @@ public class GCMIntentService extends GCMBaseIntentService {
     
     public void setServerURL(String url){
         SERVER_URL = url;
+    }
+    
+    public void setPhoneNumber(String number){
+    	phoneNumber = number;
     }
     
     /*
