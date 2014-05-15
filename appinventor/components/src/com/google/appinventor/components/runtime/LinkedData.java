@@ -626,4 +626,16 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   public void FinishedDeletingDataFromLocal() {
     EventDispatcher.dispatchEvent(this, "FinishedDeletingDataFromLocal");
   }
+
+  /**
+   * Returns the contents of this LinkedData component as a string. Useful
+   * for debugging purposes.
+   * @return
+   */
+  @SimpleFunction
+  public String ToString() {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    model.write(out, "TTL");
+    return out.toString();
+  }
 }
