@@ -5,6 +5,14 @@
 
 package com.google.appinventor.components.runtime;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.locks.Lock;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
@@ -19,6 +27,7 @@ import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
+import com.google.appinventor.components.runtime.util.FileUtil;
 
 import android.R;
 import android.app.Activity;
@@ -370,6 +379,21 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
             });
         }
     }
+    
+    /**
+     * Event indicating that a SendMessageToServer call has finished.
+     *
+     * @param url the URL used for the request
+     * @param responseCode the response code from the server
+     * @param responseType the mime type of the response
+     * @param responseContent the response content from the server
+     */
+    @SimpleEvent
+    public void GotResponseFromServer(String url, int responseCode, String responseType, String responseContent) {
+      // invoke the application's "GotResponseFromServer" event handler.
+      EventDispatcher.dispatchEvent(this, "GotResponseFromServer", url, responseCode, responseType,
+          responseContent);
+    }
 
     // try local binding to FunfManager
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -551,5 +575,112 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         Log.i(TAG, "after updated notification contents");
         mNM.notify(PROBE_NOTIFICATION_ID, notification);
         Log.i(TAG, "notified");
+    }
+    
+    /**
+     * Performs an HTTP POST request using the GCM Server url property and the specified text.
+     *
+     * @param text the text data for the POST request
+     */
+    @SimpleFunction(description = "Performs an HTTP POST request using the GCM Server url property and " +
+        "the specified text.<br>" +
+        "The characters of the text are encoded using UTF-8 encoding.<br>" +
+        "The GotResponseFromServer event will be triggered when the request is done.")
+    public void SendMessageToServer(final String text) {
+      try {
+        final URL url = new URL(SERVER_URL);
+        AsynchUtil.runAsynchronously(new Runnable() {
+          @Override
+          public void run() {
+            // Convert text to bytes using the encoding.
+            byte[] requestData;
+            try {
+              requestData = text.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+              form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "SendMessageToServer",
+                  ErrorMessages.ERROR_WEB_UNSUPPORTED_ENCODING, "UTF-8");
+              return;
+            }
+
+            try {
+              // Open the connection.
+              HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+              if (connection != null) {
+                try {
+                  connection.setRequestMethod("POST");
+                  if (requestData != null) {
+                    connection.setDoOutput(true); // This makes it something other than a HTTP GET.
+                    // Write the data.
+                    connection.setFixedLengthStreamingMode(requestData.length);
+                    BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
+                    try {
+                      out.write(requestData, 0, requestData.length);
+                      out.flush();
+                    } finally {
+                      out.close();
+                    }
+                  }
+
+                  // Get the response.
+                  final int responseCode = connection.getResponseCode();
+                  final String responseType = (connection.getContentType() != null) ? connection.getContentType() : "";
+                  final String responseContent = getResponseContent(connection);
+
+                  // Dispatch the event.
+                  mainUIThreadActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                      GotResponseFromServer(url.toString(), responseCode, responseType, responseContent);
+                    }
+                  });
+                } finally {
+                  connection.disconnect();
+                }
+              }
+            } catch (Exception e) {
+              form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "SendMessageToServer",
+                  ErrorMessages.ERROR_WEB_UNABLE_TO_POST_OR_PUT, text, url);
+            }
+          }
+        });
+      } catch (MalformedURLException e) {
+        form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "SendMessageToServer",
+            ErrorMessages.ERROR_WEB_MALFORMED_URL, SERVER_URL);
+      }
+    }
+    
+    private static String getResponseContent(HttpURLConnection connection) throws IOException {
+      // Use the content encoding to convert bytes to characters.
+      String encoding = connection.getContentEncoding();
+      if (encoding == null) {
+        encoding = "UTF-8";
+      }
+      InputStreamReader reader = new InputStreamReader(getConnectionStream(connection), encoding);
+      try {
+        int contentLength = connection.getContentLength();
+        StringBuilder sb = (contentLength != -1)
+            ? new StringBuilder(contentLength)
+            : new StringBuilder();
+        char[] buf = new char[1024];
+        int read;
+        while ((read = reader.read(buf)) != -1) {
+          sb.append(buf, 0, read);
+        }
+        return sb.toString();
+      } finally {
+        reader.close();
+      }
+    }
+    
+    private static InputStream getConnectionStream(HttpURLConnection connection) {
+      // According to the Android reference documentation for HttpURLConnection: If the HTTP response
+      // indicates that an error occurred, getInputStream() will throw an IOException. Use
+      // getErrorStream() to read the error response.
+      try {
+        return connection.getInputStream();
+      } catch (IOException e1) {
+        // Use the error response.
+        return connection.getErrorStream();
+      }
     }
 }
