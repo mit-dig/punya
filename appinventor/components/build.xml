@@ -190,6 +190,7 @@
     <pathelement location="${lib.dir}/powermock/powermock-easymock-1.4.10-full.jar" />
     <!-- android.jar must go last on the classpath list
          so that its junit (or other) stubs don't override the real ones -->
+    <pathelement location="${lib.dir}/android_support/android-support-v4.jar" />
     <pathelement location="${lib.dir}/android/4.2.2/android.jar" />
   </path>
 
