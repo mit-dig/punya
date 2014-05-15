@@ -272,6 +272,8 @@ public class LinkedData extends AndroidNonvisibleComponent implements
         type = "N3";
       } else if(path.endsWith(".ttl")) {
         type = "TURTLE";
+      } else if(path.endsWith(".txt")) {
+        type = "TURTLE";
       }
       FileOutputStream fos = new FileOutputStream(path);
       model.write(fos, type);
