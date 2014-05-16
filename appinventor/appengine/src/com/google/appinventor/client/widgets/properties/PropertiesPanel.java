@@ -6,6 +6,7 @@
 package com.google.appinventor.client.widgets.properties;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -39,18 +40,33 @@ public class PropertiesPanel extends Composite {
     initWidget(outerPanel);
   }
 
+  boolean hasValidDescription(EditableProperty p) {
+    return p.getDescription() != null &&
+        !p.getDescription().isEmpty() &&
+        !p.getDescription().equals(p.getName());
+  }
+
   /**
    * Adds a new property to be displayed in the UI.
    *
    * @param property  new property to be shown
    */
   void addProperty(EditableProperty property) {
+    HorizontalPanel header = new HorizontalPanel();
     Label label = new Label(property.getCaption());
     label.setStyleName("ode-PropertyLabel");
-    panel.add(label);
+    header.add(label);
+    header.setStyleName("ode-PropertyHeader");
+    if ( hasValidDescription(property) ) {
+      PropertyHelpWidget helpImage = new PropertyHelpWidget(property);
+      header.add(helpImage);
+      helpImage.setStylePrimaryName("ode-PropertyHelpWidget");
+    }
+    panel.add(header);
     PropertyEditor editor = property.getEditor();
     editor.setStyleName("ode-PropertyEditor");
     panel.add(editor);
+    panel.setWidth("100%");
   }
 
   /**

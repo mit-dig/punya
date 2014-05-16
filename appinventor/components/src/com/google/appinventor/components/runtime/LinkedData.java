@@ -93,7 +93,14 @@ public class LinkedData extends AndroidNonvisibleComponent implements
    * Returns the URL of the SPARQL endpoint.
    * @return
    */
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "<p>Use the Endpoint URL field to specify a Uniform "
+          + "Resource Locator (URL) of a SPARQL endpoint to read and write "
+          + "data on the web. For example, if you want to query structured "
+          + "content from DBpedia, use <code>http://dbpedia.org/sparql</code>."
+          + "</p><p>There are a number of public endpoints listed at "
+          + "<a href=\"http://datahub.io/dataset?res_format=api%2Fsparql\" "
+          + "target='_new'>DataHub.io</a></p>")
   public String EndpointURL() {
     return endpointURL;
   }

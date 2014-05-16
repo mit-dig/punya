@@ -1294,3 +1294,11 @@ textarea::-webkit-input-placeholder {
 .checkbox.inline + .checkbox.inline {
   margin-left: 10px;
 }
+
+.ode-PropertiesPanel td img {
+  margin-top: 8px;
+}
+
+.ode-PropertyHeader img {
+  margin-top: 8px;
+}

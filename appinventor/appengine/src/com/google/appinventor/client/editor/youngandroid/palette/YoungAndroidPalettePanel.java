@@ -144,7 +144,8 @@ public class YoungAndroidPalettePanel extends Composite implements SimplePalette
     // Configure properties
     for (PropertyDefinition property : COMPONENT_DATABASE.getPropertyDefinitions(componentType)) {
       mockComponent.addProperty(property.getName(), property.getDefaultValue(),
-          property.getCaption(), createPropertyEditor(property.getEditorType()));
+          property.getCaption(), property.getDescription(),
+          createPropertyEditor(property.getEditorType()));
     }
   }
 

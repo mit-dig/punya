@@ -44,13 +44,14 @@ public class EditableProperties extends Properties<EditableProperty> {
    * @param name  property name
    * @param defaultValue  default value of property
    * @param caption property caption for use in the ui
+   * @param description property description for use in the ui
    * @param editor  property editor
    * @param type  type of property; see {@code TYPE_*} constants in {@link EditableProperty}
    */
 
   public void addProperty(String name, String defaultValue, String caption,
-      PropertyEditor editor, int type) {
-    addProperty(new EditableProperty(this, name, defaultValue, caption, editor, type));
+      String description, PropertyEditor editor, int type) {
+    addProperty(new EditableProperty(this, name, defaultValue, caption, description, editor, type));
   }
 
   @Override

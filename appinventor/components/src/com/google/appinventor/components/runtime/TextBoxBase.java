@@ -389,7 +389,19 @@ public abstract class TextBoxBase extends AndroidViewComponent
    */
   @SimpleProperty(
       category = PropertyCategory.APPEARANCE,
-      description = "Resource URI that identifies the concept being entered for this field")
+      description = "<p>Object Type changes how the linked data components "
+          + "interpret the value of the text. If left blank, the system will "
+          + "attempt to intelligently identify the type based on features such "
+          + "as whether the text is a sequence of numbers or begins with "
+          + "&quot;http://&quot;. If no type is specified and one cannot be "
+          + "determined, the string will remain untyped.</p>"
+          + "<p>Recommended values include:</p>"
+          + "<ul>"
+          + "<li>xsd:dateTime - for dates and times</li>"
+          + "<li>xsd:decimal - for decimals (e.g. 3.57)</li>"
+          + "<li>xsd:integer - for integers (e.g. 137)</li>"
+          + "<li>xsd:gYear - for years (e.g. 2001)</li>"
+          + "</ul>")
   public String ObjectType() {
     return conceptUri;
   }
@@ -488,7 +500,13 @@ public abstract class TextBoxBase extends AndroidViewComponent
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI,
       defaultValue = "")
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "<p>Property URI specifies the relationship between a "
+          + "Linked Data Form containing a TextBox, Password, etc. and the "
+          + "component. Common properties include the name properties in the "
+          + "Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, "
+          + "foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), "
+          + "or descriptions (e.g. rdfs:comment, dc:description).</p>")
   public void PropertyURI(String uri) {
     this.propertyUri = uri;
   }
@@ -513,7 +531,10 @@ public abstract class TextBoxBase extends AndroidViewComponent
   }
 
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
-      description = "")
+      description = "<p>If the text box is contained in a Linked Data Form and "
+          + "Subject Identifier is checked, then the value of the text box "
+          + "will be used to construct a new Uniform Resource Identifier (URI) "
+          + "when the form is submitted.</p>")
   @Override
   public boolean SubjectIdentifier() {
     return isSubject;

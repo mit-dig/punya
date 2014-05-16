@@ -133,7 +133,12 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
    * @return
    */
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
-      description = "Endpoint from which entities will be retrieved.")
+      description = "<p>Use the Endpoint URL field to specify a Uniform "
+          + "Resource Locator (URL) of a SPARQL endpoint to query for objects "
+          + "used to populate the list picker.</p><p>For example, DBpedia "
+          + "provides a SPARQL endpoint at "
+          + "<code>http://dbpedia.org/sparql</code> that can be used to query "
+          + "content extracted from Wikipedia.</p>")
   public String EndpointURL() {
     return this.endpointUrl;
   }
@@ -141,7 +146,12 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
   // LDComponent implementation
 
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
-      description = "The picker will be populated with entities of the specified type.")
+      description = "<p>Object Type specifies a Uniform Resource Identifier "
+          + "(URI) for a type used to identify objects that should appear in "
+          + "the list picker.</p><p>For example, "
+          + "<code>http://xmlns.com/foaf/0.1/Person</code> (foaf:Person), is a "
+          + "commonly used class for identifying people. Specifying it here "
+          + "would generate a list of people from the Endpoint URL.</p>")
   @Override
   public String ObjectType() {
     return conceptUri;
@@ -165,7 +175,12 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
   }
 
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
-      description = "The Linked Data List Picker will query for items based on this relation with the specified 'ObjectType'. Defaults to rdf:type.")
+      description = "<p>RelationToObjectType specifies the relationship "
+          + "between objects presented by the list picker and the Object Type. "
+          + "This field defaults to <code>rdf:type</code>, but other useful "
+          + "values may include <code>skos:narrower</code> or "
+          + "<code>schema:additionalType</code>. The correct property to use "
+          + "will be dependent on the data available in Endpoint URL.</p>")
   public String RelationToObject() {
     return relationUri;
   }
@@ -257,7 +272,13 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     EventDispatcher.dispatchEvent(this, "UnableToRetrieveContent", error);
   }
 
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+      description = "<p>If the list picker is placed within a Linked Data Form, "
+          + "the Property URI specifies the relationship between the object "
+          + "being built by the form and the item selected in the list picker."
+          + "</p><p>For example, an application for disaster reporting may "
+          + "query a hierarchy of disaster types and present those types using "
+          + "the Linked Data List Picker.</p>")
   @Override
   public String PropertyURI() {
     return propertyUri;
@@ -285,7 +306,11 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
 
   @Override
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
-      description = "")
+      description = "<p>If the list picker is placed within a Linked Data Form, "
+          + "the Subject Identifier value indicates whether the selected "
+          + "item in the list picker should be used as an input when the "
+          + "Linked Data component generates a new subject identifier for the "
+          + "thing described by the form.</p>")
   public boolean SubjectIdentifier() {
     return isSubject;
   }

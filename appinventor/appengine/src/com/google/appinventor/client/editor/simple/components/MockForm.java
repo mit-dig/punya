@@ -295,8 +295,10 @@ public final class MockForm extends MockContainer {
   @Override
   protected void addWidthHeightProperties() {
     addProperty(PROPERTY_NAME_WIDTH, "" + PORTRAIT_WIDTH, null,
+        "Specifies the width of the component on the screen.",
         new YoungAndroidLengthPropertyEditor());
     addProperty(PROPERTY_NAME_HEIGHT, "" + LENGTH_PREFERRED, null,
+        "Specifies the height of the component on the screen.",
         new YoungAndroidLengthPropertyEditor());
   }
 

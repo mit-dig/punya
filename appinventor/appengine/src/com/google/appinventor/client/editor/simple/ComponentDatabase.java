@@ -203,19 +203,29 @@ class ComponentDatabase implements ComponentDatabaseInterface {
         Boolean.valueOf(properties.get("nonVisible").asString().getString()),
         properties.get("iconName").asString().getString(),
         componentNode.toJson());
-    findComponentProperties(component, properties.get("properties").asArray());
+    findComponentProperties(component, properties.get("properties").asArray(),
+        properties.get("blockProperties").asArray());
     components.put(component.name, component);
   }
 
   /*
    * Enters property information into the component descriptor.
    */
-  private void findComponentProperties(Component component, JSONArray propertiesArray) {
+  private void findComponentProperties(Component component,
+      JSONArray propertiesArray, JSONArray blockPropertiesArray) {
+    Map<String, String> descriptions = new HashMap<String, String>();
+    for (JSONValue block : blockPropertiesArray.getElements()) {
+      Map<String, JSONValue> properties = block.asObject().getProperties();
+      descriptions.put(properties.get("name").asString().getString(),
+          properties.get("description").asString().getString());
+    }
     for (JSONValue propertyValue : propertiesArray.getElements()) {
       Map<String, JSONValue> properties = propertyValue.asObject().getProperties();
-      component.add(new PropertyDefinition(properties.get("name").asString().getString(),
+      String name = properties.get("name").asString().getString();
+      component.add(new PropertyDefinition(name,
           properties.get("defaultValue").asString().getString(),
-          properties.get("editorType").asString().getString()));
+          name, properties.get("editorType").asString().getString(),
+          descriptions.get(name)));
     }
   }
 
