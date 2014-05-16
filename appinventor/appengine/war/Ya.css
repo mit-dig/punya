@@ -1309,7 +1309,35 @@ textarea::-webkit-input-placeholder {
 .ode-PropertiesPanel .gwt-StackPanelItem div {
   font-size: 12px;
   padding: 2px 8px;
-  background-color: #4ea429;
-  color: white;
+  background-color: #D2E08B;
+  color: #555;
   height: 16px;
+}
+
+.ode-PropertiesPanel .gwt-DisclosurePanel .content {
+  border: 0;
+  margin: 0;
+}
+
+.ode-PropertiesPanel .gwt-DisclosurePanel > tbody > tr > td {
+  height: 16px;
+  font-size: 12px;
+}
+
+.ode-PropertiesPanel .gwt-DisclosurePanel > tbody > tr > td > a {
+  background-color: #ceda91;
+}
+
+.ode-PropertiesPanel .gwt-DisclosurePanel-closed > tbody > tr+tr > td {
+  margin: 0;
+  padding: 0;
+  height: 0;
+}
+
+.gwt-DisclosurePanel > tbody > tr > td > a > table {
+  border-spacing: 0;
+}
+
+.gwt-DisclosurePanel > tbody > tr > td img {
+  margin-top: 3px;
 }

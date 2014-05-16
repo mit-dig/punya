@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.StackPanel;
@@ -23,9 +24,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class PropertiesPanel extends Composite {
 
   // UI elements
-  private final StackPanel panel;
+  private final VerticalPanel panel;
   private final Label componentName;
   private final Map<String, VerticalPanel> propertyPanels;
+  private final Map<String, DisclosurePanel> headers;
 
   /**
    * Creates a new properties panel.
@@ -36,12 +38,13 @@ public class PropertiesPanel extends Composite {
     outerPanel.setWidth("100%");
 
     propertyPanels = new HashMap<String, VerticalPanel>();
+    headers = new HashMap<String, DisclosurePanel>();
 
     componentName = new Label("");
     componentName.setStyleName("ode-PropertiesComponentName");
     outerPanel.add(componentName);
 
-    panel = new StackPanel();
+    panel = new VerticalPanel();
     panel.setWidth("100%");
     panel.setStylePrimaryName("ode-PropertiesPanel");
     outerPanel.add(panel);
@@ -63,14 +66,19 @@ public class PropertiesPanel extends Composite {
       VerticalPanel child = new VerticalPanel();
       child.setWidth( "100%" );
       propertyPanels.put( category, child );
+      DisclosurePanel disclosure = new DisclosurePanel( category );
+      disclosure.add( child );
+      disclosure.setOpen( true );
+      disclosure.setWidth( "100%" );
+      headers.put( category, disclosure );
     }
     return propertyPanels.get( category );
   }
 
   private final void updateStackPanel() {
-    Set<String> categories = new TreeSet<String>( propertyPanels.keySet() );
+    Set<String> categories = new TreeSet<String>( headers.keySet() );
     for ( String category : categories ) {
-      panel.add( propertyPanels.get( category ), category );
+      panel.add( headers.get( category ) );
     }
   }
 
@@ -105,6 +113,7 @@ public class PropertiesPanel extends Composite {
    */
   public void clear() {
     propertyPanels.clear();
+    headers.clear();
     panel.clear();
     componentName.setText("");
   }
