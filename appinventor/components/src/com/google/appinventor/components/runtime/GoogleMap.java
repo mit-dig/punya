@@ -140,6 +140,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   private static final AtomicInteger snextMarkerId = new AtomicInteger(1);
   private final Handler androidUIHandler = new Handler();
 
+  private YailList markersList;
+  
   // Setting for LocationClient
   // These settings are the same as the settings for the map. They will in fact give you updates at
   // the maximal rates currently possible.
@@ -859,8 +861,8 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           lng = ((DFloNum)lngObj).doubleValue();
         }
         //check for lat, lng range
-        // Latitude measurements range from 0�� to (+/���)90��.
-        // Longitude measurements range from 0�� to (+/���)180
+        // Latitude measurements range from 0������ to (+/���������)90������.
+        // Longitude measurements range from 0������ to (+/���������)180
         if ((lat < -90) || (lat > 90) || (lng < -180) || (lng > 180) ){
           addOne = false;
         }
@@ -980,13 +982,22 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     return id;
   }
 
+  
+  @SimpleFunction(description = "Add a list of markers composed of name-value pairs. Name fields for a marker are: " +
+        "\"lat\" (type double) [required], \"lng\"(type double) [required], " +
+        "\"color\"(type int)[in hue value ranging from 0~360], " +
+        "\"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
+  public YailList GetMarkers(){
+  return markersList;  
+  }
+    
   @SimpleFunction(description = "Adding a list of markers that are represented as JsonArray. " +
-  		" The inner JsonObject represents a marker" +
+      " The inner JsonObject represents a marker" +
       "and is composed of name-value pairs. Name fields for a marker are: " +
       "\"lat\" (type double) [required], \"lng\"(type double) [required], " +
       "\"color\"(type int)[in hue value ranging from 0~360], " +
       "\"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
-  public YailList AddMarkersFromJson(String jsonString) {
+  public void AddMarkersFromJson(String jsonString) {
     ArrayList<Integer> markerIds = new ArrayList<Integer>();
     JsonParser parser = new JsonParser();
     float[] hsv = new float[3];
@@ -1069,16 +1080,17 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       } else { // not a JsonArray
         form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
             ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, "markers needs to be represented as JsonArray");
-        return YailList.makeList(markerIds);
+        markersList = YailList.makeList(markerIds);
       }
 
     } catch (JsonSyntaxException e) {
       form.dispatchErrorOccurredEvent(this, "AddMarkersFromJson",
           ErrorMessages.ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED, jsonString);
-      return YailList.makeList(markerIds); // return an empty markerIds list
+      markersList = YailList.makeList(markerIds); // return an empty markerIds list
     }
-
-    return YailList.makeList(markerIds);
+    
+    markersList = YailList.makeList(markerIds);
+  //  return YailList.makeList(markerIds);
   }
 
   /**
