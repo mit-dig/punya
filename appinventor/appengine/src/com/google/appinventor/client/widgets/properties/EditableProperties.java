@@ -50,8 +50,8 @@ public class EditableProperties extends Properties<EditableProperty> {
    */
 
   public void addProperty(String name, String defaultValue, String caption,
-      String description, PropertyEditor editor, int type) {
-    addProperty(new EditableProperty(this, name, defaultValue, caption, description, editor, type));
+      String category, String description, PropertyEditor editor, int type) {
+    addProperty(new EditableProperty(this, name, defaultValue, caption, category, description, editor, type));
   }
 
   @Override

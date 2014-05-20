@@ -60,8 +60,8 @@ public final class EditableProperty extends Property {
    * @param type  type of property; see {@code TYPE_*} constants
    */
   public EditableProperty(EditableProperties properties, String name, String defaultValue,
-      String caption, String description, PropertyEditor editor, int type) {
-    super(name, defaultValue);
+      String caption, String category, String description, PropertyEditor editor, int type) {
+    super(name, defaultValue, category);
 
     this.properties = properties;
     this.type = type;
@@ -83,8 +83,8 @@ public final class EditableProperty extends Property {
    * @param type  type of property; see {@code TYPE_*} constants
    */
   public EditableProperty(EditableProperties properties, String name, String defaultValue,
-      int type) {
-    this(properties, name, defaultValue, name, null, new TextPropertyEditor(), type);
+      String category, int type) {
+    this(properties, name, defaultValue, name, category, null, new TextPropertyEditor(), type);
   }
 
   /**

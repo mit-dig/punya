@@ -25,21 +25,19 @@ public interface ComponentDatabaseInterface {
     private final String caption;
     private final String editorType;
     private final String description;
+    private final String category;
 
     public PropertyDefinition(String name, String defaultValue, String editorType) {
-      this(name, defaultValue, name, editorType, null);
+      this(name, defaultValue, name, editorType, null, null);
     }
 
-    public PropertyDefinition(String name, String defaultValue, String caption, String editorType) {
-      this(name, defaultValue, caption, editorType, null);
-    }
-
-    public PropertyDefinition(String name, String defaultValue, String caption, String editorType, String description) {
+    public PropertyDefinition(String name, String defaultValue, String caption, String editorType, String category, String description) {
       this.name = name;
       this.defaultValue = defaultValue;
       this.caption = caption;
       this.editorType = editorType;
       this.description = description;
+      this.category = category;
     }
 
     public String getName() {
@@ -60,6 +58,10 @@ public interface ComponentDatabaseInterface {
 
     public String getDescription() {
       return description;
+    }
+
+    public String getCategory() {
+      return category;
     }
   }
 
