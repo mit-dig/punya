@@ -593,9 +593,15 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
           @Override
           public void run() {
             // Convert text to bytes using the encoding.
-            byte[] requestData;
+            byte[] requestData = null;
             try {
-              requestData = text.getBytes("UTF-8");
+              String regId = retrieveRegId();
+              if (!regId.equalsIgnoreCase("")) {
+                String inputText = text + "&regId=" + regId;
+                requestData = inputText.getBytes("UTF-8");
+              } else {
+                form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "SendMessageToServer", ErrorMessages.ERROR_GCM_NO_REGID_FOR_MESSAGE, "Not registered with GCM Server");
+              }
             } catch (UnsupportedEncodingException e) {
               form.dispatchErrorOccurredEvent(GoogleCloudMessaging.this, "SendMessageToServer",
                   ErrorMessages.ERROR_WEB_UNSUPPORTED_ENCODING, "UTF-8");

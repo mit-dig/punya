@@ -190,6 +190,7 @@ public final class ErrorMessages {
 
   // for Google Cloud Messaging
   public static final int ERROR_GCM_APPSERVER_INVALID = 2019;
+  public static final int ERROR_GCM_NO_REGID_FOR_MESSAGE = 2020;
   
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
