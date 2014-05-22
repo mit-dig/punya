@@ -218,8 +218,7 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
    * Sets a Subject URI this form describes.
    * @param uri
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_URI,
-      defaultValue = "")
+  @SimpleProperty
   public void Subject(String uri) {
     subject = uri;
   }
