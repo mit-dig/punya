@@ -267,6 +267,9 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("Player")) {
         srcCompVersion = upgradePlayerProperties(componentProperties, srcCompVersion);
 
+      } else if (componentType.equals("LinkedData")) {
+        srcCompVersion = upgradeLinkedDataProperties(componentProperties, srcCompVersion);
+
       } else if (componentType.equals("LinkedDataForm")) {
         srcCompVersion = upgradeLinkedDataFormProperties(componentProperties, srcCompVersion);
 
@@ -868,6 +871,16 @@ public final class YoungAndroidFormUpgrader {
       handlePropertyRename(componentProperties, "IsLooping", "Loop");
       // Properties related to this component have now been upgraded to version  5.
       srcCompVersion = 5;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeLinkedDataProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if ( srcCompVersion < 3 ) {
+      // BaseURL is removed
+      componentProperties.remove("BaseURL");
+      srcCompVersion = 3;
     }
     return srcCompVersion;
   }
