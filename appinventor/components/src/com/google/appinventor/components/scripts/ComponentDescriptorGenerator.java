@@ -144,6 +144,8 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append(javaTypeToYailType(prop.getType()));
     sb.append("\", \"rw\": \"");
     sb.append(prop.isUserVisible() ? prop.getRwString() : "invisible");
+    sb.append("\", \"category\": \"");
+    sb.append(prop.getCategory().getName());
     sb.append("\"}");
   }
   

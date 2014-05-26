@@ -412,6 +412,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
         return WRITE_ONLY;
       }
     }
+
+    protected PropertyCategory getCategory() {
+      return propertyCategory;
+    }
   }
 
   /**

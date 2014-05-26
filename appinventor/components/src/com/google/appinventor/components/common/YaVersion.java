@@ -299,7 +299,9 @@ public class YaVersion {
   // - The pebbleSmartWatch component was added.
   // For YOUNG_ANDROID_VERSION 108:
   // - LINKED_DATA_LISTPICKER_COMPONENT_VERSION was incremented to 3.
-  public static final int YOUNG_ANDROID_VERSION = 108;
+  // For YOUNG_ANDROID_VERSION 109:
+  // - LINKED_DATA_COMPONENT_VERSION was incremented to 3.
+  public static final int YOUNG_ANDROID_VERSION = 109;
  
 
   // ............................... Blocks Language Version Number ...............................
@@ -753,7 +755,9 @@ public class YaVersion {
 
   // For LINKED_DATA_COMPONENT_VERSION_2:
   // - Renamed SemanticWeb component to LinkedData component
-  public static final int LINKED_DATA_COMPONENT_VERSION = 2;
+  // For LINKED_DATA_COMPONENT_VERSION 3:
+  // - Removed BaseURL property eclipsed by FormID on Linked Data Form
+  public static final int LINKED_DATA_COMPONENT_VERSION = 3;
   
 
   public static final int LD_COMPONENT_VERSION = 1;

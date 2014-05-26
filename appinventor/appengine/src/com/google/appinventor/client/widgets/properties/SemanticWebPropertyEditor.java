@@ -114,6 +114,7 @@ public class SemanticWebPropertyEditor extends PropertyEditor implements ChangeH
     });
     options.setMinLength(3);
     options.setPosition(AutoCompletePosition.create("right top", "right bottom", "none"));
+    options.cancelNullValueSelection();
     ui.autocomplete(options);
     textEdit.addChangeHandler(this);
   }

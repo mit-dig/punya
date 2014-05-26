@@ -42,4 +42,30 @@ public class AsyncAutoCompleteOptions extends AutoCompleteOptions {
   public final native void setPosition(AutoCompletePosition position) /*-{
     this.position = position;
   }-*/;
+
+  public final native void cancelNullValueSelection() /*-{
+    this.select = function( e, ui ) {
+      var cancel = ui.item.value == "";
+      if ( cancel ) e.preventDefault();
+      return !cancel;
+    };
+    this._renderItem = function( ul, item ) {
+      console.log("in _renderItem");
+      return $( "<li>" )
+          .attr( "data-value", item.value )
+          .css( "font-style", item.value == "" ? "italic" : "normal" )
+          .append( $( "<a>" ).text( item.label ) )
+          .appendTo( ul );
+    };
+    this._renderMenu = function( ul, items ) {
+      console.log("in _renderMenu");
+      var that = this;
+      $.each( items, function( index, item ) {
+        that._renderItemData( ul, item );
+      });
+      if ( items.length == 1 && items[0].value == '' ) {
+        $( ul ).find( "li" ).css("font-style", "italic");
+      }
+    };
+  }-*/;
 }

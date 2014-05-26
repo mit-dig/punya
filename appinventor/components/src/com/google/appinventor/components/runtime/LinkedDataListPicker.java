@@ -132,7 +132,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
    * Gets the endpoint URL for the list picker.
    * @return
    */
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>Use the Endpoint URL field to specify a Uniform "
           + "Resource Locator (URL) of a SPARQL endpoint to query for objects "
           + "used to populate the list picker.</p><p>For example, DBpedia "
@@ -145,7 +145,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
 
   // LDComponent implementation
 
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>Object Type specifies a Uniform Resource Identifier "
           + "(URI) for a type used to identify objects that should appear in "
           + "the list picker.</p><p>For example, "
@@ -174,7 +174,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     }
   }
 
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>RelationToObjectType specifies the relationship "
           + "between objects presented by the list picker and the Object Type. "
           + "This field defaults to <code>rdf:type</code>, but other useful "
@@ -272,7 +272,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     EventDispatcher.dispatchEvent(this, "UnableToRetrieveContent", error);
   }
 
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>If the list picker is placed within a Linked Data Form, "
           + "the Property URI specifies the relationship between the object "
           + "being built by the form and the item selected in the list picker."
@@ -305,7 +305,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
   }
 
   @Override
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>If the list picker is placed within a Linked Data Form, "
           + "the Subject Identifier value indicates whether the selected "
           + "item in the list picker should be used as an input when the "

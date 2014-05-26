@@ -25,7 +25,7 @@ public final class GeneralSettings extends Settings {
     super(SettingsConstants.USER_GENERAL_SETTINGS);
 
     addProperty(new EditableProperty(this, SettingsConstants.GENERAL_SETTINGS_CURRENT_PROJECT_ID,
-        "0", EditableProperty.TYPE_INVISIBLE));
+        "0", null, EditableProperty.TYPE_INVISIBLE));
   }
 
   @Override

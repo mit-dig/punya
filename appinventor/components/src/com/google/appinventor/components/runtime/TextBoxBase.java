@@ -388,7 +388,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
    * @return  concept uri
    */
   @SimpleProperty(
-      category = PropertyCategory.APPEARANCE,
+      category = PropertyCategory.LINKED_DATA,
       description = "<p>Object Type changes how the linked data components "
           + "interpret the value of the text. If left blank, the system will "
           + "attempt to intelligently identify the type based on features such "
@@ -500,7 +500,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI,
       defaultValue = "")
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>Property URI specifies the relationship between a "
           + "Linked Data Form containing a TextBox, Password, etc. and the "
           + "component. Common properties include the name properties in the "
@@ -530,7 +530,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
     this.isSubject = isSubject;
   }
 
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>If the text box is contained in a Linked Data Form and "
           + "Subject Identifier is checked, then the value of the text box "
           + "will be used to construct a new Uniform Resource Identifier (URI) "

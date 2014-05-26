@@ -438,6 +438,9 @@ public class BlockSaveFile {
       } else if (genus.equals("Label")) {
         blkCompVersion = upgradeLabelBlocks(blkCompVersion, componentName);
 
+      } else if (genus.equals("LinkedData")) {
+        blkCompVersion = upgradeLinkedDataBlocks(blkCompVersion, componentName);
+
       } else if (genus.equals("ListPicker")) {
         blkCompVersion = upgradeListPickerBlocks(blkCompVersion, componentName);
 
@@ -1309,6 +1312,25 @@ public class BlockSaveFile {
       // nothing needs to be changed to upgrade to version 2
       // UsesLocation property added.
       // No properties need to be modified to upgrade to version 3.
+      blkCompVersion = 3;
+    }
+    return blkCompVersion;
+  }
+
+  private int upgradeLinkedDataBlocks(int blkCompVersion, String componentName) {
+    if (blkCompVersion < 3) {
+      boolean foundBaseURL = false;
+      for (Element block : getAllMatchingMethodOrEventBlocks(componentName, "LinkedData", "BaseURL")) {
+        foundBaseURL = true;
+        markBlockBad( block, "BaseURL does not exist.");
+      }
+      if (foundBaseURL) {
+        FeedbackReporter.showWarningMessage(
+                "BaseURL has been removed from the LinkedData component and "
+                + "has been replaced with a per-LinkedDataForm FormID to allow "
+                + "greater flexibility over how each LinkedDataForm generates "
+                + "data.");
+      }
       blkCompVersion = 3;
     }
     return blkCompVersion;

@@ -200,6 +200,12 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         log.info(label+","+value+","+prefix);
         pairs.add(createEntry(label, value, prefix));
       }
+      if ( pairs.size() == 0 ) {
+        Map<String, String> nullPair = new HashMap<String, String>();
+        nullPair.put("label", "No results found");
+        nullPair.put("value", "");
+        pairs.add(nullPair);
+      }
       log.info("Finished query");
     } else {
       log.warn("Unexpected query type");

@@ -25,21 +25,21 @@ public final class YoungAndroidSettings extends Settings {
     super(SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS);
 
     addProperty(new EditableProperty(this, SettingsConstants.YOUNG_ANDROID_SETTINGS_ICON,
-        "", EditableProperty.TYPE_INVISIBLE));
+        "", null, EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_SHOW_HIDDEN_COMPONENTS,
-        "False", EditableProperty.TYPE_INVISIBLE));
+        "False", null, EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
-        SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_CODE, "1",
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_CODE, "1", null,
         EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
-        SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_NAME, "1.0",
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_NAME, "1.0", null,
         EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
-        SettingsConstants.YOUNG_ANDROID_SETTINGS_USES_LOCATION, "false",
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_USES_LOCATION, "false", null,
         EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
-        SettingsConstants.YOUNG_ANDROID_SETTINGS_MAPS_KEY, "",
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_MAPS_KEY, "", null,
         EditableProperty.TYPE_INVISIBLE));
   }
 }

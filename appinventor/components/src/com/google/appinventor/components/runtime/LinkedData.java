@@ -73,13 +73,9 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   /** endpointURL stores the URI of a SPARQL endpoint **/
   private String endpointURL;
 
-  /** baseURL is used for constructing URIs of new objects **/
-  private String baseURL;
-
   public LinkedData(ComponentContainer container) {
 	  super(container.$form());
 	  endpointURL = "http://dbpedia.org/sparql";
-	  baseURL = "http://example.com/";
     model = ModelFactory.createDefaultModel();
     model.setNsPrefix("rdf", RDF_NS);
     model.setNsPrefix("rdfs", RDFS_NS);
@@ -93,7 +89,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
    * Returns the URL of the SPARQL endpoint.
    * @return
    */
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR,
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>Use the Endpoint URL field to specify a Uniform "
           + "Resource Locator (URL) of a SPARQL endpoint to read and write "
           + "data on the web. For example, if you want to query structured "
@@ -115,29 +111,6 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   @SimpleProperty
   public void EndpointURL(String url) {
 	  endpointURL = url;
-  }
-
-  /**
-   * Returns the base URL of the component
-   * @see #BaseURL(String)
-   * @return
-   */
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-  public String BaseURL() {
-    return baseURL;
-  }
-
-  /**
-   * Specifies the base URL used for constructing new identifiers
-   * when using linked data components. The URL should end with either
-   * a / or a # per linked data design principles.
-   * @return
-   */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-      defaultValue = "http://example.com/")
-  @SimpleProperty
-  public void BaseURL(String url) {
-    baseURL = url;
   }
 
   /**
