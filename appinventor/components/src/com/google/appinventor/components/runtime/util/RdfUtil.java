@@ -579,8 +579,8 @@ public final class RdfUtil {
       conn.setDoOutput(true);
       conn.setRequestMethod("POST");
       //conn.setRequestProperty("Content-Length", Integer.toString(prefixes.length()));
-      conn.setRequestProperty("Content-Type", "text/plain; charset=UTF-8");
-      //conn.setRequestProperty("Accept", "*/*");
+      conn.setRequestProperty("Content-Type", "application/sparql-query");
+      conn.setRequestProperty("Accept", "*/*");
       String userInfo = uri.getUserInfo();
       if(userInfo != null && userInfo.length() != 0) {
         if(!userInfo.contains(":")) {
@@ -602,6 +602,7 @@ public final class RdfUtil {
       } else if(status >= 400) {
         success = false;
         Log.w(LOG_TAG, "HTTP status for update was "+status);
+        Log.w(LOG_TAG, "HTTP response msg was "+conn.getResponseMessage());
       }
       conn.disconnect();
     } catch (MalformedURLException e) {
