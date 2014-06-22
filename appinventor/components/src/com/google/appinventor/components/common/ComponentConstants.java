@@ -72,5 +72,13 @@ public class ComponentConstants {
   public static final int SURVEY_STYLE_CHECKBOX = 5;
   public static final int SURVEY_STYLE_SCALE = 6;
   public static final int SURVEY_STYLE_YESNO = 7;
-    
+
+
+  /**
+   * ListView component.
+   */
+  public static final int LISTVIEW_PREFERRED_WIDTH = 315;
+  public static final int LISTVIEW_PREFERRED_HEIGHT = 40;
+  public static final int LISTVIEW_FILTER_PREFERRED_HEIGHT = 30;
+
 }

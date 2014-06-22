@@ -162,8 +162,8 @@ public class Survey extends AndroidViewComponent{
 	public Survey(ComponentContainer container) throws IOException {
 		super(container);
     mainUI = container.$form();
-    exportRoot =  new File(Environment.getExternalStorageDirectory(), mainUI.getPackageName()) +
-                File.separator + "export";
+    exportRoot =  new java.io.File(Environment.getExternalStorageDirectory(), mainUI.getPackageName()) +
+                java.io.File.separator + "export";
 
     JsonParser parse = new JsonParser();
     webview = new WebView(container.$context());
@@ -443,7 +443,7 @@ public class Survey extends AndroidViewComponent{
 	private String genSurvey() throws IOException{
 		Log.i(TAG, "the style is: " + style);
 //		String templatePath  = "component" + File.separator + getTemplatePath(this.style);
-		String templatePath  = "component" + File.separator + surveyTemplate.get(this.style);
+		String templatePath  = "component" + java.io.File.separator + surveyTemplate.get(this.style);
 
 		
 		BufferedInputStream in = new BufferedInputStream(container.$context().getAssets().open(templatePath));
@@ -680,7 +680,7 @@ public class Survey extends AndroidViewComponent{
     		description = "Get the export path for survey results")
     public String ExportFolderPath(){
         // the real export path is exportPath + "/" + exportformat
-        return this.exportRoot + File.separator + this.exportFormat;
+        return this.exportRoot + java.io.File.separator + this.exportFormat;
 
         
     }
