@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -195,6 +195,7 @@ public class BlocklyPanel extends HTMLPanel {
       return;
     }
     if (loadStat.error) {
+      YaBlocksEditor.setBlocksDamaged(formName);
       ErrorReporter.reportError(MESSAGES.blocksNotSaved(formName));
     } else {
       YaBlocksEditor.onBlocksAreaChanged(formName);
@@ -552,6 +553,10 @@ public class BlocklyPanel extends HTMLPanel {
     doStartRepl(formName, alreadyRunning, forEmulator, forUsb);
   }
 
+  public void hardReset() {
+    doHardReset(formName);
+  }
+
   public static boolean checkIsAdmin() {
     return Ode.getInstance().getUser().getIsAdmin();
   }
@@ -597,7 +602,7 @@ public class BlocklyPanel extends HTMLPanel {
    * @return The created dialog box.
    */
 
-  public static DialogBox createDialog(String title, String mess, String buttonName, int size, final JavaScriptObject callback) {
+  public static DialogBox createDialog(String title, String mess, final String buttonName, final String cancelButtonName, int size, final JavaScriptObject callback) {
     final DialogBox dialogBox = new DialogBox();
     dialogBox.setStylePrimaryName("ode-DialogBox");
     dialogBox.setText(title);
@@ -613,14 +618,25 @@ public class BlocklyPanel extends HTMLPanel {
     VerticalPanel DialogBoxContents = new VerticalPanel();
     HTML message = new HTML(mess);
     message.setStyleName("DialogBox-message");
-    SimplePanel holder = new SimplePanel();
-    Button ok = new Button(buttonName);
-    ok.addClickListener(new ClickListener() {
-        public void onClick(Widget sender) {
-          doCallBack(callback);
-        }
-      });
-    holder.add(ok);
+    HorizontalPanel holder = new HorizontalPanel();
+    if (buttonName != null) {           // If buttonName and cancelButtonName are null
+      Button ok = new Button(buttonName); // We won't have any buttons and other
+      ok.addClickListener(new ClickListener() { // code is needed to dismiss us
+          public void onClick(Widget sender) {
+            doCallBack(callback, buttonName);
+          }
+        });
+      holder.add(ok);
+    }
+    if (cancelButtonName != null) {
+      Button cancel = new Button(cancelButtonName);
+      cancel.addClickListener(new ClickListener() {
+          public void onClick(Widget sender) {
+            doCallBack(callback, cancelButtonName);
+          }
+        });
+      holder.add(cancel);
+    }
     DialogBoxContents.add(message);
     DialogBoxContents.add(holder);
     dialogBox.setWidget(DialogBoxContents);
@@ -674,8 +690,8 @@ public class BlocklyPanel extends HTMLPanel {
    * and call it.
    * @param callback the Javascript callback.
    */
-  private static native void doCallBack(JavaScriptObject callback) /*-{
-    callback.call();
+  private static native void doCallBack(JavaScriptObject callback, String buttonName) /*-{
+    callback.call(null, buttonName);
   }-*/;
 
   private static native void exportMethodsToJavascript() /*-{
@@ -697,7 +713,7 @@ public class BlocklyPanel extends HTMLPanel {
     $wnd.BlocklyPanel_popScreen =
       $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::popScreen());
     $wnd.BlocklyPanel_createDialog =
-      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::createDialog(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILcom/google/gwt/core/client/JavaScriptObject;));
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::createDialog(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILcom/google/gwt/core/client/JavaScriptObject;));
     $wnd.BlocklyPanel_hideDialog =
       $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::HideDialog(Lcom/google/gwt/user/client/ui/DialogBox;));
     $wnd.BlocklyPanel_setDialogContent =
@@ -799,6 +815,10 @@ public class BlocklyPanel extends HTMLPanel {
 
   public static native void doStartRepl(String formName, boolean alreadyRunning, boolean forEmulator, boolean forUsb) /*-{
     $wnd.Blocklies[formName].ReplMgr.startRepl(alreadyRunning, forEmulator, forUsb);
+  }-*/;
+
+  public static native void doHardReset(String formName) /*-{
+    $wnd.Blocklies[formName].ReplMgr.ehardreset(formName);
   }-*/;
 
   public static native void doRenderBlockly(String formName) /*-{

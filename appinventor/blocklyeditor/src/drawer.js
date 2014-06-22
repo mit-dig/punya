@@ -1,22 +1,28 @@
-// Copyright 2012 Massachusetts Institute of Technology. All rights reserved.
-
+// -*- mode: java; c-basic-offset: 2; -*-
+// Copyright 2013-2014 MIT, All rights reserved
+// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 /**
+ * @license
  * @fileoverview Visual blocks editor for App Inventor
  * Set of drawers for holding factory blocks (blocks that create
  * other blocks when dragged onto the workspace). The set of drawers
  * includes the built-in drawers that we get from the blocks language, as
  * well as a drawer per component instance that was added to this workspace.
  *
+ * @author mckinney@mit.edu (Andrew F. McKinney)
  * @author Sharon Perl (sharon@google.com)
  */
 
-Blockly.Drawer = {};
+'use strict';
+
+goog.provide('Blockly.Drawer');
+
+goog.require('Blockly.Flyout');
 
 // Some block drawers need to be initialized after all the javascript source is loaded because they
 // use utility functions that may not yet be defined at the time their source is read in. They
 // can do this by adding a field to Blockly.DrawerInit whose value is their initialization function.
 // For example, see language/common/math.js.
-if (!Blockly.DrawerInit) Blockly.DrawerInit = {};
 
 /**
  * Create the dom for the drawer. Creates a flyout Blockly.Drawer.flyout_,
@@ -24,7 +30,7 @@ if (!Blockly.DrawerInit) Blockly.DrawerInit = {};
  */
 Blockly.Drawer.createDom = function() {
   Blockly.Drawer.flyout_ = new Blockly.Flyout();
-  // insert the flyout after the main workspace (except, there's no 
+  // insert the flyout after the main workspace (except, there's no
   // svg.insertAfter method, so we need to insert before the thing following
   // the main workspace. Neil Fraser says: this is "less hacky than it looks".
   var flyoutGroup = Blockly.Drawer.flyout_.createDom();
@@ -40,7 +46,7 @@ Blockly.Drawer.init = function() {
   for (var name in Blockly.DrawerInit) {
     Blockly.DrawerInit[name]();
   }
-  
+
   Blockly.Drawer.languageTree = Blockly.Drawer.buildTree_();
 };
 
@@ -52,7 +58,7 @@ Blockly.Drawer.init = function() {
 Blockly.Drawer.PREFIX_ = 'cat_';
 
 /**
- * Build the hierarchical tree of block types. 
+ * Build the hierarchical tree of block types.
  * Note: taken from Blockly's toolbox.js
  * @return {!Object} Tree object.
  * @private
@@ -60,8 +66,8 @@ Blockly.Drawer.PREFIX_ = 'cat_';
 Blockly.Drawer.buildTree_ = function() {
   var tree = {};
   // Populate the tree structure.
-  for (var name in Blockly.Language) {
-    var block = Blockly.Language[name];
+  for (var name in Blockly.Blocks) {
+    var block = Blockly.Blocks[name];
     // Blocks without a category are fragments used by the mutator dialog.
     if (block.category) {
       var cat = Blockly.Drawer.PREFIX_ + window.encodeURI(block.category);
@@ -77,7 +83,7 @@ Blockly.Drawer.buildTree_ = function() {
 
 /**
  * Show the contents of the built-in drawer named drawerName. drawerName
- * should be one of Blockly.MSG_VARIABLE_CATEGORY, 
+ * should be one of Blockly.MSG_VARIABLE_CATEGORY,
  * Blockly.MSG_PROCEDURE_CATEGORY, or one of the built-in block categories.
  * @param drawerName
  */
@@ -86,7 +92,7 @@ Blockly.Drawer.showBuiltin = function(drawerName) {
   var blockSet = Blockly.Drawer.languageTree[drawerName];
   if(drawerName == "cat_Procedures") {
     var newBlockSet = [];
-    for(var i=0;i<blockSet.length;i++) {      
+    for(var i=0;i<blockSet.length;i++) {
       if(!(blockSet[i] == "procedures_callnoreturn" // Include callnoreturn only if at least one defnoreturn declaration
            && JSON.stringify(Blockly.AIProcedure.getProcedureNames(false))
               == JSON.stringify([Blockly.FieldProcedure.defaultValue]))
@@ -119,14 +125,14 @@ Blockly.Drawer.showComponent = function(instanceName) {
     var xmlList = Blockly.Drawer.instanceNameToXMLArray(instanceName);
     Blockly.Drawer.flyout_.show(xmlList);
   } else {
-    console.log("Got call to Blockly.Drawer.showComponent(" +  instanceName + 
+    console.log("Got call to Blockly.Drawer.showComponent(" +  instanceName +
                 ") - unknown component name");
   }
 };
 
 /**
- * Show the contents of the generic component drawer named drawerName. (This is under the 
- * "Any components" section in App Inventor). drawerName should be the name of a component type for 
+ * Show the contents of the generic component drawer named drawerName. (This is under the
+ * "Any components" section in App Inventor). drawerName should be the name of a component type for
  * which we have at least one component instance in the blocks workspace. If no such component
  * type is found, currently we just log a message to the console and do nothing.
  * @param drawerName
@@ -138,7 +144,7 @@ Blockly.Drawer.showGeneric = function(typeName) {
     var xmlList = Blockly.Drawer.componentTypeToXMLArray(typeName);
     Blockly.Drawer.flyout_.show(xmlList);
   } else {
-    console.log("Got call to Blockly.Drawer.showGeneric(" +  typeName + 
+    console.log("Got call to Blockly.Drawer.showGeneric(" +  typeName +
                 ") - unknown component type name");
   }
 };
@@ -281,8 +287,8 @@ Blockly.Drawer.procedureCallersXMLString = function(returnsValue) {
 }
 
 Blockly.Drawer.compareDeclarationsByName = function (decl1, decl2) {
-  var name1 = decl1.getTitleValue('NAME').toLocaleLowerCase();
-  var name2 = decl2.getTitleValue('NAME').toLocaleLowerCase();
+  var name1 = decl1.getFieldValue('NAME').toLocaleLowerCase();
+  var name2 = decl2.getFieldValue('NAME').toLocaleLowerCase();
   return name1.localeCompare(name2);
 }
 
@@ -299,7 +305,7 @@ Blockly.Drawer.procedureCallerBlockString = function(procDeclBlock) {
   var declType = procDeclBlock.type;
   var callerType = (declType == 'procedures_defreturn') ? 'procedures_callreturn' : 'procedures_callnoreturn';
   var blockString = '<block type="' + callerType + '" inline="false">'
-  var procName = procDeclBlock.getTitleValue('NAME');
+  var procName = procDeclBlock.getFieldValue('NAME');
   blockString += '<title name="PROCNAME">' + procName + '</title>';
   var mutationDom = procDeclBlock.mutationToDom();
   mutationDom.setAttribute('name', procName); // Decl doesn't have name attribute, but caller does
@@ -355,7 +361,7 @@ Blockly.Drawer.getDefaultXMLString = function(blockType,mutatorAttributes) {
 }
 
 Blockly.Drawer.defaultBlockXMLStrings = {
-  controls_forRange : {xmlString:
+  controls_forRange: {xmlString:
   '<xml>' +
     '<block type="controls_forRange">' +
       '<value name="START"><block type="math_number"><title name="NUM">1</title></block></value>' +
@@ -364,7 +370,7 @@ Blockly.Drawer.defaultBlockXMLStrings = {
     '</block>' +
   '</xml>' },
 
-   math_random_int : {xmlString:
+   math_random_int: {xmlString:
   '<xml>' +
     '<block type="math_random_int">' +
     '<value name="FROM"><block type="math_number"><title name="NUM">1</title></block></value>' +
@@ -384,7 +390,7 @@ Blockly.Drawer.defaultBlockXMLStrings = {
       '</value>' +
     '</block>' +
   '</xml>'},
-  lists_create_with:{xmlString:
+  lists_create_with: {xmlString:
   '<xml>' +
     '<block type="lists_create_with">' +
       '<mutation items="0"></mutation>' +
@@ -393,13 +399,41 @@ Blockly.Drawer.defaultBlockXMLStrings = {
       '<mutation items="2"></mutation>' +
     '</block>' +
   '</xml>'},
-  component_method: [{matchingMutatorAttributes:{component_type:"TinyDB", method_name:"GetValue"},
-    mutatorXMLStringFunction: function(mutatorAttributes) { return '' +
-    '<xml>' +
-      '<block type="component_method">' +
-      //mutator generator
-      Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
-      '<value name="ARG1"><block type="text"><title name="TEXT"></title></block></value>' +
-    '</block>' +
-  '</xml>';}}]
+
+  component_method: [
+    {matchingMutatorAttributes:{component_type:"TinyDB", method_name:"GetValue"},
+     mutatorXMLStringFunction: function(mutatorAttributes) {
+       return '' +
+         '<xml>' +
+         '<block type="component_method">' +
+         //mutator generator
+         Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
+         '<value name="ARG1"><block type="text"><title name="TEXT"></title></block></value>' +
+         '</block>' +
+         '</xml>';}},
+
+    // Notifer.ShowTextDialog has cancelable default to TRUE
+    {matchingMutatorAttributes:{component_type:"Notifier", method_name:"ShowTextDialog"},
+     mutatorXMLStringFunction: function(mutatorAttributes) {
+       return '' +
+         '<xml>' +
+         '<block type="component_method">' +
+         //mutator generator
+         Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
+         '<value name="ARG2"><block type="logic_boolean"><title name="BOOL">TRUE</title></block></value>' +
+         '</block>' +
+         '</xml>';}},
+
+    // Notifer.ShowChooseDialog has cancelable default to TRUE
+    {matchingMutatorAttributes:{component_type:"Notifier", method_name:"ShowChooseDialog"},
+     mutatorXMLStringFunction: function(mutatorAttributes) {
+       return '' +
+         '<xml>' +
+         '<block type="component_method">' +
+         //mutator generator
+         Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
+         '<value name="ARG4"><block type="logic_boolean"><title name="BOOL">TRUE</title></block></value>' +
+         '</block>' +
+         '</xml>';}}
+  ]
 };

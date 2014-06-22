@@ -5,6 +5,8 @@
 
 package com.google.appinventor.components.runtime;
 
+import android.content.Context;
+import android.webkit.JavascriptInterface;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -39,14 +41,26 @@ import android.webkit.WebViewClient;
  */
 
 @DesignerComponent(version = YaVersion.WEBVIEWER_COMPONENT_VERSION,
-                   category = ComponentCategory.USERINTERFACE,
-                   description = "Component for viewing Web pages.  The Home URL can be " +
-                   "specified in the Designer or in the Blocks Editor.  The view can be set " +
-                   "to follow links when they are tapped, and users can fill in Web forms. " +
-                   "Warning: This is not a full browser.  For example, pressing the phone's " +
-                   "hardware Back key will exit the app, rather than move back in the " +
-                   "browser history.")
-
+    category = ComponentCategory.USERINTERFACE,
+    description = "Component for viewing Web pages.  The Home URL can be " +
+        "specified in the Designer or in the Blocks Editor.  The view can be set " +
+        "to follow links when they are tapped, and users can fill in Web forms. " +
+        "Warning: This is not a full browser.  For example, pressing the phone's " +
+        "hardware Back key will exit the app, rather than move back in the " +
+        "browser history." +
+        "<p />You can use the WebViewer.WebViewString property to communicate " +
+        "between your app and Javascript code running in the Webviewer page. " +
+        "In the app, you get and set WebViewString.  " +
+        "In the WebViewer, you include Javascript that references the window.AppInventor " +
+        "object, using the methoods </em getWebViewString()</em> and <em>setWebViewString(text)</em>.  " +
+        "<p />For example, if the WebViewer opens to a page that contains the Javascript command " +
+        "<br /> <em>document.write(\"The answer is\" + window.AppInventor.getWebViewString());</em> " +
+        "<br />and if you set WebView.WebVewString to \"hello\", then the web page will show " +
+        "</br ><em>The answer is hello</em>.  " +
+        "<br />And if the Web page contains Javascript that executes the command " +
+        "<br /><em>windowAppInventor.setWebViewString(\"hello from Javascript\")</em>, " +
+        "<br />then the value of the WebViewString property will be " +
+        "<br /><em>hello from Javascript</em>. ")
 
 // TODO(halabelson): Integrate control of the Back key, when we provide it
 
@@ -65,6 +79,9 @@ public final class WebViewer extends AndroidViewComponent {
   // Whether or not to prompt for permission in the WebViewer
   private boolean prompt = true;
 
+  // allows passing strings to javascript
+  WebViewInterface wvInterface;
+
   /**
    * Creates a new WebViewer component.
    *
@@ -77,6 +94,9 @@ public final class WebViewer extends AndroidViewComponent {
     webview.setWebViewClient(new WebViewerClient());
     webview.getSettings().setJavaScriptEnabled(true);
     webview.setFocusable(true);
+    // adds a way to send strings to the javascript
+    wvInterface = new WebViewInterface(webview.getContext());
+    webview.addJavascriptInterface(wvInterface, "AppInventor");
     // enable pinch zooming and zoom controls
     webview.getSettings().setBuiltInZoomControls(true);
 
@@ -86,19 +106,19 @@ public final class WebViewer extends AndroidViewComponent {
     container.$add(this);
 
     webview.setOnTouchListener(new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-          switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_UP:
-              if (!v.hasFocus()) {
-                v.requestFocus();
-              }
-              break;
-          }
-          return false;
+      @Override
+      public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction()) {
+          case MotionEvent.ACTION_DOWN:
+          case MotionEvent.ACTION_UP:
+            if (!v.hasFocus()) {
+              v.requestFocus();
+            }
+            break;
         }
-      });
+        return false;
+      }
+    });
 
     // set the initial default properties.  Height and Width
     // will be fill-parent, which will be the default for the web viewer.
@@ -107,6 +127,26 @@ public final class WebViewer extends AndroidViewComponent {
     HomeUrl("");
     Width(LENGTH_FILL_PARENT);
     Height(LENGTH_FILL_PARENT);
+  }
+
+  /**
+   * Gets the web view string
+   *
+   * @return string
+   */
+  @SimpleProperty(description = "Gets the WebView's String, which is viewable through " +
+      "Javascript in the WebView as the window.AppInventor object",
+      category = PropertyCategory.BEHAVIOR)
+  public String WebViewString() {
+    return wvInterface.getWebViewString();
+  }
+
+  /**
+   * Sets the web view string
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public void WebViewString(String newString) {
+    wvInterface.setWebViewString(newString);
   }
 
   @Override
@@ -154,7 +194,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
   @SimpleProperty(
       description = "URL of the page the WebViewer should initially open to.  " +
-      "Setting this will load the page.",
+          "Setting this will load the page.",
       category = PropertyCategory.BEHAVIOR)
   public String HomeUrl() {
     return homeUrl;
@@ -166,7 +206,7 @@ public final class WebViewer extends AndroidViewComponent {
    * @param url URL of the page the WebVewier should load
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-                    defaultValue = "")
+      defaultValue = "")
   @SimpleProperty()
   public void HomeUrl(String url) {
     homeUrl = url;
@@ -182,7 +222,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
   @SimpleProperty(
       description = "URL of the page currently viewed.   This could be different from the " +
-      "Home URL if new pages were visited by following links.",
+          "Home URL if new pages were visited by following links.",
       category = PropertyCategory.BEHAVIOR)
   public String CurrentUrl() {
     return (webview.getUrl() == null) ? "" : webview.getUrl();
@@ -206,7 +246,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
   @SimpleProperty(
       description = "Determines whether to follow links when they are tapped in the WebViewer.  " +
-      "If you follow links, you can use GoBack and GoForward to navigate the browser history. ",
+          "If you follow links, you can use GoBack and GoForward to navigate the browser history. ",
       category = PropertyCategory.BEHAVIOR)
   public boolean FollowLinks() {
     return followLinks;
@@ -218,7 +258,7 @@ public final class WebViewer extends AndroidViewComponent {
    * @param follow
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
-                    defaultValue = "True")
+      defaultValue = "True")
   @SimpleProperty()
   public void FollowLinks(boolean follow) {
     followLinks = follow;
@@ -231,7 +271,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
   @SimpleFunction(
       description = "Loads the home URL page.  This happens automatically when " +
-      "the home URL is changed.")
+          "the home URL is changed.")
   public void GoHome() {
     webview.loadUrl(homeUrl);
   }
@@ -241,7 +281,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
   @SimpleFunction(
       description = "Go back to the previous page in the history list.  " +
-                    "Does nothing if there is no previous page.")
+          "Does nothing if there is no previous page.")
   public void GoBack() {
     if (webview.canGoBack()) {
       webview.goBack();
@@ -253,7 +293,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
   @SimpleFunction(
       description = "Go forward to the next page in the history list.   " +
-                    "Does nothing if there is no next page.")
+          "Does nothing if there is no next page.")
   public void GoForward() {
     if (webview.canGoForward()) {
       webview.goForward();
@@ -296,10 +336,10 @@ public final class WebViewer extends AndroidViewComponent {
    * @param uses -- Whether or not the API is available
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
-    defaultValue = "False")
+      defaultValue = "False")
   @SimpleProperty(userVisible = false,
-    description = "Whether or not to give the application permission to use the Javascript geolocation API. " +
-                  "This property is available only in the designer.")
+      description = "Whether or not to give the application permission to use the Javascript geolocation API. " +
+          "This property is available only in the designer.")
   public void UsesLocation(boolean uses) {
     // We don't actually do anything here (the work is in the MockWebViewer)
   }
@@ -312,7 +352,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
 
   @SimpleProperty(description = "If True, then prompt the user of the WebView to give permission to access the geolocation API. " +
-    "If False, then assume permission is granted.")
+      "If False, then assume permission is granted.")
   public boolean PromptforPermission() {
     return prompt;
   }
@@ -325,7 +365,7 @@ public final class WebViewer extends AndroidViewComponent {
    */
 
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
-    defaultValue = "True")
+      defaultValue = "True")
   @SimpleProperty(userVisible = true)
   public void PromptforPermission(boolean prompt) {
     this.prompt = prompt;
@@ -346,4 +386,38 @@ public final class WebViewer extends AndroidViewComponent {
     if (SdkLevel.getLevel() >= SdkLevel.LEVEL_ECLAIR)
       EclairUtil.clearWebViewGeoLoc();
   }
+
+  /**
+   * Allows the setting of properties to be monitored from the javascript
+   * in the WebView
+   */
+  public class WebViewInterface {
+    Context mContext;
+    String webViewString;
+
+    /** Instantiate the interface and set the context */
+    WebViewInterface(Context c) {
+      mContext = c;
+      webViewString = " ";
+    }
+
+    /**
+     * Gets the web view string
+     *
+     * @return string
+     */
+    @JavascriptInterface
+    public String getWebViewString() {
+      return webViewString;
+    }
+
+    /**
+     * Sets the web view string
+     */
+    public void setWebViewString(String newString) {
+      webViewString = newString;
+    }
+
+  }
 }
+

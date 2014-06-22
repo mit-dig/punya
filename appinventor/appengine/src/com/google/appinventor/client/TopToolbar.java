@@ -8,6 +8,7 @@ package com.google.appinventor.client;
 import com.google.appinventor.client.boxes.ProjectListBox;
 import com.google.appinventor.client.boxes.ViewerBox;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
+import com.google.appinventor.client.editor.youngandroid.YaBlocksEditor;
 import com.google.appinventor.client.explorer.commands.BuildCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.CopyYoungAndroidProjectCommand;
@@ -86,6 +87,7 @@ public class TopToolbar extends Composite {
   private static final String WIDGET_NAME_EMULATOR_BUTTON = "Emulator";
   private static final String WIDGET_NAME_USB_BUTTON = "Usb";
   private static final String WIDGET_NAME_RESET_BUTTON = "Reset";
+  private static final String WIDGET_NAME_HARDRESET_BUTTON = "HardReset";
   private static final String WIDGET_NAME_PROJECT = "Project";
   private static final String WIDGET_NAME_HELP = "Help";
   private static final String WIDGET_NAME_ABOUT = "About";
@@ -154,7 +156,7 @@ public class TopToolbar extends Composite {
     fileItems.add(new DropDownItem(WIDGET_NAME_DELETE_KEYSTORE, MESSAGES.deleteKeystoreButton(),
         new DeleteKeystoreAction()));
 
-    // Connect -> {Connect to Companion; Connect to Emulator; Connect to USB}
+    // Connect -> {Connect to Companion; Connect to Emulator; Connect to USB; Reset Connections}
     connectItems.add(new DropDownItem(WIDGET_NAME_WIRELESS_BUTTON,
         MESSAGES.wirelessButton(), new WirelessAction()));
     connectItems.add(new DropDownItem(WIDGET_NAME_EMULATOR_BUTTON,
@@ -164,6 +166,8 @@ public class TopToolbar extends Composite {
     connectItems.add(null);
     connectItems.add(new DropDownItem(WIDGET_NAME_RESET_BUTTON, MESSAGES.resetConnections(),
         new ResetAction()));
+    connectItems.add(new DropDownItem(WIDGET_NAME_HARDRESET_BUTTON, MESSAGES.hardResetConnections(),
+        new HardResetAction()));
 
     // Build -> {Show Barcode; Download to Computer; Generate YAIL only when logged in as an admin}
     buildItems.add(new DropDownItem(WIDGET_NAME_BUILD_BARCODE, MESSAGES.showBarcodeButton(),
@@ -231,7 +235,6 @@ public class TopToolbar extends Composite {
 
     initWidget(toolbar);
 
-    connectDropDown.setItemEnabled(MESSAGES.resetConnections(), false);
   }
 
   // -----------------------------
@@ -317,6 +320,13 @@ public class TopToolbar extends Composite {
     @Override
     public void execute() {
       startRepl(false, false, false); // We are really stopping the repl here
+    }
+  }
+
+  private class HardResetAction implements Command {
+    @Override
+    public void execute() {
+      replHardReset();
     }
   }
 
@@ -613,21 +623,21 @@ public class TopToolbar extends Composite {
   private static class LibraryAction implements Command {
     @Override
     public void execute() {
-      Window.open("http://appinventor.mit.edu/explore/library", "_ai2", "");
+      Window.open("http://appinventor.mit.edu/explore/library", "_ai2", "scrollbars=1");
     }
   }
 
   private static class GetStartedAction implements Command {
     @Override
     public void execute() {
-      Window.open("http://appinventor.mit.edu/explore/get-started", "_ai2", "");
+      Window.open("http://appinventor.mit.edu/explore/get-started", "_ai2", "scrollbars=1");
     }
   }
 
   private static class TutorialsAction implements Command {
     @Override
     public void execute() {
-      Window.open("http://appinventor.mit.edu/explore/ai2/tutorials", "_ai2", "");
+      Window.open("http://appinventor.mit.edu/explore/ai2/tutorials", "_ai2", "scrollbars=1");
     }
   }
 
@@ -635,21 +645,21 @@ public class TopToolbar extends Composite {
     @Override
     public void execute() {
       Window.open("http://appinventor.mit.edu/explore/ai2/support/troubleshooting", "_ai2",
-          "");
+          "scrollbars=1");
     }
   }
 
   private static class ForumsAction implements Command {
     @Override
     public void execute() {
-      Window.open("http://appinventor.mit.edu/explore/forums", "_ai2", "");
+      Window.open("https://groups.google.com/forum/#!forum/mitappinventortest", "_ai2", "scrollbars=1");
     }
   }
 
   private static class FeedbackAction implements Command {
     @Override
     public void execute() {
-      Window.open("http://something.example.com", "_blank", null);
+      Window.open("http://something.example.com", "_blank", "scrollbars=1");
     }
   }
 
@@ -658,12 +668,10 @@ public class TopToolbar extends Composite {
       connectDropDown.setItemEnabled(MESSAGES.wirelessButton(), true);
       connectDropDown.setItemEnabled(MESSAGES.emulatorButton(), true);
       connectDropDown.setItemEnabled(MESSAGES.usbButton(), true);
-      connectDropDown.setItemEnabled(MESSAGES.resetConnections(), false);
     } else {
       connectDropDown.setItemEnabled(MESSAGES.wirelessButton(), false);
       connectDropDown.setItemEnabled(MESSAGES.emulatorButton(), false);
       connectDropDown.setItemEnabled(MESSAGES.usbButton(), false);
-      connectDropDown.setItemEnabled(MESSAGES.resetConnections(), true);
     }
   }
 
@@ -707,6 +715,18 @@ public class TopToolbar extends Composite {
     } else {
       updateConnectToDropDownButton(false, false, false);
     }
+  }
+
+  private void replHardReset() {
+    DesignToolbar.DesignProject currentProject = Ode.getInstance().getDesignToolbar().getCurrentProject();
+    if (currentProject == null) {
+      OdeLog.wlog("DesignToolbar.currentProject is null. "
+            + "Ignoring attempt to do hard reset.");
+      return;
+    }
+    DesignToolbar.Screen screen = currentProject.screens.get(currentProject.currentScreen);
+    ((YaBlocksEditor)screen.blocksEditor).hardReset();
+    updateConnectToDropDownButton(false, false, false);
   }
 
   /**

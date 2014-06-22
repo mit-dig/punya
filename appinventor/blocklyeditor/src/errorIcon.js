@@ -1,3 +1,4 @@
+// -*- mode: java; c-basic-offset: 2; -*-
 /**
  * Visual Blocks Editor
  *
@@ -18,9 +19,12 @@
  */
 
 /**
- * @fileoverview Object representing a warning.
+ * @license
+ * @fileoverview Object representing a warning for MIT App Inventor.
+ * @author mckinney@mit.edu (Andrew F. McKinney)
  * @author fraser@google.com (Neil Fraser)
  */
+
 'use strict';
 
 goog.provide('Blockly.ErrorIcon');
@@ -103,7 +107,7 @@ Blockly.ErrorIcon.prototype.createIcon_ = function() {
  */
 Blockly.ErrorIcon.prototype.textToDom_ = function(text) {
   var paragraph = Blockly.createSvgElement('text',
-      {'class': 'blocklyText', 'y': Blockly.Bubble.BORDER_WIDTH}, null);
+      {'class': 'blocklyText  blocklyErrorWarningText', 'y': Blockly.Bubble.BORDER_WIDTH}, null);
   var lines = text.split('\n');
   for (var i = 0; i < lines.length; i++) {
     var tspanElement = Blockly.createSvgElement('tspan',
