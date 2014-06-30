@@ -9,8 +9,16 @@ import com.google.appinventor.client.jquery.AsyncAutoCompleteObjectListHandler;
 import com.google.appinventor.client.jquery.AsyncAutoCompleteOptions;
 import com.google.appinventor.client.jquery.AutoCompletePosition;
 import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.xedge.jquery.client.JQEvent;
@@ -28,7 +36,8 @@ import com.xedge.jquery.ui.client.model.LabelValuePair;
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
-public class SemanticWebPropertyEditor extends PropertyEditor implements ChangeHandler {
+public class SemanticWebPropertyEditor extends PropertyEditor
+    implements ChangeHandler, ValueChangeHandler<String> {
 
   /**
    * Enum used to represent the type of search the editor will
@@ -45,6 +54,8 @@ public class SemanticWebPropertyEditor extends PropertyEditor implements ChangeH
    * Text box widget used in the interface
    */
   protected final TextBox textEdit;
+
+  protected boolean hasFocus = false;
 
   /**
    * URI for the field
@@ -65,6 +76,27 @@ public class SemanticWebPropertyEditor extends PropertyEditor implements ChangeH
 
     // configure widget
     textEdit = new TextBox();
+    textEdit.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        hasFocus = true;
+      }
+    });
+    textEdit.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent event) {
+        hasFocus = false;
+        validate();
+      }
+    });
+    textEdit.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        if (!hasFocus) {
+          textEdit.setFocus(true);
+        }
+      }
+    });
     initWidget(textEdit);
     setHeight("2em");
 
@@ -117,6 +149,7 @@ public class SemanticWebPropertyEditor extends PropertyEditor implements ChangeH
     options.cancelNullValueSelection();
     ui.autocomplete(options);
     textEdit.addChangeHandler(this);
+    textEdit.addValueChangeHandler(this);
   }
 
   @Override
@@ -126,7 +159,16 @@ public class SemanticWebPropertyEditor extends PropertyEditor implements ChangeH
 
   @Override
   public void onChange(ChangeEvent arg0) {
+    validate();
+  }
+
+  protected void validate() {
     property.setValue(textEdit.getText());
+  }
+
+  @Override
+  public void onValueChange(ValueChangeEvent<String> arg0) {
+    validate();
   }
 
 }
