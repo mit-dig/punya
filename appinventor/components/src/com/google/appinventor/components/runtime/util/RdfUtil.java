@@ -47,6 +47,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.Prologue;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -782,5 +783,22 @@ public final class RdfUtil {
       Log.w(LOG_TAG, "Unable to insert triples due to communication issue.", e);
     }
     return success;
+  }
+
+  public static String prepStreamingQuery(String querytext, String regId, String streamName, String window, String step) {
+    Log.d(LOG_TAG, "before parsing querytext");
+    //Query query = QueryFactory.parse(null, querytext, "", Syntax.syntaxSPARQL_11);
+    Query query = QueryFactory.create(querytext);
+    
+    Log.d(LOG_TAG, "before adding binding variable for UUID");
+    query.addResultVar("uuid", NodeValue.makeString(regId));
+    
+    Log.d(LOG_TAG, "before adding ex.org named graph");
+    query.addNamedGraphURI("http://ex.org/gcm");
+    
+    Log.d(LOG_TAG, "query before replacing FROM clause: " + query.toString());
+    String queryStr = query.toString().replace("FROM NAMED <http://ex.org/gcm>", "FROM STREAM <" + streamName + "> [RANGE " + window + " STEP " + step + "]");
+    //queryStr = "REGISTER QUERY " + regId + " AS " + queryStr;
+    return queryStr;
   }
 }

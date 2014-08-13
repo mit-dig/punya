@@ -327,9 +327,11 @@ public class YaVersion {
   // - YANDEX_COMPONENT_VERSION was incremented to 1.
   // For YOUNG_ANDROID_VERSION 121:
   // - BUTTON_COMPONENT_VERSION was incremented to 6.
+  // For YOUNG_ANDROID_VERSION 122:
+  // - LinkedDataStreamingClient was added.
 
 
-  public static final int YOUNG_ANDROID_VERSION = 121;
+  public static final int YOUNG_ANDROID_VERSION = 122;
  
 
   // ............................... Blocks Language Version Number ...............................
@@ -888,5 +890,8 @@ public class YaVersion {
   public static final int CONTACTINFO_COMPONENT_VERSION = 1;	
 
   public static final int PEBBLESMARTWATCH_COMPONENT_VERSION = 1;	
+  
+  // For LINKEDDATASTREAMING_COMPONENT_VERSION 1:
+  public static final int LINKEDDATASTREAMING_COMPONENT_VERSION = 1;
 
 }
