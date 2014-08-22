@@ -22,6 +22,7 @@ import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -46,10 +47,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-
 /* 
  * Derived from GoogleCloudMessaging Component
  * @author dmiao@mit.edu (Daniela Miao)
@@ -69,6 +66,9 @@ import com.hp.hpl.jena.query.QueryFactory;
         +"android.permission.WAKE_LOCK, "
         +"android.permission.VIBRATE"
         )
+@UsesLibraries(libraries = "xercesImpl.jar," + 
+    "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
+    "jena-arq.jar")
 public final class LinkedDataStreamingClient extends AndroidNonvisibleComponent
         implements Component, OnDestroyListener {
 
@@ -614,7 +614,9 @@ public final class LinkedDataStreamingClient extends AndroidNonvisibleComponent
     /**
      * Performs an HTTP POST query subscription request using the GCM Server url property and the given query.
      * Query is converted to a CONSTRUCT query because an arbitrary UUID injection is necessary.
-     *
+     * 
+     * select * is currently not supported
+     * 
      * @param query the query text provided by the user
      */
     @SimpleFunction(description = "Performs an HTTP POST query subscription request using the GCM Server url property and " +
