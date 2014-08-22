@@ -69,6 +69,9 @@ import com.hp.hpl.jena.query.QueryFactory;
         +"android.permission.WAKE_LOCK, "
         +"android.permission.VIBRATE"
         )
+@UsesLibraries(libraries = "xercesImpl.jar," + 
+    "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
+    "jena-arq.jar")
 public final class LinkedDataStreamingClient extends AndroidNonvisibleComponent
         implements Component, OnDestroyListener {
 
