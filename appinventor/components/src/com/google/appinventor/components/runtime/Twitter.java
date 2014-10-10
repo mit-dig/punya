@@ -17,16 +17,12 @@ import twitter4j.DirectMessage;
 import twitter4j.IDs;
 import twitter4j.Query;
 import twitter4j.Status;
+import twitter4j.StatusUpdate;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
-import twitter4j.conf.Configuration;
-import twitter4j.conf.ConfigurationBuilder;
-import twitter4j.media.ImageUpload;
-import twitter4j.media.ImageUploadFactory;
-import twitter4j.media.MediaProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -226,7 +222,8 @@ public final class Twitter extends AndroidNonvisibleComponent implements
   /**
    * TwitPicAPIkey property getter method.
    */
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  @Deprecated
+  @SimpleProperty(userVisible = false, category = PropertyCategory.BEHAVIOR)
   public String TwitPic_API_Key() {
      return TwitPic_API_Key;
   }
@@ -238,8 +235,11 @@ public final class Twitter extends AndroidNonvisibleComponent implements
    * @param TwitPic_API_Key
    *          the API Key for image uploading, given by TwitPic
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
-  @SimpleProperty(category = PropertyCategory.BEHAVIOR, description="The API Key for image uploading, provided by TwitPic.")
+  @Deprecated
+  // Hide the deprecated property from the Designer
+  //@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
+  @SimpleProperty(userVisible = false, category = PropertyCategory.BEHAVIOR,
+      description="The API Key for image uploading, provided by TwitPic.")
   public void TwitPic_API_Key(String TwitPic_API_Key) {
     this.TwitPic_API_Key = TwitPic_API_Key;
   }
@@ -493,16 +493,16 @@ public final class Twitter extends AndroidNonvisibleComponent implements
           return;
       }
   /**
-   * Tweet with Image, Uploaded to TwitPic
+   * Tweet with Image, Uploaded to Twitter
    */
   @SimpleFunction(description = "This sends a tweet as the logged-in user with the "
-      + "specified Text and a URL to the uploaded image on TwitPic, which will be trimmed if it exceeds"
-      + MAX_CHARACTERS
-      + " characters. If an image is not found or invalid, only the text will be tweeted."
+	  + "specified Text and a path to the image to be uploaded, which will be trimmed if it "
+	  + "exceeds " + MAX_CHARACTERS + " characters. "
+	  + "If an image is not found or invalid, only the text will be tweeted."
       + "<p><u>Requirements</u>: This should only be called after the "
       + "<code>IsAuthorized</code> event has been raised, indicating that the "
       + "user has successfully logged in to Twitter.</p>" )
-  public void TweetWithImage(final String status, final String ImagePath) {
+  public void TweetWithImage(final String status, final String imagePath) {
     if (twitter == null || userName.length() == 0) {
       form.dispatchErrorOccurredEvent(this, "TweetWithImage",
           ErrorMessages.ERROR_TWITTER_SET_STATUS_FAILED, "Need to login?");
@@ -510,55 +510,23 @@ public final class Twitter extends AndroidNonvisibleComponent implements
     }
 
     AsynchUtil.runAsynchronously(new Runnable() {
-      String url = "";
-      String directURL = "";
-      String id = "";
-      
       public void run() {
         try {
-          ConfigurationBuilder builder = new ConfigurationBuilder().setMediaProviderAPIKey(TwitPic_API_Key);
-          builder.setOAuthConsumerKey(ConsumerKey());
-          builder.setOAuthConsumerSecret(ConsumerSecret());
-          builder.setOAuthAccessToken(accessToken.getToken());
-          builder.setOAuthAccessTokenSecret(accessToken.getTokenSecret());
-          Configuration conf = builder.build();
-          ImageUpload upload = new ImageUploadFactory(conf).getInstance(MediaProvider.TWITPIC);
-          
-          String[] pathtokens = ImagePath.split("/");
-          String NewImagePath;
-          if (pathtokens[0].equals("file:")) {
-              NewImagePath = new java.io.File(new URL(ImagePath).toURI()).getAbsolutePath();
-              Log.i(TAG,"NewImagePath is " + NewImagePath);
-          } else {
-              NewImagePath = ImagePath;
+          String cleanImagePath = imagePath;
+          File imageFilePath = new File(cleanImagePath);
+          if (imageFilePath.exists()) {
+            StatusUpdate theTweet = new StatusUpdate(status);
+            theTweet.setMedia(imageFilePath);
+            twitter.updateStatus(theTweet);
           }
-          
-          if (new File(NewImagePath).exists()) {
-              url = upload.upload(new File(NewImagePath));
-              Log.i(TAG,"Uploaded " + NewImagePath + " , got " + url + " back.");
-          
-              String[] tokens = url.split("/");
-              id = tokens[tokens.length-1];
-              handler.post(new Runnable() {
-                  @Override
-                  public void run() {
-                      directURL = "http://twitpic.com/show/full/" + id;
-                      ImageUploaded(directURL);
-                      Log.i(TAG,"Called ImageUploaded with " + directURL);
-                  }
-              });
-          }
-          twitter.updateStatus(status + " " + url);
+          else {
+            form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
+            ErrorMessages.ERROR_TWITTER_INVALID_IMAGE_PATH);
+          } 
         } catch (TwitterException e) {
           form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
               ErrorMessages.ERROR_TWITTER_SET_STATUS_FAILED, e.getMessage());
-        } catch (MalformedURLException e) {
-          form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
-                  ErrorMessages.ERROR_TWITTER_SET_STATUS_FAILED, e.getMessage());
-        } catch (URISyntaxException e) {
-          form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
-                  ErrorMessages.ERROR_TWITTER_SET_STATUS_FAILED, e.getMessage());
-        }
+        } 
       }
     });
   }
