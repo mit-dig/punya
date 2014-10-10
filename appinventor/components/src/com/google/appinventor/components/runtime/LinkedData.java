@@ -53,7 +53,7 @@ import android.util.Log;
     iconName = "images/semanticWeb.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
-@UsesLibraries(libraries = "xercesImpl.jar," + 
+@UsesLibraries(libraries = "xercesImpl.jar," +
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")
 public class LinkedData extends AndroidNonvisibleComponent implements
@@ -129,7 +129,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
 
   private void executeQuery(String queryText) {
     try {
-      ResultSet results = RdfUtil.executeSELECT( endpointURL, queryText, model );
+      ResultSet results = RdfUtil.executeSELECT( endpointURL, queryText );
       if ( results == null ) {
         form.runOnUiThread(new Runnable() {
           public void run() {
@@ -214,7 +214,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     }
     return true;
   }
-  
+
   /**
    * Read contents of the specified path (local or remote) into the referent model.
    * Note the implementation is identical to ReadDataFromWeb
@@ -436,7 +436,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   public void FinishedAddingDataToWeb(String graph) {
     EventDispatcher.dispatchEvent(this, "FinishedAddingDataToWeb", graph);
   }
-  
+
   /**
    * Attempts to feed the statements contained within this Linked Data
    * component into the endpoint (most likely CSPARQL).
@@ -451,7 +451,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     };
     AsynchUtil.runAsynchronously(call);
   }
-  
+
   private void doFeedModel(final URI uri) {
     try {
       if(RdfUtil.feedData(uri, model)) {
@@ -476,7 +476,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       });
     }
   }
-            
+
             @SimpleFunction
             public String ResultsToSimpleJSON(final YailList results) {
                 StringBuilder sb = new StringBuilder("[");
@@ -584,7 +584,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   public void FinishedDeletingDataFromWeb(String graph) {
     EventDispatcher.dispatchEvent(this, "FinishedDeletingDataFromWeb", graph);
   }
-  
+
   /**
    * Deletes all data from the referent model
    */
@@ -598,7 +598,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       FailedToDeleteDataFromLocal();
     }
   }
-  
+
   @SimpleEvent
   public void FailedToDeleteDataFromLocal() {
     EventDispatcher.dispatchEvent(this, "FailedToDeleteDataFromLocal");
