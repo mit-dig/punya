@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import twitter4j.DirectMessage;
 import twitter4j.IDs;
@@ -21,6 +18,7 @@ import twitter4j.StatusUpdate;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
+import twitter4j.MediaEntity;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import android.content.Context;
@@ -510,14 +508,29 @@ public final class Twitter extends AndroidNonvisibleComponent implements
     }
 
     AsynchUtil.runAsynchronously(new Runnable() {
+      String imageUrl;
       public void run() {
         try {
           String cleanImagePath = imagePath;
+          // Clean up the file path if necessary
+          if (cleanImagePath.startsWith("file://")) {
+            cleanImagePath = imagePath.replace("file://", "");
+            Log.d(TAG, "The clean image path is "+ cleanImagePath);
+          }
           File imageFilePath = new File(cleanImagePath);
           if (imageFilePath.exists()) {
+        	Log.d(TAG, "The clean image does exist");
             StatusUpdate theTweet = new StatusUpdate(status);
             theTweet.setMedia(imageFilePath);
-            twitter.updateStatus(theTweet);
+            Status st = twitter.updateStatus(theTweet);
+            MediaEntity [] entities = st.getMediaEntities();
+            imageUrl = entities[0].getMediaURLHttps();
+            handler.post(new Runnable() {
+            	@Override
+            	public void run() {
+            		ImageUploaded(imageUrl);
+            	}
+           }); 
           }
           else {
             form.dispatchErrorOccurredEvent(Twitter.this, "TweetWithImage",
