@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime;
 
@@ -72,7 +73,7 @@ import com.google.appinventor.components.runtime.util.ErrorMessages;
     + "     logged-in user (<code>RequestFriendTimeline</code>)</li>\n "
     + "<li> Getting the most recent mentions of the logged-in user "
     + "     (<code>RequestMentions</code>)</li></ul></p>\n "
-    + "<p>You must obtain a Comsumer Key and Consumer Secret for Twitter authorization "
+    + "<p>You must obtain a Consumer Key and Consumer Secret for Twitter authorization "
     + " specific to your app from http://twitter.com/oauth_clients/new",
     category = ComponentCategory.SOCIAL, nonVisible = true, iconName = "images/twitter.png")
 @SimpleObject
@@ -494,9 +495,9 @@ public final class Twitter extends AndroidNonvisibleComponent implements
    * Tweet with Image, Uploaded to Twitter
    */
   @SimpleFunction(description = "This sends a tweet as the logged-in user with the "
-	  + "specified Text and a path to the image to be uploaded, which will be trimmed if it "
-	  + "exceeds " + MAX_CHARACTERS + " characters. "
-	  + "If an image is not found or invalid, only the text will be tweeted."
+      + "specified Text and a path to the image to be uploaded, which will be trimmed if it "
+      + "exceeds " + MAX_CHARACTERS + " characters. "
+      + "If an image is not found or invalid, only the text will be tweeted."
       + "<p><u>Requirements</u>: This should only be called after the "
       + "<code>IsAuthorized</code> event has been raised, indicating that the "
       + "user has successfully logged in to Twitter.</p>" )

@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.common;
 
@@ -329,11 +330,32 @@ public class YaVersion {
   // - BUTTON_COMPONENT_VERSION was incremented to 6.
   // For YOUNG_ANDROID_VERSION 122:
   // - LinkedDataStreamingClient was added.
-  // For YOUNG_ANDROID_VERSION 122:
+  // For YOUNG_ANDROID_VERSION 123:
   // - Update Twitter uploadImage (removed the twitpick).
+  // For YOUNG_ANDROID_VERSION 124 (mit-cml/master YaVersion 96):
+  // - TIMEPICKER_COMPONENT_VERSION was incremented to 2.
+  // For YOUNG_ANDROID_VERSION 125 (mit-cml/master YaVersion 97):
+  // - PLAYER_COMPONENT_VERSION was incremented to 6
+  // For YOUNG_ANDROID_VERSION 126 (mit-cml/master YaVersion 98):
+  // - PHONECALL_COMPONENT_VERSION was incremented to 2.
+  // For YOUNG_ANDROID_VERSION 127 (mit-cml/master YaVersion 99):
+  // - CONTACTPICKER_COMPONENT_VERSION was incremented to 5
+  // For YOUNG_ANDROID_VERSION 128 (mit-cml/master YaVersion 100):
+  // - DATEPICKER_COMPONENT_VERSION was incremented to 2.
+  // For YOUNG_ANDROID_VERSION 129 (mit-cml/master YaVersion 101):
+  // - FORM_COMPONENT_VERSION was incremented to 13.
+  // For YOUNG_ANDROID_VERSION 130 (mit-cml/master YaVersion 102):
+  // - FUSIONTABLESCONTROL_COMPONENT_VERSION was incremented to 3.
+  // For YOUNG_ANDROID_VERSION 131 (mit-cml/master YaVersion 103):
+  // - LISTVIEW_COMPONENT_VERSION was incremented to 2.
+  // For YOUNG_ANDROID_VERSION 132 (mit-cml/master YaVersion 104):
+  // - TWITTER_COMPONENT_VERSION was incremented to 4.
+  // For YOUNG_ANDROID_VERSION 133 (mit-cml/master YaVersion 105):
+  // - WEB_COMPONENT_VERSION was incremented to 4.
+  // For YOUNG_ANDROID_VERSION 134:
+  // - TWITTER_COMPONENT_VERSION was incremented to 5.
 
-
-  public static final int YOUNG_ANDROID_VERSION = 123;
+  public static final int YOUNG_ANDROID_VERSION = 134;
  
 
   // ............................... Blocks Language Version Number ...............................
@@ -404,7 +426,31 @@ public class YaVersion {
   // 3. Add code in com.google.appinventor.client.youngandroid.YoungAndroidFormUpgrader#
   //    upgradeComponentProperties to upgrade the .scm file contents
   // 4. Add code in openblocks.yacodeblocks.BlockSaveFile#upgradeComponentBlocks to
-  //    upgrade the .blk file contents
+  //    upgrade the .blk file contents (not used in AI 2)
+
+
+  // Note added after internationalization (8/25/2014)
+  // If you add any properties, events or methods to a component you *must*:
+
+  //   Add an entry for each new property/event/method into
+  //   OdeMessages.java iff a property with that name doesn't already
+  //   exist (so if you are adding a property that has the same name as
+  //   another property in a different component, you don't do it a
+  //   second time). To add the "Foo" property you would add:
+
+  //         @defaultMessage("Foo")
+  //         @description(""
+  //         String FooProperties();
+
+  //   You then have to add a mapping to
+  //   TranslationComponentProperties.java (or ..Methods or ..Events
+  //   etc).
+
+  //   If you edit the description of a component (but not yet a
+  //   property,method or event of that component) you must also find and
+  //   update the description in OdeMessages.java
+
+
 
   //For ACCELEROMETERSENSOR_COMPONENT_VERSION 2:
   // - AccelerometerSensor.MinimumInterval property was added.
@@ -508,7 +554,10 @@ public class YaVersion {
   // - The method Open was added.
   // For CONTACTPICKER_COMPONENT_VERSION 4:
   // - The Shape property was added.
-  public static final int CONTACTPICKER_COMPONENT_VERSION = 4;
+  // For CONTACTPICKER_COMPONENT_VERSION 5:
+  // - Added PhoneNumber, PhoneNumberList, and EmailAddressList to ContactPicker.
+  // - For Eclair and up, we now use ContactsContract instead of the deprecated Contacts.
+  public static final int CONTACTPICKER_COMPONENT_VERSION = 5;
 
   // For EMAILPICKER_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
@@ -516,7 +565,13 @@ public class YaVersion {
   // - The ConceptURI property was renamed to ObjectType
   public static final int EMAILPICKER_COMPONENT_VERSION = 3;
 
-  public static final int DATEPICKER_COMPONENT_VERSION = 1;
+  // For DATEPICKER_COMPONENT_VERSION 2:
+  // The datepicker dialog was updated to show the current date
+  // instead of the last set date by default.
+  // The SetDateToDisplay and LaunchPicker methods were added to
+  // give the user more control of what time is displayed in the
+  // datepicker dialog.
+  public static final int DATEPICKER_COMPONENT_VERSION = 2;
 
   // For FILE_COMPONENT_VERSION 1:
   public static final int FILE_COMPONENT_VERSION = 1;
@@ -546,12 +601,18 @@ public class YaVersion {
   // - OpenScreenAnimation and CloseScreenAnimation are now properties.
   // For FORM_COMPONENT_VERSION 12:
   // - AboutScreen property was added
-  public static final int FORM_COMPONENT_VERSION = 12;
+  // For FORM_COMPONENT_VERSION 13:
+  // - The Screen.Scrollable property was set to False by default
+  public static final int FORM_COMPONENT_VERSION = 13;
 
 
   // For FUSIONTABLESCONTROL_COMPONENT_VERSION 2:
   // - The Fusiontables API was migrated from SQL to V1
-  public static final int FUSIONTABLESCONTROL_COMPONENT_VERSION = 2;
+  // For FUSIONTABLESCONTROL_COMPONENT_VERSION 3:
+  // - InsertRow, GetRows and GetRowsWithConditions was added.
+  // - KeyFile, UseServiceAuthentication and ServiceAccountEmail
+  //   were added.
+  public static final int FUSIONTABLESCONTROL_COMPONENT_VERSION = 3;
 
   public static final int GAMECLIENT_COMPONENT_VERSION = 1;
 
@@ -676,7 +737,11 @@ public class YaVersion {
 
   public static final int PEDOMETER_COMPONENT_VERSION = 1;
 
-  public static final int PHONECALL_COMPONENT_VERSION = 1;
+  // For PHONECALL_COMPONENT_VERSION 2:
+  // - The PhoneCallStarted event was added.
+  // - The PhoneCallEnded event was added.
+  // - The IncomingCallAnswered event was added.
+  public static final int PHONECALL_COMPONENT_VERSION = 2;
 
   // For PHONENUMBERPICKER_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
@@ -699,8 +764,11 @@ public class YaVersion {
   // - The IsPlaying method was added.
   // For PLAYER_COMPONENT_VERSION 5:
   // - The IsLooping property was renamed to Loop.
+  // For PLAYER_COMPONENT_VERSION 6:
+  // - The PlayInForeground property was added.
+  // - The OtherPlayerStarted event was added.
 
-  public static final int PLAYER_COMPONENT_VERSION = 5;
+  public static final int PLAYER_COMPONENT_VERSION = 6;
 
   public static final int SHARING_COMPONENT_VERSION = 1;
 
@@ -743,7 +811,13 @@ public class YaVersion {
   //   instead of a boolean
   public static final int TEXTING_COMPONENT_VERSION = 3;
 
-  public static final int TIMEPICKER_COMPONENT_VERSION = 1;
+  // For TIMEPICKER_COMPONENT_VERSION 2:
+  // After feedback from the forum, the timepicker dialog was updated
+  // to show the current time instead of the last set time by default.
+  // The SetTimeToDisplay and LaunchPicker methods were added to
+  // give the user more control of what time is displayed in the
+  // timepicker dialog.
+  public static final int TIMEPICKER_COMPONENT_VERSION = 2;
 
   public static final int TINYDB_COMPONENT_VERSION = 1;
 
@@ -773,11 +847,14 @@ public class YaVersion {
   // - The 'SetStatus' procedure has been changed to 'Tweet' to be more intuitive.
   // - Added 'TweetWithImage' which uploads an image to TwitPic and adds it to
   //   a tweet to allow a user to tweet with a picture. This requires a TwitPic_API_Key
-  //   property.  
+  //   property.
   // For TWITTER_COMPONENT_VERSION 4:
   // - Modified 'TweetWithImage' to upload images to Twitter directly because of the shutdown of
-  // - TwitPic. The TwitPic_API_Key property is now deprecated and hidden.
-  public static final int TWITTER_COMPONENT_VERSION = 4;
+  //   TwitPic. The TwitPic_API_Key property is now deprecated and hidden.
+  // For TWITTER_COMPONENT_VERSION 5:
+  // - Added 'ImageUploaded' event to report when an image is uploaded to Twitter and the
+  //   associated URL for that image.
+  public static final int TWITTER_COMPONENT_VERSION = 5;
 
   // For VERTICALARRANGEMENT_COMPONENT_VERSION 2:
   // - The AlignHorizontal property was added
@@ -804,7 +881,9 @@ public class YaVersion {
   //   method was added.
   // For WEB_COMPONENT_VERSION 3:
   // - PUT and DELETE Actions added (PutText, PutTextWithEncoding, PutFile, and Delete).
-  public static final int WEB_COMPONENT_VERSION = 3;
+  // For WEB_COMPONENT_VERSION 4:
+  // - Added method XMLTextDecode
+  public static final int WEB_COMPONENT_VERSION = 4;
 
   // For WEBVIEWER_COMPONENT_VERSION 2:
   // - The CanGoForward and CanGoBack methods were added
@@ -827,12 +906,19 @@ public class YaVersion {
   // For SPINNER_COMPONENT_VERSION 1:
   public static final int SPINNER_COMPONENT_VERSION = 1;
 
-  // For listView component Version
-  public static final int LISTVIEW_COMPONENT_VERSION = 1;
+  // For LISTVIEW_COMPONENT_VERSION 1:
+  // -- Initial version.
+  // For LISTVIEW_COMPONENT_VERSION 2:
+  // - Added the Elements property getter
+  public static final int LISTVIEW_COMPONENT_VERSION = 2;
 
   // For YANDEX_COMPONENT_VERSION 1:
   // - Initial version.
   public static final int YANDEX_COMPONENT_VERSION = 1;
+
+  // Rendezvous Server Location
+
+  public static final String RENDEZVOUS_SERVER = "rendezvous.appinventor.mit.edu";
 
   // Companion Versions and Update Information
 
@@ -849,10 +935,11 @@ public class YaVersion {
   // key as the Companion it is replacing, as the Package Manager
   // is invoked from the running Companion.
 
-  public static final String PREFERRED_COMPANION = "2.19ai2zx1";
+  public static final String PREFERRED_COMPANION = "2.22ai2zx1";
   public static final String COMPANION_UPDATE_URL = "";
-  public static final String [] ACCEPTABLE_COMPANIONS = { "2.15ai2", "2.15ai2zx1", "2.16ai2", "2.16ai2zx1", "2.17ai2",
-                                                          "2.17ai2zx1", "2.19ai2", "2.19ai2zx1" };
+  public static final String COMPANION_UPDATE_URL1 = "";
+  public static final String [] ACCEPTABLE_COMPANIONS = { "2.20ai2", "2.20ai2zx1", "2.21ai2", "2.21ai2zx1",
+                                                          "2.22ai2", "2.22ai2zx1" };
 
   // Splash Screen Values
   public static final int SPLASH_SURVEY = 1;

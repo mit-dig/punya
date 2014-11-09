@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.buildserver;
 
@@ -186,8 +187,7 @@ public final class Compiler {
   private final PrintStream out;
   private final PrintStream err;
   private final PrintStream userErrors;
-  private final boolean isForRepl;
-  private final boolean isForWireless;
+  private final boolean isForCompanion;
   // Maximum ram that can be used by a child processes, in MB.
   private final int childProcessRamMb;
   private Set<String> librariesNeeded; // Set of component libraries
@@ -233,7 +233,7 @@ public final class Compiler {
     for (String componentType : componentTypes) {
       permissions.addAll(componentPermissions.get(componentType));
     }
-    if (isForWireless) {      // This is so ACRA can do a logcat on phones older then Jelly Bean
+    if (isForCompanion) {      // This is so ACRA can do a logcat on phones older then Jelly Bean
       permissions.add("android.permission.READ_LOGS");
     }
 
@@ -339,6 +339,13 @@ public final class Compiler {
     System.out.println("Component assets needed, n= " + assetsNeeded.size());
   }
 
+
+  // This patches around a bug in AAPT (and other placed in Android)
+  // where an ampersand in the name string breaks AAPT.
+  private String cleanVname(String vname) {
+    return vname.replace("&", "and");
+  }
+
   /*
    * Creates an AndroidManifest.xml file needed for the Android application.
    */
@@ -349,7 +356,7 @@ public final class Compiler {
     String className = Signatures.getClassName(mainClass);
     String projectName = project.getProjectName();
     String vCode = (project.getVCode() == null) ? DEFAULT_VERSION_CODE : project.getVCode();
-    String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : project.getVName();
+    String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanVname(project.getVName());
     LOG.log(Level.INFO, "VCode: " + project.getVCode());
     LOG.log(Level.INFO, "VName: " + project.getVName());
 
@@ -373,7 +380,7 @@ public final class Compiler {
       // these lines we indicate that we use these features BUT THAT THEY ARE NOT REQUIRED so it is ok
       // to make the app available on devices that lack the feature. Without these lines the Play Store
       // makes a guess based on permissions and assumes that they are required features.
-      if (isForWireless) {
+      if (isForCompanion) {
           out.write("  <uses-feature android:name=\"android.hardware.bluetooth\" android:required=\"false\" />\n");
           out.write("  <uses-feature android:name=\"android.hardware.location\" android:required=\"false\" />\n");
           out.write("  <uses-feature android:name=\"android.hardware.telephony\" android:required=\"false\" />\n");
@@ -441,7 +448,7 @@ public final class Compiler {
       out.write("android:debuggable=\"false\" ");
       out.write("android:label=\"" + projectName + "\" ");
       out.write("android:icon=\"@drawable/ya\" ");
-      if (isForWireless) {              // This is to hook into ACRA
+      if (isForCompanion) {              // This is to hook into ACRA
         out.write("android:name=\"com.google.appinventor.components.runtime.ReplApplication\" ");
       }
       out.write(">\n");
@@ -464,8 +471,10 @@ public final class Compiler {
         // TODO:  Check that this doesn't screw up other components.  Also, it might be
         // better to do this programmatically when the NearField component is created, rather
         // than here in the manifest.
-        if (componentTypes.contains("NearField") && !isForWireless && isMain) {
+        if (componentTypes.contains("NearField") && !isForCompanion && isMain) {
           out.write("android:launchMode=\"singleTask\" ");
+        } else if (isMain && isForCompanion) {
+          out.write("android:launchMode=\"singleTop\" ");
         }
 
         out.write("android:windowSoftInputMode=\"stateHidden\" ");
@@ -473,15 +482,12 @@ public final class Compiler {
 
         out.write("      <intent-filter>\n");
         out.write("        <action android:name=\"android.intent.action.MAIN\" />\n");
-        if (isMain && !isForRepl) {
-          // We only want the LAUNCHER category if this is a normal user-compiled app.
-          // If this is the special REPL app then we don't want the app to show up in
-          // the apps list
+        if (isMain) {
           out.write("        <category android:name=\"android.intent.category.LAUNCHER\" />\n");
         }
         out.write("      </intent-filter>\n");
 
-        if (componentTypes.contains("NearField") && !isForWireless && isMain) {
+        if (componentTypes.contains("NearField") && !isForCompanion && isMain) {
           //  make the form respond to NDEF_DISCOVERED
           //  this will trigger the form's onResume method
           //  For now, we're handling text/plain only,but we can add more and make the Nearfield
@@ -495,6 +501,7 @@ public final class Compiler {
         out.write("    </activity>\n");
       }
 
+      // TODO(ewpatton): Provide if statements to conditionally include the following activities
       // SWListActivity
       out.write("    <activity android:name=\"" + SWLIST_ACTIVITY_CLASS + "\" " +
           "android:configChanges=\"orientation|keyboardHidden\" " +
@@ -604,6 +611,18 @@ public final class Compiler {
       out.write("    </intent-filter>\n");
       out.write("</receiver>");
 	  }
+
+      // Add WebViewActivity to the manifest only if a Twitter component is used in the app
+      if (componentTypes.contains("Twitter")){
+        out.write("    <activity android:name=\"" + WEBVIEW_ACTIVITY_CLASS + "\" " +
+            "android:configChanges=\"orientation|keyboardHidden\" " +
+            "android:screenOrientation=\"behind\">\n");
+        out.write("      <intent-filter>\n");
+        out.write("        <action android:name=\"android.intent.action.MAIN\" />\n");
+        out.write("      </intent-filter>\n");
+        out.write("    </activity>\n");
+      }
+
       // BroadcastReceiver for Texting Component
       if (componentTypes.contains("Texting")) {
         System.out.println("Android Manifest: including <receiver> tag");
@@ -659,7 +678,6 @@ public final class Compiler {
    * @param out  stdout stream for compiler messages
    * @param err  stderr stream for compiler messages
    * @param userErrors stream to write user-visible error messages
-   * @param isForRepl {@code true}, if this compilation is for the special REPL app
    * @param keystoreFilePath
    * @param childProcessRam   maximum RAM for child processes, in MBs.
    * @return  {@code true} if the compilation succeeds, {@code false} otherwise
@@ -668,12 +686,12 @@ public final class Compiler {
    */
   public static boolean compile(Project project, Set<String> componentTypes,
                                 PrintStream out, PrintStream err, PrintStream userErrors,
-                                boolean isForRepl, boolean isForWireless, String keystoreFilePath,
+                                boolean isForCompanion, String keystoreFilePath,
                                 int childProcessRam, String dexCacheDir) throws IOException, JSONException {
     long start = System.currentTimeMillis();
 
     // Create a new compiler instance for the compilation
-    Compiler compiler = new Compiler(project, componentTypes, out, err, userErrors, isForRepl, isForWireless,
+    Compiler compiler = new Compiler(project, componentTypes, out, err, userErrors, isForCompanion,
                                      childProcessRam, dexCacheDir);
 
     // Get names of component-required libraries and assets.
@@ -944,20 +962,18 @@ public final class Compiler {
    * @param out  stdout stream for compiler messages
    * @param err  stderr stream for compiler messages
    * @param userErrors stream to write user-visible error messages
-   * @param isForRepl {@code true}, if this compilation is for the special REPL app
    * @param childProcessMaxRam  maximum RAM for child processes, in MBs.
    */
   @VisibleForTesting
   Compiler(Project project, Set<String> componentTypes, PrintStream out, PrintStream err,
-           PrintStream userErrors, boolean isForRepl, boolean isForWireless,
+           PrintStream userErrors, boolean isForCompanion,
            int childProcessMaxRam, String dexCacheDir) {
     this.project = project;
     this.componentTypes = componentTypes;
     this.out = out;
     this.err = err;
     this.userErrors = userErrors;
-    this.isForRepl = isForRepl;
-    this.isForWireless = isForWireless;
+    this.isForCompanion = isForCompanion;
     this.childProcessRamMb = childProcessMaxRam;
     this.dexCacheDir = dexCacheDir;
   }
@@ -1288,6 +1304,7 @@ public final class Compiler {
         "-A", project.getAssetsDirectory().getAbsolutePath(),
         "-I", getResource(ANDROID_RUNTIME),
         "-F", tmpPackageName,
+        libsDir.getAbsolutePath()
     };
     long startAapt = System.currentTimeMillis();
     // Using System.err and System.out on purpose. Don't want to pollute build messages with
@@ -1322,10 +1339,10 @@ public final class Compiler {
         if (library.endsWith(ARMEABI_V7A_SUFFIX)) { // Remove suffix and copy.
           library = library.substring(0, library.length() - ARMEABI_V7A_SUFFIX.length());
           Files.copy(new File(getResource(RUNTIME_FILES_DIR + ARMEABI_V7A_DIRECTORY +
-              File.separator + library)), new File(armeabiV7aDir, library));
+              "/" + library)), new File(armeabiV7aDir, library));
         } else {
-          Files.copy(new File(getResource(RUNTIME_FILES_DIR + library)),
-              new File(armeabiDir, library));
+          Files.copy(new File(getResource(RUNTIME_FILES_DIR + ARMEABI_DIR_NAME +
+              "/" + library)), new File(armeabiDir, library));
         }
       }
       return true;

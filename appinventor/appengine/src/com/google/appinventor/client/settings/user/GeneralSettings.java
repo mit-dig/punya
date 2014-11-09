@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client.settings.user;
 
@@ -26,6 +27,8 @@ public final class GeneralSettings extends Settings {
 
     addProperty(new EditableProperty(this, SettingsConstants.GENERAL_SETTINGS_CURRENT_PROJECT_ID,
         "0", null, EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this, SettingsConstants.USER_TEMPLATE_URLS,"",
+        null, EditableProperty.TYPE_INVISIBLE));
   }
 
   @Override

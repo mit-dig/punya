@@ -1,7 +1,8 @@
 // -*- Mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime;
 
@@ -27,6 +28,7 @@ import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
@@ -46,9 +48,7 @@ import com.google.appinventor.components.runtime.util.MediaUtil;
           "will delete previous images, in order from oldest to newest.",
     category = ComponentCategory.MEDIA)
 
-// Note(hal): This permission declaration is not necessary.  Why not?
-// @UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE")
-
+@UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE")
 @SimpleObject
 public class ImagePicker extends Picker implements ActivityResultListener {
 

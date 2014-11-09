@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime.util;
 
@@ -149,11 +150,11 @@ public class MediaUtil {
       return form.getAssets().open(mediaPath);
 
     } catch (IOException e) {
-        if (findCaseinsensitivePath(form, mediaPath) == null){
+        if (findCaseinsensitivePath(form, mediaPath) == null) {
           throw e;
         } else {
-        String path = findCaseinsensitivePath(form, mediaPath);
-        return form.getAssets().open(path);
+          String path = findCaseinsensitivePath(form, mediaPath);
+          return form.getAssets().open(path);
         }
     }
   }
@@ -179,8 +180,14 @@ public class MediaUtil {
 
       case CONTACT_URI:
         // Open the photo for the contact.
-        InputStream is = Contacts.People.openContactPhotoInputStream(form.getContentResolver(),
-            Uri.parse(mediaPath));
+        InputStream is = null;
+        if (SdkLevel.getLevel() >= SdkLevel.LEVEL_HONEYCOMB) {
+          is = HoneycombUtil.openContactPhotoInputStreamHelper(form.getContentResolver(),
+              Uri.parse(mediaPath));
+        } else {
+          is = Contacts.People.openContactPhotoInputStream(form.getContentResolver(),
+              Uri.parse(mediaPath));
+        }
         if (is != null) {
           return is;
         }
@@ -292,10 +299,13 @@ public class MediaUtil {
     }
 
     InputStream is2 = openMedia(form, mediaPath, mediaSource);
+      BitmapDrawable originalBitmapDrawable = null;
     try {
       return new BitmapDrawable(decodeStream(is2, null, options));
     } finally {
-      is2.close();
+      if (is2 != null) {
+        is2.close();
+      }
     }
   }
 

@@ -1,12 +1,15 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client.editor.youngandroid.properties;
 
 
 import com.google.appinventor.client.widgets.properties.ChoicePropertyEditor;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 
 /**
@@ -21,8 +24,8 @@ public class YoungAndroidVisibilityChoicePropertyEditor extends ChoicePropertyEd
   // Figure out why not and explain in a comment.
   
   private static final Choice[] visibility = new Choice[] {
-    new Choice("showing", "True"),
-    new Choice("hidden", "False"),
+    new Choice(MESSAGES.VisibilityShowingProperties(), "True"),
+    new Choice(MESSAGES.VisibilityHiddenProperties(), "False"),
   };
 
   public YoungAndroidVisibilityChoicePropertyEditor() {

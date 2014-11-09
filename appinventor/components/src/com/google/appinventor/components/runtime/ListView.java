@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2014 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime;
 
@@ -176,11 +177,21 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * Set a list of text elements to build a ListView
    * @param itemsList a YailList containing the strings to be added to the ListView
    */
-  @SimpleProperty(description="Set a list of text elements to build your list.",
+  @SimpleProperty(description="List of text elements to build your list.",
       category = PropertyCategory.BEHAVIOR)
   public void Elements(YailList itemsList) {
     items = ElementsUtil.elements(itemsList, "Listview");
     setAdapterData();
+  }
+
+  /**
+   * Elements property getter method
+   *
+   * @return a YailList representing the list of strings to be picked from
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public YailList Elements() {
+    return items;
   }
 
   /**

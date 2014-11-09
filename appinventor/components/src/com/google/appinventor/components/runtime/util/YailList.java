@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime.util;
 
@@ -42,6 +43,13 @@ public class YailList extends Pair {
 
   private YailList(Object cdrval) {
     super(YailConstants.YAIL_HEADER, cdrval);
+  }
+
+  /**
+   * Create an empty YailList YailList from an array.
+   */
+  public static YailList makeEmptyList() {
+    return new YailList();
   }
 
   /**

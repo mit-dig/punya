@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 package com.google.appinventor.buildserver;
 
 import com.google.appinventor.common.version.GitBuildId;
@@ -491,7 +492,7 @@ public class BuildServer {
     // actually be deleted. That's only if the build server is killed (via ctrl+c) while a build
     // is happening, so we should be careful about that.
     outputDir.deleteOnExit();
-    Result buildResult = projectBuilder.build(userName, new ZipFile(zipFile), outputDir, false, false,
+    Result buildResult = projectBuilder.build(userName, new ZipFile(zipFile), outputDir, false,
       commandLineOptions.childProcessRamMb, commandLineOptions.dexCacheDir);
     String buildOutput = buildResult.getOutput();
     LOG.info("Build output: " + buildOutput);

@@ -45,7 +45,7 @@ public final class PropertyHelpWidget extends Image {
       setTitle(prop.getName());
 
       // Create title from component name.
-      Label titleBar = new Label(prop.getName());
+      Label titleBar = new Label(prop.getCaption());
       setTitle(prop.getName());
       titleBar.setStyleName("ode-ComponentHelpPopup-TitleBar");
 
