@@ -44,7 +44,7 @@ Make sure you change *YOUR_USER_NAME* to your user name.
 
 Configuring a remote pointing to this repository is also a good idea if you are forking:
 
-    $ cd appinventor-sources
+    $ cd punya
     $ git remote add upstream https://github.com/mit-dig/punya.git
 
 Finally, you will also have to make sure that you are ignoring files that need ignoring:
