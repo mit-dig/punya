@@ -206,6 +206,30 @@ public final class Project {
     fireProjectNodeAdded(node);
     return node;
   }
+  
+  /**
+   * Adds the given node to the project.
+   *
+   * <p/>If a node with the same file id already exists, the node is not added
+   * and the existing node is returned. However, the 'project node added' event
+   * is still fired.
+   *
+   * @param parent  parent node of node to be added
+   * @param node  node to be added
+   * @return the node that was added, or the existing node with the same file id
+   */
+  public ProjectNode copyNode(ProjectNode parent, String oldFileId, String fildId) {
+    for (ProjectNode child : parent.getChildren()) {
+      if (child.getFileId().equals(oldFileId)) {
+      	ProjectNode copyChild = child;
+      	copyChild.setName(fildId);
+        parent.addChild(copyChild);
+        fireProjectNodeAdded(copyChild);
+        return copyChild;
+      }
+    }
+    return null;
+  }
 
   /**
    * Deletes the given node from the project.

@@ -89,6 +89,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Add Screen ...")
   @Description("Label of the button for adding a new screen")
   String addFormButton();
+  
+  @DefaultMessage("Copy Screen ...")
+  @Description("Label of the button for copying a new screen")
+  String copyFormButton();
 
   @DefaultMessage("Remove Screen")
   @Description("Label of the button for removing a screen")
