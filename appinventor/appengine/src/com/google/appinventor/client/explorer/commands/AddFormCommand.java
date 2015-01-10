@@ -8,6 +8,9 @@ package com.google.appinventor.client.explorer.commands;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
@@ -30,12 +33,9 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A command that creates a new form.

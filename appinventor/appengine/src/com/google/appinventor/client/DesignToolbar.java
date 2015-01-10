@@ -101,6 +101,7 @@ public class DesignToolbar extends Toolbar {
   }
 
   private static final String WIDGET_NAME_ADDFORM = "AddForm";
+  private static final String WIDGET_NAME_COPYFORM = "CopyForm";
   private static final String WIDGET_NAME_REMOVEFORM = "RemoveForm";
   private static final String WIDGET_NAME_SCREENS_DROPDOWN = "ScreensDropdown";
   private static final String WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR = "SwitchToBlocksEditor";
@@ -160,7 +161,7 @@ public class DesignToolbar extends Toolbar {
     if (AppInventorFeatures.allowMultiScreenApplications()) {
       addButton(new ToolbarItem(WIDGET_NAME_ADDFORM, MESSAGES.addFormButton(),
           new AddFormAction()));
-      addButton(new ToolbarItem(WIDGET_NAME_ADDFORM, MESSAGES.copyFormButton(),
+      addButton(new ToolbarItem(WIDGET_NAME_COPYFORM, MESSAGES.copyFormButton(),
           new CopyFormAction()));
       addButton(new ToolbarItem(WIDGET_NAME_REMOVEFORM, MESSAGES.removeFormButton(),
           new RemoveFormAction()));
@@ -203,7 +204,7 @@ public class DesignToolbar extends Toolbar {
       ProjectRootNode projectRootNode = ode.getCurrentYoungAndroidProjectRootNode();
       if (projectRootNode != null) {
         ChainableCommand cmd = new CopyFormCommand();
-        cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADDFORM_YA, projectRootNode);
+        cmd.startExecuteChain(Tracking.PROJECT_ACTION_COPYFORM_YA, projectRootNode);
       }
     }
   }

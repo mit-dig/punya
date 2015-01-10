@@ -150,6 +150,11 @@ public interface ProjectServiceAsync {
    * @see ProjectService#addFile(long, String)
    */
   void addFile(long projectId, String fileId, AsyncCallback<Long> callback);
+  
+  /**
+   * @see ProjectService#copyFile(long, String)
+   */
+  void copyScreen(long projectId, String targetFormFileId, String fileId, AsyncCallback<Long> callback);
 
   void newProjectFromGallery(String appName, String aiaPath, long attributionId, AsyncCallback<UserProject> callback);
 

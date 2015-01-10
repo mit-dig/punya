@@ -553,11 +553,17 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
           new IllegalArgumentException("Unknown project type:" + projectType));
     }
   }
-
+  
   @Override
   public long addFile(long projectId, String fileId) {
     final String userId = userInfoProvider.getUserId();
     return getProjectRpcImpl(userId, projectId).addFile(userId, projectId, fileId);
+  }
+  
+  @Override
+  public long copyScreen(long projectId, String targetFormFileId, String fileId) {
+    final String userId = userInfoProvider.getUserId();
+    return getProjectRpcImpl(userId, projectId).copyScreen(userId, projectId, targetFormFileId, fileId);
   }
 
   /**

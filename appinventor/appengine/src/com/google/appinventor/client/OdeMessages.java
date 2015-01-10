@@ -1189,6 +1189,10 @@ public interface OdeMessages extends Messages {
   @Description("Error message reported when adding a form failed on the server.")
   String addFormError();
 
+  @DefaultMessage("Server error: could not copy form. Please try again later!")
+  @Description("Error message reported when copying a form failed on the server.")
+  String copyFormError();
+  
   // Used in explorer/commands/BuildCommand.java, and
   // explorer/commands/WaitForBuildResultCommand.java
 

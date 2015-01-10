@@ -8,6 +8,9 @@ package com.google.appinventor.client.explorer.commands;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
@@ -30,18 +33,14 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A command that copies an existing form.
  *
  * @author lizlooney@google.com (Liz Looney)
- * @author weihuali0509@gmail.com (Weihua J. Li)
  */
 public final class CopyFormCommand extends ChainableCommand {
 
@@ -138,9 +137,6 @@ public final class CopyFormCommand extends ChainableCommand {
 
         okText = MESSAGES.addScreenButton();
         cancelText = MESSAGES.cancelScreenButton();
-
-        // okText = "Add";
-        // cancelText = "Don't Add";
       }
 
       Button cancelButton = new Button(cancelText);
@@ -172,7 +168,7 @@ public final class CopyFormCommand extends ChainableCommand {
       String newFormName = newNameTextBox.getText();
       if (validate(newFormName)) {
         hide();
-        addFormAction(projectRootNode, "Screen2", newFormName);
+        copyFormAction(projectRootNode, newFormName);
       } else {
         newNameTextBox.setFocus(true);
       }
@@ -199,31 +195,31 @@ public final class CopyFormCommand extends ChainableCommand {
      *
      * @param formName the new form name
      */
-    protected void addFormAction(final YoungAndroidProjectNode projectRootNode, 
-    		final String oldFormName, final String formName) {
+    protected void copyFormAction(final YoungAndroidProjectNode projectRootNode, 
+        final String formName) {
       final Ode ode = Ode.getInstance();
       final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
       String qualifiedFormName = packageNode.getPackageName() + '.' + formName;
       final String formFileId = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
       final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
       
-      String oldQualifiedFormName = packageNode.getPackageName() + '.' + formName;
-      final String oldFormFileId = YoungAndroidFormNode.getFormFileId(oldQualifiedFormName);
-      final String oldBlocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(oldQualifiedFormName);
+      final String targetFormName = "Screen2";
+      String targetQualifiedFormName = packageNode.getPackageName() + '.' + targetFormName;
+      final String targetFormFileId = YoungAndroidFormNode.getFormFileId(targetQualifiedFormName);
 
       OdeAsyncCallback<Long> callback = new OdeAsyncCallback<Long>(
           // failure message
-          MESSAGES.addFormError()) {
+          MESSAGES.copyFormError()) {
         @Override
         public void onSuccess(Long modDate) {
           final Ode ode = Ode.getInstance();
           ode.updateModificationDate(projectRootNode.getProjectId(), modDate);
-          
+
           // Add the new form and blocks nodes to the project
           final Project project = ode.getProjectManager().getProject(projectRootNode);
-          project.copyNode(packageNode, oldFormFileId, formFileId);
-          project.copyNode(packageNode, oldBlocksFileId, blocksFileId);
-          
+          project.addNode(packageNode, new YoungAndroidFormNode(formFileId));
+          project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
+
           // Add the screen to the DesignToolbar and select the new form editor. 
           // We need to do this once the form editor and blocks editor have been
           // added to the project editor (after the files are completely loaded).
@@ -264,7 +260,7 @@ public final class CopyFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
-      ode.getProjectService().addFile(projectRootNode.getProjectId(), formFileId, callback);
+      ode.getProjectService().copyScreen(projectRootNode.getProjectId(), targetFormFileId, formFileId, callback);
     }
 
     @Override
