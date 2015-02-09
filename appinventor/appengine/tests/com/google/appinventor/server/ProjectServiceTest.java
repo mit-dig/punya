@@ -481,7 +481,8 @@ public class ProjectServiceTest {
         "{\"" + SettingsConstants.YOUNG_ANDROID_SETTINGS_ICON + "\":\"\",\"" +
         SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_CODE + "\":\"1\",\"" +
         SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_NAME + "\":\"1.0\",\"" +
-        SettingsConstants.YOUNG_ANDROID_SETTINGS_USES_LOCATION + "\":\"false\"}}",
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_USES_LOCATION + "\":\"false\",\"" +
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_MAPS_KEY + "\":\"\"}}",
         loadedSettings);
 
     String storedSettings =
