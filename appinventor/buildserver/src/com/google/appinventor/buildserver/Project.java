@@ -311,7 +311,7 @@ public final class Project {
   }
   
   public String getMapsKey() {
-    return properties.getProperty(MAPKEY, "");
+    return properties.getProperty(MAPKEY);
   }
   
   public void setMapsKey(String maps) {

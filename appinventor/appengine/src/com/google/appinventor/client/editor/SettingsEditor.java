@@ -74,14 +74,12 @@ public class SettingsEditor extends DialogBox {
 
   protected void saveSettings() {
     Settings settings = project.getSettings().getSettings(SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS);
-
     String currentValue = settings.getPropertyValue(SettingsConstants.YOUNG_ANDROID_SETTINGS_MAPS_KEY);
     String newValue = mapsKeyField.getText();
     if (!newValue.equals(currentValue)) {
       settings.changePropertyValue(SettingsConstants.YOUNG_ANDROID_SETTINGS_MAPS_KEY, newValue);
       Ode.getInstance().getEditorManager().scheduleAutoSave(project.getSettings());
     }
-
     this.hide(true);
   }
 }
