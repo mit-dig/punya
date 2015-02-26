@@ -133,6 +133,12 @@ public class Camera extends AndroidNonvisibleComponent
       deleteFile(imageFile);
     }
   }
+  
+  @SimpleFunction(description = "Delete local image")
+  public void deleteImage(String image) {
+    Uri imageUri = Uri.parse(image);
+    deleteFile(imageUri);
+  }
 
   private void deleteFile(Uri fileUri) {
     File fileToDelete = new File(fileUri.getPath());
@@ -168,7 +174,4 @@ public class Camera extends AndroidNonvisibleComponent
     return this.localStorageFolder;
     
   }
-  
-  
-  
 }
