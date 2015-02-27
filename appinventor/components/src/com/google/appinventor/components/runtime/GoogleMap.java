@@ -76,7 +76,7 @@ import gnu.math.IntNum;
     + "android.permission.ACCESS_FINE_LOCATION, "
     + "com.google.android.providers.gsf.permission.READ_GSERVICES, "
     + "android.permission.WRITE_EXTERNAL_STORAGE")
-@UsesLibraries(libraries = "google-play-services.jar, funf.jar") // we have to include funf.jar because we use gson.JsonParser
+@UsesLibraries(libraries = "google-play-services.jar, gson-2.1.jar") // we have to include funf.jar because we use gson.JsonParser
 public class GoogleMap extends AndroidViewComponent implements OnResumeListener, OnInitializeListener, OnPauseListener,
 OnMarkerClickListener, OnInfoWindowClickListener, OnMarkerDragListener, OnMapClickListener, 
 OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
