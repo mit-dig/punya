@@ -2,14 +2,10 @@ package com.google.appinventor.components.runtime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
@@ -24,25 +20,15 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.AsyncCallbackPair;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil;
-import com.google.appinventor.components.runtime.util.RdfUtil.Solution;
-import com.google.appinventor.components.runtime.util.WebServiceUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.vocabulary.RDF;
 
 import android.util.Log;
 
@@ -392,7 +378,33 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       final URI uri = noResolveUpdate ? base : base.resolve(part);
       Runnable call = new Runnable() {
         public void run() {
-          doInsertModel(uri, graph);
+          doInsertModel(0, uri, graph);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (URISyntaxException e) {
+      Log.w(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
+      FailedToAddDataToWeb(graph, "Invalid endpoint URI. See log for details.");
+    }
+  }
+  
+  /**
+   * Attempts to insert the statements contained within this Linked Data
+   * component into the endpoint with an optional graph.
+   * @param graph Empty string for the default graph, otherwise a valid URI
+   * @param noResolveUpdate true if the component should attempt to resolve the
+   * update URL relative to {@link #EndpointURL()}, false will send the query
+   * directly to {@link #endpointURL()}.
+   */
+  @SimpleFunction
+  public void AddDataToVirtuosoServer(final String graph, boolean noResolveUpdate) {
+    try {
+      URI part = new URI(null, null, "update", null, null);
+      URI base = URI.create(EndpointURL());
+      final URI uri = noResolveUpdate ? base : base.resolve(part);
+      Runnable call = new Runnable() {
+        public void run() {
+          doInsertModel(1, uri, graph);
         }
       };
       AsynchUtil.runAsynchronously(call);
@@ -402,9 +414,17 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     }
   }
 
-  private void doInsertModel(final URI uri, final String graph) {
+  private void doInsertModel(int option, final URI uri, final String graph) {
     try {
-      if(RdfUtil.insertData(uri, model, graph.length() == 0 ? null : graph)) {
+    	
+    	boolean selection = false;
+    	if (option == 0) {
+    		selection = RdfUtil.insertDataToDydra(uri, model, graph.length() == 0 ? null : graph);
+    	} else if (option == 1) {
+    		selection = RdfUtil.insertDataToVirtuoso(uri, model, graph.length() == 0 ? null : graph);
+    	} 
+    	
+      if(selection) {
         form.runOnUiThread(new Runnable() {
           public void run() {
             FinishedAddingDataToWeb(graph);
