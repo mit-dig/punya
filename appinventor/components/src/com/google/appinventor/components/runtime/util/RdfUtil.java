@@ -1065,9 +1065,10 @@ public final class RdfUtil {
     return queryStr;
   }
   
-	public static void performHttpsRequest(String urlString, InputStream inputStream,
-			String filePath) throws IOException {
+	public static boolean performHttpsRequest(String urlString, InputStream inputStream,
+			String securityToken, String filePath) throws IOException {
 
+		boolean success = false;
 		HttpsURLConnection conn = null;
 		DataOutputStream dos = null;
 
@@ -1089,6 +1090,7 @@ public final class RdfUtil {
 			conn.setRequestProperty("Connection", "Keep-Alive");
 			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="
 					+ boundary);
+			//conn.setRequestProperty("securityToken", securityToken);
 
 			SSLContext context = generateSSLContext(inputStream);
 			conn.setSSLSocketFactory(context.getSocketFactory());
@@ -1120,8 +1122,19 @@ public final class RdfUtil {
 			conn.getInputStream();
 			fileInputStream.close();
 			dos.flush();
+			
+      int status = conn.getResponseCode();
+      Log.d(LOG_TAG, "HTTPS Status = " + status);
+      if(status == 200) {
+        success = true;
+      } else {
+        Log.w(LOG_TAG, "HTTPS status for update was "+status);
+        Log.w(LOG_TAG, "HTTPS response msg was "+conn.getResponseMessage());
+      }
 		} finally {
 			dos.close();
+			conn.disconnect();
 		}
+		return success;
 	}
 }

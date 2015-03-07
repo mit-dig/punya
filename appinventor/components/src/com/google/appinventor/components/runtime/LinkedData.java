@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import android.util.Log;
+
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -31,8 +33,6 @@ import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-
-import android.util.Log;
 
 @DesignerComponent(version = YaVersion.LINKED_DATA_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
@@ -365,21 +365,37 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   }
 
   @SimpleFunction
-  public void HttpsPostFileToWeb(final String Url, final String certificateName, final String filePath) {
+  public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filePath) {
     try {
     	final InputStream inputStream = form.getAssets().open(certificateName);
       Runnable call = new Runnable() {
         public void run() {
 					try {
-						RdfUtil.performHttpsRequest(Url, inputStream, filePath);
+						boolean success = RdfUtil.performHttpsRequest(Url, inputStream, securityToken, filePath);
+			      if(success) {
+			        form.runOnUiThread(new Runnable() {
+			          public void run() {
+			          	FinishedHttsPostingFileToWeb();
+			          }
+			        });
+			      } else {
+			        form.runOnUiThread(new Runnable() {
+			          public void run() {
+			          	Log.e(LOG_TAG, "Unable to https post file to web. Please check the system logs." );
+			          	FailedHttsPostingFileToWeb();
+			          }
+			        });
+			      }
 					} catch (IOException e) {
-						Log.e(LOG_TAG, "Unable to https post file to web.", e);
+						FailedHttsPostingFileToWeb();
+						Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
 					}
         }
       };
       AsynchUtil.runAsynchronously(call);
     } catch (Exception e) {
-      Log.e(LOG_TAG, "Unable to https post file to web.", e);
+    	Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
+    	FailedHttsPostingFileToWeb();
     }
   }
   
@@ -463,18 +479,16 @@ public class LinkedData extends AndroidNonvisibleComponent implements
 
   private void doInsertModel(String certificateName, int option, final URI uri, final String graph) {
     try {
-    	
-    	boolean selection = false;
+    	boolean success = false;
     	if (option == 0) {
-    		selection = RdfUtil.insertDataToDydra(uri, model, graph.length() == 0 ? null : graph);
+    		success = RdfUtil.insertDataToDydra(uri, model, graph.length() == 0 ? null : graph);
     	} else if (option == 1) {
-    		selection = RdfUtil.insertDataToVirtuoso(uri, model, graph.length() == 0 ? null : graph);
+    		success = RdfUtil.insertDataToVirtuoso(uri, model, graph.length() == 0 ? null : graph);
     	} else if (option == 2) {
     		InputStream inputStream = form.getAssets().open(certificateName);
-    		selection = RdfUtil.insertDataToVirtuosoHttps(inputStream, uri, model, graph.length() == 0 ? null : graph);
+    		success = RdfUtil.insertDataToVirtuosoHttps(inputStream, uri, model, graph.length() == 0 ? null : graph);
     	} 
-    	
-      if(selection) {
+      if(success) {
         form.runOnUiThread(new Runnable() {
           public void run() {
             FinishedAddingDataToWeb(graph);
@@ -547,42 +561,41 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     }
   }
 
-            @SimpleFunction
-            public String ResultsToSimpleJSON(final YailList results) {
-                StringBuilder sb = new StringBuilder("[");
-                for(int i = 0; i < results.size(); i++) {
-                    YailList solution = (YailList) results.getObject( i );
-                    if(i > 0) {
-                        sb.append(",");
-                    }
-                    sb.append("{");
-                    for(int j = 0; j < solution.size(); j++) {
-                        YailList binding = (YailList) solution.getObject( j );
-                        String varName = binding.getString( 0 );
-                        Object varValue = binding.getObject( 1 );
-                        if( j != 0 ) {
-                            sb.append(",");
-                        }
-                        sb.append("\"");
-                        sb.append(varName);
-                        sb.append("\":");
-                        if(isPrimitiveOrWrapper(varValue.getClass())) {
-                            sb.append(varValue);
-                        } else {
-                            sb.append("\"");
-                            sb.append(varValue);
-                            sb.append("\"");
-                        }
-                        sb.append("");
-                    }
-                    sb.append("}");
-                }
-                sb.append("]");
-                String result = sb.toString();
-                Log.d(LOG_TAG, "JSON = " + result);
-                return result;
-            }
-
+	@SimpleFunction
+	public String ResultsToSimpleJSON(final YailList results) {
+		StringBuilder sb = new StringBuilder("[");
+		for (int i = 0; i < results.size(); i++) {
+			YailList solution = (YailList) results.getObject(i);
+			if (i > 0) {
+				sb.append(",");
+			}
+			sb.append("{");
+			for (int j = 0; j < solution.size(); j++) {
+				YailList binding = (YailList) solution.getObject(j);
+				String varName = binding.getString(0);
+				Object varValue = binding.getObject(1);
+				if (j != 0) {
+					sb.append(",");
+				}
+				sb.append("\"");
+				sb.append(varName);
+				sb.append("\":");
+				if (isPrimitiveOrWrapper(varValue.getClass())) {
+					sb.append(varValue);
+				} else {
+					sb.append("\"");
+					sb.append(varValue);
+					sb.append("\"");
+				}
+				sb.append("");
+			}
+			sb.append("}");
+		}
+		sb.append("]");
+		String result = sb.toString();
+		Log.d(LOG_TAG, "JSON = " + result);
+		return result;
+	}
 
   @SimpleEvent
   public void FailedToFeedDataToWeb(String error) {
@@ -689,5 +702,15 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     model.write(out, "TTL");
     return out.toString();
+  }
+  
+  @SimpleEvent
+  public void FinishedHttsPostingFileToWeb() {
+    EventDispatcher.dispatchEvent(this, "FinishedHttsPostingDataToWeb");
+  }
+  
+  @SimpleEvent
+  public void FailedHttsPostingFileToWeb() {
+    EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb");
   }
 }
