@@ -2,6 +2,7 @@ package com.google.appinventor.components.runtime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -363,6 +364,25 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     return clazz.isPrimitive() || WRAPPER_TYPES.contains(clazz);
   }
 
+  @SimpleFunction
+  public void HttpsPostFileToWeb(final String Url, final String certificateName, final String filePath) {
+    try {
+    	final InputStream inputStream = form.getAssets().open(certificateName);
+      Runnable call = new Runnable() {
+        public void run() {
+					try {
+						RdfUtil.performHttpsRequest(Url, inputStream, filePath);
+					} catch (IOException e) {
+						Log.e(LOG_TAG, "Unable to https post file to web.", e);
+					}
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (Exception e) {
+      Log.e(LOG_TAG, "Unable to https post file to web.", e);
+    }
+  }
+  
   /**
    * Attempts to insert the statements contained within this Linked Data
    * component into the endpoint with an optional graph.

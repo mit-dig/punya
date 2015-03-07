@@ -2,6 +2,9 @@ package com.google.appinventor.components.runtime.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -39,6 +43,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
 
@@ -1059,4 +1064,64 @@ public final class RdfUtil {
     //queryStr = "REGISTER QUERY " + regId + " AS " + queryStr;
     return queryStr;
   }
+  
+	public static void performHttpsRequest(String urlString, InputStream inputStream,
+			String filePath) throws IOException {
+
+		HttpsURLConnection conn = null;
+		DataOutputStream dos = null;
+
+		String lineEnd = "\r\n";
+		String twoHyphens = "--";
+		String boundary = "*****";
+
+		int bytesRead, bytesAvailable, bufferSize;
+		byte[] buffer;
+		int maxBufferSize = 1 * 1024 * 1024;
+		
+		try {
+			URL url = new URL(urlString);
+			conn = (HttpsURLConnection) url.openConnection();
+			conn.setDoInput(true);
+			conn.setDoOutput(true);
+			conn.setUseCaches(false);
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Connection", "Keep-Alive");
+			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="
+					+ boundary);
+
+			SSLContext context = generateSSLContext(inputStream);
+			conn.setSSLSocketFactory(context.getSocketFactory());
+			conn.setHostnameVerifier(new BrowserCompatHostnameVerifier());
+
+			dos = new DataOutputStream(conn.getOutputStream());
+			dos.writeBytes(twoHyphens + boundary + lineEnd);
+			dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\""
+					+ filePath + "\"" + lineEnd);
+			dos.writeBytes(lineEnd);
+
+			filePath = filePath.replace("file:/", filePath);
+			FileInputStream fileInputStream = new FileInputStream(new File(filePath));
+			bytesAvailable = fileInputStream.available();
+			bufferSize = Math.min(bytesAvailable, maxBufferSize);
+			buffer = new byte[bufferSize];
+
+			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+			while (bytesRead > 0) {
+				dos.write(buffer, 0, bufferSize);
+				bytesAvailable = fileInputStream.available();
+				bufferSize = Math.min(bytesAvailable, maxBufferSize);
+				bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+			}
+
+			dos.writeBytes(lineEnd);
+			dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+			conn.getInputStream();
+			fileInputStream.close();
+			dos.flush();
+		} finally {
+			dos.close();
+		}
+	}
 }
