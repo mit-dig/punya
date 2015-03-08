@@ -368,37 +368,50 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filePath) {
   	Log.d(LOG_TAG, "This is within the HttpsPostFileToWeb.");
     try {
-    	final InputStream inputStream = form.getAssets().open(certificateName);
-    	Log.d(LOG_TAG, "After getting the certificate InputStream.");
       Runnable call = new Runnable() {
         public void run() {
-					try {
-						boolean success = RdfUtil.performHttpsRequest(Url, inputStream, securityToken, filePath);
-			      if(success) {
-			        form.runOnUiThread(new Runnable() {
-			          public void run() {
-			          	FinishedHttsPostingFileToWeb();
-			          }
-			        });
-			      } else {
-			        form.runOnUiThread(new Runnable() {
-			          public void run() {
-			          	Log.e(LOG_TAG, "Unable to https post file to web. Please check the system logs." );
-			          	FailedHttsPostingFileToWeb();
-			          }
-			        });
-			      }
-					} catch (IOException e) {
-						FailedHttsPostingFileToWeb();
-						Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
-					}
+        	doInsertData(Url, certificateName, securityToken, filePath);
         }
       };
       AsynchUtil.runAsynchronously(call);
     } catch (Exception e) {
     	Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
-    	FailedHttsPostingFileToWeb();
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+        	FailedHttsPostingFileToWeb("Please see system log (logcat) for more info.");
+        }
+      });
     }
+  }
+  
+  private void doInsertData(final String Url, final String certificateName, final String securityToken, final String filePath) {
+		try {
+    	final InputStream inputStream = form.getAssets().open(certificateName);
+    	Log.d(LOG_TAG, "After getting the certificate InputStream.");
+			boolean success = RdfUtil.performHttpsRequest(Url, inputStream, securityToken, filePath);
+			Log.d(LOG_TAG, "The post file result is "+success);
+      if(success) {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+		        FinishedHttsPostingFileToWeb("done");
+          }
+        });
+      } else {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+		        FailedHttsPostingFileToWeb("Please see system log (logcat) for more info.");
+          }
+        });
+      }
+		} catch (IOException e) {
+			Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
+    	final String erroMessage = e.getLocalizedMessage();
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+	        FailedHttsPostingFileToWeb(erroMessage);
+        }
+      });
+		}
   }
   
   /**
@@ -707,12 +720,13 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   }
   
   @SimpleEvent
-  public void FinishedHttsPostingFileToWeb() {
-    EventDispatcher.dispatchEvent(this, "FinishedHttsPostingDataToWeb");
+  public void FinishedHttsPostingFileToWeb(String message) {
+  	Log.d(LOG_TAG, "Within the FinishedHttsPostingFileToWeb");
+    EventDispatcher.dispatchEvent(this, "FinishedHttsPostingFileToWeb", message);
   }
   
   @SimpleEvent
-  public void FailedHttsPostingFileToWeb() {
-    EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb");
+  public void FailedHttsPostingFileToWeb(String errorMessage) {
+    EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb", errorMessage);
   }
 }
