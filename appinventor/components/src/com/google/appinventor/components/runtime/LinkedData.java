@@ -366,8 +366,10 @@ public class LinkedData extends AndroidNonvisibleComponent implements
 
   @SimpleFunction
   public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filePath) {
+  	Log.d(LOG_TAG, "This is within the HttpsPostFileToWeb.");
     try {
     	final InputStream inputStream = form.getAssets().open(certificateName);
+    	Log.d(LOG_TAG, "After getting the certificate InputStream.");
       Runnable call = new Runnable() {
         public void run() {
 					try {

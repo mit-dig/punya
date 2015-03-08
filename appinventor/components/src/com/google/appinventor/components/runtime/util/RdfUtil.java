@@ -1068,6 +1068,7 @@ public final class RdfUtil {
 	public static boolean performHttpsRequest(String urlString, InputStream inputStream,
 			String securityToken, String filePath) throws IOException {
 
+		Log.d(LOG_TAG, "This is within the performHttpsRequest.");
 		boolean success = false;
 		HttpsURLConnection conn = null;
 		DataOutputStream dos = null;
@@ -1083,6 +1084,7 @@ public final class RdfUtil {
 		try {
 			URL url = new URL(urlString);
 			conn = (HttpsURLConnection) url.openConnection();
+			Log.d(LOG_TAG, "Openning up the http connection.");
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
 			conn.setUseCaches(false);
@@ -1102,7 +1104,7 @@ public final class RdfUtil {
 					+ filePath + "\"" + lineEnd);
 			dos.writeBytes(lineEnd);
 
-			filePath = filePath.replace("file:/", filePath);
+			filePath = filePath.replace("file:/", "");
 			FileInputStream fileInputStream = new FileInputStream(new File(filePath));
 			bytesAvailable = fileInputStream.available();
 			bufferSize = Math.min(bytesAvailable, maxBufferSize);
