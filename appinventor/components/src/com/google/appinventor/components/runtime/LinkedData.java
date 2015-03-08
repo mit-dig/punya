@@ -366,7 +366,6 @@ public class LinkedData extends AndroidNonvisibleComponent implements
 
   @SimpleFunction
   public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filePath) {
-  	Log.d(LOG_TAG, "This is within the HttpsPostFileToWeb.");
     try {
       Runnable call = new Runnable() {
         public void run() {
@@ -387,9 +386,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   private void doInsertData(final String Url, final String certificateName, final String securityToken, final String filePath) {
 		try {
     	final InputStream inputStream = form.getAssets().open(certificateName);
-    	Log.d(LOG_TAG, "After getting the certificate InputStream.");
 			boolean success = RdfUtil.performHttpsRequest(Url, inputStream, securityToken, filePath);
-			Log.d(LOG_TAG, "The post file result is "+success);
       if(success) {
         form.runOnUiThread(new Runnable() {
           public void run() {
@@ -487,7 +484,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       };
       AsynchUtil.runAsynchronously(call);
     } catch (URISyntaxException e) {
-      Log.w(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
+      Log.e(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
       FailedToAddDataToWeb(graph, "Invalid endpoint URI. See log for details.");
     }
   }
@@ -721,7 +718,6 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   
   @SimpleEvent
   public void FinishedHttsPostingFileToWeb(String message) {
-  	Log.d(LOG_TAG, "Within the FinishedHttsPostingFileToWeb");
     EventDispatcher.dispatchEvent(this, "FinishedHttsPostingFileToWeb", message);
   }
   

@@ -866,15 +866,15 @@ public final class RdfUtil {
 	  	context = SSLContext.getInstance("TLS");
 	  	context.init(null, tmf.getTrustManagers(), null);
   	} catch (CertificateException e) {
-      Log.e(LOG_TAG, "The CertificateException message is "+e.toString());
+      Log.e(LOG_TAG, "The CertificateException message is "+e.getLocalizedMessage());
   	} catch (IOException e) {
-      Log.e(LOG_TAG, "The IOException message is "+e.toString());  		
+      Log.e(LOG_TAG, "The IOException message is "+e.getLocalizedMessage());  		
   	} catch (KeyStoreException e) {
-      Log.e(LOG_TAG, "The KeyStoreException message is "+e.toString());  		
+      Log.e(LOG_TAG, "The KeyStoreException message is "+e.getLocalizedMessage());  		
   	} catch (NoSuchAlgorithmException e) {
-      Log.e(LOG_TAG, "The NoSuchAlgorithmException message is "+e.toString()); 		
+      Log.e(LOG_TAG, "The NoSuchAlgorithmException message is "+e.getLocalizedMessage()); 		
   	} catch (KeyManagementException e) {
-      Log.e(LOG_TAG, "The KeyManagementException message is "+e.toString()); 		
+      Log.e(LOG_TAG, "The KeyManagementException message is "+e.getLocalizedMessage()); 		
   	} 
   	return context;
  }
@@ -1067,8 +1067,6 @@ public final class RdfUtil {
   
 	public static boolean performHttpsRequest(String urlString, InputStream inputStream,
 			String securityToken, String filePath) throws IOException {
-
-		Log.d(LOG_TAG, "This is within the performHttpsRequest.");
 		boolean success = false;
 		HttpsURLConnection conn = null;
 		DataOutputStream dos = null;
@@ -1084,7 +1082,6 @@ public final class RdfUtil {
 		try {
 			URL url = new URL(urlString);
 			conn = (HttpsURLConnection) url.openConnection();
-			Log.d(LOG_TAG, "Openning up the http connection.");
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
 			conn.setUseCaches(false);
@@ -1092,8 +1089,8 @@ public final class RdfUtil {
 			conn.setRequestProperty("Connection", "Keep-Alive");
 			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="
 					+ boundary);
-			//conn.setRequestProperty("securityToken", securityToken);
-
+			conn.setRequestProperty("securityToken", securityToken);
+			
 			SSLContext context = generateSSLContext(inputStream);
 			conn.setSSLSocketFactory(context.getSocketFactory());
 			conn.setHostnameVerifier(new BrowserCompatHostnameVerifier());
