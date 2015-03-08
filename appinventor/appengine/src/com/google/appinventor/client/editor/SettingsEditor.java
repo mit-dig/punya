@@ -21,6 +21,8 @@ public class SettingsEditor extends DialogBox {
 
   public SettingsEditor(Project project) {
     this.project = project;
+    this.setStylePrimaryName("ode-DialogBox");
+    this.setText("Google Maps Setting");
     mapsKeyField = new TextBox();
     Label label = new Label("Google Maps API Key:");
     VerticalPanel panel2 = new VerticalPanel();
@@ -60,8 +62,8 @@ public class SettingsEditor extends DialogBox {
     panel2.add(panel);
     this.add(panel2);
     this.setWidth("100%");
-    this.setHeight("70%");
-    this.addStyleName("ode-DialogBox");
+    this.setHeight("70%");this.addStyleName("ode-DialogBox");
+
     this.center();
     init();
   }
