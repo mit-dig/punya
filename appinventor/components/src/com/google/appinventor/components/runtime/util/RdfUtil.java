@@ -40,6 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -494,8 +495,9 @@ public final class RdfUtil {
       return fullUri;
     }
     if(subject.toString().equals(form.FormID())) {
-      Log.d(LOG_TAG, "Form did not have URI fields; generating timestamp URI");
-      subject.append(System.currentTimeMillis());
+      Log.d(LOG_TAG, "Form did not have URI fields; generating timestamp + uuid URI");
+      String uuid = UUID.randomUUID().toString();
+      subject.append(System.currentTimeMillis() + "-" + uuid);
     }
     return subject.toString();
   }
