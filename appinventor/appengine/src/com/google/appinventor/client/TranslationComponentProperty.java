@@ -20,6 +20,13 @@ public class TranslationComponentProperty {
   }
 
   public static String getName(String key) {
+    //This is the short term solution.
+    //TODO: 
+    //We should throw an exception here if there is no matched in the map.
+    //We should manually add the non-existing method/property names to ode.java.
+    if (!myMap.containsKey(key)) {
+      return key;
+    }
     return myMap.get(key);
   }
 
