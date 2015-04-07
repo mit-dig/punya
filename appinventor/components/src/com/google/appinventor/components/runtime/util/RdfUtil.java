@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -56,7 +57,7 @@ public final class RdfUtil {
 
   public static final class VariableBinding extends ArrayList<Object> {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -5764559802159393326L;
 
@@ -94,7 +95,7 @@ public final class RdfUtil {
   public static final class Solution implements Set<VariableBinding>, Serializable, Cloneable {
     private final Map<String, VariableBinding> backingMap;
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -6904508566180785801L;
 
@@ -580,7 +581,7 @@ public final class RdfUtil {
       conn.setDoOutput(true);
       conn.setRequestMethod("POST");
       //conn.setRequestProperty("Content-Length", Integer.toString(prefixes.length()));
-      conn.setRequestProperty("Content-Type", "application/sparql-query");
+      conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
       conn.setRequestProperty("Accept", "*/*");
       String userInfo = uri.getUserInfo();
       if(userInfo != null && userInfo.length() != 0) {
@@ -594,7 +595,7 @@ public final class RdfUtil {
       conn.connect();
       OutputStream os = conn.getOutputStream();
       PrintStream ps = new PrintStream(os);
-      ps.print(prefixes);
+      ps.print("query=" + URLEncoder.encode( prefixes.toString(), "UTF-8" ));
       ps.close();
       int status = conn.getResponseCode();
       Log.d(LOG_TAG, "HTTP Status = " + status);
@@ -708,7 +709,7 @@ public final class RdfUtil {
     }
     return success;
   }
-  
+
   public static YailList resultSetAsYailList(ResultSet results) {
     final Collection<Solution> solutions = RdfUtil.resultSetAsCollection( results );
     final List<YailList> list = new ArrayList<YailList>();
@@ -721,7 +722,7 @@ public final class RdfUtil {
     }
     return YailList.makeList( list );
   }
-  
+
   /**
    * Performs a POST to a remote CSPARQL Engine feed
    * @param uri URI for the endpoint
@@ -742,7 +743,7 @@ public final class RdfUtil {
       return false;
     }
     baos = null;
-    
+
     HttpURLConnection conn = null;
     Log.i(LOG_TAG, "Sending update to server:");
     Log.d(LOG_TAG, contents);
@@ -789,13 +790,13 @@ public final class RdfUtil {
     Log.d(LOG_TAG, "before parsing querytext");
     //Query query = QueryFactory.parse(null, querytext, "", Syntax.syntaxSPARQL_11);
     Query query = QueryFactory.create(querytext);
-    
+
     Log.d(LOG_TAG, "before adding binding variable for UUID");
     query.addResultVar("uuid", NodeValue.makeString(regId));
-    
+
     Log.d(LOG_TAG, "before adding ex.org named graph");
     query.addNamedGraphURI("http://ex.org/gcm");
-    
+
     Log.d(LOG_TAG, "query before replacing FROM clause: " + query.toString());
     String queryStr = query.toString().replace("FROM NAMED <http://ex.org/gcm>", "FROM STREAM <" + streamName + "> [RANGE " + window + " STEP " + step + "]");
     //queryStr = "REGISTER QUERY " + regId + " AS " + queryStr;
