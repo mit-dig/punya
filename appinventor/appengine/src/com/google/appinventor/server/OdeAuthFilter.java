@@ -119,7 +119,7 @@ public class OdeAuthFilter implements Filter {
   void writeWhitelistErrorMessage(HttpServletResponse response) throws IOException {
     response.setContentType("text/plain; charset=utf-8");
     PrintWriter out = response.getWriter();
-    out.print("You are attempting to connect to this App Inventor service with the login ID:\n\n" +
+    out.print("You are attempting to connect to this Punya Framework service with the login ID:\n\n" +
         localUser.getUserEmail() + "\n\nThat ID has not been authorized to use this service.  " +
         "If you believe that you were in fact given authorization, you should contact the " +
         "service operator.");

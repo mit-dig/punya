@@ -46,7 +46,7 @@ public class AndroidServlet extends OdeServlet {
         .append("<!-- Copyright 2009 Google Inc. All Rights Reserved. -->\n")
         .append("<html>\n")
         .append("<head>\n")
-        .append("<title>App Inventor for Android Downloads</title>\n")
+        .append("<title>Punya Framework for Android Downloads</title>\n")
         .append("<link type=\"text/css\" rel=\"stylesheet\" href=\"Ode.css\">\n")
         .append("</head>\n")
         .append("<body>\n")

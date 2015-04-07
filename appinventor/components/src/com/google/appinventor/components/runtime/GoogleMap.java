@@ -76,9 +76,9 @@ import gnu.math.IntNum;
     + "android.permission.ACCESS_FINE_LOCATION, "
     + "com.google.android.providers.gsf.permission.READ_GSERVICES, "
     + "android.permission.WRITE_EXTERNAL_STORAGE")
-@UsesLibraries(libraries = "google-play-services.jar, funf.jar") // we have to include funf.jar because we use gson.JsonParser
+@UsesLibraries(libraries = "google-play-services.jar, gson-2.1.jar") // we have to include funf.jar because we use gson.JsonParser
 public class GoogleMap extends AndroidViewComponent implements OnResumeListener, OnInitializeListener, OnPauseListener,
-OnMarkerClickListener, OnInfoWindowClickListener, OnMarkerDragListener, OnMapClickListener, 
+OnMarkerClickListener, OnInfoWindowClickListener, OnMarkerDragListener, OnMapClickListener,
 OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
   private final Activity context;
@@ -91,7 +91,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   // private final android.widget.LinearLayout viewLayout;
   // private LinearLayout viewLayout;
   private android.widget.LinearLayout viewLayout;
-  
+
   // translates App Inventor alignment codes to Android gravity
   // private final AlignmentUtil alignmentSetter;
   private final String MAP_FRAGMENT_TAG;
@@ -141,7 +141,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   private final Handler androidUIHandler = new Handler();
 
   private YailList markersList;
-  
+
   // Setting for LocationClient
   // These settings are the same as the settings for the map. They will in fact give you updates at
   // the maximal rates currently possible.
@@ -196,7 +196,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     setUpMapIfNeeded();
 
     container.$add(this);
-    
+
     Width(LENGTH_FILL_PARENT);
     Height(LENGTH_FILL_PARENT);
     form.registerForOnInitialize(this);
@@ -225,7 +225,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       }
   }
 
-  
+
 //  Currently this doesn't work
   @Override
   @SimpleProperty()
@@ -271,12 +271,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           this); // OnConnectionFailedListener
     }
   }
-  
-  
+
+
   private void setUpMap() {
     // could be the boilerplate for initiating everything
-    // including all the configurations and markers 
-    
+    // including all the configurations and markers
+
     // (testing: add an marker)
     Log.i(TAG, "in setUpMap()");
     // Set listeners for marker events.  See the bottom of this class for their behavior.
@@ -697,7 +697,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   @SimpleFunction(description = "Set the layer of Google map. Default layer is \"normal\", other choices including \"hybrid\"," +
       "\"satellite\", and \"terrain\" ")
   public void SetMapType(String layerName){
-    
+
     if (layerName.equals("normal")) {
       this.mapType = com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
     } else if (layerName.equals("hybrid")) {
@@ -706,7 +706,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       this.mapType = com.google.android.gms.maps.GoogleMap.MAP_TYPE_SATELLITE;
     } else if (layerName.equals("terrain")) {
       this.mapType = com.google.android.gms.maps.GoogleMap.MAP_TYPE_TERRAIN;
-    } else {  
+    } else {
       Log.i(TAG, "Error setting layer with name " + layerName);
       form.dispatchErrorOccurredEvent(this, "SetMapType",
           ErrorMessages.ERROR_GOOGLE_MAP_INVALID_INPUT, layerName + " is not the correct type");
@@ -805,7 +805,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         return "satellite";
       case com.google.android.gms.maps.GoogleMap.MAP_TYPE_TERRAIN:
         return "terrain";
-    } 
+    }
     return null;
   }
 
@@ -818,7 +818,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   @SimpleFunction(description = "Adding a list of YailLists for markers. The representation of a maker in the "
       + "inner YailList is composed of: "
       + "lat(double) [required], long(double) [required], Color, "
-      + "title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added " 
+      + "title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added "
       + " markers. Note that the markers ids are not meant to persist after " +
       " the app is closed, but for temporary references to the markers within the program only. Return an empty list" +
       " if any error happen in the input")
@@ -969,7 +969,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     Marker marker = mMap.addMarker(new MarkerOptions()
         .position(latlng)
         .icon(BitmapDescriptorFactory.defaultMarker(hue)));
-    
+
     if (!title.isEmpty()){
       marker.setTitle(title);
     }
@@ -982,15 +982,15 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     return id;
   }
 
-  
+
   @SimpleFunction(description = "Add a list of markers composed of name-value pairs. Name fields for a marker are: " +
         "\"lat\" (type double) [required], \"lng\"(type double) [required], " +
         "\"color\"(type int)[in hue value ranging from 0~360], " +
         "\"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
   public YailList GetMarkers(){
-  return markersList;  
+  return markersList;
   }
-    
+
   @SimpleFunction(description = "Adding a list of markers that are represented as JsonArray. " +
       " The inner JsonObject represents a marker" +
       "and is composed of name-value pairs. Name fields for a marker are: " +
@@ -1074,7 +1074,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
                   snippet, draggable);
               }
             }
-          } 
+          }
         }//end of JsonArray
 
       } else { // not a JsonArray
@@ -1088,7 +1088,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
           ErrorMessages.ERROR_GOOGLE_MAP_JSON_FORMAT_DECODE_FAILED, jsonString);
       markersList = YailList.makeList(markerIds); // return an empty markerIds list
     }
-    
+
     markersList = YailList.makeList(markerIds);
   //  return YailList.makeList(markerIds);
   }
@@ -1201,7 +1201,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       }
     }
     return YailList.makeList(markerIds);
-    
+
   }
 
   @SimpleFunction(description = "Set the property of a marker, note that the marker has to be added first or else will "
@@ -1391,7 +1391,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       }
     });
   }
-  
+
   @Override
   public void onInfoWindowClick(Marker marker) {
     // TODO Auto-generated method stub
@@ -1460,7 +1460,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       }
     });
   }
-  
+
 
   @Override
   public void onMapLongClick(LatLng latLng) {
@@ -1640,7 +1640,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
         radius.latitude, radius.longitude, result);
     return result[0];
   }
-  
+
   @Override
   public void onConnectionFailed(ConnectionResult arg0) {
     // TODO Auto-generated method stub

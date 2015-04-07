@@ -1975,7 +1975,7 @@ public class ObjectifyStorageIo implements  StorageIo {
             MotdData firstMotd = new MotdData();
             firstMotd.id = MOTD_ID;
             firstMotd.caption = "Hello!";
-            firstMotd.content = "Welcome to the experimental App Inventor system from MIT. " +
+            firstMotd.content = "Welcome to the experimental Punya Framework system from MIT. " +
                 "This is still a prototype.  It would be a good idea to frequently back up " +
                 "your projects to local storage.";
             datastore.put(firstMotd);

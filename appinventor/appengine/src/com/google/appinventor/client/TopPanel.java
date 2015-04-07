@@ -264,7 +264,7 @@ public class TopPanel extends Composite {
     });
     panel.add(logo);
     panel.setCellWidth(logo, "50px");
-    Label title = new Label("MIT App Inventor 2");
+    Label title = new Label("Punya Framework");
     Label version = new Label("Beta");
     title.setStyleName("ode-LogoText");
     version.setStyleName("ode-LogoVersion");

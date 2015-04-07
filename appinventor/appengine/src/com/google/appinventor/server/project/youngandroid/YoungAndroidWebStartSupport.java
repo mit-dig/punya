@@ -77,8 +77,8 @@ public final class YoungAndroidWebStartSupport extends WebStartSupport {
         // Create jnlp file and send it back
         String jnlp = prepareJnlpForJsonpServer(req, "1.5+", "925m",
             ResourceUtil.CODEBLOCKS_JAR, ResourceUtil.CODEBLOCKS_MAIN,
-            "App Inventor for Android Blocks Editor",  // title
-            "App Inventor for Android Blocks Editor"); // description
+            "Punya Framework for Android Blocks Editor",  // title
+            "Punya Framework for Android Blocks Editor"); // description
         ModifiedHeaders.setHeaders(resp);
         sendFileResponse(resp, "AppInventorForAndroidCodeblocks.jnlp",
             "application/x-java-jnlp-file; charset=utf-8", jnlp.getBytes(Charsets.UTF_8));
@@ -119,8 +119,8 @@ public final class YoungAndroidWebStartSupport extends WebStartSupport {
 
       } else if (0 == fileName.compareToIgnoreCase(YaHttpServerConstants.STARTER_PHONEAPP_APK)) {
         if (!fileName.equals(YaHttpServerConstants.STARTER_PHONEAPP_APK)) {
-          throw CrashReport.createAndLogError(LOG, req, 
-              "Bad starter app name, user=" + userId + ", project=" + projectId, 
+          throw CrashReport.createAndLogError(LOG, req,
+              "Bad starter app name, user=" + userId + ", project=" + projectId,
               null);
         }
         // Special case for the phone component APK. projectId is ignored.
