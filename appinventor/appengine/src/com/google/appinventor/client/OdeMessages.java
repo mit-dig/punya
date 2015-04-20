@@ -5281,4 +5281,874 @@ public interface OdeMessages extends Messages {
   @Description("")
   String XMLTextDecodeMethods();
 
+  // Extracted Mechanically from the Punya Sources
+
+  @DefaultMessage("DefaultDuration")
+  @Description("The default duration (in seconds) of each scan for this probe")
+  String DefaultDurationProperties();
+
+  @DefaultMessage("DefaultInterval")
+  @Description("The default interval (in seconds) between each scan for this probe")
+  String DefaultIntervalProperties();
+
+  @DefaultMessage("EnableSaveToDB")
+  @Description("Save all sensed data from Wifi sensor probe to db automatically")
+  String EnableSaveToDBProperties();
+
+  @DefaultMessage("EnabledSchedule")
+  @Description("")
+  String EnabledScheduleProperties();
+
+  @DefaultMessage("HideSensitiveData")
+  @Description("If set to True, then sensitive values will be hashed. Note that for some application, only hashed values will be good enough. It's not necessary to read clear text of user information which can cause some privacy issues.")
+  String HideSensitiveDataProperties();
+
+  @DefaultMessage("LocalDBName")
+  @Description("")
+  String LocalDBNameProperties();
+
+  @DefaultMessage("SetScheduleInterval")
+  @Description("")
+  String SetScheduleIntervalProperties();
+
+  @DefaultMessage("ActivityInfoReceived")
+  @Description("Indicates that the activity info has been received.")
+  String ActivityInfoReceivedEvents();
+
+  @DefaultMessage("ActivityScanComplete")
+  @Description("Indicates that one round of scan has finish")
+  String ActivityScanCompleteEvents();
+
+  @DefaultMessage("CreateNotification")
+  @Description("Create a notication with message to wake up another activity when tap on the notification")
+  String CreateNotificationMethods();
+
+  @DefaultMessage("Enabled")
+  @Description("Enable activity probe sensor to run once")
+  String EnabledMethods();
+
+  @DefaultMessage("EnabledSchedule")
+  @Description("Enables the sensor periodically and raise the corresponding events")
+  String EnabledScheduleMethods();
+
+  @DefaultMessage("ExportFolderPath")
+  @Description("Get the path of the foler to which sensor db are exported")
+  String ExportFolderPathMethods();
+
+  @DefaultMessage("ExportSensorDB")
+  @Description("Export all sensor data as CSV files")
+  String ExportSensorDBMethods();
+
+  @DefaultMessage("BatteryInfoReceived")
+  @Description("Indicates that the battery status info has been received.")
+  String BatteryInfoReceivedEvents();
+
+  @DefaultMessage("CalllogsInfoReceived")
+  @Description("Indicates that the calllog info has been received.")
+  String CalllogsInfoReceivedEvents();
+
+  @DefaultMessage("AfterDate")
+  @Description("Specify the date after which the callogs occurred. The formate should be \"YYYY-MM-DD HH:mm:ss\"")
+  String AfterDateMethods();
+
+  @DefaultMessage("LocalStorageFolder")
+  @Description("Return the folder(directory) in which we store the photos locally")
+  String LocalStorageFolderProperties();
+
+  @DefaultMessage("Cellid")
+  @Description("The cell id of the cell tower.")
+  String CellidProperties();
+
+  @DefaultMessage("LocationAreaCode")
+  @Description("The location area code of the cell tower.")
+  String LocationAreaCodeProperties();
+
+  @DefaultMessage("Timestamp")
+  @Description("The timestamp of this sensor event.")
+  String TimestampProperties();
+
+  @DefaultMessage("CellInfoReceived")
+  @Description("Indicates that the celltower sensor info has been received.")
+  String CellInfoReceivedEvents();
+
+  @DefaultMessage("CellTowerScanComplete")
+  @Description("Indicates that one round of scan has finish")
+  String CellTowerScanCompleteEvents();
+
+  @DefaultMessage("ContactInfoReceived")
+  @Description("Indicates that the contact info has been received.")
+  String ContactInfoReceivedEvents();
+
+  @DefaultMessage("AppKey")
+  @Description("")
+  String AppKeyProperties();
+
+  @DefaultMessage("AppSecret")
+  @Description("")
+  String AppSecretProperties();
+
+  @DefaultMessage("DropboxUploadFolder")
+  @Description("This function specifies the path of the Dropboxfolder in which the uploaded file will be put. Default is \"\", the files willbe places under /Apps/App Inventor/Your-App-Name/data/ on each end user's dropbox.")
+  String DropboxUploadFolderProperties();
+
+  @DefaultMessage("ScheduleUploadEnabled")
+  @Description("Indicates whether there exists any schedule upload task")
+  String ScheduleUploadEnabledProperties();
+
+  @DefaultMessage("UploadPeriod")
+  @Description("Return the upload period of the current schedule uploading task")
+  String UploadPeriodProperties();
+
+  @DefaultMessage("WifiOnly")
+  @Description("")
+  String WifiOnlyProperties();
+
+  @DefaultMessage("appSecret")
+  @Description("")
+  String appSecretProperties();
+
+  @DefaultMessage("ServiceStatusChanged")
+  @Description("This event is raised when upload service status has changed")
+  String ServiceStatusChangedEvents();
+
+  @DefaultMessage("UploadDone")
+  @Description("This event is raised after the program calls <code>UploadData</code> if the upload task was done.")
+  String UploadDoneEvents();
+
+  @DefaultMessage("GetScheduleTaskLog")
+  @Description("Get the message log of the most recent schedule upload task")
+  String GetScheduleTaskLogMethods();
+
+  @DefaultMessage("GetScheduleTaskLogTime")
+  @Description("Get the finshed datetime of last upload service task")
+  String GetScheduleTaskLogTimeMethods();
+
+  @DefaultMessage("GetScheduleTaskStatus")
+  @Description("Get the status of the status of the most recent schedule upload task")
+  String GetScheduleTaskStatusMethods();
+
+  @DefaultMessage("ScheduleUpload")
+  @Description("Enable upload scheduled task based on specified filepath of a folder locally in parameter <code>folderPath</code>. One use case is to upload all the save photosin some SD folder periodically. The parameter <code>period</code> is in second.")
+  String ScheduleUploadMethods();
+
+  @DefaultMessage("ScheduleUploadDB")
+  @Description("Enable upload scheduled task based on specified filepath of a folder locally. One use case is to upload all the save photosin some SD folder periodically")
+  String ScheduleUploadDBMethods();
+
+  @DefaultMessage("StopScheduleUpload")
+  @Description("Stop the schedule uploading task")
+  String StopScheduleUploadMethods();
+
+  @DefaultMessage("UploadDB")
+  @Description("Enable to upload the specified db file to remote storage place for backup. Will first archive the database. By default, if it's database name forsensor compoent, it should be \"SensorData\"")
+  String UploadDBMethods();
+
+  @DefaultMessage("UploadData")
+  @Description("This function uploads the file (as specified with its filepath) to dropbox folder.")
+  String UploadDataMethods();
+
+  @DefaultMessage("ObjectType")
+  @Description("<p>Object Type changes how the linked data components interpret the value of the text. If left blank, the system will attempt to intelligently identify the type based on features such as whether the text is a sequence of numbers or begins with &quot;http://&quot;. If no type is specified and one cannot be determined, the string will remain untyped.</p><p>Recommended values include:</p><ul><li>xsd:dateTime - for dates and times</li><li>xsd:decimal - for decimals (e.g. 3.57)</li><li>xsd:integer - for integers (e.g. 137)</li><li>xsd:gYear - for years (e.g. 2001)</li></ul>")
+  String ObjectTypeProperties();
+
+  @DefaultMessage("PropertyURI")
+  @Description("<p>Property URI specifies the relationship between a Linked Data Form containing a TextBox, Password, etc. and the component. Common properties include the name properties in the Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), or descriptions (e.g. rdfs:comment, dc:description).</p>")
+  String PropertyURIProperties();
+
+  @DefaultMessage("SubjectIdentifier")
+  @Description("<p>If the text box is contained in a Linked Data Form and Subject Identifier is checked, then the value of the text box will be used to construct a new Uniform Resource Identifier (URI) when the form is submitted.</p>")
+  String SubjectIdentifierProperties();
+
+  @DefaultMessage("RegId")
+  @Description("")
+  String RegIdProperties();
+
+  @DefaultMessage("ReturnMessage")
+  @Description("")
+  String ReturnMessageProperties();
+
+  @DefaultMessage("SenderID")
+  @Description("")
+  String SenderIDProperties();
+
+  @DefaultMessage("ServerURL")
+  @Description("")
+  String ServerURLProperties();
+
+  @DefaultMessage("phoneNumber")
+  @Description("")
+  String phoneNumberProperties();
+
+  @DefaultMessage("GCMInfoReceived")
+  @Description("Indicates that the GCM info has been received.")
+  String GCMInfoReceivedEvents();
+
+  @DefaultMessage("GotResponseFromServer")
+  @Description("Event indicating that a SendMessageToServer call has finished.")
+  String GotResponseFromServerEvents();
+
+  @DefaultMessage("RegInfoReceived")
+  @Description("Indicates when the server registration has been successful.")
+  String RegInfoReceivedEvents();
+
+  @DefaultMessage("Register")
+  @Description("Add the GCM authorization to this running app instance")
+  String RegisterMethods();
+
+  @DefaultMessage("SendMessageToServer")
+  @Description("Performs an HTTP POST request using the GCM Server url property and the specified text.<br>The characters of the text are encoded using UTF-8 encoding.<br>The GotResponseFromServer event will be triggered when the request is done.")
+  String SendMessageToServerMethods();
+
+  @DefaultMessage("UnRegister")
+  @Description("Removes the GCM authorization from this running app instance")
+  String UnRegisterMethods();
+
+  @DefaultMessage("isRegistered")
+  @Description("Method for isRegistered")
+  String isRegisteredMethods();
+
+  @DefaultMessage("isServiceReady")
+  @Description("Method for isServiceReady")
+  String isServiceReadyMethods();
+
+  @DefaultMessage("GoogleDriveFolder")
+  @Description("Set up the Google Drivefolder in which the uploaded file(s) will be placed. If not set, default will be the root of Google Drive")
+  String GoogleDriveFolderProperties();
+
+  @DefaultMessage("AddScheduledTask")
+  @Description("Add a background task for uploading file(s) to Google Drive. The task will upload the file(s) that is specified in <code>target</code> to the Google drive folder specified in <code>driveFolder</code> with every <code>period</code> interval. Save <code>taskName</code> for later reference for removing the task")
+  String AddScheduledTaskMethods();
+
+  @DefaultMessage("CopyFile")
+  @Description("Copy the master app scripts to your Google Drive root. Itwill return true if successful, otherwise false.")
+  String CopyFileMethods();
+
+  @DefaultMessage("CreateFolder")
+  @Description("Create a folder witht the given name.")
+  String CreateFolderMethods();
+
+  @DefaultMessage("GetAllUploadTasks")
+  @Description("Obtain all the names for current scheduled upload tasks")
+  String GetAllUploadTasksMethods();
+
+  @DefaultMessage("GetUploadTaskInfo")
+  @Description("Obtain the information for a upload task that's running in the background.Will return a list containing the target, google drive folder, and period of the upload task. If the specified task does not exist then the return list will be empty")
+  String GetUploadTaskInfoMethods();
+
+  @DefaultMessage("RemoveScheduledTask")
+  @Description("Remove a background task for uploading files(s).")
+  String RemoveScheduledTaskMethods();
+
+  @DefaultMessage("CompassEnabled")
+  @Description("Indicates whether the compass widget is currently enabled in the map ui")
+  String CompassEnabledProperties();
+
+  @DefaultMessage("MapCameraChangedListenerEnabled")
+  @Description("Indicates if the map camera's position changed listener is currently enabled")
+  String MapCameraChangedListenerEnabledProperties();
+
+  @DefaultMessage("MapClickListenerEnabled")
+  @Description("Indicates if the mapClick event listener is currently enabled")
+  String MapClickListenerEnabledProperties();
+
+  @DefaultMessage("MapLongClickListenerEnabled")
+  @Description("Indicates if the map longClick listener is currently enabled")
+  String MapLongClickListenerEnabledProperties();
+
+  @DefaultMessage("MapType")
+  @Description("Indicates the current map type")
+  String MapTypeProperties();
+
+  @DefaultMessage("MyLocationEnabled")
+  @Description("Indicates whether my locaiton UI control is currently enabled for the Google map.")
+  String MyLocationEnabledProperties();
+
+  @DefaultMessage("RotateEnabled")
+  @Description("Indicates whether the capability to rotate a map on the ui is currently enabled")
+  String RotateEnabledProperties();
+
+  @DefaultMessage("ScrollEnabled")
+  @Description("Indicates whether the capability to scroll a map on the ui is currently enabled")
+  String ScrollEnabledProperties();
+
+  @DefaultMessage("ZoomControlEnabled")
+  @Description("Indicates whether the zoom widget on the map ui is currently enabled")
+  String ZoomControlEnabledProperties();
+
+  @DefaultMessage("ZoomGestureEnabled")
+  @Description("Indicates whether the zoom gesture is currently enabled")
+  String ZoomGestureEnabledProperties();
+
+  @DefaultMessage("CameraPositionChanged")
+  @Description("Called after the camera position of a map has changed.")
+  String CameraPositionChangedEvents();
+
+  @DefaultMessage("FinishedDraggingCircle")
+  @Description("Event been raised after the action of moving a draggable circle is finished. Possible a user drag the center of the circle or drag the radius marker of the circle")
+  String FinishedDraggingCircleEvents();
+
+  @DefaultMessage("InfoWindowClicked")
+  @Description("When the marker's infowindow is clicked, returning marker's id")
+  String InfoWindowClickedEvents();
+
+  @DefaultMessage("MapIsReady")
+  @Description("Indicates that the map has been rendered and ready for adding markers or changing other settings. Please add or updating markers within this event")
+  String MapIsReadyEvents();
+
+  @DefaultMessage("OnLocationChanged")
+  @Description("Triggers this event when user location has changed. Only works when EnableMylocation is set to true")
+  String OnLocationChangedEvents();
+
+  @DefaultMessage("OnMapClick")
+  @Description("Called when the user makes a tap gesture on the map")
+  String OnMapClickEvents();
+
+  @DefaultMessage("OnMapLongClick")
+  @Description("Called when the user makes a long-press gesture on the map")
+  String OnMapLongClickEvents();
+
+  @DefaultMessage("OnMarkerClick")
+  @Description("When a marker is clicked")
+  String OnMarkerClickEvents();
+
+  @DefaultMessage("OnMarkerDrag")
+  @Description("When a marker is been dragged")
+  String OnMarkerDragEvents();
+
+  @DefaultMessage("OnMarkerDragEnd")
+  @Description("When the user drags a marker and finish the action, returning marker's id and it's latest position")
+  String OnMarkerDragEndEvents();
+
+  @DefaultMessage("OnMarkerDragStart")
+  @Description("When a marker starts been dragged")
+  String OnMarkerDragStartEvents();
+
+  @DefaultMessage("AddCircle")
+  @Description("Create a circle overlay on the map UI with specified latitude and longitude for center. \"hue\" (min 0, max 360) and \"alpha\" (min 0, max 255) are used to set color and transparency level of the circle, \"strokeWidth\" and \"strokeColor\" are for the perimeter of the circle. Returning a unique id of the circle for future reference to events raised by moving this circle. If the circle isset to be draggable, two default markers will appear on the map: one in the center of the circle, another on the perimeter.")
+  String AddCircleMethods();
+
+  @DefaultMessage("AddMarkers")
+  @Description("Adding a list of YailLists for markers. The representation of a maker in the inner YailList is composed of: lat(double) [required], long(double) [required], Color, title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added  markers. Note that the markers ids are not meant to persist after  the app is closed, but for temporary references to the markers within the program only. Return an empty list if any error happen in the input")
+  String AddMarkersMethods();
+
+  @DefaultMessage("AddMarkersFromJson")
+  @Description("Adding a list of markers that are represented as JsonArray.  The inner JsonObject represents a markerand is composed of name-value pairs. Name fields for a marker are: \"lat\" (type double) [required], \"lng\"(type double) [required], \"color\"(type int)[in hue value ranging from 0~360], \"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
+  String AddMarkersFromJsonMethods();
+
+  @DefaultMessage("AddMarkersHue")
+  @Description("Adding a list of YailList for markers. The inner YailList represents a marker and is composed of lat(Double) [required], long(Double) [required], color(int)[in hue value ranging from 0-360], title(String), snippet(String), draggable(boolean). Return a list of unique ids for the markers that are added")
+  String AddMarkersHueMethods();
+
+  @DefaultMessage("BoundCamera")
+  @Description("Transforms the camera such that the specified latitude/longitude bounds are centered on screen at the greatest possible zoom level. Need to specify both latitudes and longitudes for both northeast location and southwest location of the bounding box")
+  String BoundCameraMethods();
+
+  @DefaultMessage("EnableCompass")
+  @Description("Enables/disables the compass widget on the map's ui. Call this only after event \"MapIsReady\" is received")
+  String EnableCompassMethods();
+
+  @DefaultMessage("EnableMapCameraPosChangeListener")
+  @Description("Enable/Disable to listen to map's camera position changed event")
+  String EnableMapCameraPosChangeListenerMethods();
+
+  @DefaultMessage("EnableMapClickListener")
+  @Description("Enable/Disable to listen to map's click event")
+  String EnableMapClickListenerMethods();
+
+  @DefaultMessage("EnableMapLongClickListener")
+  @Description("Enable/disable to listen to map's long click event")
+  String EnableMapLongClickListenerMethods();
+
+  @DefaultMessage("EnableMyLocation")
+  @Description("Enable or disable my location widget control for Google Map. One can call GetMyLocation() to obtain the current location after enable this.\"")
+  String EnableMyLocationMethods();
+
+  @DefaultMessage("EnableRotate")
+  @Description("Enables/disables the capability to rotate a map on the ui. Call this only after the event \"MapIsReady\" is received.")
+  String EnableRotateMethods();
+
+  @DefaultMessage("EnableScroll")
+  @Description("Enables/disables the capability to scroll a map on the ui. Call this only after the event \"MapIsReady\" is received")
+  String EnableScrollMethods();
+
+  @DefaultMessage("EnableZoomControl")
+  @Description("Enables/disables the zoom widget on the map's ui. Call this only after the event \"MapIsReady\" is received")
+  String EnableZoomControlMethods();
+
+  @DefaultMessage("EnableZoomGesture")
+  @Description("Enables/disables zoom gesture on the map ui. Call this only after the event  \"MapIsReady\" is received.")
+  String EnableZoomGestureMethods();
+
+  @DefaultMessage("GetAllCircleIDs")
+  @Description("Get all circles Ids. A short cut to get all the references for the eixisting circles")
+  String GetAllCircleIDsMethods();
+
+  @DefaultMessage("GetAllMarkerID")
+  @Description("Get all the existing markers's Ids")
+  String GetAllMarkerIDMethods();
+
+  @DefaultMessage("GetMarkers")
+  @Description("Add a list of markers composed of name-value pairs. Name fields for a marker are: \"lat\" (type double) [required], \"lng\"(type double) [required], \"color\"(type int)[in hue value ranging from 0~360], \"title\"(type String), \"snippet\"(type String), \"draggable\"(type boolean)")
+  String GetMarkersMethods();
+
+  @DefaultMessage("GetMyLocation")
+  @Description("Get current location using Google Map Service. Return a YailList with first item beingthe latitude, the second item being the longitude, and last time being the accuracy of the reading.")
+  String GetMyLocationMethods();
+
+  @DefaultMessage("MoveCamera")
+  @Description("Move the map's camera to the specified position and zoom level")
+  String MoveCameraMethods();
+
+  @DefaultMessage("RemoveCircle")
+  @Description("Remove a circle for the map. Returns true if successfully removed, false if the circle does not exist with the specified id")
+  String RemoveCircleMethods();
+
+  @DefaultMessage("RemoveMarker")
+  @Description("Remove a marker from the map")
+  String RemoveMarkerMethods();
+
+  @DefaultMessage("SetMapType")
+  @Description("Set the layer of Google map. Default layer is \"normal\", other choices including \"hybrid\",\"satellite\", and \"terrain\"")
+  String SetMapTypeMethods();
+
+  @DefaultMessage("UpdateCircle")
+  @Description("Set the property of an existing circle. Properties include: \"alpha\"(number, value ranging from 0~255), \"color\" (nimber, hue value ranging 0~360), \"radius\"(number in meters)")
+  String UpdateCircleMethods();
+
+  @DefaultMessage("UpdateMarker")
+  @Description("Set the property of a marker, note that the marker has to be added first or else will throw an exception! Properties include: \"color\"(hue value ranging from 0~360), \"title\", \"snippet\", \"draggable\"(give either true or false as the value).")
+  String UpdateMarkerMethods();
+
+  @DefaultMessage("Lux")
+  @Description("The illuminance(lux) of light in the current environment.")
+  String LuxProperties();
+
+  @DefaultMessage("LightInfoReceived")
+  @Description("Indicates that the illuminance(light) info has been received.")
+  String LightInfoReceivedEvents();
+
+  @DefaultMessage("EndpointURL")
+  @Description("<p>Use the Endpoint URL field to specify a Uniform Resource Locator (URL) of a SPARQL endpoint to read and write data on the web. For example, if you want to query structured content from DBpedia, use <code>http://dbpedia.org/sparql</code>.</p><p>There are a number of public endpoints listed at <a href=\"http://datahub.io/dataset?res_format=api%2Fsparql\" target='_new'>DataHub.io</a></p>")
+  String EndpointURLProperties();
+
+  @DefaultMessage("FailedToAddDataToWeb")
+  @Description("Event for FailedToAddDataToWeb")
+  String FailedToAddDataToWebEvents();
+
+  @DefaultMessage("FailedToDeleteDataFromLocal")
+  @Description("Event for FailedToDeleteDataFromLocal")
+  String FailedToDeleteDataFromLocalEvents();
+
+  @DefaultMessage("FailedToDeleteDataFromWeb")
+  @Description("Event for FailedToDeleteDataFromWeb")
+  String FailedToDeleteDataFromWebEvents();
+
+  @DefaultMessage("FailedToFeedDataToWeb")
+  @Description("Event for FailedToFeedDataToWeb")
+  String FailedToFeedDataToWebEvents();
+
+  @DefaultMessage("FailedToWriteDataToWeb")
+  @Description("This event is raised when the LinkedData component fails to publish a graph to a remote SPARQL endpoint.")
+  String FailedToWriteDataToWebEvents();
+
+  @DefaultMessage("FinishedAddingDataToWeb")
+  @Description("Event for FinishedAddingDataToWeb")
+  String FinishedAddingDataToWebEvents();
+
+  @DefaultMessage("FinishedDeletingDataFromLocal")
+  @Description("Event for FinishedDeletingDataFromLocal")
+  String FinishedDeletingDataFromLocalEvents();
+
+  @DefaultMessage("FinishedDeletingDataFromWeb")
+  @Description("Event for FinishedDeletingDataFromWeb")
+  String FinishedDeletingDataFromWebEvents();
+
+  @DefaultMessage("FinishedFeedingDataToWeb")
+  @Description("Event for FinishedFeedingDataToWeb")
+  String FinishedFeedingDataToWebEvents();
+
+  @DefaultMessage("FinishedWritingDataToWeb")
+  @Description("This event is raised when a graph is successfully published on a remote endpoint.")
+  String FinishedWritingDataToWebEvents();
+
+  @DefaultMessage("RetrievedRawResults")
+  @Description("This event is raised after a SPARQL engine finishes processing a query and the client has received the results, but before those results have been processed into objects so that they may be used in conjunction with other linked-data-enabled components.")
+  String RetrievedRawResultsEvents();
+
+  @DefaultMessage("RetrievedResults")
+  @Description("This event is raised after a SPARQL engine finishes processing a query and the client has received the results.")
+  String RetrievedResultsEvents();
+
+  @DefaultMessage("UnsupportedQueryType")
+  @Description("Event raised when a SPARQL query to be executed is not supported by the Linked Data component.")
+  String UnsupportedQueryTypeEvents();
+
+  @DefaultMessage("AddDataFromComponent")
+  @Description("Takes a component implementing the LDComponent interface and uses the properties defined there to insert a triple into the model using the given subject.")
+  String AddDataFromComponentMethods();
+
+  @DefaultMessage("AddDataFromLinkedDataForm")
+  @Description("Takes a LinkedDataForm component and converts it and any nested elements into triples within the model encapsulated by this LinkedData component.")
+  String AddDataFromLinkedDataFormMethods();
+
+  @DefaultMessage("AddDataToWeb")
+  @Description("Attempts to insert the statements contained within this Linked Data component into the endpoint with an optional graph.")
+  String AddDataToWebMethods();
+
+  @DefaultMessage("DeleteDataFromLocal")
+  @Description("Deletes all data from the referent model")
+  String DeleteDataFromLocalMethods();
+
+  @DefaultMessage("DeleteDataFromWeb")
+  @Description("Attempts to delete the statements contained within this Linked Data component from the endpoint with an optional graph.")
+  String DeleteDataFromWebMethods();
+
+  @DefaultMessage("ExecuteSPARQLQuery")
+  @Description("Execute a SPARQL query on the set EndpointURL of this Linked Data component. Currently only supports SELECT queries, and converts all integer types into Long and decimal types into Double.")
+  String ExecuteSPARQLQueryMethods();
+
+  @DefaultMessage("FeedDataToWeb")
+  @Description("Attempts to feed the statements contained within this Linked Data component into the endpoint (most likely CSPARQL).")
+  String FeedDataToWebMethods();
+
+  @DefaultMessage("ReadDataFromLocal")
+  @Description("Read contents of the specified path (local or remote) into the referent model. Note the implementation is identical to ReadDataFromWeb")
+  String ReadDataFromLocalMethods();
+
+  @DefaultMessage("ReadDataFromWeb")
+  @Description("Read contents of the specified path (local or remote) into the referent model. Note the implementation is identical to ReadDataFromLocal")
+  String ReadDataFromWebMethods();
+
+  @DefaultMessage("ResultsToSimpleJSON")
+  @Description("Method for ResultsToSimpleJSON")
+  String ResultsToSimpleJSONMethods();
+
+  @DefaultMessage("ToString")
+  @Description("Returns the contents of this LinkedData component as a string. Useful for debugging purposes.")
+  String ToStringMethods();
+
+  @DefaultMessage("WriteDataToLocal")
+  @Description("Saves the model to the given path on the file system.")
+  String WriteDataToLocalMethods();
+
+  @DefaultMessage("WriteDataToWeb")
+  @Description("Write the model represented by the LinkedData component to the RDF graph store represented by EndpointURL using the given graph URI. Any existing triples will get replaced?")
+  String WriteDataToWebMethods();
+
+  @DefaultMessage("FormID")
+  @Description("<p>FormID is an autogenerated identifier for a form. It is used in the generation of identifiers of object descriptions created by this form when <code>AddDataFromLinkedDataForm</code> is called on a <code>LinkedData</code> component. Setting multiple forms to use the same FormID will allow them to change the same set of objects.</p>")
+  String FormIDProperties();
+
+  @DefaultMessage("GenerateSubjectURI")
+  @Description("Provides a URI for the form even if SubjectURI is not set.")
+  String GenerateSubjectURIProperties();
+
+  @DefaultMessage("InverseProperty")
+  @Description("<p>Inverse Property specifies whether the relationship between the thing described by an outer form and the thing described by an inner form should be reversed.</p><p>For example, an application for movies may want to provide a method for attributing a new movie to an existing director. However, Schema.org's director property goes from a creative work to a person. Using InverseProperty, one can start with a person and attribute a new creative work (movie) to that person by choosing the schema:director property and then setting InverseProperty to True.</p>")
+  String InversePropertyProperties();
+
+  @DefaultMessage("Subject")
+  @Description("<p>By default, the use of a form results in a new description of an object. Setting the Subject property to a specific Uniform Resource Identifier (URI) will cause the form to write its description out as if it were talking about the existing resource rather than a new resource. This is useful for building an application for editing existing structured content.</p>")
+  String SubjectProperties();
+
+  @DefaultMessage("RelationToObject")
+  @Description("<p>RelationToObjectType specifies the relationship between objects presented by the list picker and the Object Type. This field defaults to <code>rdf:type</code>, but other useful values may include <code>skos:narrower</code> or <code>schema:additionalType</code>. The correct property to use will be dependent on the data available in Endpoint URL.</p>")
+  String RelationToObjectProperties();
+
+  @DefaultMessage("SelectionLabel")
+  @Description("")
+  String SelectionLabelProperties();
+
+  @DefaultMessage("SelectionURI")
+  @Description("")
+  String SelectionURIProperties();
+
+  @DefaultMessage("AfterQuery")
+  @Description("This event is raised after the query is executed on the remote endpoint.")
+  String AfterQueryEvents();
+
+  @DefaultMessage("BeforeQuery")
+  @Description("This event is raised before the query is executed on the remote endpoint.")
+  String BeforeQueryEvents();
+
+  @DefaultMessage("UnableToRetrieveContent")
+  @Description("Raised in the event a query fails.")
+  String UnableToRetrieveContentEvents();
+
+  @DefaultMessage("StreamingInfoReceived")
+  @Description("Indicates that the GCM info has been received.")
+  String StreamingInfoReceivedEvents();
+
+  @DefaultMessage("SubscriptionResponseReceived")
+  @Description("Event for SubscriptionResponseReceived")
+  String SubscriptionResponseReceivedEvents();
+
+  @DefaultMessage("SubscribeToQuery")
+  @Description("Performs an HTTP POST query subscription request using the GCM Server url property and  the given query.<br>The characters of the text are encoded using UTF-8 encoding.<br>")
+  String SubscribeToQueryMethods();
+
+  @DefaultMessage("GoodEnoughAccuracy")
+  @Description("")
+  String GoodEnoughAccuracyProperties();
+
+  @DefaultMessage("UseCache")
+  @Description("Set whether the location info will use the last known location without acquring a new location either through GPC or Network fix")
+  String UseCacheProperties();
+
+  @DefaultMessage("UseNetwork")
+  @Description("")
+  String UseNetworkProperties();
+
+  @DefaultMessage("LocationInfoReceived")
+  @Description("Indicates that the Location info has been received.")
+  String LocationInfoReceivedEvents();
+
+  @DefaultMessage("LocationUpdateComplete")
+  @Description("Indicates that the updating Location info has completed.")
+  String LocationUpdateCompleteEvents();
+
+  @DefaultMessage("SendMessageToPebble")
+  @Description("Send a text message to the pebble.")
+  String SendMessageToPebbleMethods();
+
+  @DefaultMessage("SensitivityLevel")
+  @Description("The sensitivity level used to detect walking. 9 different options for this value: \"extra high\", \"very high\", \"high\", \"higher\", \"medium\", \"lower\", \"low\", \"very low\", \"extra low\"")
+  String SensitivityLevelProperties();
+
+  @DefaultMessage("PedometerInfoReceived")
+  @Description("Indicates that the pedometer(one walking step) info has been received.")
+  String PedometerInfoReceivedEvents();
+
+  @DefaultMessage("PedometerScanComplete")
+  @Description("Indicates that one round of scan has finish")
+  String PedometerScanCompleteEvents();
+
+  @DefaultMessage("ProximityInfoReceived")
+  @Description("Indicates that the proximity sensor info has been received.")
+  String ProximityInfoReceivedEvents();
+
+  @DefaultMessage("AppsInfoReceived")
+  @Description("Indicates that the running applications info has been received.")
+  String AppsInfoReceivedEvents();
+
+  @DefaultMessage("ScreenInfoReceived")
+  @Description("Indicates that the running applications info has been received.")
+  String ScreenInfoReceivedEvents();
+
+  @DefaultMessage("ArchivePeriold")
+  @Description("Current period of the schedule archive task")
+  String ArchivePerioldProperties();
+
+  @DefaultMessage("CurrentActiveSensors")
+  @Description("The active sensor collections, as a list of two-element sublists. The first element of each sublist represents the sensor name. The second element of each sublist represents the schedule period of that sensor")
+  String CurrentActiveSensorsProperties();
+
+  @DefaultMessage("DBName")
+  @Description("")
+  String DBNameProperties();
+
+  @DefaultMessage("ExportFolderPath")
+  @Description("")
+  String ExportFolderPathProperties();
+
+  @DefaultMessage("ExportFormat")
+  @Description("")
+  String ExportFormatProperties();
+
+  @DefaultMessage("ScheduleArchiveEnabled")
+  @Description("Indicates whether the schedule archive task is currentenabled.")
+  String ScheduleArchiveEnabledProperties();
+
+  @DefaultMessage("ScheduleClearBackupEnabled")
+  @Description("Indicates whether the schedule clear db bacup task is currently enabled")
+  String ScheduleClearBackupEnabledProperties();
+
+  @DefaultMessage("ScheduleClearBackupPeriod")
+  @Description("Current period of the schedule clear backup task")
+  String ScheduleClearBackupPeriodProperties();
+
+  @DefaultMessage("ScheduleExpoertPeriod")
+  @Description("Current period of the schedule export task")
+  String ScheduleExpoertPeriodProperties();
+
+  @DefaultMessage("ScheduleExportEnabled")
+  @Description("Indicates whether the scheduled export task is currentenabled.")
+  String ScheduleExportEnabledProperties();
+
+  @DefaultMessage("FinishedInitServiceValues")
+  @Description("Indicates that SensorDB is bound to SensorDBPipeline and re-initialize values from the pipeline e.g. archive_period, export_period, clearbackup_period, ..etc. App Inventor's user should use this event to update UI that needs values from the background service")
+  String FinishedInitServiceValuesEvents();
+
+  @DefaultMessage("AddSensorCollection")
+  @Description("Add sensor colleciton task for a specific sensor with specified period (in seconds)")
+  String AddSensorCollectionMethods();
+
+  @DefaultMessage("Export")
+  @Description("Export Sensor Database as CSV files or JSON files. Input \"csv\" or \"json\" for exporting format")
+  String ExportMethods();
+
+  @DefaultMessage("ForceKill")
+  @Description("(Testing) force Stop funfManager")
+  String ForceKillMethods();
+
+  @DefaultMessage("RemoveSensorCollection")
+  @Description("Remove data colleciton task of a specific sensor")
+  String RemoveSensorCollectionMethods();
+
+  @DefaultMessage("ScheduleArchive")
+  @Description("Enable archive schedule task with specified period in seconds")
+  String ScheduleArchiveMethods();
+
+  @DefaultMessage("ScheduleClearBackup")
+  @Description("Enable clear db backup schedule task with sepcified period in seconds")
+  String ScheduleClearBackupMethods();
+
+  @DefaultMessage("ScheduleExport")
+  @Description("Enable export db schedule task with specified period in seconds")
+  String ScheduleExportMethods();
+
+  @DefaultMessage("StopClearDbBackup")
+  @Description("Disable clear backup task")
+  String StopClearDbBackupMethods();
+
+  @DefaultMessage("StopScheduleArchive")
+  @Description("Discable archive scheduled task")
+  String StopScheduleArchiveMethods();
+
+  @DefaultMessage("StopScheduleExport")
+  @Description("Discable export scheduled task")
+  String StopScheduleExportMethods();
+
+  @DefaultMessage("UpdateSensorCollection")
+  @Description("Update the period of sensor colleciton task of a specific sensor")
+  String UpdateSensorCollectionMethods();
+
+  @DefaultMessage("getAvailableSensors")
+  @Description("Return available names of the avaiable sesnors for data collection")
+  String getAvailableSensorsMethods();
+
+  @DefaultMessage("SmsInfoReceived")
+  @Description("Indicates that the calllog info has been received.")
+  String SmsInfoReceivedEvents();
+
+  @DefaultMessage("SocialProximityInfoReceived")
+  @Description("Indicates that the proximity sensor info has been received.")
+  String SocialProximityInfoReceivedEvents();
+
+  @DefaultMessage("SocialProximityScanComplete")
+  @Description("Indicates that one round of scan has finish")
+  String SocialProximityScanCompleteEvents();
+
+  @DefaultMessage("SetDiscoverable")
+  @Description("Enabling discoverability. If set, the device will be discoverable for a period of time as specified in the variable \"seconds\". Note that if set seconds to be 0, the device will be discoverable forever.")
+  String SetDiscoverableMethods();
+
+  @DefaultMessage("getOwnDeviceName")
+  @Description("Get your own device name (Bluetooth)")
+  String getOwnDeviceNameMethods();
+
+  @DefaultMessage("setOwnDeviceName")
+  @Description("Overwrite your own device name (Bluetooth)")
+  String setOwnDeviceNameMethods();
+
+  @DefaultMessage("SetQuestion")
+  @Description("")
+  String SetQuestionProperties();
+
+  @DefaultMessage("SetStyle")
+  @Description("Set the style of the survey with integer. 1 = textbox, 2 = textarea, 3 = multiplechoice, 4 = chooselist, 5 = checkbox, 6 = scale, 7 = yesno")
+  String SetStyleProperties();
+
+  @DefaultMessage("SetSurveyGroup")
+  @Description("")
+  String SetSurveyGroupProperties();
+
+  @DefaultMessage("DeleteSurveyDB")
+  @Description("This will clean up the survey database on the smartphone")
+  String DeleteSurveyDBMethods();
+
+  @DefaultMessage("LoadSurvey")
+  @Description("Set survey style, set question beforecall LoadSurvey")
+  String LoadSurveyMethods();
+
+  @DefaultMessage("SetOptions")
+  @Description("For survey style MultipleChoice, ChooseList, CheckBox and ScalePassuse this to pass in options for survey answers. Note for Scale, only three options should be passed in and in the order of \"min\", \"max\", \"default\" value of the scale")
+  String SetOptionsMethods();
+
+  @DefaultMessage("TelephonyInfoReceived")
+  @Description("Indicates that the Telephony info has been received.")
+  String TelephonyInfoReceivedEvents();
+
+  @DefaultMessage("GetTimerTimezone")
+  @Description("")
+  String GetTimerTimezoneProperties();
+
+  @DefaultMessage("NextTimeTriggered")
+  @Description("The next timer triggered time in UTC time (seconds). return 0 when timer is disabled")
+  String NextTimeTriggeredProperties();
+
+  @DefaultMessage("Repeating")
+  @Description("Wake up the device if asleep")
+  String RepeatingProperties();
+
+  @DefaultMessage("TimeLeftBeforeTriggered")
+  @Description("How much time left before next trigger (in seconds)")
+  String TimeLeftBeforeTriggeredProperties();
+
+  @DefaultMessage("WakeUp")
+  @Description("Wake up the device if asleep")
+  String WakeUpProperties();
+
+  @DefaultMessage("TimerTriggered")
+  @Description("Indicates that we receive the timer trigger")
+  String TimerTriggeredEvents();
+
+  @DefaultMessage("FinishForm")
+  @Description("Try to kill myself, force the From.onDestroyed() gets called")
+  String FinishFormMethods();
+
+  @DefaultMessage("NextDateTimeTriggered")
+  @Description("The next triggered time in human readable formatted string. The returnstring represented the date for next trigger will be in format \"dd-MM-yyyy HH:mm:ss\".")
+  String NextDateTimeTriggeredMethods();
+
+  @DefaultMessage("ResetTimer")
+  @Description("Reset the configuration of the timer to default interval=30, repeating = false, wakeup = true")
+  String ResetTimerMethods();
+
+  @DefaultMessage("SetRepeatedDailyTimer")
+  @Description("Set the Timer to be triggered at specified hour and minute and repeat daily")
+  String SetRepeatedDailyTimerMethods();
+
+  @DefaultMessage("SetRepeatedWeeklyTimer")
+  @Description("Set the Timer to be triggered at the specified weekday, hour and time, and repeat weekly. e.g Sunday = 1 and Monday =2.")
+  String SetRepeatedWeeklyTimerMethods();
+
+  @DefaultMessage("SetTimerTimezone")
+  @Description("Set timer's timezone.")
+  String SetTimerTimezoneMethods();
+
+  @DefaultMessage("TimerEnabled")
+  @Description("Enable the timer")
+  String TimerEnabledMethods();
+
+  @DefaultMessage("setTimer")
+  @Description("Set to be triggered at a specific weekday in the future. e.g. for Jan 30 2012 23:55, year=2012, month=1, date=30, hourOfDay=23, minute=55.")
+  String setTimerMethods();
+
+  @DefaultMessage("ImageUploaded")
+  @Description("This event is raised when the a twitter message with a picture has been uploaded via <code>TweetWithImage</code>. the uploaded image URL is in the <code>url</code> variable.")
+  String ImageUploadedEvents();
+
+  @DefaultMessage("Frequency")
+  @Description("The frequency in MHz of the channel over which the client is communicating with the access point.")
+  String FrequencyProperties();
+
+  @DefaultMessage("WifiInfoReceived")
+  @Description("Indicates that the Wifi sensor info has been received.")
+  String WifiInfoReceivedEvents();
+
+  @DefaultMessage("WifiScanComplete")
+  @Description("Indicates that one round of scan has finish")
+  String WifiScanCompleteEvents();
+
 }
