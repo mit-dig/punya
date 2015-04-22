@@ -6,9 +6,8 @@
 
 package com.google.appinventor.client.editor.youngandroid.palette;
 
-
+import com.google.appinventor.client.ComponentsTranslation;
 import com.google.appinventor.client.TranslationDesignerPallete;
-import com.google.appinventor.client.TranslationDesignerProperties;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.palette.DropTargetProvider;
@@ -151,9 +150,9 @@ public class YoungAndroidPalettePanel extends Composite implements SimplePalette
     // Configure properties
     for (PropertyDefinition property : COMPONENT_DATABASE.getPropertyDefinitions(componentType)) {
       mockComponent.addProperty(property.getName(), property.getDefaultValue(),
-          TranslationDesignerProperties.getCorrespondingString(property.getCaption()),
+          ComponentsTranslation.getPropertyName(property.getCaption()),
           property.getCategory(),
-          TranslationDesignerProperties.getCorrespondingString(property.getDescription()),
+          ComponentsTranslation.getPropertyName(property.getDescription()),
           createPropertyEditor(property.getEditorType()));
       /*OdeLog.log("Property Caption: " + property.getCaption() + ", "
           + TranslationComponentProperty.getName(property.getCaption()));*/
