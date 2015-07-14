@@ -2,7 +2,7 @@
 $Source $Yail
 |#
 
-(define-repl-form edu.mit.appinventor.aicompanion3.Screen1 Screen1)
+(define-repl-form edu.mit.appinventor.punya.aicompanion3.Screen1 Screen1)
 (require <com.google.youngandroid.runtime>)
 
 (def (p$badversion )  (set-and-coerce-property! 'ErrorLabel 'Text "The version of App Inventor you are using is not compatible with this Companion app. " 'text))
@@ -23,7 +23,7 @@ $Source $Yail
  (set-and-coerce-property! 'Screen1 'BackgroundImage "mooning.png" 'text)
  (set-and-coerce-property! 'Screen1 'Icon "AI2Companion-Icon.png" 'text)
  (set-and-coerce-property! 'Screen1 'Scrollable #t 'boolean)
- (set-and-coerce-property! 'Screen1 'Title "MIT App Inventor 2 Companion" 'text)
+ (set-and-coerce-property! 'Screen1 'Title "MIT Punya Companion" 'text)
 )
 
 (define-event Screen1 Initialize()(set-this-form)
