@@ -933,7 +933,7 @@ public class YaVersion {
 
   public static final String PREFERRED_COMPANION = "2.22ai2zx1";
   public static final String COMPANION_UPDATE_URL = "";
-  public static final String COMPANION_UPDATE_URL1 = "";
+  public static final String COMPANION_UPDATE_URL1 = "http://punya.csail.mit.edu/mis/companion/MIT%20Punya%20Companion.apk";
   public static final String [] ACCEPTABLE_COMPANIONS = { "2.20ai2", "2.20ai2zx1", "2.21ai2", "2.21ai2zx1",
                                                           "2.22ai2", "2.22ai2zx1" };
 
