@@ -503,20 +503,26 @@ public final class YoungAndroidProjectService extends CommonProjectService {
             sourceFiles.contains(targetBlocklyFileName) &&
             sourceFiles.contains(targetYailFileName)) {
         	
-          //String formFileContents = getInitialFormPropertiesFileContents(qualifiedFormName);
-          String formFileContents = load(userId, projectId, targetFormFileName);
+          //Screen1, or Screen2
+          int lastDotPos = qualifiedFormName.lastIndexOf('.');
+          String simpleFormName = qualifiedFormName.substring(lastDotPos + 1);
+          lastDotPos = targetQualifiedFormName.lastIndexOf('.');
+          String simpleTargetFormName = targetQualifiedFormName.substring(lastDotPos + 1);
+          
+          String formFileContents = load(userId, projectId, targetFormFileName)
+              .replace(simpleTargetFormName, simpleFormName);
           storageIo.addSourceFilesToProject(userId, projectId, false, formFileName);
           storageIo.uploadFileForce(projectId, formFileName, userId, formFileContents,
               StorageUtil.DEFAULT_CHARSET);
 
-          //String blocklyFileContents = getInitialBlocklySourceFileContents(qualifiedFormName);
-          String blocklyFileContents = load(userId, projectId, targetBlocklyFileName);
+          String blocklyFileContents = load(userId, projectId, targetBlocklyFileName)
+              .replace(simpleTargetFormName, simpleFormName);
           storageIo.addSourceFilesToProject(userId, projectId, false, blocklyFileName);
           storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
               StorageUtil.DEFAULT_CHARSET);
 
-          //String yailFileContents = "";  // start empty
-          String yailFileContents = load(userId, projectId, targetYailFileName);
+          String yailFileContents = load(userId, projectId, targetYailFileName)
+              .replace(simpleTargetFormName, simpleFormName);
           storageIo.addSourceFilesToProject(userId, projectId, false, yailFileName);
           return storageIo.uploadFileForce(projectId, yailFileName, userId, yailFileContents,
               StorageUtil.DEFAULT_CHARSET);
