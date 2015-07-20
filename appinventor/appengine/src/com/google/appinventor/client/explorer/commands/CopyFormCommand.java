@@ -9,6 +9,7 @@ package com.google.appinventor.client.explorer.commands;
 import static com.google.appinventor.client.Ode.MESSAGES;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.appinventor.client.DesignToolbar;
@@ -18,12 +19,15 @@ import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.widgets.LabeledTextBox;
+import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -74,6 +78,7 @@ public final class CopyFormCommand extends ChainableCommand {
   private class NewFormDialog extends DialogBox {
     // UI elements
     private final LabeledTextBox newNameTextBox;
+    private final LabeledTextBox targetNameTextBox;
 
     private final Set<String> otherFormNames;
 
@@ -106,6 +111,8 @@ public final class CopyFormCommand extends ChainableCommand {
       }
 
       String defaultFormName = prefix + (highIndex + 1);
+      Ode ode = Ode.getInstance();
+      YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
 
       newNameTextBox = new LabeledTextBox(MESSAGES.formNameLabel());
       newNameTextBox.setText(defaultFormName);
@@ -121,6 +128,23 @@ public final class CopyFormCommand extends ChainableCommand {
           }
         }
       });
+      
+      targetNameTextBox = new LabeledTextBox(MESSAGES.oldFormNameLabel());
+      targetNameTextBox.setText( sourceNode.getFormName());
+      targetNameTextBox.getTextBox().addKeyUpHandler(new KeyUpHandler() {
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
+          int keyCode = event.getNativeKeyCode();
+          if (keyCode == KeyCodes.KEY_ENTER) {
+            handleOkClick(projectRootNode);
+          } else if (keyCode == KeyCodes.KEY_ESCAPE) {
+            hide();
+            executionFailedOrCanceled();
+          }
+        }
+      });
+      
+      contentPanel.add(targetNameTextBox);
       contentPanel.add(newNameTextBox);
 
       String cancelText = MESSAGES.cancelButton();
@@ -166,9 +190,10 @@ public final class CopyFormCommand extends ChainableCommand {
 
     private void handleOkClick(YoungAndroidProjectNode projectRootNode) {
       String newFormName = newNameTextBox.getText();
+      String targetFromName = targetNameTextBox.getText();
       if (validate(newFormName)) {
         hide();
-        copyFormAction(projectRootNode, newFormName);
+        copyFormAction(projectRootNode, newFormName, targetFromName);
       } else {
         newNameTextBox.setFocus(true);
       }
@@ -193,17 +218,16 @@ public final class CopyFormCommand extends ChainableCommand {
     /**
      * Adds a new form to the project.
      *
-     * @param formName the new form name
+     * @param newFormName the new form name
      */
     protected void copyFormAction(final YoungAndroidProjectNode projectRootNode, 
-        final String formName) {
+        final String newFormName, final String targetFormName) {
       final Ode ode = Ode.getInstance();
       final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
-      String qualifiedFormName = packageNode.getPackageName() + '.' + formName;
+      String qualifiedFormName = packageNode.getPackageName() + '.' + newFormName;
       final String formFileId = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
       final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
       
-      final String targetFormName = "Screen2";
       String targetQualifiedFormName = packageNode.getPackageName() + '.' + targetFormName;
       final String targetFormFileId = YoungAndroidFormNode.getFormFileId(targetQualifiedFormName);
 
@@ -238,9 +262,9 @@ public final class CopyFormCommand extends ChainableCommand {
               if (formEditor != null && blocksEditor != null && !ode.screensLocked()) {
                 DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
                 long projectId = formEditor.getProjectId();
-                designToolbar.addScreen(projectId, formName, formEditor, 
+                designToolbar.addScreen(projectId, newFormName, formEditor, 
                     blocksEditor);
-                designToolbar.switchToScreen(projectId, formName, DesignToolbar.View.FORM);
+                designToolbar.switchToScreen(projectId, newFormName, DesignToolbar.View.FORM);
                 executeNextCommand(projectRootNode);
               } else {
                 // The form editor and/or blocks editor is still not there. Try again later.
@@ -248,7 +272,6 @@ public final class CopyFormCommand extends ChainableCommand {
               }
             }
           });
-
         }
 
         @Override
@@ -266,7 +289,6 @@ public final class CopyFormCommand extends ChainableCommand {
     @Override
     public void show() {
       super.show();
-
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {

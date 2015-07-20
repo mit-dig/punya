@@ -1165,9 +1165,13 @@ public interface OdeMessages extends Messages {
   @Description("Title of new Screen dialog.")
   String newFormTitle();
 
-  @DefaultMessage("Screen name:")
+  @DefaultMessage("New screen name:")
   @Description("Label in front of name in new screen dialog.")
   String formNameLabel();
+  
+  @DefaultMessage("Target screen name:")
+  @Description("Label in front of name in new screen dialog.")
+  String oldFormNameLabel();
 
   @DefaultMessage("WARNING: The number of screens in this app might exceed the limits of App Inventor. " +
                   "Click <a target=\"_blank\" href=\"/reference/other/manyscreens.html\">here</a> for advice about " +
@@ -5185,15 +5189,15 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GetRowsWithConditionsMethods();
 
-  @DefaultMessage("简体中文")
+  @DefaultMessage("������������")
   @Description("")
   String SwitchToSimplifiedChinese();
 
-  @DefaultMessage("繁体中文")
+  @DefaultMessage("������������")
   @Description("")
   String SwitchToTraditionalChinese();
 
-  @DefaultMessage("Español")
+  @DefaultMessage("Espa��ol")
   @Description("")
   String SwitchToSpanish();
 
