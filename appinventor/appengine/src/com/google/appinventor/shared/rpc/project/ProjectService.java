@@ -284,6 +284,15 @@ public interface ProjectService extends RemoteService {
    * @return modification date for project
    */
   long addFile(long projectId, String fileId);
+  
+  /**
+   * Copies an existing screen in the project.
+   *
+   * @param projectId  project id
+   * @param fileId  id of file to add
+   * @return modification date for project
+   */
+  long copyScreen(long projectId, String targetFormFileId, String fileId);
 
   /**
    * creates a new project from a gallery app

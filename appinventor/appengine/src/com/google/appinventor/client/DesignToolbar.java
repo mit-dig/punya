@@ -13,6 +13,7 @@ import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.SettingsEditor;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
 import com.google.appinventor.client.explorer.commands.AddFormCommand;
+import com.google.appinventor.client.explorer.commands.CopyFormCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
 import com.google.appinventor.client.output.OdeLog;
@@ -100,6 +101,7 @@ public class DesignToolbar extends Toolbar {
   }
 
   private static final String WIDGET_NAME_ADDFORM = "AddForm";
+  private static final String WIDGET_NAME_COPYFORM = "CopyForm";
   private static final String WIDGET_NAME_REMOVEFORM = "RemoveForm";
   private static final String WIDGET_NAME_SCREENS_DROPDOWN = "ScreensDropdown";
   private static final String WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR = "SwitchToBlocksEditor";
@@ -159,6 +161,8 @@ public class DesignToolbar extends Toolbar {
     if (AppInventorFeatures.allowMultiScreenApplications()) {
       addButton(new ToolbarItem(WIDGET_NAME_ADDFORM, MESSAGES.addFormButton(),
           new AddFormAction()));
+      addButton(new ToolbarItem(WIDGET_NAME_COPYFORM, MESSAGES.copyFormButton(),
+          new CopyFormAction()));
       addButton(new ToolbarItem(WIDGET_NAME_REMOVEFORM, MESSAGES.removeFormButton(),
           new RemoveFormAction()));
       addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
@@ -186,6 +190,21 @@ public class DesignToolbar extends Toolbar {
       if (projectRootNode != null) {
         ChainableCommand cmd = new AddFormCommand();
         cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADDFORM_YA, projectRootNode);
+      }
+    }
+  }
+  
+  private class CopyFormAction implements Command {
+    @Override
+    public void execute() {
+      Ode ode = Ode.getInstance();
+      if (ode.screensLocked()) {
+        return;                 // Don't permit this if we are locked out (saving files)
+      }
+      ProjectRootNode projectRootNode = ode.getCurrentYoungAndroidProjectRootNode();
+      if (projectRootNode != null) {
+        ChainableCommand cmd = new CopyFormCommand();
+        cmd.startExecuteChain(Tracking.PROJECT_ACTION_COPYFORM_YA, projectRootNode);
       }
     }
   }
