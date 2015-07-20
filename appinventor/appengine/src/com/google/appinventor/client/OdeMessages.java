@@ -1188,6 +1188,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Duplicate Screen name!")
   @Description("Error shown when a new form name would be the same as an existing one")
   String duplicateFormNameError();
+  
+  @DefaultMessage("No such Screen name exist!")
+  @Description("Error shown when copying an non-existing one")
+  String noSuchFormNameError();
 
   @DefaultMessage("Server error: could not add form. Please try again later!")
   @Description("Error message reported when adding a form failed on the server.")
@@ -5189,15 +5193,15 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GetRowsWithConditionsMethods();
 
-  @DefaultMessage("������������")
+  @DefaultMessage("简体中文")
   @Description("")
   String SwitchToSimplifiedChinese();
 
-  @DefaultMessage("������������")
+  @DefaultMessage("繁体中文")
   @Description("")
   String SwitchToTraditionalChinese();
 
-  @DefaultMessage("Espa��ol")
+  @DefaultMessage("Español")
   @Description("")
   String SwitchToSpanish();
 

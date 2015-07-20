@@ -191,7 +191,7 @@ public final class CopyFormCommand extends ChainableCommand {
     private void handleOkClick(YoungAndroidProjectNode projectRootNode) {
       String newFormName = newNameTextBox.getText();
       String targetFromName = targetNameTextBox.getText();
-      if (validate(newFormName)) {
+      if (validateNew(newFormName) && validateTarget(targetFromName)) {
         hide();
         copyFormAction(projectRootNode, newFormName, targetFromName);
       } else {
@@ -199,7 +199,7 @@ public final class CopyFormCommand extends ChainableCommand {
       }
     }
 
-    private boolean validate(String newFormName) {
+    private boolean validateNew(String newFormName) {
       // Check that it meets the formatting requirements.
       if (!TextValidators.isValidIdentifier(newFormName)) {
         Window.alert(MESSAGES.malformedFormNameError());
@@ -211,7 +211,21 @@ public final class CopyFormCommand extends ChainableCommand {
         Window.alert(MESSAGES.duplicateFormNameError());
         return false;
       }
+      return true;
+    }
+    
+    private boolean validateTarget(String newFormName) {
+      // Check that it meets the formatting requirements.
+      if (!TextValidators.isValidIdentifier(newFormName)) {
+        Window.alert(MESSAGES.malformedFormNameError());
+        return false;
+      }
 
+      // Check that it's NOT unique.
+      if (!otherFormNames.contains(newFormName)) {
+        Window.alert(MESSAGES.noSuchFormNameError());
+        return false;
+      }
       return true;
     }
 
