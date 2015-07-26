@@ -1164,6 +1164,14 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("New Screen")
   @Description("Title of new Screen dialog.")
   String newFormTitle();
+  
+  @DefaultMessage("Generate LD form in the current screen")
+  @Description("Title of Auto LD form generator Screen dialog.")
+  String newLDFormTitle();
+  
+  @DefaultMessage("Linked Data Ontology uri:")
+  @Description("Label for the Linked Data Ontology URL in new screen dialog.")
+  String LDOntologyLabel();
 
   @DefaultMessage("New screen name:")
   @Description("Label in front of name in new screen dialog.")
@@ -1920,6 +1928,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Settings")
   @Description("Change the project settings")
   String changeSettingsButton();
+  
+  @DefaultMessage("Generate LD Form")
+  @Description("Auto LD form generator")
+  String generateLDForm();
 
   // This error message is displayed as HTML
 
