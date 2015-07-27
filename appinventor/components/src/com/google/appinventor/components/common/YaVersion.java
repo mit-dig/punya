@@ -539,9 +539,7 @@ public class YaVersion {
   // - Callback parameters speed and heading were added to Flung. (for all sprites)
   public static final int BALL_COMPONENT_VERSION = 5;
 
-  // For BARCODESCANNER_COMPONENT_VERSION 2:
-  // -- UseExternalScanner property was added (default true)
-  public static final int BARCODESCANNER_COMPONENT_VERSION = 2;
+  public static final int BARCODESCANNER_COMPONENT_VERSION = 1;
 
   // For BLUETOOTHCLIENT_COMPONENT_VERSION 2:
   // - The BluetoothClient.Enabled property was added.
