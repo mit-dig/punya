@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -99,6 +100,7 @@ public final class Compiler {
 
   private static final String DEFAULT_VERSION_CODE = "1";
   private static final String DEFAULT_VERSION_NAME = "1.0";
+  private static final String DEFAULT_APP_NAME = "";
 
   private static final String COMPONENT_PERMISSIONS =
           RUNTIME_FILES_DIR + "simple_components_permissions.json";
@@ -342,8 +344,8 @@ public final class Compiler {
 
   // This patches around a bug in AAPT (and other placed in Android)
   // where an ampersand in the name string breaks AAPT.
-  private String cleanVname(String vname) {
-    return vname.replace("&", "and");
+  private String cleanName(String name) {
+    return name.replace("&", "and");
   }
 
   /*
@@ -356,13 +358,14 @@ public final class Compiler {
     String className = Signatures.getClassName(mainClass);
     String projectName = project.getProjectName();
     String vCode = (project.getVCode() == null) ? DEFAULT_VERSION_CODE : project.getVCode();
-    String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanVname(project.getVName());
+    String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanName(project.getVName());
+    String aName = (project.getAName() == null) ? DEFAULT_APP_NAME : cleanName(project.getAName());
     LOG.log(Level.INFO, "VCode: " + project.getVCode());
     LOG.log(Level.INFO, "VName: " + project.getVName());
 
     // TODO(user): Use com.google.common.xml.XmlWriter
     try {
-      BufferedWriter out = new BufferedWriter(new FileWriter(manifestFile));
+      BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(manifestFile), "UTF-8"));
       out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
       // TODO(markf) Allow users to set versionCode and versionName attributes.
       // See http://developer.android.com/guide/publishing/publishing.html for
@@ -446,7 +449,11 @@ public final class Compiler {
       // TODONE(jis): Turned off debuggable. No one really uses it and it represents a security
       // risk for App Inventor App end-users.
       out.write("android:debuggable=\"false\" ");
-      out.write("android:label=\"" + projectName + "\" ");
+      if (aName.equals("")) {
+        out.write("android:label=\"" + projectName + "\" ");
+      } else {
+        out.write("android:label=\"" + aName + "\" ");
+      }
       out.write("android:icon=\"@drawable/ya\" ");
       if (isForCompanion) {              // This is to hook into ACRA
         out.write("android:name=\"com.google.appinventor.components.runtime.ReplApplication\" ");
@@ -621,6 +628,16 @@ public final class Compiler {
         out.write("        <action android:name=\"android.intent.action.MAIN\" />\n");
         out.write("      </intent-filter>\n");
         out.write("    </activity>\n");
+      }
+
+      if (componentTypes.contains("BarcodeScanner")) {
+        // Barcode Activity
+        out.write("    <activity android:name=\"com.google.zxing.client.android.AppInvCaptureActivity\"\n");
+        out.write("              android:screenOrientation=\"landscape\"\n");
+        out.write("              android:stateNotNeeded=\"true\"\n");
+        out.write("              android:configChanges=\"orientation|keyboardHidden\"\n");
+        out.write("              android:theme=\"@android:style/Theme.NoTitleBar.Fullscreen\"\n");
+        out.write("              android:windowSoftInputMode=\"stateAlwaysHidden\" />\n");
       }
 
       // BroadcastReceiver for Texting Component
@@ -1174,7 +1191,7 @@ public final class Compiler {
         apkAbsolutePath,
         zipAlignedPath
     };
-    long startAapt = System.currentTimeMillis();
+    long startZipAlign = System.currentTimeMillis();
     // Using System.err and System.out on purpose. Don't want to pollute build messages with
     // tools output
     if (!Execution.execute(null, zipAlignCommandLine, System.out, System.err)) {
@@ -1190,7 +1207,7 @@ public final class Compiler {
       return false;
     }
     String zipALignTimeMessage = "ZIPALIGN time: " +
-        ((System.currentTimeMillis() - startAapt) / 1000.0) + " seconds";
+        ((System.currentTimeMillis() - startZipAlign) / 1000.0) + " seconds";
     out.println(zipALignTimeMessage);
     LOG.info(zipALignTimeMessage);
     return true;

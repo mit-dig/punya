@@ -10,6 +10,9 @@
     './src/msg/es_es/_messages.js',
     './src/msg/zh_tw/_messages.js',
     './src/msg/zh_cn/_messages.js',
+    './src/msg/fr_fr/_messages.js',
+    './src/msg/it_it/_messages.js',
+    './src/msg/ru/_messages.js',
     './src/msg/en/_messages.js',
 
     // Lyn's instrumentation code
@@ -108,9 +111,6 @@
     "./src/generators/yail/colors.js",
     "./src/generators/yail/variables.js",
     "./src/generators/yail/procedures.js",
-
-    //versioning files
-    "./src/versioning/017_blocksOverhaul.js",
 
     // Repl
     "./src/replmgr.js"

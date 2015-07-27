@@ -205,7 +205,16 @@ public final class ErrorMessages {
   // DatePicker errors
   public static final int ERROR_ILLEGAL_DATE = 2401;
 
-  // Please start the next group of error numbers at 2501.
+  // WebViewer errors
+  public static final int ERROR_WEBVIEW_SSL_ERROR = 2501;
+
+  //FusiontablesControl errors
+  public static final int FUSION_TABLES_QUERY_ERROR = 2601;
+
+  //TextToSpeech errors
+  public static final int ERROR_TTS_NOT_READY = 2701;
+
+  // Please start the next group of error numbers at 2801.
 
 
   public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 12010;
@@ -538,6 +547,13 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_ILLEGAL_MINUTE, "The minute must be set to a value between 0 and 59.");
     //DatePicker errors
     errorMessages.put(ERROR_ILLEGAL_DATE, "The date you entered is invalid.");
+    errorMessages.put(ERROR_WEBVIEW_SSL_ERROR, "SSL Connection could not complete.");
+    // FusiontablesControl errors
+    errorMessages.put(FUSION_TABLES_QUERY_ERROR, "Fusion tables returned an error. The query was: %s. " +
+       "The response was: %s");
+    // TextToSpeech errors
+    errorMessages.put(ERROR_TTS_NOT_READY,
+       "TextToSpeech is not yet ready to perform this operation");
   }
 
   private ErrorMessages() {

@@ -84,7 +84,8 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
   protected static final List<String> YAIL_NAMES = Arrays.asList("CsvUtil", "Double", "Float",
     "Integer", "JavaCollection", "JavaIterator", "KawaEnvironment", "Long", "Short",
     "SimpleForm", "String", "Pattern", "YailList", "YailNumberToString", "YailRuntimeError");
-
+  private static final int ICON_IMAGE_WIDTH = 16;
+  private static final int ICON_IMAGE_HEIGHT = 16;
   public static final int BORDER_SIZE = 2 + 2; // see ode-SimpleMockComponent in Ya.css
 
   /**
@@ -147,6 +148,9 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
 
     private void handleOkClick() {
       String newName = newNameTextBox.getText();
+      // Remove leading and trailing whitespace
+      // Replace nonempty sequences of internal spaces by underscores
+      newName = newName.trim().replaceAll("[\\s\\xa0]+", "_");
       if (newName.equals(getName())) {
         hide();
       } else if (validate(newName)) {
@@ -156,13 +160,14 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
         getForm().fireComponentRenamed(MockComponent.this, oldName);
       } else {
         newNameTextBox.setFocus(true);
+        newNameTextBox.selectAll();
       }
     }
 
     private boolean validate(String newName) {
 
       // Check that it meets the formatting requirements.
-      if (!TextValidators.isValidIdentifier(newName)) {
+      if (!TextValidators.isValidComponentIdentifier(newName)) {
         Window.alert(MESSAGES.malformedComponentNameError());
         return false;
       }
@@ -198,6 +203,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
         @Override
         public void execute() {
           newNameTextBox.setFocus(true);
+          newNameTextBox.selectAll();
         }
       });
     }
@@ -250,7 +256,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
       public void onSelected() {
         // are we showing the blocks editor? if so, toggle the component drawer
         if (Ode.getInstance().getCurrentFileEditor() instanceof YaBlocksEditor) {
-          YaBlocksEditor blocksEditor = 
+          YaBlocksEditor blocksEditor =
               (YaBlocksEditor) Ode.getInstance().getCurrentFileEditor();
           OdeLog.log("Showing item " + getName());
           blocksEditor.showComponentBlocks(getName());
@@ -663,13 +669,13 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     // used to get HTML for the iconImage. AbstractImagePrototype requires
     // an ImageResource, which we don't necessarily have.
     String imageHTML = new ClippedImagePrototype(iconImage.getUrl(), iconImage.getOriginLeft(),
-        iconImage.getOriginTop(), iconImage.getWidth(), iconImage.getHeight()).getHTML();
+        iconImage.getOriginTop(), ICON_IMAGE_WIDTH, ICON_IMAGE_HEIGHT).getHTML();
     TreeItem itemNode = new TreeItem(
         new HTML("<span>" + imageHTML + getName() + "</span>"));
     itemNode.setUserObject(sourceStructureExplorerItem);
     return itemNode;
   }
-  
+
   /**
    * If this component isn't a Form, and this component's type isn't already in typesAndIcons,
    * adds this component's type name as a key to typesAndIcons, mapped to the HTML string used
@@ -681,7 +687,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     String name = getVisibleTypeName();
     if (!isForm() && !typesAndIcons.containsKey(name)) {
       String imageHTML = new ClippedImagePrototype(iconImage.getUrl(), iconImage.getOriginLeft(),
-          iconImage.getOriginTop(), iconImage.getWidth(), iconImage.getHeight()).getHTML();
+          iconImage.getOriginTop(), ICON_IMAGE_WIDTH, ICON_IMAGE_HEIGHT).getHTML();
       typesAndIcons.put(name, imageHTML);
     }
   }
@@ -702,7 +708,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
   protected ProjectNode getAssetNode(String name) {
     Project project = Ode.getInstance().getProjectManager().getProject(editor.getProjectId());
     if (project != null) {
-      HasAssetsFolder<YoungAndroidAssetsFolder> hasAssetsFolder = 
+      HasAssetsFolder<YoungAndroidAssetsFolder> hasAssetsFolder =
           (YoungAndroidProjectNode) project.getRootNode();
       for (ProjectNode asset : hasAssetsFolder.getAssetsFolder().getChildren()) {
         if (asset.getName().equals(name)) {

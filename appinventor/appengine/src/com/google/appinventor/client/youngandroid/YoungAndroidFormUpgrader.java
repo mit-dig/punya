@@ -7,6 +7,9 @@
 package com.google.appinventor.client.youngandroid;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
+
+import java.util.Map;
+
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.components.MockVisibleComponent;
 import com.google.appinventor.client.output.OdeLog;
@@ -16,8 +19,6 @@ import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.properties.json.JSONArray;
 import com.google.appinventor.shared.properties.json.JSONValue;
 import com.google.gwt.user.client.Window;
-
-import java.util.Map;
 
 /**
  * A class that can upgrade a Young Android Form source file.
@@ -208,6 +209,9 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("Ball")) {
         srcCompVersion = upgradeBallProperties(componentProperties, srcCompVersion);
 
+      } else if (componentType.equals("BarcodeScanner")) {
+        srcCompVersion = upgradeBarcodeScannerProperties(componentProperties, srcCompVersion);
+
       } else if (componentType.equals("BluetoothClient")) {
         srcCompVersion = upgradeBluetoothClientProperties(componentProperties, srcCompVersion);
 
@@ -231,6 +235,9 @@ public final class YoungAndroidFormUpgrader {
 
       } else if (componentType.equals("CheckBox")) {
         srcCompVersion = upgradeCheckBoxProperties(componentProperties, srcCompVersion);
+
+      } else if (componentType.equals("Clock")) {
+        srcCompVersion = upgradeClockProperties(componentProperties, srcCompVersion);
 
       } else if (componentType.equals("ContactPicker")) {
         srcCompVersion = upgradeContactPickerProperties(componentProperties, srcCompVersion);
@@ -294,6 +301,9 @@ public final class YoungAndroidFormUpgrader {
 
       } else if (componentType.equals("Sound")) {
         srcCompVersion = upgradeSoundProperties(componentProperties, srcCompVersion);
+
+      } else if (componentType.equals("SoundRecorder")) {
+        srcCompVersion = upgradeSoundRecorderProperties(componentProperties, srcCompVersion);
 
       } else if (componentType.equals("TimePicker")) {
         srcCompVersion = upgradeTimePickerProperties(componentProperties, srcCompVersion);
@@ -412,6 +422,11 @@ public final class YoungAndroidFormUpgrader {
       // No properties need to be modified to upgrade to version 4.
       srcCompVersion = 4;
     }
+    if (srcCompVersion < 5) {
+      // The ActivityStarter.ActivityCanceled event was added.
+      // No properties need to be modified to upgrade to version 5.
+      srcCompVersion = 5;
+    }
     return srcCompVersion;
   }
 
@@ -433,6 +448,14 @@ public final class YoungAndroidFormUpgrader {
     if (srcCompVersion < 5) {
       // The callback parameters speed and heading were added to Flung.
       srcCompVersion = 5;
+    }
+    return srcCompVersion;
+  }
+  private static int upgradeBarcodeScannerProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if (srcCompVersion < 2) {
+      // The UseExternalScanner property was added.
+      srcCompVersion = 2;
     }
     return srcCompVersion;
   }
@@ -494,7 +517,10 @@ public final class YoungAndroidFormUpgrader {
       // Initial version. Placeholder for future upgrades
       srcCompVersion = 1;
     }
-
+    if (srcCompVersion < 2) {
+      // Added the property to allow for the removal of the Thumb Slider
+      srcCompVersion = 2;
+    }
     return srcCompVersion;
   }
 
@@ -504,7 +530,17 @@ public final class YoungAndroidFormUpgrader {
       // Added speech pitch and rate
       srcCompVersion = 2;
     }
-
+    if (srcCompVersion < 3) {
+      // The AvailableLanguages property was added
+      // The AvailableCountires property was added
+      // No properties need to be modified to upgrade to version 3.
+      srcCompVersion = 3;
+    }
+    if (srcCompVersion < 4) {
+      // the Country designer property was changed to use a ChoicePropertyEditor
+      // the Language designer property was changed to use a ChoicePropertyEditor
+      srcCompVersion = 4;
+    }
     return srcCompVersion;
   }
 
@@ -583,6 +619,24 @@ public final class YoungAndroidFormUpgrader {
       // The callback parameters speed and heading were added to Flung.
       srcCompVersion = 7;
     }
+    if (srcCompVersion < 8) {
+      // DrawCircle parameter names changed to centerx,centery, radius
+      // Touched parameter touchedSprite name changed to touchedAnySprite
+      // Dragged parameter draggedSprite name changed to draggedAnySprite
+      srcCompVersion = 8;
+    }
+    if (srcCompVersion < 9) {
+      // DrawCircle takes a new isFilled as fourth parameter.
+      srcCompVersion = 9;
+    }
+    if (srcCompVersion < 10) {
+      // TextAlignment default was changed to Component.ALIGNMENT_CENTER.
+      // Previously the default was ALIGNMENT_NORMAL (left).
+      int oldDefault = 0; // ALIGNMENT_NORMAL (left)
+      JSONValue def = new ClientJsonString(Integer.toString(oldDefault));
+      componentProperties.put("TextAlignment", def);
+      srcCompVersion = 10;
+    }
     return srcCompVersion;
   }
 
@@ -592,6 +646,16 @@ public final class YoungAndroidFormUpgrader {
       // The Value property was renamed to Checked.
       handlePropertyRename(componentProperties, "Value", "Checked");
       // Properties related to this component have now been upgraded to version 2.
+      srcCompVersion = 2;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeClockProperties(Map<String, JSONValue> componentProperties,
+    int srcCompVersion) {
+    if (srcCompVersion < 2) {
+      // The FormatDate and FormatDateTime methods were modified to take another parameter of pattern.
+      // No properties need to be modified to upgrade to version 2.
       srcCompVersion = 2;
     }
     return srcCompVersion;
@@ -642,6 +706,7 @@ public final class YoungAndroidFormUpgrader {
     }
     if (srcCompVersion < 3) {
       // The ConceptURI property was renamed to ObjectType.
+      // RequestFocus function was added (via TextBoxBase)
       handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
       // Properties related to this component have now been upgraded to version 3.
       srcCompVersion = 3;
@@ -741,6 +806,15 @@ public final class YoungAndroidFormUpgrader {
       }
       srcCompVersion = 13;
     }
+    if (srcCompVersion < 14) {
+      // The AppName property was added.
+      srcCompVersion = 14;
+    }
+    if (srcCompVersion < 16) {
+      // The ShowStatusBar property was added.
+      // The TitleVisible property was added.
+      srcCompVersion = 16;
+    }
     return srcCompVersion;
   }
 
@@ -832,6 +906,11 @@ public final class YoungAndroidFormUpgrader {
       // Properties related to this component have now been upgraded to version 2.
       srcCompVersion = 2;
     }
+    if (srcCompVersion < 3) {
+      // The HasMargins property was added.
+      componentProperties.put("HasMargins", new ClientJsonString("False"));
+      srcCompVersion = 3;
+    }
     return srcCompVersion;
   }
 
@@ -870,14 +949,31 @@ public final class YoungAndroidFormUpgrader {
       //  Added title property
       srcCompVersion = 8;
     }
+    if (srcCompVersion < 9) {
+      // Added ItemTextColor, ItemBackgroundColor
+      srcCompVersion = 9;
+    }
     return srcCompVersion;
   }
 
   private static int upgradeListViewProperties(Map<String, JSONValue> componentProperties,
       int srcCompVersion) {
     if (srcCompVersion < 2) {
-      // Added the Elements getter
+      // Added the Elements property
       srcCompVersion = 2;
+    }
+    if (srcCompVersion < 3) {
+      // Added the BackgroundColor property
+      // Added the TextColor property
+      srcCompVersion = 3;
+    }
+    if (srcCompVersion < 4) {
+      // Added the TextSize property
+      srcCompVersion = 4;
+    }
+    if (srcCompVersion < 5) {
+      // Added the SelectionColor property
+      srcCompVersion = 5;
     }
     return srcCompVersion;
   }
@@ -915,6 +1011,7 @@ public final class YoungAndroidFormUpgrader {
       // The ConceptURI property was renamed to ObjectType.
       handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
       // Properties related to this component have now been upgraded to version 3.
+      // Added RequestFocus Function (via TextBoxBase)
       srcCompVersion = 3;
     }
     return srcCompVersion;
@@ -1035,6 +1132,17 @@ public final class YoungAndroidFormUpgrader {
     return srcCompVersion;
   }
 
+  private static int upgradeSoundRecorderProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if (srcCompVersion < 2) {
+      // The SoundRecorder.RecordFile property was added.
+      // No properties need to be modified to upgrade to version 2.
+      srcCompVersion = 2;
+    }
+    return srcCompVersion;
+  }
+
+
   private static int upgradeTimePickerProperties(Map<String, JSONValue> componentProperties,
       int srcCompVersion) {
     if (srcCompVersion < 2) {
@@ -1076,6 +1184,11 @@ public final class YoungAndroidFormUpgrader {
       // The BackgroundColor, NotifierLength, and TextColor options were added.
       // No properties need to be modified to upgrade to version 3.
       srcCompVersion = 3;
+    }
+    if (srcCompVersion < 4) {
+      // A new type of dialog was created, a ProgressDialog, and a method to
+      // dismiss the dialog was also added.
+      srcCompVersion = 4;
     }
     return srcCompVersion;
   }
@@ -1175,6 +1288,7 @@ public final class YoungAndroidFormUpgrader {
     }
     if (srcCompVersion < 5) {
       // The LDComponent interface was added.
+      // RequestFocus method was added
       // No properties need to be modified to upgrade to version 5.
       srcCompVersion = 5;
     }
@@ -1213,14 +1327,16 @@ public final class YoungAndroidFormUpgrader {
 
   private static int upgradeWebViewerProperties(Map<String, JSONValue> componentProperties,
                                                 int srcCompVersion) {
-    if (srcCompVersion < 4) {
+    if (srcCompVersion < 6) {
       // The CanGoForward and CanGoBack methods were added.
       // No properties need to be modified to upgrade to version 2.
       // UsesLocation property added.
       // No properties need to be modified to upgrade to version 3.
       // WebViewString added
       // No properties need to be modified to upgrade to version 4.
-      srcCompVersion = 4;
+      // IgnoreSslError property added (version 5)
+      // ClearCaches method was added (version 6)
+      srcCompVersion = 6;
     }
     return srcCompVersion;
   }
@@ -1231,4 +1347,16 @@ public final class YoungAndroidFormUpgrader {
       componentProperties.put(newPropName, componentProperties.remove(oldPropName));
     }
   }
+
+  private static void handleSupplyValueForPreviouslyDefaultedProperty(
+      Map<String, JSONValue> componentProperties,
+      String PropName, JSONValue valueToSupply) {
+    // if the property wasn't previously there as a key, the previous value was
+    // the default value
+    if (!(componentProperties.containsKey(PropName))) {
+      componentProperties.put(PropName, valueToSupply);
+    }
+  }
+
+
 }
