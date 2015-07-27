@@ -1044,8 +1044,8 @@ public class YaVersion {
   // is invoked from the running Companion.
 
   public static final String PREFERRED_COMPANION = "2.27punya1";
-  public static final String COMPANION_UPDATE_URL = "";
-  public static final String COMPANION_UPDATE_URL1 = "";
+  public static final String COMPANION_UPDATE_URL = "/companions/MITPunyaCompanion.asc";
+  public static final String COMPANION_UPDATE_URL1 = "/companions/MITPunyaCompanion.apk";
   public static final String [] ACCEPTABLE_COMPANIONS = { "2.27punya1" };
 
   // Splash Screen Values
