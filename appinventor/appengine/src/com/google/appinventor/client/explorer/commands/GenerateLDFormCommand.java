@@ -11,6 +11,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import com.google.appinventor.client.DesignToolbar;
@@ -183,20 +184,15 @@ public final class GenerateLDFormCommand extends ChainableCommand {
     }
 
     private void handleOkClick(YoungAndroidProjectNode projectRootNode) {
-      String newFormName = ontologyTextBox.getText();
-      if (validateNew(newFormName)) {
-        if (OkButtonSwitcher==0) {
-          //hide();
-          //String targetFromName = "";
-          //copyFormAction(projectRootNode, newFormName, targetFromName);
-          addCheckBoxesToPanel(fetchPropertiesInOntology());
-          center(); 
-          OkButtonSwitcher++;
-        } else {
-          hide();
-        }
+      Ode ode = Ode.getInstance();
+      YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
+      if (OkButtonSwitcher==0) {
+        addCheckBoxesToPanel(fetchPropertiesInOntology());
+        center(); 
+        OkButtonSwitcher++;
       } else {
-        ontologyTextBox.setFocus(true);
+        addLDFormAction(projectRootNode, sourceNode.getFormName());
+        hide();
       }
     }
     
@@ -281,13 +277,10 @@ public final class GenerateLDFormCommand extends ChainableCommand {
      *
      * @param newFormName the new form name
      */
-    protected void copyFormAction(final YoungAndroidProjectNode projectRootNode, 
-        final String newFormName, final String targetFormName) {
+    protected void addLDFormAction(final YoungAndroidProjectNode projectRootNode, 
+        final String targetFormName) {
       final Ode ode = Ode.getInstance();
       final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
-      String qualifiedFormName = packageNode.getPackageName() + '.' + newFormName;
-      final String formFileId = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
-      final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
       
       String targetQualifiedFormName = packageNode.getPackageName() + '.' + targetFormName;
       final String targetFormFileId = YoungAndroidFormNode.getFormFileId(targetQualifiedFormName);
@@ -302,9 +295,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
 
           // Add the new form and blocks nodes to the project
           final Project project = ode.getProjectManager().getProject(projectRootNode);
-          project.addNode(packageNode, new YoungAndroidFormNode(formFileId));
-          project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
-
+          
           // Add the screen to the DesignToolbar and select the new form editor. 
           // We need to do this once the form editor and blocks editor have been
           // added to the project editor (after the files are completely loaded).
@@ -318,19 +309,11 @@ public final class GenerateLDFormCommand extends ChainableCommand {
             public void execute() {
               ProjectEditor projectEditor = 
                   ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
-              FileEditor formEditor = projectEditor.getFileEditor(formFileId);
-              FileEditor blocksEditor = projectEditor.getFileEditor(blocksFileId);
-              if (formEditor != null && blocksEditor != null && !ode.screensLocked()) {
-                DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
-                long projectId = formEditor.getProjectId();
-                designToolbar.addScreen(projectId, newFormName, formEditor, 
-                    blocksEditor);
-                designToolbar.switchToScreen(projectId, newFormName, DesignToolbar.View.FORM);
-                executeNextCommand(projectRootNode);
-              } else {
-                // The form editor and/or blocks editor is still not there. Try again later.
-                Scheduler.get().scheduleDeferred(this);
-              }
+              DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
+              FileEditor formEditor = projectEditor.getFileEditor(targetFormFileId);
+              long projectId = formEditor.getProjectId();
+              executeNextCommand(projectRootNode);
+              Window.Location.reload();
             }
           });
         }
@@ -344,7 +327,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
-      ode.getProjectService().copyScreen(projectRootNode.getProjectId(), targetFormFileId, formFileId, callback);
+      ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, callback);
     }
 
     @Override

@@ -112,7 +112,7 @@ public abstract class CommonProjectService {
   }
   
   /**
-   * Adds a file to the given project.
+   * Adds a new screen to the given project.
    *
    * @param userId the user id
    * @param projectId  project ID
@@ -125,6 +125,22 @@ public abstract class CommonProjectService {
       storageIo.addSourceFilesToProject(userId, projectId, false, fileId);
     }
     return storageIo.uploadRawFileForce(projectId, fileId, userId, new byte[0]);
+  }
+  
+  /**
+   * Adds a LD form to a given screen in the project.
+   *
+   * @param userId the user id
+   * @param projectId  project ID
+   * @param fileId  ID of file to delete
+   * @return modification date for project
+   */
+  public long addLDForm(String userId, long projectId, String targetFormFileId) {
+    List<String> sourceFiles = storageIo.getProjectSourceFiles(userId, projectId);
+    if (!sourceFiles.contains(targetFormFileId)) {
+      storageIo.addSourceFilesToProject(userId, projectId, false, targetFormFileId);
+    }
+    return storageIo.uploadRawFileForce(projectId, targetFormFileId, userId, new byte[0]);
   }
 
   /**

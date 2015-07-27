@@ -51,6 +51,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -534,6 +535,56 @@ public final class YoungAndroidProjectService extends CommonProjectService {
       }
     } else {
       return super.addFile(userId, projectId, fileId);
+    }
+  }
+  
+  @Override
+  public long addLDForm(String userId, long projectId, String targetFileId) {
+    if (targetFileId.endsWith(FORM_PROPERTIES_EXTENSION) ||
+    		targetFileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
+      // If the file to be added is a form file or a blocks file, add a new form file, a new
+      // blocks file, and a new yail file (as a placeholder for later code generation)      
+      String targetQualifiedFormName = YoungAndroidSourceNode.getQualifiedName(targetFileId);
+      String targetFormFileName = YoungAndroidFormNode.getFormFileId(targetQualifiedFormName);
+      String targetBlocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(targetQualifiedFormName);
+      String targetYailFileName = YoungAndroidYailNode.getYailFileId(targetQualifiedFormName);
+
+      List<String> sourceFiles = storageIo.getProjectSourceFiles(userId, projectId);
+      if (sourceFiles.contains(targetFormFileName) &&
+          sourceFiles.contains(targetBlocklyFileName) &&
+          sourceFiles.contains(targetYailFileName)) {
+          
+          String formFileContents = load(userId, projectId, targetFormFileName);
+          
+          LOG.info("The original form file content is " + formFileContents);
+          
+          String newString = formFileContents.replace("#|", "");
+          newString = newString.replace("$JSON", "");
+          newString = newString.replace("|#", "");
+          try {
+          	JSONObject obj = new JSONObject(newString);
+          	JSONObject obj2 = (JSONObject) obj.get("Properties");
+            JSONArray obj3 = (JSONArray) obj2.get("$Components");
+            
+            obj3.put(obj3.length(), obj3.get(0));
+            
+            obj2.put("$Components", obj3);
+            obj.put("Properties", obj2);
+            String result = "#|" + "\n" + "$JSON" + "\n" + obj.toString() + "\n" + "|#";
+            LOG.info("The smaller form file content is " + result);
+            formFileContents = result;
+          } catch (JSONException e) {
+          	LOG.info("The exception is "+e.toString());
+          }
+          
+          long uploadResult = storageIo.uploadFileForce(projectId, targetFormFileName, userId, formFileContents,
+              StorageUtil.DEFAULT_CHARSET);
+          return uploadResult;
+      } else {
+          throw new IllegalStateException("One or more files to be copied don't exist.");
+      }
+    } else {
+      return super.addFile(userId, projectId, targetFileId);
     }
   }
 
