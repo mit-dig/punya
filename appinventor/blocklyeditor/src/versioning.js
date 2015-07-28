@@ -2012,7 +2012,11 @@ Blockly.Versioning.AllUpgradeMaps =
     // AI2: - Modified 'TweetWithImage' to upload images to Twitter directly because of the shutdown of
     //   TwitPic. The TwitPic_API_Key property is now deprecated and hidden.
     // *** This really should involve markBadBlock or something similar ***
-    4: "noUpgrade"
+    4: "noUpgrade",
+
+    // AI2: - Added 'ImageUploaded' event to report when an image is uploaded to Twitter and the
+    //   associated URL for that image.
+    5: "noUpgrade"
 
   }, // End Twitter upgraders
 
@@ -2116,7 +2120,13 @@ Blockly.Versioning.AllUpgradeMaps =
     //This is initial version. Placeholder for future upgrades
     1: "noUpgrade"
 
-  } // End YandexTranslate upgraders
+  }, // End YandexTranslate upgraders
+
+  "LinkedDataListPicker" : {
+    1: "noUpgrade",
+    2: "noUpgrade",
+    3: "noUpgrade"
+  }
 
 }
 

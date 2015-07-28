@@ -293,6 +293,9 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("LinkedDataForm")) {
         srcCompVersion = upgradeLinkedDataFormProperties(componentProperties, srcCompVersion);
 
+      } else if (componentType.equals("LinkedDataListPicker")) {
+        srcCompVersion = upgradeLinkedDataListProperties(componentProperties, srcCompVersion);
+
       } else if (componentType.equals("SemanticWebListPicker")) {
         srcCompVersion = upgradeSemanticWebListPickerProperties(componentProperties, srcCompVersion);
 
@@ -1092,6 +1095,22 @@ public final class YoungAndroidFormUpgrader {
       // Properties related to this component have now been upgraded to version 2.
       srcCompVersion = 2;
     }
+
+    if (srcCompVersion < 3) {
+      // Renamed Semantic Form to Linked Data Form
+      srcCompVersion = 3;
+    }
+
+    return srcCompVersion;
+  }
+
+  private static int upgradeLinkedDataListProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+
+    if (srcCompVersion < 3) {
+      srcCompVersion = 3;
+    }
+
     return srcCompVersion;
   }
 
@@ -1226,6 +1245,12 @@ public final class YoungAndroidFormUpgrader {
       // No properties need to be modified to upgrade to version 4.
       srcCompVersion = 4;
     }
+    if (srcCompVersion < 5) {
+      // - Added 'ImageUploaded' event to report when an image is uploaded to Twitter and the
+      //   associated URL for that image.
+      srcCompVersion = 5;
+    }
+
     return srcCompVersion;
   }
 
