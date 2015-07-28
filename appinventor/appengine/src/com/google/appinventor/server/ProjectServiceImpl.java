@@ -567,9 +567,9 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
   }
   
   @Override
-  public long addLDForm(long projectId, String targetFormFileId) {
+  public long addLDForm(long projectId, String targetFormFileId, List<String> uriCollection) {
     final String userId = userInfoProvider.getUserId();
-    return getProjectRpcImpl(userId, projectId).addLDForm(userId, projectId, targetFormFileId);
+    return getProjectRpcImpl(userId, projectId).addLDForm(userId, projectId, targetFormFileId, uriCollection);
   }
 
   /**

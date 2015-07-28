@@ -212,7 +212,11 @@ public final class GenerateLDFormCommand extends ChainableCommand {
     }
     
     private void addCheckBoxToCollection(String cBox) {
-      checkBoxCollection.add(cBox);
+    	if (checkBoxCollection.contains(cBox)) {
+    		checkBoxCollection.remove(cBox);
+    	} else {
+        checkBoxCollection.add(cBox);
+    	}
     }
     
     private List<String> fetchPropertiesInOntology() {
@@ -327,7 +331,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
-      ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, callback);
+      ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, callback);
     }
 
     @Override

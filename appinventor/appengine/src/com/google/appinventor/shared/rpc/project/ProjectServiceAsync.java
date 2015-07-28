@@ -159,7 +159,7 @@ public interface ProjectServiceAsync {
   /**
    * @see ProjectService#addLDForm(long, String)
    */
-  void addLDForm(long projectId, String targetFormFileId, AsyncCallback<Long> callback);
+  void addLDForm(long projectId, String targetFormFileId, List<String> uriCollection, AsyncCallback<Long> callback);
 
   void newProjectFromGallery(String appName, String aiaPath, long attributionId, AsyncCallback<UserProject> callback);
 

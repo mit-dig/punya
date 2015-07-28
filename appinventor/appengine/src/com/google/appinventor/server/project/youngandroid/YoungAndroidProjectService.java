@@ -66,9 +66,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -261,7 +263,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
       String qualifiedName = properties.getProperty("main");
       String newContent = getProjectPropertiesFileContents(projectName, qualifiedName, newIcon, newVCode, newVName, newUsesLocation, newMapsKey);
       storageIo.uploadFileForce(projectId, PROJECT_PROPERTIES_FILE_NAME, userId,
-    	  newContent, StorageUtil.DEFAULT_CHARSET);
+        newContent, StorageUtil.DEFAULT_CHARSET);
     }
   }
 
@@ -503,7 +505,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         if (sourceFiles.contains(targetFormFileName) &&
             sourceFiles.contains(targetBlocklyFileName) &&
             sourceFiles.contains(targetYailFileName)) {
-        	
+          
           //Screen1, or Screen2
           int lastDotPos = qualifiedFormName.lastIndexOf('.');
           String simpleFormName = qualifiedFormName.substring(lastDotPos + 1);
@@ -539,9 +541,9 @@ public final class YoungAndroidProjectService extends CommonProjectService {
   }
   
   @Override
-  public long addLDForm(String userId, long projectId, String targetFileId) {
+  public long addLDForm(String userId, long projectId, String targetFileId, List<String> uriCollection) {
     if (targetFileId.endsWith(FORM_PROPERTIES_EXTENSION) ||
-    		targetFileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
+        targetFileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
       // If the file to be added is a form file or a blocks file, add a new form file, a new
       // blocks file, and a new yail file (as a placeholder for later code generation)      
       String targetQualifiedFormName = YoungAndroidSourceNode.getQualifiedName(targetFileId);
@@ -555,26 +557,39 @@ public final class YoungAndroidProjectService extends CommonProjectService {
           sourceFiles.contains(targetYailFileName)) {
           
           String formFileContents = load(userId, projectId, targetFormFileName);
-          
           LOG.info("The original form file content is " + formFileContents);
           
           String newString = formFileContents.replace("#|", "");
           newString = newString.replace("$JSON", "");
           newString = newString.replace("|#", "");
           try {
-          	JSONObject obj = new JSONObject(newString);
-          	JSONObject obj2 = (JSONObject) obj.get("Properties");
-            JSONArray obj3 = (JSONArray) obj2.get("$Components");
+            JSONObject originalObj = new JSONObject(newString);
+            JSONObject originalObj2 = (JSONObject) originalObj.get("Properties");
             
-            obj3.put(obj3.length(), obj3.get(0));
             
-            obj2.put("$Components", obj3);
-            obj.put("Properties", obj2);
-            String result = "#|" + "\n" + "$JSON" + "\n" + obj.toString() + "\n" + "|#";
+            JSONArray originalObj3;
+            
+            try {
+              originalObj3 = (JSONArray) originalObj2.get("$Components");            	
+            } catch (JSONException e) {
+            	originalObj3 = new JSONArray();
+            }
+
+            LOG.info("The generateFormContent " + generateFormContent(uriCollection));
+            JSONObject formObj = new JSONObject(generateFormContent(uriCollection));
+            
+            JSONArray tmpObj = (JSONArray) formObj.get("$Components");
+            originalObj3.put(originalObj3.length(), tmpObj.get(0));
+            
+            originalObj2.put("$Components", originalObj3);
+            originalObj.put("Properties", originalObj2);
+            
+            String result = "#|" + "\n" + "$JSON" + "\n" + originalObj.toString() + "\n" + "|#";
             LOG.info("The smaller form file content is " + result);
+            LOG.info("The uri collection is " + uriCollection.toString());
             formFileContents = result;
           } catch (JSONException e) {
-          	LOG.info("The exception is "+e.toString());
+            LOG.info("The exception is "+e.toString());
           }
           
           long uploadResult = storageIo.uploadFileForce(projectId, targetFormFileName, userId, formFileContents,
@@ -586,6 +601,142 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     } else {
       return super.addFile(userId, projectId, targetFileId);
     }
+  }
+  
+  public String generateFormContent(List<String> uriCollection) {
+    String contentPart1 = 
+    "{"+
+      "\"$Components\": ["+
+        "{"+
+          "\"$Name\": \"LinkedDataForm$formID$\","+
+          "\"$Type\": \"LinkedDataForm\","+
+          "\"$Version\": \"3\","+
+          "\"Uuid\": \"$formUUID$\","+
+          "\"FormID\": \"http:\\/\\/example.com\\/test_AT_example.com\\/LDFormGenerator\\/$formTimestamp$\\/\","+
+          "\"Width\": \"-2\",";
+    
+    String contentPart2 = 
+          "\"$Components\": ["+
+            "{"+
+              "\"$Name\": \"TableArrangement$tableID$\","+
+              "\"$Type\": \"TableArrangement\","+
+              "\"$Version\": \"1\","+
+              "\"Uuid\": \"$tableUUID$\","+
+              "\"Rows\": \"$tableRowNum$\","+
+              "\"Width\": \"-2\","+
+              "\"$Components\": [";
+     
+    String contentPart3 = 
+                "{"+
+                  "\"$Name\": \"Label$labelID$\","+
+                  "\"$Type\": \"Label\","+
+                  "\"$Version\": \"2\","+
+                  "\"Uuid\": \"$labelUUID$\","+
+                  "\"Text\": \"$labelText$\","+
+                  "\"Column\": \"$labelCol$\","+
+                  "\"Row\": \"$labelRow$\""+
+                "}";
+
+    String contentPart4 = 
+                "{"+
+                  "\"$Name\": \"TextBox$TextBoxID$\","+
+                  "\"$Type\": \"TextBox\","+
+                  "\"$Version\": \"6\","+
+                  "\"Uuid\": \"$TextBoxUUID$\","+
+                  "\"Hint\": \"Hint for TextBox1\","+
+                  "\"PropertyURI\": \"$TextBoxURI$\","+
+                  "\"Column\": \"$TextBoxCol$\","+
+                  "\"Row\": \"$TextBoxRow$\""+
+                "}";
+      
+     String contentPart5 = 
+              "]"+
+            "}"+
+          "]"+
+        "}"+
+      "]"+
+    "}";
+     
+     String formIDRegex = "$formID$";
+     String formUUIDRegex = "$formUUID$";
+     String formTimestampRegex = "$formTimestamp$";
+     
+     String tableIDRegex = "$tableID$"; 
+     String tableUUIDRegex = "$tableUUID$"; 
+     String tableRowNumRegex = "$tableRowNum$"; 
+     
+     contentPart1 = contentPart1.replace(formIDRegex, generateRandomLetterOrNum());
+     contentPart1 = contentPart1.replace(formUUIDRegex, System.currentTimeMillis()+"");
+     contentPart1 = contentPart1.replace(formTimestampRegex, System.currentTimeMillis()+"");
+       
+     contentPart2 = contentPart2.replace(tableIDRegex, generateRandomLetterOrNum());
+     contentPart2 = contentPart2.replace(tableUUIDRegex, System.currentTimeMillis()+"");
+     contentPart2 = contentPart2.replace(tableRowNumRegex, uriCollection.size()+"");
+    
+     String textBoxUri = "http:\\/\\/xmlns.com\\/foaf\\/0.1\\/lastName";
+     String formContent = generateLabelTextbox(uriCollection, contentPart3, contentPart4);
+    return contentPart1 + contentPart2 + formContent + contentPart5;
+  }
+  
+  public String generateLabelTextbox(List<String> uriCollection, String contentPart3, String contentPart4) {
+    String labelIDRegex = "$labelID$"; 
+    String labelUUIDRegex = "$labelUUID$"; 
+    String labelTextRegex = "$labelText$"; 
+    String labelColRegex = "$labelCol$"; 
+    String labelRowRegex = "$labelRow$"; 
+    
+    String textBoxIDRegex = "$TextBoxID$"; 
+    String textBoxUUIDRegex = "$TextBoxUUID$"; 
+    String textBoxURIRegex = "$TextBoxURI$"; 
+    String textBoxColRegex = "$TextBoxCol$"; 
+    String textBoxRowRegex = "$TextBoxRow$"; 
+    
+    String labelText = "";
+    String textBoxUri = "";
+    
+    String formContent = "";
+    String formContentPart1 = "";
+    String formContentPart2 = "";
+    
+   for (int i = 0; i < uriCollection.size(); i++) {
+  	 textBoxUri = uriCollection.get(i);
+  	 String[] items = textBoxUri.split("/");
+  	 labelText = items[items.length-1];
+  	 
+     formContentPart1 = contentPart3.replace(labelIDRegex, generateRandomLetterOrNum());
+     formContentPart1 = formContentPart1.replace(labelUUIDRegex, System.currentTimeMillis()+"");
+     formContentPart1 = formContentPart1.replace(labelTextRegex, labelText);
+     formContentPart1 = formContentPart1.replace(labelColRegex, "0");
+     formContentPart1 = formContentPart1.replace(labelRowRegex, i+"");
+     
+     formContentPart2 = contentPart4.replace(textBoxIDRegex, generateRandomLetterOrNum());
+     formContentPart2 = formContentPart2.replace(textBoxUUIDRegex, System.currentTimeMillis()+"");
+     formContentPart2 = formContentPart2.replace(textBoxURIRegex, textBoxUri);
+     formContentPart2 = formContentPart2.replace(textBoxColRegex, "1");
+     formContentPart2 = formContentPart2.replace(textBoxRowRegex, i+"");
+
+     formContent = formContent + formContentPart1 + "," + formContentPart2 + "," ;    	 
+   }
+   
+   if (formContent.endsWith(",") && formContent.length() > 2) {
+  	 formContent = formContent.substring(0, formContent.length()-1);
+   }
+  	return formContent;
+  }
+  
+  // 6 random letters &/ numbers
+  public String generateRandomLetterOrNum() {
+    String val = "";
+    // char or numbers (5), random 0-9 A-Z
+    for(int i = 0; i<6;){
+      int ranAny = 48 + (new Random()).nextInt(90-65);
+      if(!(57 < ranAny && ranAny<= 65)){
+        char c = (char)ranAny;      
+        val += c;
+        i++;
+      }
+    }
+    return val;
   }
 
   @Override
