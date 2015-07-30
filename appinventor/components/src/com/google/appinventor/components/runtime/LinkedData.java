@@ -2,15 +2,15 @@ package com.google.appinventor.components.runtime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+
+import android.util.Log;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -24,27 +24,15 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.AsyncCallbackPair;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil;
-import com.google.appinventor.components.runtime.util.RdfUtil.Solution;
-import com.google.appinventor.components.runtime.util.WebServiceUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.vocabulary.RDF;
-
-import android.util.Log;
 
 @DesignerComponent(version = YaVersion.LINKED_DATA_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
@@ -376,6 +364,53 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     return clazz.isPrimitive() || WRAPPER_TYPES.contains(clazz);
   }
 
+  @SimpleFunction
+  public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filePath) {
+    try {
+      Runnable call = new Runnable() {
+        public void run() {
+        	doInsertData(Url, certificateName, securityToken, filePath);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (Exception e) {
+    	Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+        	FailedHttsPostingFileToWeb("Please see system log (logcat) for more info.");
+        }
+      });
+    }
+  }
+  
+  private void doInsertData(final String Url, final String certificateName, final String securityToken, final String filePath) {
+		try {
+    	final InputStream inputStream = form.getAssets().open(certificateName);
+			boolean success = RdfUtil.performHttpsRequest(Url, inputStream, securityToken, filePath);
+      if(success) {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+		        FinishedHttsPostingFileToWeb("done");
+          }
+        });
+      } else {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+		        FailedHttsPostingFileToWeb("Please see system log (logcat) for more info.");
+          }
+        });
+      }
+		} catch (IOException e) {
+			Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
+    	final String erroMessage = e.getLocalizedMessage();
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+	        FailedHttsPostingFileToWeb(erroMessage);
+        }
+      });
+		}
+  }
+  
   /**
    * Attempts to insert the statements contained within this Linked Data
    * component into the endpoint with an optional graph.
@@ -392,7 +427,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       final URI uri = noResolveUpdate ? base : base.resolve(part);
       Runnable call = new Runnable() {
         public void run() {
-          doInsertModel(uri, graph);
+          doInsertModel("", 0, uri, graph);
         }
       };
       AsynchUtil.runAsynchronously(call);
@@ -401,10 +436,71 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       FailedToAddDataToWeb(graph, "Invalid endpoint URI. See log for details.");
     }
   }
-
-  private void doInsertModel(final URI uri, final String graph) {
+  
+  /**
+   * Attempts to insert the statements contained within this Linked Data
+   * component into the endpoint with an optional graph.
+   * @param graph Empty string for the default graph, otherwise a valid URI
+   * @param noResolveUpdate true if the component should attempt to resolve the
+   * update URL relative to {@link #EndpointURL()}, false will send the query
+   * directly to {@link #endpointURL()}.
+   */
+  @SimpleFunction
+  public void AddDataToVirtuosoServer(final String graph, boolean noResolveUpdate) {
     try {
-      if(RdfUtil.insertData(uri, model, graph.length() == 0 ? null : graph)) {
+      URI part = new URI(null, null, "update", null, null);
+      URI base = URI.create(EndpointURL());
+      final URI uri = noResolveUpdate ? base : base.resolve(part);
+      Runnable call = new Runnable() {
+        public void run() {
+          doInsertModel("", 1, uri, graph);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (URISyntaxException e) {
+      Log.w(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
+      FailedToAddDataToWeb(graph, "Invalid endpoint URI. See log for details.");
+    }
+  }
+  
+  /**
+   * Attempts to insert the statements contained within this Linked Data
+   * component into the endpoint with an optional graph.
+   * @param graph Empty string for the default graph, otherwise a valid URI
+   * @param noResolveUpdate true if the component should attempt to resolve the
+   * update URL relative to {@link #EndpointURL()}, false will send the query
+   * directly to {@link #endpointURL()}.
+   */
+  @SimpleFunction
+  public void AddDataToVirtuosoHttpsServer(final String certificateName, final String graph, boolean noResolveUpdate) {
+    try {
+      URI part = new URI(null, null, "update", null, null);
+      URI base = URI.create(EndpointURL());
+      final URI uri = noResolveUpdate ? base : base.resolve(part);
+      Runnable call = new Runnable() {
+        public void run() {
+          doInsertModel(certificateName, 2, uri, graph);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (URISyntaxException e) {
+      Log.e(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
+      FailedToAddDataToWeb(graph, "Invalid endpoint URI. See log for details.");
+    }
+  }
+
+  private void doInsertModel(String certificateName, int option, final URI uri, final String graph) {
+    try {
+    	boolean success = false;
+    	if (option == 0) {
+    		success = RdfUtil.insertDataToDydra(uri, model, graph.length() == 0 ? null : graph);
+    	} else if (option == 1) {
+    		success = RdfUtil.insertDataToVirtuoso(uri, model, graph.length() == 0 ? null : graph);
+    	} else if (option == 2) {
+    		InputStream inputStream = form.getAssets().open(certificateName);
+    		success = RdfUtil.insertDataToVirtuosoHttps(inputStream, uri, model, graph.length() == 0 ? null : graph);
+    	} 
+      if(success) {
         form.runOnUiThread(new Runnable() {
           public void run() {
             FinishedAddingDataToWeb(graph);
@@ -477,42 +573,41 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     }
   }
 
-            @SimpleFunction
-            public String ResultsToSimpleJSON(final YailList results) {
-                StringBuilder sb = new StringBuilder("[");
-                for(int i = 0; i < results.size(); i++) {
-                    YailList solution = (YailList) results.getObject( i );
-                    if(i > 0) {
-                        sb.append(",");
-                    }
-                    sb.append("{");
-                    for(int j = 0; j < solution.size(); j++) {
-                        YailList binding = (YailList) solution.getObject( j );
-                        String varName = binding.getString( 0 );
-                        Object varValue = binding.getObject( 1 );
-                        if( j != 0 ) {
-                            sb.append(",");
-                        }
-                        sb.append("\"");
-                        sb.append(varName);
-                        sb.append("\":");
-                        if(isPrimitiveOrWrapper(varValue.getClass())) {
-                            sb.append(varValue);
-                        } else {
-                            sb.append("\"");
-                            sb.append(varValue);
-                            sb.append("\"");
-                        }
-                        sb.append("");
-                    }
-                    sb.append("}");
-                }
-                sb.append("]");
-                String result = sb.toString();
-                Log.d(LOG_TAG, "JSON = " + result);
-                return result;
-            }
-
+	@SimpleFunction
+	public String ResultsToSimpleJSON(final YailList results) {
+		StringBuilder sb = new StringBuilder("[");
+		for (int i = 0; i < results.size(); i++) {
+			YailList solution = (YailList) results.getObject(i);
+			if (i > 0) {
+				sb.append(",");
+			}
+			sb.append("{");
+			for (int j = 0; j < solution.size(); j++) {
+				YailList binding = (YailList) solution.getObject(j);
+				String varName = binding.getString(0);
+				Object varValue = binding.getObject(1);
+				if (j != 0) {
+					sb.append(",");
+				}
+				sb.append("\"");
+				sb.append(varName);
+				sb.append("\":");
+				if (isPrimitiveOrWrapper(varValue.getClass())) {
+					sb.append(varValue);
+				} else {
+					sb.append("\"");
+					sb.append(varValue);
+					sb.append("\"");
+				}
+				sb.append("");
+			}
+			sb.append("}");
+		}
+		sb.append("]");
+		String result = sb.toString();
+		Log.d(LOG_TAG, "JSON = " + result);
+		return result;
+	}
 
   @SimpleEvent
   public void FailedToFeedDataToWeb(String error) {
@@ -619,5 +714,15 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     model.write(out, "TTL");
     return out.toString();
+  }
+  
+  @SimpleEvent
+  public void FinishedHttsPostingFileToWeb(String message) {
+    EventDispatcher.dispatchEvent(this, "FinishedHttsPostingFileToWeb", message);
+  }
+  
+  @SimpleEvent
+  public void FailedHttsPostingFileToWeb(String errorMessage) {
+    EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb", errorMessage);
   }
 }
