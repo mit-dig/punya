@@ -6346,4 +6346,71 @@ public interface OdeMessages extends Messages {
   @Description("")
   String SelectionColorProperties();
 
+  @DefaultMessage("deleteImage")
+  @Description("")
+  String deleteImageMethods();
+
+  @DefaultMessage("getSDCardPath")
+  @Description("")
+  String getSDCardPathProperties();
+
+  @DefaultMessage("addOverlay")
+  @Description("")
+  String addOverlayMethods();
+
+  @DefaultMessage("addPolygon")
+  @Description("")
+  String addPolygonMethods();
+
+  @DefaultMessage("addTileOverlay")
+  @Description("")
+  String addTileOverlayMethods();
+
+  @DefaultMessage("clearAllPolygons")
+  @Description("")
+  String clearAllPolygonsMethods();
+
+
+  @DefaultMessage("drawCentralSquare")
+  @Description("")
+  String drawCentralSquareMethods();
+
+
+  @DefaultMessage("getBoundingBox")
+  @Description("")
+  String getBoundingBoxMethods();
+
+  @DefaultMessage("getMapCenter")
+  @Description("")
+  String getMapCenterMethods();
+
+  @DefaultMessage("getZoomLevelInfo")
+  @Description("")
+  String getZoomLevelInfoMethods();
+
+  @DefaultMessage("FailedHttsPostingFileToWeb")
+  @Description("")
+  String FailedHttsPostingFileToWebEvents();
+
+  @DefaultMessage("AddDataToVirtuosoHttpsServer")
+  @Description("")
+  String AddDataToVirtuosoHttpsServerMethods();
+
+  @DefaultMessage("AddDataToVirtuosoServer")
+  @Description("")
+  String AddDataToVirtuosoServerMethods();
+
+  @DefaultMessage("HttpsPostFileToWeb")
+  @Description("")
+  String HttpsPostFileToWebMethods();
+
+  @DefaultMessage("generateRandomUUID")
+  @Description("")
+  String generateRandomUUIDProperties();
+
+  @DefaultMessage("FinishedHttsPostingFileToWeb")
+  @Description("")
+  String FinishedHttsPostingFileToWebEvents();
+
 }
+
