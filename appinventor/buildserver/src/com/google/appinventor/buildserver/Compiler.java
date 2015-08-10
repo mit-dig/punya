@@ -104,7 +104,7 @@ public final class Compiler {
   private static final String DEFAULT_APP_NAME = "";
 
   //This is the dummy (doesn't work) Google Maps API Key to prevent MIT AI Companion to crash.
-  private static final String DEFAULT_GOOGLE_MAPS_API_KEY = "AIzaSyBeyL-CUzkSFKAtWhVG47QWp-vOl2VEn5M";
+  private static final String DEFAULT_GOOGLE_MAPS_API_KEY = "AIzaSyCmOh64wdlLf5Ay4hXo_1M-vDWerizaUrk";
 
 
   private static final String COMPONENT_PERMISSIONS =
