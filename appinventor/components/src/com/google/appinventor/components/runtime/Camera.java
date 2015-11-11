@@ -27,6 +27,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Camera provides access to the phone's camera
@@ -79,10 +80,10 @@ public class Camera extends AndroidNonvisibleComponent
     if (Environment.MEDIA_MOUNTED.equals(state)) {
       Log.i("CameraComponent", "External storage is available and writable");
       
-      
+      String uuid = UUID.randomUUID().toString();
       imageFile = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
         "/Pictures/app_inventor_" + date.getTime()
-        + ".jpg"));
+        + "_" + uuid + ".jpg"));
 
       ContentValues values = new ContentValues();
       values.put(MediaStore.Images.Media.DATA, imageFile.getPath());
@@ -134,6 +135,12 @@ public class Camera extends AndroidNonvisibleComponent
       deleteFile(imageFile);
     }
   }
+  
+  @SimpleFunction(description = "Delete local image")
+  public void deleteImage(String image) {
+    Uri imageUri = Uri.parse(image);
+    deleteFile(imageUri);
+  }
 
   private void deleteFile(Uri fileUri) {
     File fileToDelete = new File(fileUri.getPath());
@@ -169,7 +176,4 @@ public class Camera extends AndroidNonvisibleComponent
     return this.localStorageFolder;
     
   }
-  
-  
-  
 }

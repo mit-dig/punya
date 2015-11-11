@@ -3,6 +3,7 @@ package com.google.appinventor.components.runtime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -294,5 +295,10 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
     } else {
       return Subject();
     }
+  }
+  
+  @SimpleProperty
+  public String generateRandomUUID() {
+  	return UUID.randomUUID().toString();
   }
 }

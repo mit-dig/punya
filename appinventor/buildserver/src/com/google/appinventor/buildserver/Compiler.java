@@ -100,7 +100,13 @@ public final class Compiler {
 
   private static final String DEFAULT_VERSION_CODE = "1";
   private static final String DEFAULT_VERSION_NAME = "1.0";
+
   private static final String DEFAULT_APP_NAME = "";
+
+  //The API key is initialized here to prevent crashing. 
+  // The Google Maps API Key is from the QCRI gmail account
+  private static final String DEFAULT_GOOGLE_MAPS_API_KEY = "AIzaSyCmOh64wdlLf5Ay4hXo_1M-vDWerizaUrk";
+
 
   private static final String COMPONENT_PERMISSIONS =
           RUNTIME_FILES_DIR + "simple_components_permissions.json";
@@ -358,10 +364,16 @@ public final class Compiler {
     String className = Signatures.getClassName(mainClass);
     String projectName = project.getProjectName();
     String vCode = (project.getVCode() == null) ? DEFAULT_VERSION_CODE : project.getVCode();
+
     String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanName(project.getVName());
     String aName = (project.getAName() == null) ? DEFAULT_APP_NAME : cleanName(project.getAName());
+
+    
+    String gMapsAPIKey = (project.getMapsKey() == null) ? DEFAULT_GOOGLE_MAPS_API_KEY : project.getMapsKey();
+
     LOG.log(Level.INFO, "VCode: " + project.getVCode());
     LOG.log(Level.INFO, "VName: " + project.getVName());
+    LOG.log(Level.INFO, "MapsKey: " + project.getMapsKey());
 
     // TODO(user): Use com.google.common.xml.XmlWriter
     try {
@@ -567,7 +579,6 @@ public final class Compiler {
       out.write("</receiver>");
 	  }
       
-
 	  // Add the FUNF probe services
       // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.BatteryProbe\"></service>\n");
       // out.write("<service android:name=\"edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe\"></service>\n");
@@ -590,8 +601,6 @@ public final class Compiler {
 	    out.write("    </intent-filter>\n");
 	    out.write("</receiver>\n");
 	  }
-
-	  
 
 	  //add UploadServices and DataBaseService
 	  out.write("<service android:name=\"edu.mit.media.funf.storage.NameValueDatabaseService\"></service> \n");
@@ -646,25 +655,15 @@ public final class Compiler {
             "</intent-filter>  \n" +
         "</receiver> \n");
       }
-      
-      if (componentTypes.contains("GoogleMap")) {
-         if (project.getMapsKey().length() > 0) {
-         System.out.println("Android Manifest: including Google Maps key:" + project.getMapsKey());
-            out.write("<meta-data android:name=\"com.google.android.maps.v2.API_KEY\" ");
-                   out.write("android:value=\"" + project.getMapsKey() + "\"/>");
-        }
-      }
 
       // adds the google maps v2 api key
       if (componentTypes.contains("GoogleMap")) {
-        if (project.getMapsKey().length() > 0) {
-          System.out.println("Android Manifest: including Google Maps key:" + project.getMapsKey());
-          out.write("<meta-data android:name=\"com.google.android.maps.v2.API_KEY\" ");
-          out.write("android:value=\"" + project.getMapsKey() + "\"/>");
-        }
+        System.out.println("Android Manifest: including Google Maps key:" + gMapsAPIKey);
+        out.write("<meta-data android:name=\"com.google.android.maps.v2.API_KEY\" ");
+        out.write("android:value=\"" + gMapsAPIKey + "\"/>");
       }
 
-	  // Close the application tag
+      // Close the application tag
       out.write("  </application>\n");
       out.write("</manifest>\n");
       out.close();

@@ -338,5 +338,9 @@ public class File extends AndroidNonvisibleComponent implements Component {
       return dirPath.getPath() + "/" + filename;
     }
   }
-
+  
+  @SimpleProperty
+  public String getSDCardPath() {
+  	return Environment.getExternalStorageDirectory().getPath();
+  }
 }
