@@ -437,6 +437,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Import project (.aia) from my computer ...")
   @Description("Name of Import Project menuitem")
   String importProjectMenuItem();
+  
+  @DefaultMessage("Import Screen (.aiax) from my computer ...")
+  @Description("Name of Import Screen menuitem")
+  String importScreenMenuItem();
 
   @DefaultMessage("Delete project")
   @Description("Name of Delete project menuitem")
@@ -461,6 +465,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Export selected project (.aia) to my computer")
   @Description("Name of Export Project menuitem")
   String exportProjectMenuItem();
+  
+  @DefaultMessage("Export selected screen (.aiax) to my computer")
+  @Description("Name of Export Screen menuitem")
+  String exportScreenMenuItem();
 
   @DefaultMessage("Export all projects")
   @Description("Name of Export all Project menuitem")
@@ -1575,6 +1583,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Import Project...")
   @Description("Caption for project upload wizard.")
   String projectUploadWizardCaption();
+  
+  @DefaultMessage("Import Screen...")
+  @Description("Caption for screen upload wizard.")
+  String screenUploadWizardCaption();
 
   // Used in GalleryToolBar.java
   @DefaultMessage("Search")
