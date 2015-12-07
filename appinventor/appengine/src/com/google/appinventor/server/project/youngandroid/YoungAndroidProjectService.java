@@ -581,6 +581,14 @@ public final class YoungAndroidProjectService extends CommonProjectService {
             JSONArray tmpObj = (JSONArray) formObj.get("$Components");
             originalObj3.put(originalObj3.length(), tmpObj.get(0));
             
+            List<String> returns = generateLDContent();
+            String LDContent = returns.get(0);
+            LOG.info("The generateLDContent " + LDContent);
+            formObj = new JSONObject(LDContent);
+            
+            tmpObj = (JSONArray) formObj.get("$Components");
+            originalObj3.put(originalObj3.length(), tmpObj.get(0));
+            
             originalObj2.put("$Components", originalObj3);
             originalObj.put("Properties", originalObj2);
             
@@ -601,6 +609,30 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     } else {
       return super.addFile(userId, projectId, targetFileId);
     }
+  }
+  
+  public List<String> generateLDContent() {
+    String contentPart = 
+    "{"+
+      "\"$Components\": ["+
+        "{"+
+          "\"$Name\": \"LinkedData$LDID$\","+
+          "\"$Type\": \"LinkedData\","+
+          "\"$Version\": \"3\","+
+          "\"Uuid\": \"$LDUUID$\""+
+        "}"+
+      "]"+
+    "}";
+    String LDIDRegex = "$LDID$";
+    String LDUUIDRegex = "$LDUUID$";
+
+    String LDID = generateRandomLetterOrNum();
+    contentPart = contentPart.replace(LDIDRegex, LDID);
+    contentPart = contentPart.replace(LDUUIDRegex, System.currentTimeMillis()+"");
+    List<String> returns = new ArrayList<String>(); 
+    returns.add(contentPart);
+    returns.add(LDID);
+    return returns;
   }
   
   public String generateFormContent(List<String> uriCollection) {
@@ -649,33 +681,33 @@ public final class YoungAndroidProjectService extends CommonProjectService {
                   "\"Row\": \"$TextBoxRow$\""+
                 "}";
       
-     String contentPart5 = 
+     String contentPart6 = 
               "]"+
-            "}"+
+            "}"+ 
           "]"+
         "}"+
       "]"+
     "}";
-     
-     String formIDRegex = "$formID$";
-     String formUUIDRegex = "$formUUID$";
-     String formTimestampRegex = "$formTimestamp$";
-     
-     String tableIDRegex = "$tableID$"; 
-     String tableUUIDRegex = "$tableUUID$"; 
-     String tableRowNumRegex = "$tableRowNum$"; 
-     
-     contentPart1 = contentPart1.replace(formIDRegex, generateRandomLetterOrNum());
-     contentPart1 = contentPart1.replace(formUUIDRegex, System.currentTimeMillis()+"");
-     contentPart1 = contentPart1.replace(formTimestampRegex, System.currentTimeMillis()+"");
-       
-     contentPart2 = contentPart2.replace(tableIDRegex, generateRandomLetterOrNum());
-     contentPart2 = contentPart2.replace(tableUUIDRegex, System.currentTimeMillis()+"");
-     contentPart2 = contentPart2.replace(tableRowNumRegex, uriCollection.size()+"");
-    
-     String textBoxUri = "http:\\/\\/xmlns.com\\/foaf\\/0.1\\/lastName";
-     String formContent = generateLabelTextbox(uriCollection, contentPart3, contentPart4);
-    return contentPart1 + contentPart2 + formContent + contentPart5;
+
+    String formIDRegex = "$formID$";
+    String formUUIDRegex = "$formUUID$";
+    String formTimestampRegex = "$formTimestamp$";
+
+    String tableIDRegex = "$tableID$"; 
+    String tableUUIDRegex = "$tableUUID$"; 
+    String tableRowNumRegex = "$tableRowNum$"; 
+
+    contentPart1 = contentPart1.replace(formIDRegex, generateRandomLetterOrNum());
+    contentPart1 = contentPart1.replace(formUUIDRegex, System.currentTimeMillis()+"");
+    contentPart1 = contentPart1.replace(formTimestampRegex, System.currentTimeMillis()+"");
+
+    contentPart2 = contentPart2.replace(tableIDRegex, generateRandomLetterOrNum());
+    contentPart2 = contentPart2.replace(tableUUIDRegex, System.currentTimeMillis()+"");
+    contentPart2 = contentPart2.replace(tableRowNumRegex, uriCollection.size()+"");
+
+    String textBoxUri = "http:\\/\\/xmlns.com\\/foaf\\/0.1\\/lastName";
+    String formContent = generateLabelTextbox(uriCollection, contentPart3, contentPart4);
+    return contentPart1 + contentPart2 + formContent + contentPart6;
   }
   
   public String generateLabelTextbox(List<String> uriCollection, String contentPart3, String contentPart4) {
@@ -722,6 +754,49 @@ public final class YoungAndroidProjectService extends CommonProjectService {
   	 formContent = formContent.substring(0, formContent.length()-1);
    }
   	return formContent;
+  }
+  
+  public void generateBlockContent(String linkedDataFieldName, String linkedDataFormFieldName) {
+    String LDNameReg = "LinkedData1";
+    String LDFormNameReg = "LinkedDataFormECCCEH";
+    
+    String contentPart = 
+    "<block type=\"local_declaration_statement\" id=\"143\" inline=\"false\" x=\"-5\" y=\"-320\">"+
+    "<mutation>"+
+      "<localname name=\"isAddDataFromLDSuccessful\"></localname>"+
+    "</mutation>"+
+    "<field name=\"VAR0\">isAddDataFromLDSuccessful</field>"+
+    "<value name=\"DECL0\">"+
+      "<block type=\"component_method\" id=\"60\" inline=\"false\">"+
+        "<mutation component_type=\"LinkedData\" method_name=\"AddDataFromLinkedDataForm\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>"+
+        "<field name=\"COMPONENT_SELECTOR\">LinkedData1</field>"+
+        "<value name=\"ARG0\">"+
+          "<block type=\"component_component_block\" id=\"98\">"+
+            "<mutation component_type=\"LinkedDataForm\" instance_name=\"LinkedDataFormECCCEH\"></mutation>"+
+            "<field name=\"COMPONENT_SELECTOR\">LinkedDataFormECCCEH</field>"+
+          "</block>"+
+        "</value>"+
+      "</block>"+
+    "</value>"+
+    "<statement name=\"STACK\">"+
+      "<block type=\"component_method\" id=\"30\" inline=\"false\">"+
+        "<mutation component_type=\"LinkedData\" method_name=\"AddDataToWeb\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>"+
+        "<field name=\"COMPONENT_SELECTOR\">LinkedData1</field>"+
+        "<value name=\"ARG0\">"+
+          "<block type=\"text\" id=\"159\">"+
+            "<field name=\"TEXT\"></field>"+
+          "</block>"+
+        "</value>"+
+        "<value name=\"ARG1\">"+
+          "<block type=\"logic_boolean\" id=\"166\">"+
+            "<field name=\"BOOL\">TRUE</field>"+
+          "</block>"+
+        "</value>"+
+       "</block>"+
+     "</statement>"+
+   "</block>";
+   contentPart = contentPart.replace(LDNameReg, linkedDataFieldName);
+   contentPart = contentPart.replace(LDFormNameReg, linkedDataFormFieldName);
   }
   
   // 6 random letters &/ numbers
