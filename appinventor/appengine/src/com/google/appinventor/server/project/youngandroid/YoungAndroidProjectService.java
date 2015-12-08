@@ -67,6 +67,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -562,6 +563,10 @@ public final class YoungAndroidProjectService extends CommonProjectService {
           String newString = formFileContents.replace("#|", "");
           newString = newString.replace("$JSON", "");
           newString = newString.replace("|#", "");
+          
+          String LDName = "";
+          String LDFieldName = "";
+          
           try {
             JSONObject originalObj = new JSONObject(newString);
             JSONObject originalObj2 = (JSONObject) originalObj.get("Properties");
@@ -570,19 +575,23 @@ public final class YoungAndroidProjectService extends CommonProjectService {
             JSONArray originalObj3;
             
             try {
-              originalObj3 = (JSONArray) originalObj2.get("$Components");            	
+              originalObj3 = (JSONArray) originalObj2.get("$Components");
             } catch (JSONException e) {
             	originalObj3 = new JSONArray();
             }
 
-            LOG.info("The generateFormContent " + generateFormContent(uriCollection));
-            JSONObject formObj = new JSONObject(generateFormContent(uriCollection));
+            List<String> returns = generateFormContent(uriCollection);
+            String formContent = returns.get(0);
+            LDFieldName = returns.get(1);
+            LOG.info("The generateFormContent " + formContent);
+            JSONObject formObj = new JSONObject(formContent);
             
             JSONArray tmpObj = (JSONArray) formObj.get("$Components");
             originalObj3.put(originalObj3.length(), tmpObj.get(0));
             
-            List<String> returns = generateLDContent();
+            returns = generateLDContent();
             String LDContent = returns.get(0);
+            LDName = returns.get(1);
             LOG.info("The generateLDContent " + LDContent);
             formObj = new JSONObject(LDContent);
             
@@ -602,6 +611,33 @@ public final class YoungAndroidProjectService extends CommonProjectService {
           
           long uploadResult = storageIo.uploadFileForce(projectId, targetFormFileName, userId, formFileContents,
               StorageUtil.DEFAULT_CHARSET);
+          
+          String blkFileContents = load(userId, projectId, targetBlocklyFileName);
+          LOG.info("The original blk content is \n"+ blkFileContents);
+
+          String[] lines = blkFileContents.split("\\r?\\n");
+          String lastLine1 = lines[lines.length-1];
+          String lastLine2 = lines[lines.length-2];
+          List<String> allLinesPart1 = Arrays.asList(lines).subList(0, lines.length-2);
+
+          String[] tempBlkContent = generateBlockContent("LinkedData"+LDName, "LinkedDataForm"+LDFieldName);
+          List<String> allLinesPart2 = Arrays.asList(tempBlkContent);
+
+          List<String> allLines = new ArrayList<String>();
+          allLines.addAll(allLinesPart1);
+          allLines.addAll(allLinesPart2);
+          allLines.add(lastLine2);
+          allLines.add(lastLine1);
+          
+          String finalBlkContent = allLines.toString();
+          finalBlkContent = finalBlkContent.replace(",", "\n");
+          finalBlkContent = finalBlkContent.replace("[", "");
+          finalBlkContent = finalBlkContent.replace("]", "");
+          
+          LOG.info("The new blk content is \n"+ finalBlkContent);
+          uploadResult = storageIo.uploadFileForce(projectId, targetBlocklyFileName, userId, finalBlkContent,
+              StorageUtil.DEFAULT_CHARSET);
+          
           return uploadResult;
       } else {
           throw new IllegalStateException("One or more files to be copied don't exist.");
@@ -635,7 +671,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     return returns;
   }
   
-  public String generateFormContent(List<String> uriCollection) {
+  public List<String> generateFormContent(List<String> uriCollection) {
     String contentPart1 = 
     "{"+
       "\"$Components\": ["+
@@ -697,7 +733,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String tableUUIDRegex = "$tableUUID$"; 
     String tableRowNumRegex = "$tableRowNum$"; 
 
-    contentPart1 = contentPart1.replace(formIDRegex, generateRandomLetterOrNum());
+    String tempFormID = generateRandomLetterOrNum();
+    contentPart1 = contentPart1.replace(formIDRegex, tempFormID);
     contentPart1 = contentPart1.replace(formUUIDRegex, System.currentTimeMillis()+"");
     contentPart1 = contentPart1.replace(formTimestampRegex, System.currentTimeMillis()+"");
 
@@ -707,7 +744,12 @@ public final class YoungAndroidProjectService extends CommonProjectService {
 
     String textBoxUri = "http:\\/\\/xmlns.com\\/foaf\\/0.1\\/lastName";
     String formContent = generateLabelTextbox(uriCollection, contentPart3, contentPart4);
-    return contentPart1 + contentPart2 + formContent + contentPart6;
+    String returnPart1 = contentPart1 + contentPart2 + formContent + contentPart6;
+    
+    List<String> returns = new ArrayList<String>(); 
+    returns.add(returnPart1);
+    returns.add(tempFormID);
+    return returns;
   }
   
   public String generateLabelTextbox(List<String> uriCollection, String contentPart3, String contentPart4) {
@@ -756,47 +798,52 @@ public final class YoungAndroidProjectService extends CommonProjectService {
   	return formContent;
   }
   
-  public void generateBlockContent(String linkedDataFieldName, String linkedDataFormFieldName) {
+  public String[] generateBlockContent(String linkedDataFieldName, String linkedDataFormFieldName) {
     String LDNameReg = "LinkedData1";
     String LDFormNameReg = "LinkedDataFormECCCEH";
     
     String contentPart = 
-    "<block type=\"local_declaration_statement\" id=\"143\" inline=\"false\" x=\"-5\" y=\"-320\">"+
-    "<mutation>"+
-      "<localname name=\"isAddDataFromLDSuccessful\"></localname>"+
-    "</mutation>"+
-    "<field name=\"VAR0\">isAddDataFromLDSuccessful</field>"+
-    "<value name=\"DECL0\">"+
-      "<block type=\"component_method\" id=\"60\" inline=\"false\">"+
-        "<mutation component_type=\"LinkedData\" method_name=\"AddDataFromLinkedDataForm\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>"+
-        "<field name=\"COMPONENT_SELECTOR\">LinkedData1</field>"+
-        "<value name=\"ARG0\">"+
-          "<block type=\"component_component_block\" id=\"98\">"+
-            "<mutation component_type=\"LinkedDataForm\" instance_name=\"LinkedDataFormECCCEH\"></mutation>"+
-            "<field name=\"COMPONENT_SELECTOR\">LinkedDataFormECCCEH</field>"+
-          "</block>"+
-        "</value>"+
-      "</block>"+
-    "</value>"+
-    "<statement name=\"STACK\">"+
-      "<block type=\"component_method\" id=\"30\" inline=\"false\">"+
-        "<mutation component_type=\"LinkedData\" method_name=\"AddDataToWeb\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>"+
-        "<field name=\"COMPONENT_SELECTOR\">LinkedData1</field>"+
-        "<value name=\"ARG0\">"+
-          "<block type=\"text\" id=\"159\">"+
-            "<field name=\"TEXT\"></field>"+
-          "</block>"+
-        "</value>"+
-        "<value name=\"ARG1\">"+
-          "<block type=\"logic_boolean\" id=\"166\">"+
-            "<field name=\"BOOL\">TRUE</field>"+
-          "</block>"+
-        "</value>"+
-       "</block>"+
-     "</statement>"+
-   "</block>";
-   contentPart = contentPart.replace(LDNameReg, linkedDataFieldName);
-   contentPart = contentPart.replace(LDFormNameReg, linkedDataFormFieldName);
+    " <block type=\"local_declaration_statement\" id=\"143\" inline=\"false\" x=\"-5\" y=\"-320\">\n"+
+    " <mutation>\n"+
+    "   <localname name=\"isAddDataFromLDSuccessful\"></localname>\n"+
+    " </mutation>\n"+
+    " <field name=\"VAR0\">isAddDataFromLDSuccessful</field>\n"+
+    " <value name=\"DECL0\">\n"+
+    "   <block type=\"component_method\" id=\"60\" inline=\"false\">\n"+
+    "     <mutation component_type=\"LinkedData\" method_name=\"AddDataFromLinkedDataForm\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>\n"+
+    "     <field name=\"COMPONENT_SELECTOR\">LinkedData1</field>\n"+
+    "     <value name=\"ARG0\">\n"+
+    "       <block type=\"component_component_block\" id=\"98\">\n"+
+    "         <mutation component_type=\"LinkedDataForm\" instance_name=\"LinkedDataFormECCCEH\"></mutation>\n"+
+    "         <field name=\"COMPONENT_SELECTOR\">LinkedDataFormECCCEH</field>\n"+
+    "       </block>\n"+
+    "     </value>\n"+
+    "   </block>\n"+
+    " </value>\n"+
+    " <statement name=\"STACK\">\n"+
+    "   <block type=\"component_method\" id=\"30\" inline=\"false\">\n"+
+    "     <mutation component_type=\"LinkedData\" method_name=\"AddDataToWeb\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>\n"+
+    "     <field name=\"COMPONENT_SELECTOR\">LinkedData1</field>\n"+
+    "     <value name=\"ARG0\">\n"+
+    "       <block type=\"text\" id=\"159\">\n"+
+    "         <field name=\"TEXT\"></field>\n"+
+    "       </block>\n"+
+    "     </value>\n"+
+    "     <value name=\"ARG1\">\n"+
+    "       <block type=\"logic_boolean\" id=\"166\">\n"+
+    "         <field name=\"BOOL\">TRUE</field>\n"+
+    "       </block>\n"+
+    "     </value>\n"+
+    "    </block>\n"+
+    "  </statement>\n"+
+    " </block>";
+    
+    contentPart = contentPart.replace(LDNameReg, linkedDataFieldName);
+    contentPart = contentPart.replace(LDFormNameReg, linkedDataFormFieldName);
+    LOG.info("The blk LD content is \n" + contentPart);
+    
+    String[] lines = contentPart.split("\\r?\\n");
+    return lines;
   }
   
   // 6 random letters &/ numbers
