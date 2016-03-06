@@ -30,6 +30,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,6 +120,9 @@ public class BlocklyPanel extends HTMLPanel {
 
   // Status of blocks loading, indexed by form name.
   private static final Map<String, LoadStatus> loadStatusMap = Maps.newHashMap();
+
+  // Blockly backpack
+  private static String backpack = "[]";
 
   // My form name
   private String formName;
@@ -226,6 +231,13 @@ public class BlocklyPanel extends HTMLPanel {
   // no componentOps entry exists for formName).
   public static boolean blocksInited(String formName) {
     return !componentOps.containsKey(formName);
+  }
+
+  public static String getBackpack() {
+    return backpack;
+  }
+  public static void setBackpack(String bp_contents) {
+    backpack = bp_contents;
   }
 
   /**
@@ -540,7 +552,7 @@ public class BlocklyPanel extends HTMLPanel {
   // [lyn, 2014/10/28] Handle these cases
   public String getFormJson() {
     if (blocksInited(formName)) {
-      return myBlocksEditor.encodeFormAsJsonString();
+      return myBlocksEditor.encodeFormAsJsonString(true);
     } else {
       // in case someone clicks Save before the blocks area is inited
       String formJson = pendingFormJsonMap.get(formName);
@@ -760,6 +772,22 @@ public class BlocklyPanel extends HTMLPanel {
     doSwitchLanguage(formName, languageSetting);
   }
 
+  /**
+   * Trigger and Update of the Companion if the Companion is connected
+   * and an update is available. Note: We do not compare the currently
+   * running Companion's version against the version we are going to load
+   * we just do it. If YaVersion.COMPANION_UPDATE_URL is "", then no
+   * Update is available.
+   */
+
+  public void updateCompanion() {
+    updateCompanion(formName);
+  }
+
+  public static void updateCompanion(String formName) {
+    doUpdateCompanion(formName);
+  }
+
   public static String getLocalizedPropertyName(String key) {
     return ComponentsTranslation.getPropertyName(key);
   }
@@ -838,6 +866,10 @@ public class BlocklyPanel extends HTMLPanel {
         $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getLocalizedEventName(Ljava/lang/String;));
     $wnd.BlocklyPanel_getLocalizedComponentType =
         $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getLocalizedComponentType(Ljava/lang/String;));
+    $wnd.BlocklyPanel_getBackpack =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getBackpack());
+    $wnd.BlocklyPanel_setBackpack =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::setBackpack(Ljava/lang/String;));
   }-*/;
 
   private native void initJS() /*-{
@@ -970,6 +1002,10 @@ public class BlocklyPanel extends HTMLPanel {
    */
   public static native void doSwitchLanguage(String formName, String language) /*-{
     $wnd.Blocklies[formName].language_switch.switchLanguage(language);
+  }-*/;
+
+  public static native void doUpdateCompanion(String formName) /*-{
+    $wnd.Blocklies[formName].ReplMgr.triggerUpdate();
   }-*/;
 
   public static native String getURL() /*-{

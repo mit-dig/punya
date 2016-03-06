@@ -12,6 +12,7 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
@@ -44,6 +45,7 @@ import java.util.UUID;
    nonVisible = true,
    iconName = "images/camera.png")
 @SimpleObject
+@UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE, android.permission.READ_EXTERNAL_STORAGE")
 public class Camera extends AndroidNonvisibleComponent
     implements ActivityResultListener, Component {
 
@@ -66,7 +68,35 @@ public class Camera extends AndroidNonvisibleComponent
     super(container.$form());
     this.container = container;
     this.localStorageFolder = Environment.getExternalStorageDirectory() + "/Pictures/";
- 
+
+    // Default property values
+    UseFront(false);
+  }
+
+  /**
+   * Returns true if the front-facing camera is to be used (when available)
+   *
+   * @return {@code true} indicates front-facing is to be used, {@code false} will open default
+   */
+  @Deprecated
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public boolean UseFront() {
+    return false;
+  }
+
+  /**
+   * Specifies whether the front-facing camera should be used (when available)
+   *
+   * @param front
+   *          {@code true} for front-facing camera, {@code false} for default
+   */
+  @Deprecated
+  // Hide the deprecated property from the Designer
+  //  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
+  @SimpleProperty(description = "Specifies whether the front-facing camera should be used (when available). "
+    + "If the device does not have a front-facing camera, this option will be ignored "
+    + "and the camera will open normally.")
+  public void UseFront(boolean front) {
   }
 
   /**
@@ -79,7 +109,7 @@ public class Camera extends AndroidNonvisibleComponent
 
     if (Environment.MEDIA_MOUNTED.equals(state)) {
       Log.i("CameraComponent", "External storage is available and writable");
-      
+
       String uuid = UUID.randomUUID().toString();
       imageFile = Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
         "/Pictures/app_inventor_" + date.getTime()
@@ -115,6 +145,7 @@ public class Camera extends AndroidNonvisibleComponent
     if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK) {
       File image = new File(imageFile.getPath());
       if (image.length() != 0) {
+        scanFileToAdd(image);
         AfterPicture(imageFile.toString());
       } else {
         deleteFile(imageFile);  // delete empty file
@@ -142,6 +173,19 @@ public class Camera extends AndroidNonvisibleComponent
     deleteFile(imageUri);
   }
 
+  /**
+   * Scan the newly added picture to be displayed in a default media content provider
+   * in a device (e.g. Gallery, Google Photo, etc..)
+   *
+   * @param image the picture taken by Camera component
+   */
+  private void scanFileToAdd(File image) {
+    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+    Uri contentUri = Uri.fromFile(image);
+    mediaScanIntent.setData(contentUri);
+    container.$context().getApplicationContext().sendBroadcast(mediaScanIntent);
+  }
+
   private void deleteFile(Uri fileUri) {
     File fileToDelete = new File(fileUri.getPath());
     try {
@@ -164,8 +208,7 @@ public class Camera extends AndroidNonvisibleComponent
   public void AfterPicture(String image) {
     EventDispatcher.dispatchEvent(this, "AfterPicture", image);
   }
-  
-  
+
   /*
    * Indicate the folder(directory) in which the photo is stored locally
    */
@@ -174,6 +217,6 @@ public class Camera extends AndroidNonvisibleComponent
     , category = PropertyCategory.BEHAVIOR )
   public String LocalStorageFolder(){
     return this.localStorageFolder;
-    
+
   }
 }

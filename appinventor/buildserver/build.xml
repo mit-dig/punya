@@ -71,6 +71,11 @@
     <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-3.0.5.jar" />
     <copy toFile="${classes.files.dir}/twitter4jmedia.jar" file="${lib.dir}/twitter/twitter4j-media-support-3.0.5.jar" />
     <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
+    <copy toFile="${classes.files.dir}/httpcore-4.3.2.jar" file="${lib.dir}/apache-http/httpcore-4.3.2.jar" />
+    <copy toFile="${classes.files.dir}/httpmime-4.3.4.jar" file="${lib.dir}/apache-http/httpmime-4.3.4.jar" />
+    <copy toFile="${classes.files.dir}/firebase.jar" file="${lib.dir}/firebase/firebase-client-android-2.5.0.jar" />
+    <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
+    <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-api-client-android2-beta.jar" file="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android2-beta.jar" file="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
@@ -108,7 +113,9 @@
     <copy toFile="${classes.files.dir}/android-support-v4.jar" file="${lib.dir}/android_support/android-support-v4.jar" />
 	<!-- below three are for the dropbox -->
     <copy toFile="${classes.files.dir}/dropbox.jar" file="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
-    <copy toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar" file="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
+<!--    <copy
+toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar"
+file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
     <copy toFile="${classes.files.dir}/json-simple.jar" file="${lib.dir}/dropbox/json_simple-1.1.jar" /> 
     <!-- above three are for dropbox -->   
     

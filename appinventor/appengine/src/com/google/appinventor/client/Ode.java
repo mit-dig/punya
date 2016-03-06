@@ -129,11 +129,6 @@ public class Ode implements EntryPoint {
   // I18n messages
   public static final OdeMessages MESSAGES = GWT.create(OdeMessages.class);
 
-  /**
-   * The base URL for App Inventor documentation.
-   */
-  public static final String APP_INVENTOR_DOCS_URL = "";
-
   // Global instance of the Ode object
   private static Ode instance;
 
@@ -145,6 +140,9 @@ public class Ode implements EntryPoint {
 
   // Command registry
   private static final CommandRegistry COMMANDS = new CommandRegistry();
+
+  // System config
+  private static Config config;
 
   // User settings
   private static UserSettings userSettings;
@@ -295,6 +293,15 @@ public class Ode implements EntryPoint {
   }
 
   /**
+   * Returns the system config.
+   *
+   * @return  system config
+   */
+  public static Config getSystemConfig() {
+    return config;
+  }
+
+  /**
    * Returns the user settings.
    *
    * @return  user settings
@@ -328,7 +335,7 @@ public class Ode implements EntryPoint {
         if(gallerySettings.galleryEnabled() == true){
           ProjectListBox.getProjectListBox().getProjectList().setPublishedHeaderVisible(true);
           projectToolbar.setPublishOrUpdateButtonVisible(true);
-          GalleryClient.getInstance().setSystemEnvironmet(settings.getEnvironment());
+          GalleryClient.getInstance().setSystemEnvironment(settings.getEnvironment());
           GalleryListBox.loadGalleryList();
           topPanel.showGalleryLink(true);
           if(user.isModerator()){
@@ -383,6 +390,11 @@ public class Ode implements EntryPoint {
     currentView = PROJECTS;
     getTopToolbar().updateFileMenuButtons(currentView);
     deckPanel.showWidget(projectsTabIndex);
+    // If we started a project, then the start button was disabled (to avoid
+    // a second press while the new project wizard was starting (aka we "debounce"
+    // the button). When the person switches to the projects list view again (here)
+    // we re-enable it.
+    projectToolbar.enableStartButton();
   }
 
   /**
@@ -639,6 +651,7 @@ public class Ode implements EntryPoint {
 
       @Override
       public void onSuccess(Config result) {
+        config = result;
         user = result.getUser();
         // If user hasn't accepted terms of service, ask them to.
         if (!user.getUserTosAccepted()) {
@@ -1318,7 +1331,7 @@ public class Ode implements EntryPoint {
    */
   public DialogBox createNoProjectsDialog(boolean showDialog) {
     // Create the UI elements of the DialogBox
-    final DialogBox dialogBox = new DialogBox(true);
+    final DialogBox dialogBox = new DialogBox(true, false); //DialogBox(autohide, modal)
     dialogBox.setStylePrimaryName("ode-DialogBox");
     dialogBox.setText(MESSAGES.createNoProjectsDialogText());
     Grid mainGrid = new Grid(2, 2);
@@ -1869,6 +1882,46 @@ public class Ode implements EntryPoint {
     HTML message = new HTML("<iframe src=\"" + Url + "\" style=\"border: 0; width: 680px; height: 660px;\"></iframe>");
     message.setStyleName("DialogBox-message");
     DialogBoxContents.add(message);
+    dialogBox.setWidget(DialogBoxContents);
+    dialogBox.show();
+  }
+
+  /**
+   * Display a generic warning dialog box.
+   * This method is public because it is intended to be used from other
+   * parts of the client GWT side system.
+   *
+   * Note: We expect our caller to internationalize the messages to be
+   * displayed.
+   *
+   * @param title The title for the dialog box
+   * @param message The message to display
+   * @param buttonString the name of the button, i.e., "OK"
+   */
+
+  public void warningDialog(String title, String messageString, String buttonString) {
+    // Create the UI elements of the DialogBox
+    final DialogBox dialogBox = new DialogBox(false, true); // DialogBox(autohide, modal)
+    dialogBox.setStylePrimaryName("ode-DialogBox");
+    dialogBox.setText(title);
+    dialogBox.setHeight("100px");
+    dialogBox.setWidth("400px");
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(true);
+    dialogBox.center();
+    VerticalPanel DialogBoxContents = new VerticalPanel();
+    HTML message = new HTML("<p>" + messageString + "</p>");
+    message.setStyleName("DialogBox-message");
+    FlowPanel holder = new FlowPanel();
+    Button okButton = new Button(buttonString);
+    okButton.addClickListener(new ClickListener() {
+        public void onClick(Widget sender) {
+          dialogBox.hide();
+        }
+      });
+    holder.add(okButton);
+    DialogBoxContents.add(message);
+    DialogBoxContents.add(holder);
     dialogBox.setWidget(DialogBoxContents);
     dialogBox.show();
   }

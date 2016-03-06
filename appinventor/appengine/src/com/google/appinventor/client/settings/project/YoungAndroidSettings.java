@@ -31,6 +31,9 @@ public final class YoungAndroidSettings extends Settings {
         SettingsConstants.YOUNG_ANDROID_SETTINGS_SHOW_HIDDEN_COMPONENTS,
         "False", null, EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_PHONE_TABLET,
+        "False", null, EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_CODE, "1", null,
         EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
@@ -44,6 +47,9 @@ public final class YoungAndroidSettings extends Settings {
         EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_APP_NAME, "", null,
+        EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_SIZING, "Fixed", null,
         EditableProperty.TYPE_INVISIBLE));
   }
 }

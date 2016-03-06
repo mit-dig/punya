@@ -33,11 +33,23 @@ public final class EditableProperty extends Property {
    */
   public static final int TYPE_INVISIBLE = 0x02;
 
+  /**
+   * Properties of this type will be included in a yail generation
+   * even if they are not persisted. This is used for computed properties
+   * which aren't stored, but which must be passed to a component both
+   * in the Companion and when built. Example: The FirebaseToken and
+   * deveoperId which are computed on the fly by MockFirebaseDB but
+   * which are not persisted for security reasons. Yet we still need
+   * to output them in the Yail.
+   */
+
+  public static final int TYPE_DOYAIL = 0x04;
+
   // EditableProperties that contains this EditableProperty
   private final EditableProperties properties;
 
   // Type of property
-  private final int type;
+  private int type;
 
   // Property editor for use in properties panel
   private final PropertyEditor editor;
@@ -103,6 +115,11 @@ public final class EditableProperty extends Property {
     return (type & TYPE_INVISIBLE) == 0;
   }
 
+  @Override
+  protected final boolean isYail() {
+    return (type & TYPE_DOYAIL) != 0;
+  }
+
   /**
    * {@inheritDoc}
    *
@@ -148,4 +165,13 @@ public final class EditableProperty extends Property {
   public String getDescription() {
     return description;
   }
+
+  public int getType() {
+    return type;
+  }
+
+  public void setType(int aType) {
+    this.type = aType;
+  }
+
 }

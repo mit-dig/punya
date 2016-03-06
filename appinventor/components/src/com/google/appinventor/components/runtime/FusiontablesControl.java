@@ -138,7 +138,9 @@ import java.util.ArrayList;
     "android.permission.ACCOUNT_MANAGER," +
     "android.permission.MANAGE_ACCOUNTS," +
     "android.permission.GET_ACCOUNTS," +
-    "android.permission.USE_CREDENTIALS")
+    "android.permission.USE_CREDENTIALS," +
+    "android.permission.WRITE_EXTERNAL_STORAGE," +
+    "android.permission.READ_EXTERNAL_STORAGE")
 @UsesLibraries(libraries =
     "fusiontables.jar," +
     "google-api-client-beta.jar," +
@@ -393,8 +395,10 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
 
   }
 
-//Deprecated  -- Won't work after 12/2012
-  @SimpleFunction(userVisible = false,
+  //Deprecated  -- Won't work after 12/2012
+  @Deprecated // [lyn, 2015/12/30] In AI2, now use explicit @Deprecated annotation rather than
+              // userVisible = false to deprecate an event, method, or property.
+  @SimpleFunction(
       description = "DEPRECATED. This block is deprecated as of the end of 2012.  Use SendQuery.")
   public void DoQuery() {
     if (requestHelper != null) {
@@ -807,7 +811,7 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
 
     @Override
     protected void onPreExecute() {
-      dialog.setMessage("Fusiontables...");
+      dialog.setMessage("Please wait loading...");
       dialog.show();
     }
 

@@ -18,6 +18,12 @@ import com.google.appinventor.common.utils.StringUtils;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.properties.json.JSONArray;
 import com.google.appinventor.shared.properties.json.JSONValue;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.Window;
 
 /**
@@ -245,6 +251,9 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("EmailPicker")) {
         srcCompVersion = upgradeEmailPickerProperties(componentProperties, srcCompVersion);
 
+      } else if (componentType.equals("File")) {
+        srcCompVersion = upgradeFileProperties(componentProperties, srcCompVersion);
+
       } else if (componentType.equals("Form")) {
         srcCompVersion = upgradeFormProperties(componentProperties, srcCompVersion);
 
@@ -253,6 +262,9 @@ public final class YoungAndroidFormUpgrader {
 
       } else if (componentType.equals("HorizontalArrangement")) {
         srcCompVersion = upgradeHorizontalArrangementProperties(componentProperties, srcCompVersion);
+
+      } else if (componentType.equals("Image")) {
+        srcCompVersion = upgradeImageProperties(componentProperties, srcCompVersion);
 
       } else if (componentType.equals("ImagePicker")) {
         srcCompVersion = upgradeImagePickerProperties(componentProperties, srcCompVersion);
@@ -427,6 +439,31 @@ public final class YoungAndroidFormUpgrader {
       // No properties need to be modified to upgrade to version 5.
       srcCompVersion = 5;
     }
+    if (srcCompVersion < 6) {
+      // Extras property was added to accept a list of key-value pairs to put to the intent
+      String defaultValue = "";
+      boolean sendWarning = false;
+
+      if (componentProperties.containsKey("ExtraKey")) {
+        String extraKeyValue = componentProperties.get("ExtraKey").asString().getString();
+        if (!extraKeyValue.equals(defaultValue)) {
+          sendWarning = true;
+        }
+      }
+
+      if (componentProperties.containsKey("ExtraValue")) {
+        String extraValueValue = componentProperties.get("ExtraValue").asString().getString();
+        if (!extraValueValue.equals(defaultValue)) {
+          sendWarning = true;
+        }
+      }
+
+      if (sendWarning) {
+        Window.alert(MESSAGES.extraKeyValueWarning());
+      }
+
+      srcCompVersion = 6;
+    }
     return srcCompVersion;
   }
 
@@ -533,6 +570,11 @@ public final class YoungAndroidFormUpgrader {
       // the Language designer property was changed to use a ChoicePropertyEditor
       srcCompVersion = 4;
     }
+    if (srcCompVersion < 5) {
+      // default value was added to the Country designer property
+      // default value was added to the Language designer property
+      srcCompVersion = 5;
+    }
     return srcCompVersion;
   }
 
@@ -574,6 +616,15 @@ public final class YoungAndroidFormUpgrader {
       // The UseFront property was added.
       // No properties need to be modified to upgrade to version 2.
       srcCompVersion = 2;
+    }
+    if (srcCompVersion < 3) {
+      // The UseFront property was removed, it isn't supported in
+      // newer versions of Android
+      if (componentProperties.containsKey("UseFront")) {
+        componentProperties.remove("UseFront");
+        upgradeWarnDialog(MESSAGES.useFrontDeprecated());
+      }
+      srcCompVersion = 3;
     }
     return srcCompVersion;
   }
@@ -645,10 +696,12 @@ public final class YoungAndroidFormUpgrader {
 
   private static int upgradeClockProperties(Map<String, JSONValue> componentProperties,
     int srcCompVersion) {
-    if (srcCompVersion < 2) {
-      // The FormatDate and FormatDateTime methods were modified to take another parameter of pattern.
+    if (srcCompVersion < 3) {
+      // (2) The FormatDate and FormatDateTime methods were modified to take another parameter of pattern.
       // No properties need to be modified to upgrade to version 2.
-      srcCompVersion = 2;
+      // (3) Duration Support was added
+      // No properties need to be added to upgrade to version 3.
+      srcCompVersion = 3;
     }
     return srcCompVersion;
   }
@@ -675,6 +728,11 @@ public final class YoungAndroidFormUpgrader {
       // For Eclair and up, we now use ContactsContract instead of the deprecated Contacts.
       srcCompVersion = 5;
     }
+    if (srcCompVersion < 6) {
+      // The ContactUri property was added.
+      // No properties need to be modified to upgrade to version 6.
+      srcCompVersion = 6;
+    }
     return srcCompVersion;
   }
 
@@ -684,6 +742,11 @@ public final class YoungAndroidFormUpgrader {
       // The SetDateToDisplay and LaunchPicker methods were added.
       // No properties need to be modified to upgrade to version 2.
       srcCompVersion = 2;
+    }
+    if (srcCompVersion < 3) {
+      // SetDateToDisplayFromInstant, and Instant property are added.
+      // No properties need to be modified to upgrade to version 3.
+      srcCompVersion = 3;
     }
     return srcCompVersion;
   }
@@ -702,6 +765,16 @@ public final class YoungAndroidFormUpgrader {
       handlePropertyRename(componentProperties, "ConceptURI", "ObjectType");
       // Properties related to this component have now been upgraded to version 3.
       srcCompVersion = 3;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeFileProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if(srcCompVersion < 2) {
+      // File.AfterFileSaved event was added.
+      // No properties need to be modified to upgrade to version 2.
+      srcCompVersion = 2;
     }
     return srcCompVersion;
   }
@@ -798,15 +871,42 @@ public final class YoungAndroidFormUpgrader {
       }
       srcCompVersion = 13;
     }
-    if (srcCompVersion < 14) {
+
+    if (srcCompVersion < 15) {
       // The AppName property was added.
-      srcCompVersion = 14;
+      // The Compatibility Mode property was added. No properties need to be modified to update to
+      // version 7.
+      srcCompVersion = 15;
     }
     if (srcCompVersion < 16) {
       // The ShowStatusBar property was added.
       // The TitleVisible property was added.
       srcCompVersion = 16;
     }
+    if (srcCompVersion < 17) {
+      // The CompatibilityMode property was added
+      // When upgrading projects, turn on Compatbility Mode
+      // NOTE: This change never saw production, but was on various
+      // Test Instances
+      componentProperties.put("CompatibilityMode", new ClientJsonString("True"));
+      srcCompVersion = 17;
+    }
+
+    if (srcCompVersion < 18) {
+      // Compatilibity Mode property turned into the Sizing property
+      if (componentProperties.containsKey("CompatibilityMode")) {
+        componentProperties.remove("CompatibilityMode");
+      } else {
+        componentProperties.put("Sizing", new ClientJsonString("Responsive"));
+      }
+      srcCompVersion = 18;
+    }
+
+    if (srcCompVersion < 19) {
+      // Added HideKeyboard
+      srcCompVersion = 19;
+    }
+
     return srcCompVersion;
   }
 
@@ -833,6 +933,32 @@ public final class YoungAndroidFormUpgrader {
       // The AlignHorizontal and AlignVertical properties were added. No blocks need to be modified
       // to upgrqde to version 2.
       srcCompVersion = 2;
+    }
+    if (srcCompVersion < 3) {
+      // - Added background color & image
+      srcCompVersion = 3;
+    }
+    return srcCompVersion;
+  }
+
+  private static int upgradeImageProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if (srcCompVersion < 2) {
+      // The RotationAngle property was added.
+      // No properties need to be modified to upgrade to version 2.
+      srcCompVersion = 2;
+    }
+    if (srcCompVersion < 3) {
+      // ScalePictureToFit was replaced by Scaling property
+      // Note: We will do this upgrade in a future release (jis: 2/12/2016)
+      // if (componentProperties.containsKey("ScalePictureToFit")) {
+      //   JSONValue propValue = componentProperties.remove("ScalePictureToFit");
+      //   if (propValue.asString().getString().equals("True")) {
+      //     // 1 corresponds to Scale to fit
+      //     componentProperties.put("Scaling", new ClientJsonString("1"));
+      //   }
+      // }
+      srcCompVersion = 3;
     }
     return srcCompVersion;
   }
@@ -1158,6 +1284,11 @@ public final class YoungAndroidFormUpgrader {
       // No properties need to be modified to upgrade to version 2.
       srcCompVersion = 2;
     }
+    if (srcCompVersion < 3) {
+      // SetTimeToDisplayFromInstant, and Instant property are added.
+      // No properties need to be modified to upgrade to version 3.
+      srcCompVersion = 3;
+    }
     return srcCompVersion;
   }
 
@@ -1177,6 +1308,10 @@ public final class YoungAndroidFormUpgrader {
       // The AlignHorizontal and AlignVertical properties were added. No blocks need to be modified
       // to upgrqde to version 2.
       srcCompVersion = 2;
+    }
+    if (srcCompVersion < 3) {
+      // - Added background color & image
+      srcCompVersion = 3;
     }
     return srcCompVersion;
   }
@@ -1372,5 +1507,27 @@ public final class YoungAndroidFormUpgrader {
     }
   }
 
+  private static void upgradeWarnDialog(String aMessage) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setStylePrimaryName("ode-DialogBox");
+    dialogBox.setText(MESSAGES.warningDialogTitle());
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(true);
+    final HTML message = new HTML(aMessage);
+    message.setStyleName("DialogBox-message");
+    VerticalPanel vPanel = new VerticalPanel();
+    Button okButton = new Button("OK");
+    okButton.addClickListener(new ClickListener() {
+        @Override
+        public void onClick(Widget sender) {
+          dialogBox.hide();
+        }
+      });
+    vPanel.add(message);
+    vPanel.add(okButton);
+    dialogBox.setWidget(vPanel);
+    dialogBox.center();
+    dialogBox.show();
+  }
 
 }

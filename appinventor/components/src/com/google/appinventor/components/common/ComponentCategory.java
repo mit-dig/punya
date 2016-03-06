@@ -26,7 +26,7 @@ public enum ComponentCategory{
   CLOUDSTORAGE("Cloud Storage"),
   LINKEDDATA("Linked Data"),
   LEGOMINDSTORMS("LEGO\u00AE MINDSTORMS\u00AE"),
-
+  EXPERIMENTAL("Experimental"),
   //OBSOLETE("Old stuff"),// removed to remove old stuff from the menu
   INTERNAL("For internal use only"),
   // UNINITIALIZED is used as a default value so Swing libraries can still compile
@@ -47,7 +47,7 @@ public enum ComponentCategory{
     DOC_MAP.put("Connectivity", "connectivity");
     DOC_MAP.put("LEGO\u00AE MINDSTORMS\u00AE", "legomindstorms");
     DOC_MAP.put("Semantic Web", "semanticweb");
-    //DOC_MAP.put("Experimental", "experimental");
+    DOC_MAP.put("Experimental", "experimental");
   }
 
     private String name;

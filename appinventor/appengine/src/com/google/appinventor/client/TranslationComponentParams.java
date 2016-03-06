@@ -192,6 +192,11 @@ public class TranslationComponentParams {
     map.put("translation", MESSAGES.translationParams());
     map.put("languageToTranslateTo", MESSAGES.languageToTranslateToParams());
     map.put("textToTranslate", MESSAGES.textToTranslateParams());
+    map.put("uri", MESSAGES.uriParams());
+    map.put("xAngularVelocity", MESSAGES.xAngularVelocityParams());
+    map.put("yAngularVelocity", MESSAGES.yAngularVelocityParams());
+    map.put("zAngularVelocity", MESSAGES.zAngularVelocityParams());
+    map.put("timestamp", MESSAGES.timestampParams());
     return map;
   }
 }

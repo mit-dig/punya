@@ -382,7 +382,8 @@
        (define (process-exception ex)
          (define-alias YailRuntimeError <com.google.appinventor.components.runtime.errors.YailRuntimeError>)
          ;; The call below is a no-op unless we are in the wireless repl
-         (com.google.appinventor.components.runtime.ReplApplication:reportError ex)
+;; Commented out -- we only send reports from the setting menu choice
+;;         (com.google.appinventor.components.runtime.ReplApplication:reportError ex)
          (if isrepl
              (when ((this):toastAllowed)
                    (begin (send-error (ex:getMessage))
@@ -748,9 +749,7 @@
         (set! (*:.global-var-environment *this-form*)
               (gnu.mapping.Environment:make (string-append
                                              (symbol->string form-name)
-                                             "-global-vars")))
-        ;; The REPL likes to have the form environment as a parent of the REPL environment
-        (*:addParent (KawaEnvironment:getCurrent) (*:.form-environment *this-form*)))
+                                             "-global-vars"))))
       (begin
         ;; The following is just for testing. In normal situations *this-form* should be non-null
         (set! *test-environment* (gnu.mapping.Environment:make 'test-env))
@@ -2185,7 +2184,7 @@ list, use the make-yail-list constructor with no arguments.
 (define (string-empty? text)
   (= 0 (string-length text)))
 
-(define (text-deobsfucate text confounder)
+(define (text-deobfuscate text confounder)
   (let ((lc confounder))
     (while (< (string-length lc) (string-length text))
            (set! lc (string-append lc lc)))
