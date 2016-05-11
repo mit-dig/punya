@@ -5038,6 +5038,20 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GoToUrlMethods();
 
+  // Graph component methods
+
+  @DefaultMessage("Graph SPARQL query")
+  @Description("")
+  String SPARQLqueryMethods();
+
+  @DefaultMessage("Graph Google Spreadsheet")
+  @Description("")
+  String GoogleSpreadsheetMethods();
+
+  @DefaultMessage("Graph CSV File")
+  @Description("")
+  String CSVstringMethods();
+
   @DefaultMessage("AppendToFile")
   @Description("")
   String AppendToFileMethods();
@@ -6005,6 +6019,12 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("MyLocationEnabled")
   @Description("Indicates whether my locaiton UI control is currently enabled for the Google map.")
   String MyLocationEnabledProperties();
+
+  // Graph componenet Properties
+  @DefaultMessage("Graph Information Properties")
+  @Description("Fine-tune what your graph looks like according to the options object in https://developers.google.com/chart/interactive/docs/customizing_charts")
+  String GraphInfoProperties();
+
 
   @DefaultMessage("RotateEnabled")
   @Description("Indicates whether the capability to rotate a map on the ui is currently enabled")

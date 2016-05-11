@@ -20,6 +20,7 @@ import com.google.appinventor.client.editor.simple.components.MockContactPicker;
 import com.google.appinventor.client.editor.simple.components.MockDatePicker;
 import com.google.appinventor.client.editor.simple.components.MockEmailPicker;
 import com.google.appinventor.client.editor.simple.components.MockFirebaseDB;
+import com.google.appinventor.client.editor.simple.components.MockGraph;
 import com.google.appinventor.client.editor.simple.components.MockHorizontalArrangement;
 import com.google.appinventor.client.editor.simple.components.MockImage;
 import com.google.appinventor.client.editor.simple.components.MockImagePicker;
@@ -360,6 +361,8 @@ public final class SimpleComponentDescriptor {
         return new MockSurvey(editor);  
     } else if (name.equals(MockGoogleMap.TYPE)){
       return new MockGoogleMap(editor);
+    } else if (name.equals(MockGraph.TYPE)){
+      return new MockGraph(editor);
     } else if (name.equals(MockLinkedDataForm.TYPE)) {
       return new MockLinkedDataForm(editor);
     } else if (name.equals(MockLinkedDataListPicker.TYPE)) {

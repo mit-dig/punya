@@ -514,6 +514,20 @@ public interface Images extends Resources {
   ImageResource googleMapBig();
   
   /**
+  * Designer palette item: Graph component
+  */
+  @Source("com/google/appinventor/images/graph.png")
+  ImageResource graph();
+
+  /**
+  * Designer item: Graph component in designer
+  *
+  */
+  @Source("com/google/appinventor/images/graphBig.png")
+  ImageResource graphBig();
+  
+
+  /**
    * Designer palette item: WifiSensor component
    */
   @Source("com/google/appinventor/images/wifiProbe.png")
