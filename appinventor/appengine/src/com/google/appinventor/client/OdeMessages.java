@@ -6021,9 +6021,9 @@ public interface OdeMessages extends Messages {
   String MyLocationEnabledProperties();
 
   // Graph componenet Properties
-  @DefaultMessage("Graph Information Properties")
-  @Description("Fine-tune what your graph looks like according to the options object in https://developers.google.com/chart/interactive/docs/customizing_charts")
-  String GraphInfoProperties();
+  // @DefaultMessage("Graph Information Properties")
+  // @Description("Fine-tune what your graph looks like according to the options object in https://developers.google.com/chart/interactive/docs/customizing_charts")
+  // String GraphInfoProperties();
 
 
   @DefaultMessage("RotateEnabled")

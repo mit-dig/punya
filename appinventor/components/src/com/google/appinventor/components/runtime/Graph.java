@@ -83,9 +83,6 @@ public final class Graph extends AndroidViewComponent {
   //path to javascript library uploaded by user
   private String jsLibraryPath = "";
 
-  // Graph settings
-  private String graphOptions = "";
-
   /**
    * Creates a new WebViewer component.
    *
@@ -169,25 +166,6 @@ public final class Graph extends AndroidViewComponent {
     super.Height(height);
   }
 
-  /**
-   * Specifies the graph's title, x, y Axis title, and other settings
-   * Example string input is "{'title': title, 'vAxis': { title: yAxisTitle, 'format': 'long'}, 
-   *  'hAxis': { title: xAxisTitle, 'format': 'long'}, 'width': width, 'height': height}""
-   * @param rotated  the rotation angle
-   */
-
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-      defaultValue = "")
-  @SimpleProperty
-  public void GraphInfo(String options) {
-    this.graphOptions = options;
-  }
-
-  @SimpleProperty(description = "Graph Y Axis title",
-      category = PropertyCategory.APPEARANCE)
-  public String GraphInfo() {
-    return graphOptions;
-  }
 
   /**
    * Returns the URL currently being viewed
@@ -264,17 +242,17 @@ public final class Graph extends AndroidViewComponent {
     }
 
   /*
-   *  Draw Google Chart
+   *  Draw using Google Chart
    */
   @SimpleFunction(description = "Add Google Chart based on Google spreadsheet url. If you don't know what query is, just leave it blank.")
   public void GoogleSpreadsheet(String url, String query, String chartType) {
     GoToUrl("http://mit-dig.github.io/punya-webservices/");
     String options = GraphInfo();
     String inputs = "'" + chartType + "','" + url + "','" + query + "'"; //document.body.innerHTML += '" + inputs + "'; 
-    String jsScript = "javascript: window.AppInventor.runMethod(GoogleSpreadsheet(" + inputs + ");"; //javascript:window.AppInventor.runMethod(GoogleSpreadsheet('AreaChart','https://docs.google.com/spreadsheets/d/1GkVebTN6fyu5-l2dUmGiZR9-WvXg1RSvgzlxnl73bFI/edit#gid=0', 'SELECT O,C,D,E,G where N =\"VI-2\"','{\"title\":\"Course 6 Enrollment\",\"vAxis\": {\"format\": \"########\", \"title\" : \"# of Students\"}, \"hAxis\": {\"format\": \"\", \"title\": \"Year\"}, \"width\" : 1000, \"height\":500}');
-    wvInterface.setJavascriptString(jsScript);
-    setupWebViewClient();
+    String jsScript = "javascript: document.body.innerHTML += '" + inputs + "'; window.AppInventor.runMethod(GoogleSpreadsheet(" + inputs + ");"; //javascript:window.AppInventor.runMethod(GoogleSpreadsheet('AreaChart','https://docs.google.com/spreadsheets/d/1GkVebTN6fyu5-l2dUmGiZR9-WvXg1RSvgzlxnl73bFI/edit#gid=0', 'SELECT O,C,D,E,G where N =\"VI-2\"','{\"title\":\"Course 6 Enrollment\",\"vAxis\": {\"format\": \"########\", \"title\" : \"# of Students\"}, \"hAxis\": {\"format\": \"\", \"title\": \"Year\"}, \"width\" : 1000, \"height\":500}');
+    // wvInterface.setJavascriptString(jsScript);
     webview.loadUrl(jsScript);
+    // setupWebViewClient();
   }
 
   /*
@@ -291,7 +269,7 @@ public final class Graph extends AndroidViewComponent {
   }
 
   /*
-   *  Draw CSVfile graph, using Sgvizler.
+   *  Draw CSVfile graph, using Google Charts.
    */
   @SimpleFunction(description = "Add CSV graph.")
   public void CSVstring(String csvString, String chartType) {
@@ -299,9 +277,9 @@ public final class Graph extends AndroidViewComponent {
     // String options = GraphInfo();
     String inputs = "'" + csvString + "','" + chartType + "'";
     String jsScript = "javascript: window.AppInventor.runMethod(CSVstring(" + inputs + "));";
-    wvInterface.setJavascriptString(jsScript);
+    // wvInterface.setJavascriptString(jsScript);
     webview.loadUrl(jsScript);
-    setupWebViewClient();
+    // setupWebViewClient();
   }
 
   /**
