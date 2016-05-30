@@ -208,50 +208,54 @@ public final class Graph extends AndroidViewComponent {
     if (SdkLevel.getLevel() >= SdkLevel.LEVEL_FROYO) {
       webview.setWebViewClient(FroyoUtil.getWebViewClient(ignoreSslErrors, followLinks, container.$form(), this));
     } else {
-      setupWebViewClient();  // webview.setWebViewClient(new WebViewerClient());
+      webview.setWebViewClient(new WebViewerClient()); //setupWebViewClient();
     }
   }
 
-  private void setupWebViewClient() {
+  // private void setupWebViewClient() {
 
-    webview.setWebViewClient(new WebViewClient() {
-        private int running = 0; // Could be public if you want a timer to check.
+  //   webview.setWebViewClient(new WebViewClient() {
+  //       private int running = 0; // Could be public if you want a timer to check.
 
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView webview, String urlNewString) {
-            running++;
-            webview.loadUrl(urlNewString);
-            return true;
-        }
+  //       @Override
+  //       public boolean shouldOverrideUrlLoading(WebView webview, String urlNewString) {
+  //           running++;
+  //           webview.loadUrl(urlNewString);
+  //           return true;
+  //       }
 
-        @Override
-        public void onPageStarted(WebView webview, String url, Bitmap favicon) {
-            running = Math.max(running, 1); // First request move it to 1.
-        }
+  //       @Override
+  //       public void onPageStarted(WebView webview, String url, Bitmap favicon) {
+  //           running = Math.max(running, 1); // First request move it to 1.
+  //       }
 
-        @Override
-        public void onPageFinished(WebView webview, String url) {
-            if(--running == 0) { // just "running--;" if you add a timer.
+  //       @Override
+  //       public void onPageFinished(WebView webview, String url) {
+  //           if(--running == 0) { // just "running--;" if you add a timer.
                 
-                // webview.loadUrl("javascript: document.body.innerHTML += 'We have reached onPageFinished!'; draw();");
-                wvInterface.onLoad();
-                // webview.loadUrl(jsScript);
-                // TODO: finished... if you want to fire a method.
-            }
-        }
-      });
-    }
+  //               // webview.loadUrl("javascript: document.body.innerHTML += 'We have reached onPageFinished!'; draw();");
+  //               // wvInterface.onLoad();
+  //               webview.loadUrl(jsScript);
+  //               // TODO: finished... if you want to fire a method.
+  //           }
+  //       }
+  //     });
+  //   }
 
   /*
    *  Draw using Google Chart
    */
   @SimpleFunction(description = "Add Google Chart based on Google spreadsheet url. If you don't know what query is, just leave it blank.")
   public void GoogleSpreadsheet(String url, String query, String chartType) {
+    wvInterface.setInputTypeString("GOOGLE");
+    wvInterface.setArg1String(chartType);
+    wvInterface.setArg2String(url);
+    wvInterface.setArg3String(query);
     GoToUrl("http://mit-dig.github.io/punya-webservices/");
-    String inputs = "'" + chartType + "','" + url + "','" + query + "'"; //document.body.innerHTML += '" + inputs + "'; 
-    String jsScript = "javascript: document.body.innerHTML += '" + inputs + "'; window.AppInventor.runMethod(GoogleSpreadsheet(" + inputs + ");"; //javascript:window.AppInventor.runMethod(GoogleSpreadsheet('AreaChart','https://docs.google.com/spreadsheets/d/1GkVebTN6fyu5-l2dUmGiZR9-WvXg1RSvgzlxnl73bFI/edit#gid=0', 'SELECT O,C,D,E,G where N =\"VI-2\"','{\"title\":\"Course 6 Enrollment\",\"vAxis\": {\"format\": \"########\", \"title\" : \"# of Students\"}, \"hAxis\": {\"format\": \"\", \"title\": \"Year\"}, \"width\" : 1000, \"height\":500}');
+    // String inputs = "'" + chartType + "','" + url + "','" + query + "'"; //document.body.innerHTML += '" + inputs + "'; 
+    // String jsScript = "javascript: document.body.innerHTML += '" + inputs + "'; window.AppInventor.runMethod(GoogleSpreadsheet(" + inputs + ");"; //javascript:window.AppInventor.runMethod(GoogleSpreadsheet('AreaChart','https://docs.google.com/spreadsheets/d/1GkVebTN6fyu5-l2dUmGiZR9-WvXg1RSvgzlxnl73bFI/edit#gid=0', 'SELECT O,C,D,E,G where N =\"VI-2\"','{\"title\":\"Course 6 Enrollment\",\"vAxis\": {\"format\": \"########\", \"title\" : \"# of Students\"}, \"hAxis\": {\"format\": \"\", \"title\": \"Year\"}, \"width\" : 1000, \"height\":500}');
     // wvInterface.setJavascriptString(jsScript);
-    webview.loadUrl(jsScript);
+    // webview.loadUrl(jsScript);
     // setupWebViewClient();
   }
 
@@ -260,11 +264,15 @@ public final class Graph extends AndroidViewComponent {
    */
   @SimpleFunction(description = "Add SparQL graph.")
   public void SPARQLquery(String endpoint, String query, String chartType) {
+    wvInterface.setInputTypeString("SPARQL");
+    wvInterface.setArg1String(endpoint);
+    wvInterface.setArg2String(query);
+    wvInterface.setArg3String(chartType);
     GoToUrl("http://mit-dig.github.io/punya-webservices/");
-    String inputs = "'" + endpoint + "','" + query + "','" + chartType + "'";
-    String jsScript = "javascript: window.AppInventor.runMethod(SPARQLquery(" + inputs + ");";
+    // String inputs = "'" + endpoint + "','" + query + "','" + chartType + "'";
+    // String jsScript = "javascript: window.AppInventor.runMethod(SPARQLquery(" + inputs + ");";
     // wvInterface.setJavascriptString(jsScript);
-    webview.loadUrl(jsScript); //window.AppInventor.runMethod(SPARQLquery(" + inputs + "));
+    // webview.loadUrl(jsScript); //window.AppInventor.runMethod(SPARQLquery(" + inputs + "));
     // setupWebViewClient();
   }
 
@@ -273,11 +281,14 @@ public final class Graph extends AndroidViewComponent {
    */
   @SimpleFunction(description = "Add CSV graph.")
   public void CSVstring(String csvString, String chartType) {
+    wvInterface.setInputTypeString("CSV");
+    wvInterface.setArg1String(csvString);
+    wvInterface.setArg2String(chartType);
     GoToUrl("http://mit-dig.github.io/punya-webservices/");
-    String inputs = "'" + csvString + "','" + chartType + "'";
-    String jsScript = "javascript: document.body.innerHTML += '" + inputs + "'; window.AppInventor.runMethod(CSVstring(" + inputs + "));";
+    // String inputs = "'" + csvString + "','" + chartType + "'";
+    // String jsScript = "javascript: document.body.innerHTML += '" + inputs + "'; window.AppInventor.runMethod(CSVstring(" + inputs + "));";
     // wvInterface.setJavascriptString(jsScript);
-    webview.loadUrl(jsScript);
+    // webview.loadUrl(jsScript);
     // setupWebViewClient();
   }
 
@@ -287,21 +298,43 @@ public final class Graph extends AndroidViewComponent {
    */
   private class WebViewInterface {
     Context mContext;
-    String webViewString;
     String returnString;
-    String jsScript;
+    String webViewString;
+    String inputType;
+    String arg1;
+    String arg2;
+    String arg3;
 
     /** Instantiate the interface and set the context */
     WebViewInterface(Context c) {
       mContext = c;
-      webViewString = " ";
       returnString = " ";
-      jsScript = " ";
+      webViewString = " ";
+      inputType = " ";
+      arg1 = " ";
+      arg2 = " ";
+      arg3  = " ";
     }
 
     /**
-     * Gets the web view string
-     *
+     * Set returnString to value returned by JavaScript method. (LEGACY CODE FROM WEBVIEWER)
+     */
+    @JavascriptInterface
+    public void runMethod(String value) {
+      returnString = value;
+    }
+
+    /**
+     * Set the WebViewString.
+     * @return string
+     */
+    @JavascriptInterface
+    public void setWebViewString(String str) {
+      webViewString = str;
+    }
+
+    /**
+     * Get the WebViewString.
      * @return string
      */
     @JavascriptInterface
@@ -310,45 +343,63 @@ public final class Graph extends AndroidViewComponent {
     }
 
     /**
-     * Set returnString to value returned by JavaScript method.
-     */
-    @JavascriptInterface
-    public void runMethod(String value) {
-      returnString = value;
-    }
-
-    /**
-     * Get the returnString.
+     * Set the input type.
      * @return string
      */
     @JavascriptInterface
-    public String getReturnString() {
-      return returnString;
+    public void setInputTypeString(String type) {
+      inputType = type;
     }
 
     /**
-     * Sets the web view string
+     * Get the input type.
+     * @return string
      */
-    public void setWebViewString(String newString) {
-      webViewString = newString;
+    @JavascriptInterface
+    public String getInputTypeString() {
+      return inputType;
     }
 
     /**
-     * Sets the javascript string
+     * Sets the first argument's string
      */
-    public void setJavascriptString(String script) {
-      jsScript = script;
+    public void setArg1String(String arg) {
+      arg1 = arg;
     }
 
     /**
-     * Gets the javascript string
+     * Gets the first argument's string
      */
-    public String getJavascriptString(String script) {
-      return jsScript;
+    public String getArg1String() {
+      return arg1;
     }
 
-    public void onLoad() {
-      webview.loadUrl(jsScript);
+    /**
+     * Sets the second argument's string
+     */
+    public void setArg2String(String arg) {
+      arg2 = arg;
+    }
+
+    /**
+     * Gets the second argument's string
+     */
+    public String getArg2String() {
+      return arg2;
+    }
+
+    /**
+     * Sets the third argument's string
+     */
+    public void setArg3String(String arg) {
+      arg3 = arg;
+    }
+
+    /**
+     * Gets the third argument's string
+     */
+    public String getArg3String() {
+      return arg3;
     }
 
   }
