@@ -437,6 +437,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Import project (.aia) from my computer ...")
   @Description("Name of Import Project menuitem")
   String importProjectMenuItem();
+  
+  @DefaultMessage("Import Screen (.aiax) from my computer ...")
+  @Description("Name of Import Screen menuitem")
+  String importScreenMenuItem();
 
   @DefaultMessage("Delete project")
   @Description("Name of Delete project menuitem")
@@ -461,6 +465,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Export selected project (.aia) to my computer")
   @Description("Name of Export Project menuitem")
   String exportProjectMenuItem();
+  
+  @DefaultMessage("Export selected screen (.aiax) to my computer")
+  @Description("Name of Export Screen menuitem")
+  String exportScreenMenuItem();
 
   @DefaultMessage("Export all projects")
   @Description("Name of Export all Project menuitem")
@@ -1164,6 +1172,14 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("New Screen")
   @Description("Title of new Screen dialog.")
   String newFormTitle();
+  
+  @DefaultMessage("Generate LD form in the current screen")
+  @Description("Title of Auto LD form generator Screen dialog.")
+  String newLDFormTitle();
+  
+  @DefaultMessage("Linked Data Ontology uri:")
+  @Description("Label for the Linked Data Ontology URL in new screen dialog.")
+  String LDOntologyLabel();
 
   @DefaultMessage("New screen name:")
   @Description("Label in front of name in new screen dialog.")
@@ -1567,6 +1583,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Import Project...")
   @Description("Caption for project upload wizard.")
   String projectUploadWizardCaption();
+  
+  @DefaultMessage("Import Screen...")
+  @Description("Caption for screen upload wizard.")
+  String screenUploadWizardCaption();
 
   // Used in GalleryToolBar.java
   @DefaultMessage("Search")
@@ -1920,6 +1940,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Settings")
   @Description("Change the project settings")
   String changeSettingsButton();
+  
+  @DefaultMessage("Generate LD Form")
+  @Description("Auto LD form generator")
+  String generateLDForm();
 
   // This error message is displayed as HTML
 

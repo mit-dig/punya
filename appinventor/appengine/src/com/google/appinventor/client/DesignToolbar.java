@@ -16,6 +16,7 @@ import com.google.appinventor.client.explorer.commands.AddFormCommand;
 import com.google.appinventor.client.explorer.commands.CopyFormCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
+import com.google.appinventor.client.explorer.commands.GenerateLDFormCommand;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
@@ -107,6 +108,7 @@ public class DesignToolbar extends Toolbar {
   private static final String WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR = "SwitchToBlocksEditor";
   private static final String WIDGET_NAME_SWITCH_TO_FORM_EDITOR = "SwitchToFormEditor";
   private static final String WIDGET_NAME_SETTINGS = "Settings";
+  private static final String WIDGET_NAME_GENERATE_LD_FORM = "GenerateLDForm";
 
   // Switch language
   private static final String WIDGET_NAME_SWITCH_LANGUAGE = "Language";
@@ -167,6 +169,8 @@ public class DesignToolbar extends Toolbar {
           new RemoveFormAction()));
       addButton(new ToolbarItem(WIDGET_NAME_SETTINGS, MESSAGES.changeSettingsButton(),
           new ChangeSettingsAction()));
+      addButton(new ToolbarItem(WIDGET_NAME_GENERATE_LD_FORM, MESSAGES.generateLDForm(),
+          new GenerateLDFormAction()));
     }
 
     addButton(new ToolbarItem(WIDGET_NAME_SWITCH_TO_FORM_EDITOR,
@@ -205,6 +209,21 @@ public class DesignToolbar extends Toolbar {
       if (projectRootNode != null) {
         ChainableCommand cmd = new CopyFormCommand();
         cmd.startExecuteChain(Tracking.PROJECT_ACTION_COPYFORM_YA, projectRootNode);
+      }
+    }
+  }
+  
+  private class GenerateLDFormAction implements Command {
+    @Override
+    public void execute() {
+      Ode ode = Ode.getInstance();
+      if (ode.screensLocked()) {
+        return;                 // Don't permit this if we are locked out (saving files)
+      }
+      ProjectRootNode projectRootNode = ode.getCurrentYoungAndroidProjectRootNode();
+      if (projectRootNode != null) {
+        ChainableCommand cmd = new GenerateLDFormCommand();
+        cmd.startExecuteChain(Tracking.PROJECT_ACTION_GENERATELDFORM_YA, projectRootNode);
       }
     }
   }
@@ -499,7 +518,5 @@ public class DesignToolbar extends Toolbar {
     Project p = Ode.getInstance().getProjectManager().getProject(projectRootNode);
     new SettingsEditor(p).show();
     }
-}
-
-
+  }
 }

@@ -28,6 +28,7 @@ import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
 import com.google.appinventor.client.wizards.DownloadUserSourceWizard;
 import com.google.appinventor.client.wizards.KeystoreUploadWizard;
 import com.google.appinventor.client.wizards.ProjectUploadWizard;
+import com.google.appinventor.client.wizards.ScreenUploadWizard;
 import com.google.appinventor.client.wizards.TemplateUploadWizard;
 import com.google.appinventor.client.wizards.youngandroid.NewYoungAndroidProjectWizard;
 import com.google.appinventor.common.version.AppInventorFeatures;
@@ -138,6 +139,8 @@ public class TopToolbar extends Composite {
     fileItems.add(null);
     fileItems.add(new DropDownItem(WIDGET_NAME_NEW, MESSAGES.newProjectMenuItem(),
         new NewAction()));
+    fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTPROJECT, MESSAGES.importScreenMenuItem(),
+        new ImportScreenAction()));
     fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTPROJECT, MESSAGES.importProjectMenuItem(),
         new ImportProjectAction()));
     fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTTEMPLATE, MESSAGES.importTemplateButton(),
@@ -152,6 +155,8 @@ public class TopToolbar extends Composite {
     fileItems.add(new DropDownItem(WIDGET_NAME_CHECKPOINT, MESSAGES.checkpointMenuItem(),
         new CheckpointAction()));
     fileItems.add(null);
+    fileItems.add(new DropDownItem(WIDGET_NAME_EXPORTPROJECT, MESSAGES.exportScreenMenuItem(),
+        new ExportProjectAction()));
     fileItems.add(new DropDownItem(WIDGET_NAME_EXPORTPROJECT, MESSAGES.exportProjectMenuItem(),
         new ExportProjectAction()));
     fileItems.add(new DropDownItem(WIDGET_NAME_EXPORTALLPROJECTS, MESSAGES.exportAllProjectsMenuItem(),
@@ -443,6 +448,13 @@ public class TopToolbar extends Composite {
     }
   }
 
+  private static class ImportScreenAction implements Command {
+    @Override
+    public void execute() {
+      new ScreenUploadWizard().center();
+    }
+  }
+  
   private static class ImportProjectAction implements Command {
     @Override
     public void execute() {

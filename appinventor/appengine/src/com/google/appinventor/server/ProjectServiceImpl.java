@@ -565,6 +565,12 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
     final String userId = userInfoProvider.getUserId();
     return getProjectRpcImpl(userId, projectId).copyScreen(userId, projectId, targetFormFileId, fileId);
   }
+  
+  @Override
+  public long addLDForm(long projectId, String targetFormFileId, List<String> uriCollection) {
+    final String userId = userInfoProvider.getUserId();
+    return getProjectRpcImpl(userId, projectId).addLDForm(userId, projectId, targetFormFileId, uriCollection);
+  }
 
   /**
    * This service is passed a URL to an aia file in GCS, of the form
