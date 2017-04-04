@@ -154,6 +154,12 @@ public class ServerLayout {
 
   /**
    * Relative path within {@link com.google.appinventor.server.UploadServlet}
+   * for uploading a screen
+   */
+  public static final String UPLOAD_SCREEN = "screen";
+
+  /**
+   * Relative path within {@link com.google.appinventor.server.UploadServlet}
    * for uploading a file
    */
   public static final String UPLOAD_FILE = "file";
@@ -207,6 +213,11 @@ public class ServerLayout {
    * Name of the form element to upload files.
    */
   public static final String UPLOAD_FILE_FORM_ELEMENT = "uploadFile";
+  
+  /**
+   * Name of the form element to upload screens.
+   */
+  public static final String UPLOAD_PROJECT_SCREEN_FORM_ELEMENT = "uploadProjectScreen";
 
   /**
    * Name of the form element to upload project archives.

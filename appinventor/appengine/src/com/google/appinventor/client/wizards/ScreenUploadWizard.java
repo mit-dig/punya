@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class ScreenUploadWizard extends Wizard {
   // Project archive extension
-  private static final String PROJECT_ARCHIVE_EXTENSION = ".aia";
+  private static final String SCREEN_ARCHIVE_EXTENSION = ".aiax";
 
   /**
    * Creates a new project upload wizard.
@@ -38,7 +38,7 @@ public class ScreenUploadWizard extends Wizard {
 
     // Initialize UI
     final FileUpload upload = new FileUpload();
-    upload.setName(ServerLayout.UPLOAD_PROJECT_ARCHIVE_FORM_ELEMENT);
+    upload.setName(ServerLayout.UPLOAD_PROJECT_SCREEN_FORM_ELEMENT);
     setStylePrimaryName("ode-DialogBox");
     VerticalPanel panel = new VerticalPanel();
     panel.setVerticalAlignment(VerticalPanel.ALIGN_MIDDLE);
@@ -50,10 +50,10 @@ public class ScreenUploadWizard extends Wizard {
       @Override
       public void execute() {
         String filename = upload.getFilename();
-        if (filename.endsWith(PROJECT_ARCHIVE_EXTENSION)) {
+        if (filename.endsWith(SCREEN_ARCHIVE_EXTENSION)) {
           // Strip extension and leading path off filename. We need to support both Unix ('/') and
           // Windows ('\\') path separators. File.pathSeparator is not available in GWT.
-          filename = filename.substring(0, filename.length() - PROJECT_ARCHIVE_EXTENSION.length()).
+          filename = filename.substring(0, filename.length() - SCREEN_ARCHIVE_EXTENSION.length()).
               substring(Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\')) + 1);
 
           // Make sure the project name is legal and unique.
@@ -61,8 +61,10 @@ public class ScreenUploadWizard extends Wizard {
             return;
           }
 
+          long currentProjectId = Ode.getInstance().getCurrentYoungAndroidProjectId();
+          String currentProjectName = Ode.getInstance().getCurrentYoungAndroidProjectRootNode().getName();
           String uploadUrl = GWT.getModuleBaseURL() + ServerLayout.UPLOAD_SERVLET + "/" +
-              ServerLayout.UPLOAD_PROJECT + "/" + filename;
+              ServerLayout.UPLOAD_SCREEN + "/" + currentProjectId + "/" + currentProjectName + "/" + filename;
           Uploader.getInstance().upload(upload, uploadUrl,
               new OdeAsyncCallback<UploadResponse>(
                   // failure message
@@ -76,6 +78,7 @@ public class ScreenUploadWizard extends Wizard {
                       Ode ode = Ode.getInstance();
                       Project uploadedProject = ode.getProjectManager().addProject(userProject);
                       ode.openYoungAndroidProjectInDesigner(uploadedProject);
+                      forceReload();
                       break;
                     case NOT_PROJECT_ARCHIVE:
                       // This may be a "severe" error; but in the
@@ -83,7 +86,7 @@ public class ScreenUploadWizard extends Wizard {
                       // line has been changed to report info not an error.
                       // This error is triggered when the user attempts to
                       // upload a zip file that is not a project.
-                      ErrorReporter.reportInfo(MESSAGES.notProjectArchiveError());
+                      ErrorReporter.reportInfo(MESSAGES.notScreenArchiveError());
                       break;
                     default:
                       ErrorReporter.reportError(MESSAGES.projectUploadError());
@@ -110,4 +113,8 @@ public class ScreenUploadWizard extends Wizard {
     setPixelSize(width, height);
     super.setPagePanelHeight(40);
   }
+
+  public static native void forceReload() /*-{
+    $wnd.location.reload(true);
+  }-*/;  
 }
