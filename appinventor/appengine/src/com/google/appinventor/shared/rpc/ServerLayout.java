@@ -108,6 +108,12 @@ public class ServerLayout {
    * for downloading a project's sources
    */
   public static final String DOWNLOAD_PROJECT_SOURCE = "project-source";
+  
+  /**
+   * Relative path within {@link com.google.appinventor.server.DownloadServlet}
+   * for downloading a project's sources for screen
+   */
+  public static final String DOWNLOAD_PROJECT_SOURCE_SCREEN = "project-source-screen";
 
   /**
    * Relative path within {@link com.google.appinventor.server.DownloadServlet}
@@ -145,6 +151,12 @@ public class ServerLayout {
    * for uploading a project
    */
   public static final String UPLOAD_PROJECT = "project";
+
+  /**
+   * Relative path within {@link com.google.appinventor.server.UploadServlet}
+   * for uploading a screen
+   */
+  public static final String UPLOAD_SCREEN = "screen";
 
   /**
    * Relative path within {@link com.google.appinventor.server.UploadServlet}
@@ -201,6 +213,11 @@ public class ServerLayout {
    * Name of the form element to upload files.
    */
   public static final String UPLOAD_FILE_FORM_ELEMENT = "uploadFile";
+  
+  /**
+   * Name of the form element to upload screens.
+   */
+  public static final String UPLOAD_PROJECT_SCREEN_FORM_ELEMENT = "uploadProjectScreen";
 
   /**
    * Name of the form element to upload project archives.

@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -152,6 +153,86 @@ public final class FileImporterImpl implements FileImporter {
     String settings = YoungAndroidProjectService.getProjectSettings(null, null, null, null, null);
     long projectId = storageIo.createProject(userId, project, settings);
     return storageIo.getUserProject(userId, projectId);
+  }
+
+  @Override
+  public UserProject importProjectScreen(String userId, long projectId, String projectName,
+    InputStream uploadedFileStream) throws FileImporterException, IOException {
+  	
+    // As we process the ZipEntry for each file, we'll adjust the directory structure so that it is
+    // appropriate for this user.
+    // Here we get the information (such as the qualified form name) that we'll need to do that.
+    String qualifiedFormName = StringUtils.getQualifiedFormName(
+        storageIo.getUser(userId).getUserEmail(), projectName);
+    String srcDirectory = YoungAndroidProjectService.getSourceDirectory(qualifiedFormName);
+
+    ZipInputStream zin = new ZipInputStream(uploadedFileStream);
+    String randomString = generateRandomLetterOrNum();
+    try {
+      // Extract files
+      while (true) {
+        ZipEntry entry;
+        try {
+          entry = zin.getNextEntry();
+          if (entry == null) {
+            break;
+          }
+        } catch (ZipException e) {
+          // The uploaded file is not a valid zip file
+          LOG.log(Level.SEVERE, "Invalid Project Archive Format", e);
+          throw new FileImporterException(UploadResponse.Status.NOT_PROJECT_ARCHIVE);
+        }
+
+        if (!entry.isDirectory()) {
+          String fileName = entry.getName();
+          if (fileName.startsWith(YoungAndroidProjectService.SRC_FOLDER)) {
+            // For files within the src folder, we need to update the directory that we put files
+            // in. Adjust the fileName so that it corresponds to this project's package.
+            fileName = StorageUtil.basename(fileName);
+            String fileNameOnly = fileName.split("\\.")[0];
+            String newFileNameOnly = "Import" + randomString;
+            
+            if (fileName.endsWith(".scm")) {
+            	fileName = newFileNameOnly + ".scm";
+            } else if (fileName.endsWith(".bky")) {
+            	fileName = newFileNameOnly + ".bky";         	
+            } else if (fileName.endsWith(".yail")) {
+            	fileName = newFileNameOnly + ".yail";             	
+            }
+
+            // Get the file content from the ZipEntry.
+            ByteArrayOutputStream contentStream = new ByteArrayOutputStream();
+          	fileName = srcDirectory + '/' + StorageUtil.basename(fileName);
+
+            ByteStreams.copy(zin, contentStream);
+            String content = contentStream.toString().replace(fileNameOnly, newFileNameOnly);
+            LOG.info("The file name only is " + fileNameOnly); 
+            LOG.info("The form name is " + fileName);            
+            LOG.info("The content string is " + content);
+            storageIo.addSourceFilesToProject(userId, projectId, false, fileName);
+            storageIo.uploadFileForce(projectId, fileName, userId, content, StorageUtil.DEFAULT_CHARSET);
+          }
+        }
+      }
+    } finally {
+      zin.close();
+    }
+    return storageIo.getUserProject(userId, projectId);
+  }
+  
+  // 6 random letters &/ numbers
+  public String generateRandomLetterOrNum() {
+    String val = "";
+    // char or numbers (5), random 0-9 A-Z
+    for(int i = 0; i<6;){
+      int ranAny = 48 + (new Random()).nextInt(90-65);
+      if(!(57 < ranAny && ranAny<= 65)){
+        char c = (char)ranAny;      
+        val += c;
+        i++;
+      }
+    }
+    return val;
   }
 
   @VisibleForTesting

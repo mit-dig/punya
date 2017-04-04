@@ -53,6 +53,10 @@ public interface FileExporter {
                                           boolean includeProjectHistory,
                                           boolean includeAndroidKeystore, @Nullable String zipName)
       throws IOException;
+  
+  ProjectSourceZip exportProjectSourceScreenZip(String userId, long projectId,
+      																		@Nullable String zipName)
+      throws IOException;
 
   /**
    * Exports all of the user's projects' source files as a zip of zips.

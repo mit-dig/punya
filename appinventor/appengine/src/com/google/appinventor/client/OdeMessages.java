@@ -1792,6 +1792,11 @@ public interface OdeMessages extends Messages {
   @Description("Error message reported when the file selected for upload is not a project archive.")
   String notProjectArchiveError();
 
+  @DefaultMessage("The selected file is not a screen source file!\n" +
+      "Project source files are aiaX files.")
+  @Description("Error message reported when the file selected for upload is not a screen archive.")
+  String notScreenArchiveError();
+
   // Used in ProfilePage.java
   @DefaultMessage("Edit Profile")
   @Description("Edit Profile Button, only seen by profile owner")

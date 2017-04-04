@@ -508,6 +508,9 @@ public interface StorageIo {
                                           boolean includeProjectHistory,
                                           boolean includeAndroidKeystore,
                                           @Nullable String zipName) throws IOException;
+  
+  ProjectSourceZip exportProjectSourceScreenZip(String userId, long projectId,
+      @Nullable String zipName) throws IOException;
 
   /**
    * Find a user's id given their email address. Note that this query is case
