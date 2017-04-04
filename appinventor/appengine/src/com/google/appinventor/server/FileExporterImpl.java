@@ -72,6 +72,18 @@ public final class FileExporterImpl implements FileExporter {
   }
 
   @Override
+  public ProjectSourceZip exportProjectSourceScreenZip(String userId, long projectId,
+                                                 @Nullable String zipName) throws IOException {
+    // Download project source files as a zip.
+    if (storageIo instanceof ObjectifyStorageIo) {
+      return ((ObjectifyStorageIo)storageIo).exportProjectSourceScreenZip(userId, projectId,
+          zipName);
+    } else {
+      throw new IllegalArgumentException("Objectify only");
+    }
+  }  
+
+  @Override
   public ProjectSourceZip exportAllProjectsSourceZip(String userId,
       String zipName) throws IOException {
     // Create a zip file for each project's sources.

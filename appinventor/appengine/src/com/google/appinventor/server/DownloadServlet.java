@@ -20,6 +20,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
@@ -60,6 +61,12 @@ public class DownloadServlet extends OdeServlet {
   // PROJECT_ID_INDEX = 4 (declared above)
   private static final int PROJECT_TITLE_INDEX = 5;
   private static final int SPLIT_LIMIT_PROJECT_SOURCE = 6;
+  
+  // Constants used when download kind is "project-source-screen".
+  // Since the project title may contain slashes, it must be the last component in the URI.
+  private static final int PROJECT_TITLE_INDEX_SCREEN = 5;
+  private static final int SCREEN_TITLE_INDEX = 6;
+  private static final int SPLIT_LIMIT_PROJECT_SOURCE_SCREEN = 7;
 
   // Constants used when download kind is "user-project-source".
   private static final int USER_PROJECT_USERID_INDEX = 5;
@@ -100,10 +107,11 @@ public class DownloadServlet extends OdeServlet {
 
     try {
       String uri = req.getRequestURI();
+      LOG.info("The URI is " + uri);
       // First, call split with no limit parameter.
       String[] uriComponents = uri.split("/");
       String downloadKind = uriComponents[DOWNLOAD_KIND_INDEX];
-      
+
       userId = userInfoProvider.getUserId();
 
       if (downloadKind.equals(ServerLayout.DOWNLOAD_PROJECT_OUTPUT)) {
@@ -124,6 +132,24 @@ public class DownloadServlet extends OdeServlet {
             StringUtils.normalizeForFilename(projectTitle) + ".aia";
         ProjectSourceZip zipFile = fileExporter.exportProjectSourceZip(userId,
             projectId, includeProjectHistory, false, zipName);
+        downloadableFile = zipFile.getRawFile();
+
+      } else if (downloadKind.equals(ServerLayout.DOWNLOAD_PROJECT_SOURCE_SCREEN)) {
+        // Download project source screen files as a zip.
+        long projectId = Long.parseLong(uriComponents[PROJECT_ID_INDEX]);
+        uriComponents = uri.split("/", SPLIT_LIMIT_PROJECT_SOURCE_SCREEN);
+        String projectTitle = (uriComponents.length > PROJECT_TITLE_INDEX_SCREEN) ?
+            uriComponents[PROJECT_TITLE_INDEX_SCREEN] : null;
+        String screenTitle = (uriComponents.length > SCREEN_TITLE_INDEX) ?
+            uriComponents[SCREEN_TITLE_INDEX] : null;      
+        final boolean includeProjectHistory = true;
+        String zipName_projectTitle = (projectTitle == null) ? null :
+            StringUtils.normalizeForFilename(projectTitle);
+        String zipName_screenTitle = (screenTitle == null) ? null :
+            StringUtils.normalizeForFilename(screenTitle);
+        String zipName = zipName_projectTitle + "_" + zipName_screenTitle  + ".aiax";
+        ProjectSourceZip zipFile = fileExporter.exportProjectSourceScreenZip(userId,
+            projectId, zipName);
         downloadableFile = zipFile.getRawFile();
 
       } else if (downloadKind.equals(ServerLayout.DOWNLOAD_USER_PROJECT_SOURCE)) {

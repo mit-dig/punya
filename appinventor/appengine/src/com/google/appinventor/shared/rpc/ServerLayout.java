@@ -108,6 +108,12 @@ public class ServerLayout {
    * for downloading a project's sources
    */
   public static final String DOWNLOAD_PROJECT_SOURCE = "project-source";
+  
+  /**
+   * Relative path within {@link com.google.appinventor.server.DownloadServlet}
+   * for downloading a project's sources for screen
+   */
+  public static final String DOWNLOAD_PROJECT_SOURCE_SCREEN = "project-source-screen";
 
   /**
    * Relative path within {@link com.google.appinventor.server.DownloadServlet}
