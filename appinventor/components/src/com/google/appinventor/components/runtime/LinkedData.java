@@ -378,33 +378,11 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       final URI uri = noResolveUpdate ? base : base.resolve(part);
       Runnable call = new Runnable() {
         public void run() {
-          doInsertModel(0, uri, graph);
-        }
-      };
-      AsynchUtil.runAsynchronously(call);
-    } catch (URISyntaxException e) {
-      Log.w(LOG_TAG, "Unable to generate SPARQL Update URL.", e);
-      FailedToAddDataToWeb(graph, "Invalid endpoint URI. See log for details.");
-    }
-  }
-  
-  /**
-   * Attempts to insert the statements contained within this Linked Data
-   * component into the endpoint with an optional graph.
-   * @param graph Empty string for the default graph, otherwise a valid URI
-   * @param noResolveUpdate true if the component should attempt to resolve the
-   * update URL relative to {@link #EndpointURL()}, false will send the query
-   * directly to {@link #endpointURL()}.
-   */
-  @SimpleFunction
-  public void AddDataToVirtuosoServer(final String graph, boolean noResolveUpdate) {
-    try {
-      URI part = new URI(null, null, "update", null, null);
-      URI base = URI.create(EndpointURL());
-      final URI uri = noResolveUpdate ? base : base.resolve(part);
-      Runnable call = new Runnable() {
-        public void run() {
-          doInsertModel(1, uri, graph);
+        	if (endpointURL.contains("dydra.com")) {
+            doInsertModel(0, uri, graph);
+        	} else {
+            doInsertModel(1, uri, graph);       		
+        	}
         }
       };
       AsynchUtil.runAsynchronously(call);
