@@ -11,6 +11,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNo
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
+import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -35,6 +37,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -43,6 +46,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.xedge.jquery.ui.client.model.LabelValuePair;
 
 /**
  * A command that auto generate a LD form.
@@ -187,7 +191,20 @@ public final class GenerateLDFormCommand extends ChainableCommand {
       Ode ode = Ode.getInstance();
       YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
       if (OkButtonSwitcher==0) {
-        addCheckBoxesToPanel(fetchPropertiesInOntology());
+        AsyncCallback<List<String>> continuation = new AsyncCallback<List<String>>() {
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						addCheckBoxesToPanel(new ArrayList<String>());
+					}
+
+					@Override
+					public void onSuccess(List<String> arg0) {
+		        addCheckBoxesToPanel(arg0);
+					}
+        };
+        SemWebServiceAsync service = Ode.getInstance().getSemanticWebService();
+        service.getProperties(ontologyTextBox.getText(), continuation);
         center(); 
         OkButtonSwitcher++;
       } else {
@@ -217,26 +234,6 @@ public final class GenerateLDFormCommand extends ChainableCommand {
     	} else {
         checkBoxCollection.add(cBox);
     	}
-    }
-    
-    private List<String> fetchPropertiesInOntology() {
-     List<String> propertyList = new ArrayList<String>();
-     propertyList.add("http://xmlns.com/foaf/0.1/plan");
-     propertyList.add("http://xmlns.com/foaf/0.1/surname");
-     propertyList.add("http://xmlns.com/foaf/0.1/geekcode");
-     propertyList.add("http://xmlns.com/foaf/0.1/lastName"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/family_name"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/familyName"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/firstName"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/myersBriggs"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/publications"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/schoolHomepage");
-     propertyList.add("http://xmlns.com/foaf/0.1/img");
-     propertyList.add("http://xmlns.com/foaf/0.1/pastProject");
-     propertyList.add("http://xmlns.com/foaf/0.1/currentProject"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/workInfoHomepage"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/workplaceHomepage"); 
-     return propertyList;
     }
 
     private boolean validateNew(String newFormName) {

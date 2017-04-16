@@ -24,6 +24,9 @@ import org.apache.lucene.store.RAMDirectory;
 
 import com.google.appinventor.shared.rpc.semweb.SemWebConstants;
 import com.google.appinventor.shared.rpc.semweb.SemWebService;
+import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -33,6 +36,7 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 /**
  * Implementation of the semantic web service that provides features
@@ -245,6 +249,32 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         "FILTER(regex(?lbl, \""+text+"\", \"i\")) "+
         "} GROUP BY ?uri ORDER BY ?label";
     return processQuery(queryText);
+  }
+
+  @Override
+  public List<String> getProperties(String concept) {
+  	final Logger log = Logger.getRootLogger();
+  	List<String> propertyList = new ArrayList<String>();
+  	try {
+	    HttpURLConnection conn = (HttpURLConnection)new URL(concept).openConnection();
+	    conn.addRequestProperty("Accept", "application/rdf+xml,text/turtle,text/n3");
+	    conn.setDoInput(true);
+	    conn.connect();
+      OntModel model = (OntModel) ModelFactory.createOntologyModel();
+      model.read(conn.getInputStream(), concept, "RDF/XML");
+	  	OntClass ontClass = model.getOntClass(concept);
+	  	ExtendedIterator<OntProperty> propIt = ontClass.listDeclaredProperties();
+	  	log.info("The list of properties is: ");
+	  	while (propIt.hasNext()){
+	  		if (propIt.next() != null) {
+		  		propertyList.add(propIt.next().getURI());
+		  		log.info(propIt.next().getURI());
+	  		}
+	  	}
+  	} catch(Exception e) {
+      Logger.getRootLogger().warn("Unable to read ontology " + concept, e);
+    }
+  	return propertyList;
   }
 
 }

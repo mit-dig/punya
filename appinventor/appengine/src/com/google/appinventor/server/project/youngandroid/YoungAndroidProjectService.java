@@ -774,9 +774,15 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     
    for (int i = 0; i < uriCollection.size(); i++) {
   	 textBoxUri = uriCollection.get(i);
-  	 String[] items = textBoxUri.split("/");
-  	 labelText = items[items.length-1];
   	 
+  	 if (textBoxUri.contains("#")) {
+    	 String[] items = textBoxUri.split("#");
+    	 labelText = items[items.length-1];
+  	 } else {
+    	 String[] items = textBoxUri.split("/");
+    	 labelText = items[items.length-1];
+  	 }
+
      formContentPart1 = contentPart3.replace(labelIDRegex, generateRandomLetterOrNum());
      formContentPart1 = formContentPart1.replace(labelUUIDRegex, System.currentTimeMillis()+"");
      formContentPart1 = formContentPart1.replace(labelTextRegex, labelText);
