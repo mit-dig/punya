@@ -11,6 +11,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNo
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
+import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -35,6 +37,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -43,6 +46,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.xedge.jquery.ui.client.model.LabelValuePair;
 
 /**
  * A command that auto generate a LD form.
@@ -86,6 +90,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
     // UI elements
     private final TextBox ontologyTextBox;
     private final Set<String> otherFormNames;
+    private Button okButtonForUri;
 
     NewLDFormDialog(final YoungAndroidProjectNode projectRootNode) {
       super(false, true);
@@ -120,7 +125,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
       YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
 
       ontologyTextBox = new TextBox();
-      ontologyTextBox.setText("http://xmlns.com/foaf/0.1/Person");
+      ontologyTextBox.setText("");
       ontologyTextBox.setVisibleLength(150);
       ontologyTextBox.addKeyUpHandler(new KeyUpHandler() {
         @Override
@@ -141,18 +146,6 @@ public final class GenerateLDFormCommand extends ChainableCommand {
       String cancelText = MESSAGES.cancelButton();
       String okText = MESSAGES.okButton();
 
-//      // Keeps track of the total number of screens.
-//      int formCount = otherFormNames.size() + 1;
-//      if (formCount > MAX_FORM_COUNT) {
-//        HorizontalPanel errorPanel = new HorizontalPanel();
-//        HTML tooManyScreensLabel = new HTML(MESSAGES.formCountErrorLabel());
-//        errorPanel.add(tooManyScreensLabel);
-//        errorPanel.setSize("100%", "24px");
-//        contentPanel.add(errorPanel);
-//        okText = MESSAGES.addScreenButton();
-//        cancelText = MESSAGES.cancelScreenButton();
-//      }
-
       Button cancelButtonForUri = new Button(cancelText);
       cancelButtonForUri.addClickHandler(new ClickHandler() {
         @Override
@@ -161,8 +154,8 @@ public final class GenerateLDFormCommand extends ChainableCommand {
           executionFailedOrCanceled();
         }
       });
-      
-      Button okButtonForUri = new Button(okText);
+
+      okButtonForUri = new Button(okText);
       okButtonForUri.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -187,7 +180,20 @@ public final class GenerateLDFormCommand extends ChainableCommand {
       Ode ode = Ode.getInstance();
       YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
       if (OkButtonSwitcher==0) {
-        addCheckBoxesToPanel(fetchPropertiesInOntology());
+        AsyncCallback<List<String>> continuation = new AsyncCallback<List<String>>() {
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						addCheckBoxesToPanel(new ArrayList<String>());
+					}
+
+					@Override
+					public void onSuccess(List<String> arg0) {
+		        addCheckBoxesToPanel(arg0);
+					}
+        };
+        SemWebServiceAsync service = Ode.getInstance().getSemanticWebService();
+        service.getProperties(ontologyTextBox.getText(), continuation);
         center(); 
         OkButtonSwitcher++;
       } else {
@@ -207,6 +213,12 @@ public final class GenerateLDFormCommand extends ChainableCommand {
         });
         cBoxPanel.add(cBox);
       }
+      if (properties.size() == 0) {
+        hide();
+        executionFailedOrCanceled();
+        Window.confirm(MESSAGES.confirmCheckInputValue());
+        return;
+      }
       cBoxPanel.setVisible(true);
       ontologyTextBox.setFocus(true);
     }
@@ -217,63 +229,6 @@ public final class GenerateLDFormCommand extends ChainableCommand {
     	} else {
         checkBoxCollection.add(cBox);
     	}
-    }
-    
-    private List<String> fetchPropertiesInOntology() {
-     List<String> propertyList = new ArrayList<String>();
-     propertyList.add("http://xmlns.com/foaf/0.1/plan");
-     propertyList.add("http://xmlns.com/foaf/0.1/surname");
-     propertyList.add("http://xmlns.com/foaf/0.1/geekcode");
-     propertyList.add("http://xmlns.com/foaf/0.1/lastName"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/family_name"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/familyName"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/firstName"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/myersBriggs"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/publications"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/schoolHomepage");
-     propertyList.add("http://xmlns.com/foaf/0.1/img");
-     propertyList.add("http://xmlns.com/foaf/0.1/pastProject");
-     propertyList.add("http://xmlns.com/foaf/0.1/currentProject"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/workInfoHomepage"); 
-     propertyList.add("http://xmlns.com/foaf/0.1/workplaceHomepage"); 
-     return propertyList;
-    }
-
-    private boolean validateNew(String newFormName) {
-//      // Check that it meets the formatting requirements.
-//      if (!TextValidators.isValidIdentifier(newFormName)) {
-//        Window.alert(MESSAGES.malformedFormNameError());
-//        return false;
-//      }
-//
-//      // Check that it's unique.
-//      if (otherFormNames.contains(newFormName)) {
-//        Window.alert(MESSAGES.duplicateFormNameError());
-//        return false;
-//      }
-      return true;
-    }
-    
-    private boolean validateTarget(String newFormName) {
-      // Check that it meets the formatting requirements.
-      if (!TextValidators.isValidIdentifier(newFormName)) {
-        Window.alert(MESSAGES.malformedFormNameError());
-        return false;
-      }
-
-      // Check that it's NOT unique.
-      if (!otherFormNames.contains(newFormName)) {
-        Window.alert(MESSAGES.noSuchFormNameError());
-        return false;
-      }
-      return true;
-    }
-    
-    /**
-     * 
-     */
-    protected void generateFormAction() {
-     // ***
     }
 
     /**
@@ -331,7 +286,9 @@ public final class GenerateLDFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
-      ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, callback);
+      if (checkBoxCollection.size() > 0) {
+        ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, callback);
+      }
     }
 
     @Override

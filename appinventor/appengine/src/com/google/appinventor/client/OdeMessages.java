@@ -1177,7 +1177,7 @@ public interface OdeMessages extends Messages {
   @Description("Title of Auto LD form generator Screen dialog.")
   String newLDFormTitle();
   
-  @DefaultMessage("Linked Data Ontology uri:")
+  @DefaultMessage("Enter Linked Data Ontology/Vocabulary:")
   @Description("Label for the Linked Data Ontology URL in new screen dialog.")
   String LDOntologyLabel();
 
@@ -1432,6 +1432,10 @@ public interface OdeMessages extends Messages {
       "There is no undo for deleting your keystore file.")
   @Description("Confirmation message for delete keystore")
   String confirmDeleteKeystore();
+  
+  @DefaultMessage("There is something wrong. Please double check the input value and restart the form generator.")
+  @Description("")
+  String confirmCheckInputValue(); 
 
   // Used in output/OdeLog.java
 
