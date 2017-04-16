@@ -90,6 +90,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
     // UI elements
     private final TextBox ontologyTextBox;
     private final Set<String> otherFormNames;
+    private Button okButtonForUri;
 
     NewLDFormDialog(final YoungAndroidProjectNode projectRootNode) {
       super(false, true);
@@ -124,7 +125,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
       YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
 
       ontologyTextBox = new TextBox();
-      ontologyTextBox.setText("http://xmlns.com/foaf/0.1/Person");
+      ontologyTextBox.setText("");
       ontologyTextBox.setVisibleLength(150);
       ontologyTextBox.addKeyUpHandler(new KeyUpHandler() {
         @Override
@@ -145,18 +146,6 @@ public final class GenerateLDFormCommand extends ChainableCommand {
       String cancelText = MESSAGES.cancelButton();
       String okText = MESSAGES.okButton();
 
-//      // Keeps track of the total number of screens.
-//      int formCount = otherFormNames.size() + 1;
-//      if (formCount > MAX_FORM_COUNT) {
-//        HorizontalPanel errorPanel = new HorizontalPanel();
-//        HTML tooManyScreensLabel = new HTML(MESSAGES.formCountErrorLabel());
-//        errorPanel.add(tooManyScreensLabel);
-//        errorPanel.setSize("100%", "24px");
-//        contentPanel.add(errorPanel);
-//        okText = MESSAGES.addScreenButton();
-//        cancelText = MESSAGES.cancelScreenButton();
-//      }
-
       Button cancelButtonForUri = new Button(cancelText);
       cancelButtonForUri.addClickHandler(new ClickHandler() {
         @Override
@@ -165,8 +154,8 @@ public final class GenerateLDFormCommand extends ChainableCommand {
           executionFailedOrCanceled();
         }
       });
-      
-      Button okButtonForUri = new Button(okText);
+
+      okButtonForUri = new Button(okText);
       okButtonForUri.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -224,6 +213,12 @@ public final class GenerateLDFormCommand extends ChainableCommand {
         });
         cBoxPanel.add(cBox);
       }
+      if (properties.size() == 0) {
+        hide();
+        executionFailedOrCanceled();
+        Window.confirm(MESSAGES.confirmCheckInputValue());
+        return;
+      }
       cBoxPanel.setVisible(true);
       ontologyTextBox.setFocus(true);
     }
@@ -234,43 +229,6 @@ public final class GenerateLDFormCommand extends ChainableCommand {
     	} else {
         checkBoxCollection.add(cBox);
     	}
-    }
-
-    private boolean validateNew(String newFormName) {
-//      // Check that it meets the formatting requirements.
-//      if (!TextValidators.isValidIdentifier(newFormName)) {
-//        Window.alert(MESSAGES.malformedFormNameError());
-//        return false;
-//      }
-//
-//      // Check that it's unique.
-//      if (otherFormNames.contains(newFormName)) {
-//        Window.alert(MESSAGES.duplicateFormNameError());
-//        return false;
-//      }
-      return true;
-    }
-    
-    private boolean validateTarget(String newFormName) {
-      // Check that it meets the formatting requirements.
-      if (!TextValidators.isValidIdentifier(newFormName)) {
-        Window.alert(MESSAGES.malformedFormNameError());
-        return false;
-      }
-
-      // Check that it's NOT unique.
-      if (!otherFormNames.contains(newFormName)) {
-        Window.alert(MESSAGES.noSuchFormNameError());
-        return false;
-      }
-      return true;
-    }
-    
-    /**
-     * 
-     */
-    protected void generateFormAction() {
-     // ***
     }
 
     /**
@@ -328,7 +286,9 @@ public final class GenerateLDFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
-      ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, callback);
+      if (checkBoxCollection.size() > 0) {
+        ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, callback);
+      }
     }
 
     @Override

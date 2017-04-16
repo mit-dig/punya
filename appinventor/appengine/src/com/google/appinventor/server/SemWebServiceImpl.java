@@ -84,28 +84,6 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
     String ontologiesList = props.getProperty("ontologies", "");
     String ontologies[] = ontologiesList.split(",");
 
-    // configure the index writer to use serial merge as
-    // AppEngine does not allow spawning threads
-    /*
-    IndexWriter writer = null;
-    try {
-      writer = IndexWriterFactory.create(new RAMDirectory());
-      writer.setMergeScheduler(new SerialMergeScheduler());
-    } catch (CorruptIndexException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    } catch (IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    IndexBuilderString larqBuilder;
-    if(writer == null) {
-      larqBuilder = new IndexBuilderString();
-    } else {
-      larqBuilder = new IndexBuilderString(writer);
-    }
-    */
-
     // create the ontology model and load ontologies
     ontologyModel = ModelFactory.createDefaultModel();
     //ontologyModel.register(larqBuilder);
@@ -142,9 +120,6 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         Logger.getRootLogger().warn("Unable to read ontology "+ontologies[i], e);
       }
     }
-    //larqBuilder.closeWriter();
-    //ontologyModel.unregister(larqBuilder);
-    //LARQ.setDefaultIndex(larqBuilder.getIndex());
     log.info("Lucene initialization completed in " + (System.currentTimeMillis()-start) + " ms.");
     ontologyModel.removeNsPrefix("");
   }
