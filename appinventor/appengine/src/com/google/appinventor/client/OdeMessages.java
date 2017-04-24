@@ -1177,7 +1177,7 @@ public interface OdeMessages extends Messages {
   @Description("Title of Auto LD form generator Screen dialog.")
   String newLDFormTitle();
   
-  @DefaultMessage("Enter Linked Data Ontology/Vocabulary:")
+  @DefaultMessage("Enter Linked Data Concept URI:")
   @Description("Label for the Linked Data Ontology URL in new screen dialog.")
   String LDOntologyLabel();
 
