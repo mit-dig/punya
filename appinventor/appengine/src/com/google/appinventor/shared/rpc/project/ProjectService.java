@@ -301,7 +301,7 @@ public interface ProjectService extends RemoteService {
    * @param fileId  id of file to add
    * @return modification date for project
    */
-  long addLDForm(long projectId, String targetFormFileId, List<String> uriCollection);
+  long addLDForm(long projectId, String targetFormFileId, List<String> uriCollection, String conceptURI);
 
   /**
    * creates a new project from a gallery app

@@ -542,7 +542,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
   }
   
   @Override
-  public long addLDForm(String userId, long projectId, String targetFileId, List<String> uriCollection) {
+  public long addLDForm(String userId, long projectId, String targetFileId, List<String> uriCollection, String conceptURI) {
     if (targetFileId.endsWith(FORM_PROPERTIES_EXTENSION) ||
         targetFileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
       // If the file to be added is a form file or a blocks file, add a new form file, a new
@@ -580,7 +580,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
             	originalObj3 = new JSONArray();
             }
 
-            List<String> returns = generateFormContent(uriCollection);
+            List<String> returns = generateFormContent(conceptURI, uriCollection);
             String formContent = returns.get(0);
             LDFieldName = returns.get(1);
             LOG.info("The generateFormContent " + formContent);
@@ -671,7 +671,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     return returns;
   }
   
-  public List<String> generateFormContent(List<String> uriCollection) {
+  public List<String> generateFormContent(String conceptURI, List<String> uriCollection) {
     String contentPart1 = 
     "{"+
       "\"$Components\": ["+
@@ -680,7 +680,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
           "\"$Type\": \"LinkedDataForm\","+
           "\"$Version\": \"3\","+
           "\"Uuid\": \"$formUUID$\","+
-          "\"FormID\": \"http:\\/\\/example.com\\/test_AT_example.com\\/LDFormGenerator\\/$formTimestamp$\\/\","+
+          "\"FormID\": \"http:\\/\\/punya.appinventor.mit.edu\\/LDFormGenerator_$formTimestamp$\\/\","+
+          "\"ObjectType\":" + "\"" + conceptURI + "\"" + ","+
           "\"Width\": \"-2\",";
     
     String contentPart2 = 
@@ -742,7 +743,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     contentPart2 = contentPart2.replace(tableUUIDRegex, System.currentTimeMillis()+"");
     contentPart2 = contentPart2.replace(tableRowNumRegex, uriCollection.size()+"");
 
-    String textBoxUri = "http:\\/\\/xmlns.com\\/foaf\\/0.1\\/lastName";
+    String textBoxUri = conceptURI;
     String formContent = generateLabelTextbox(uriCollection, contentPart3, contentPart4);
     String returnPart1 = contentPart1 + contentPart2 + formContent + contentPart6;
     

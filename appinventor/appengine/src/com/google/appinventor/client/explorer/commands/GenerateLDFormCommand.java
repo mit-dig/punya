@@ -287,7 +287,7 @@ public final class GenerateLDFormCommand extends ChainableCommand {
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
       if (checkBoxCollection.size() > 0) {
-        ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, callback);
+        ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, ontologyTextBox.getText(), callback);
       }
     }
 

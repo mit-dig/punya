@@ -135,7 +135,7 @@ public abstract class CommonProjectService {
    * @param fileId  ID of file to delete
    * @return modification date for project
    */
-  public long addLDForm(String userId, long projectId, String targetFormFileId, List<String> uriCollection) {
+  public long addLDForm(String userId, long projectId, String targetFormFileId, List<String> uriCollection, String conceptURI) {
     List<String> sourceFiles = storageIo.getProjectSourceFiles(userId, projectId);
     if (!sourceFiles.contains(targetFormFileId)) {
       storageIo.addSourceFilesToProject(userId, projectId, false, targetFormFileId);
