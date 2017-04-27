@@ -6,12 +6,18 @@
 package com.google.appinventor.components.runtime;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.R;
 import android.app.Activity;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -21,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -50,6 +57,7 @@ import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.util.BoundingBox;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.OnInitializeListener;
 import com.google.appinventor.components.runtime.util.YailList;
@@ -80,6 +88,7 @@ import gnu.math.IntNum;
 public class GoogleMap extends AndroidViewComponent implements OnResumeListener, OnInitializeListener, OnPauseListener,
 OnMarkerClickListener, OnInfoWindowClickListener, OnMarkerDragListener, OnMapClickListener,
 OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
+
 
   private final Activity context;
   private final Form form;
@@ -119,12 +128,13 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   private boolean enableCameraChangeListener = false;
 
   // setting up for circle overlay
-
   private static final double DEFAULT_RADIUS = 1000000;
   public static final double RADIUS_OF_EARTH_METERS = 6371009;
   private static final AtomicInteger snextCircleId = new AtomicInteger(1);
   private HashMap<Object, Integer> circles = new HashMap<Object, Integer>(); //we are storing references for both circle and draggable circle
   private List<DraggableCircle> mCircles = new ArrayList<DraggableCircle>(1);
+  
+  private HashMap<Polygon, Integer> polygons = new HashMap<Polygon, Integer>();
 
   //defaults for circle overlay
   private float mStrokeWidth = 2; // in pixel, 0 means no outline will be drawn
@@ -194,7 +204,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     }
 
     setUpMapIfNeeded();
-
     container.$add(this);
 
     Width(LENGTH_FILL_PARENT);
@@ -203,7 +212,6 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     form.registerForOnResume(this);
     form.registerForOnResume(this);
     form.registerForOnPause(this);
-
   }
 
 
@@ -365,14 +373,12 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   public boolean ZoomGestureEnabled() {
     return mUiSettings.isZoomGesturesEnabled();
   }
-
-
-
-    @SimpleEvent(description = "Indicates that the map has been rendered and ready for adding markers " +
-        "or changing other settings. Please add or updating markers within this event")
-    public void MapIsReady(){
-      Log.i(TAG, "Map is ready for adding markers and other setting");
-      EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
+  
+  @SimpleEvent(description = "Indicates that the map has been rendered and ready for adding markers " +
+      "or changing other settings. Please add or updating markers within this event")
+  public void MapIsReady(){
+    Log.i(TAG, "Map is ready for adding markers and other setting");
+    EventDispatcher.dispatchEvent(GoogleMap.this, "MapIsReady");
   }
 
   //TODO: Move this to Util
@@ -1683,4 +1689,172 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
       }
     });
   }
+  
+  @SimpleFunction
+  public void addPolygon(double latMin, double latMax, double lonMin, double lonMax) {
+//  	LatLngBounds latLngBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+//  	LatLng ne = latLngBounds.northeast;
+//  	LatLng sw = latLngBounds.southwest;
+  	
+//  	double lat1 = ne.latitude;
+//  	double lng1 = ne.latitude;
+//  	double lat4 = sw.latitude;
+//  	double lng4 = sw.longitude;
+  	
+  	PolygonOptions rectOptions = new PolygonOptions()
+  	              .add(new LatLng(latMin, lonMax),
+  	                   new LatLng(latMax, lonMax),
+  	                   new LatLng(latMax, lonMin),
+  	                   new LatLng(latMin, lonMin),
+  	                   new LatLng(latMin, lonMax));
+
+  	// Get back the mutable Polygon
+  	Polygon polygon = mMap.addPolygon(rectOptions);
+  	polygons.put(polygon, 1);
+  }
+  
+  @SimpleFunction
+  public void clearAllPolygons() {
+  	Set<Polygon> setOfPolygon = polygons.keySet();
+  	for(Polygon p : setOfPolygon) {
+  		p.remove();
+  	}
+  }
+  
+  @SimpleFunction
+  public void drawCentralSquare() {
+  	LatLngBounds latLngBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+  	
+  	LatLng ne = latLngBounds.northeast;
+  	LatLng sw = latLngBounds.southwest;
+	
+  	double lat1 = ne.latitude;
+  	double lng1 = ne.latitude;
+  	
+  	double lat4 = sw.latitude;
+  	double lng4 = sw.longitude;
+  	
+  	
+  	double latC = mMap.getCameraPosition().target.latitude;
+  	double lngC = mMap.getCameraPosition().target.longitude;
+		
+  	double latDiff2 = (latC - lat4)*0.5;
+  	double lngDiff2 = (lngC - lng4)*0.5;
+		
+//		AddMarkersFromJson("[{lat:"+(latC+latDiff2)+",lng:"+(lngC+lngDiff2)+"}]");
+//		AddMarkersFromJson("[{lat:"+(latC-latDiff2)+",lng:"+(lngC+lngDiff2)+"}]");
+//		AddMarkersFromJson("[{lat:"+(latC-latDiff2)+",lng:"+(lngC-lngDiff2)+"}]");
+//		AddMarkersFromJson("[{lat:"+(latC+latDiff2)+",lng:"+(lngC-lngDiff2)+"}]");
+		AddMarkersFromJson("[{lat:"+latC+",lng:"+lngC+"}]");
+		
+  	PolygonOptions rectOptions = new PolygonOptions()
+    .add(new LatLng((latC+latDiff2), (lngC+lngDiff2)),
+         new LatLng((latC-latDiff2), (lngC+lngDiff2)),
+         new LatLng((latC-latDiff2), (lngC-lngDiff2)),
+         new LatLng((latC+latDiff2), (lngC-lngDiff2)),
+         new LatLng((latC+latDiff2), (lngC+lngDiff2)));
+
+		// Get back the mutable Polygon
+		Polygon polygon = mMap.addPolygon(rectOptions);
+		polygons.put(polygon, 1);  	
+  }
+  
+  @SimpleFunction  
+  public String getBoundingBox(double latitudeInDegrees, double longitudeInDegrees, double halfSideInKm) {
+  	// Semi-axes of WGS-84 geoidal reference
+  	double WGS84_a = 6378137.0;  // Major semiaxis [m]
+    double WGS84_b = 6356752.3;  // Minor semiaxis [m]
+
+  	// Bounding box surrounding the point at given coordinates,
+  	// assuming local approximation of Earth surface as a sphere
+  	// of radius given by WGS84
+    double lat = Math.toRadians(latitudeInDegrees);
+    double lon = Math.toRadians(longitudeInDegrees);
+    double halfSide = 1000*halfSideInKm;
+
+    // Radius of Earth at given latitude
+  	// Earth radius at a given latitude, according to the WGS-84 ellipsoid [m]
+    // http://en.wikipedia.org/wiki/Earth_radius
+    double An = WGS84_a*WGS84_a * Math.cos(lat);
+    double Bn = WGS84_b*WGS84_b * Math.sin(lat);
+    double Ad = WGS84_a * Math.cos(lat);
+    double Bd = WGS84_b * Math.sin(lat);
+    double radius = Math.sqrt( (An*An + Bn*Bn)/(Ad*Ad + Bd*Bd) );
+
+    // Radius of the parallel at given latitude
+    double pradius = radius*Math.cos(lat);
+
+    double latMin = lat - halfSide/radius;
+    double latMax = lat + halfSide/radius;
+    double lonMin = lon - halfSide/pradius;
+    double lonMax = lon + halfSide/pradius;
+
+    String coordinates = Math.toDegrees(latMin) + "," + Math.toDegrees(lonMin) + "," 
+    		+ Math.toDegrees(latMax) + "," + Math.toDegrees(lonMax);
+    return coordinates;
+  }
+  
+  
+  @SimpleFunction
+  public void addOverlay() {
+  	LatLng NEWARK = new LatLng(40.714086, -74.228697);
+  	GroundOverlayOptions newarkMap = new GroundOverlayOptions()
+  	        .position(NEWARK, 8600f, 6500f);
+  	mMap.addGroundOverlay(newarkMap);
+  }
+  
+  @SimpleFunction
+  public void addTileOverlay() {
+  	TileProvider tileProvider = new UrlTileProvider(256, 256) {
+  	  @Override
+  	  public URL getTileUrl(int x, int y, int zoom) {
+
+  	    /* Define the URL pattern for the tile images */
+  	    String s = String.format("http://my.image.server/images/%d/%d/%d.png",
+  	        zoom, x, y);
+
+  	    if (!checkTileExists(x, y, zoom)) {
+  	      return null;
+  	    }
+
+  	    try {
+  	      return new URL(s);
+  	    } catch (MalformedURLException e) {
+  	        throw new AssertionError(e);
+  	    }
+  	  }
+
+  	  /*
+  	   * Check that the tile server supports the requested x, y and zoom.
+  	   * Complete this stub according to the tile range you support.
+  	   * If you support a limited range of tiles at different zoom levels, then you
+  	   * need to define the supported x, y range at each zoom level.
+  	   */
+  	  private boolean checkTileExists(int x, int y, int zoom) {
+  	    int minZoom = 12;
+  	    int maxZoom = 16;
+
+  	    if ((zoom < minZoom || zoom > maxZoom)) {
+  	      return false;
+  	    }
+
+  	    return true;
+  	  }
+  	};
+
+  	mMap.addTileOverlay(new TileOverlayOptions()
+  	    .tileProvider(tileProvider));
+  }
+  
+  @SimpleFunction
+  public String getMapCenter() {
+  	LatLng latLng = mMap.getCameraPosition().target;
+  	return latLng.toString();
+  }
+  
+  @SimpleFunction
+  public float getZoomLevelInfo() {
+  	return mMap.getCameraPosition().zoom;
+  }
 }
+

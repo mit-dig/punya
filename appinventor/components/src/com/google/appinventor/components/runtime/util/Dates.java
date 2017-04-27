@@ -32,6 +32,7 @@ public final class Dates {
   public static final int DATE_HOUR = Calendar.HOUR_OF_DAY;
   public static final int DATE_MINUTE = Calendar.MINUTE;
   public static final int DATE_SECOND = Calendar.SECOND;
+  public static final int DATE_MILLISECOND = Calendar.MILLISECOND;
 
   /**
    * Days of the week.
@@ -64,7 +65,10 @@ public final class Dates {
   }                  // COV_NF_LINE
 
   /**
-   * Adds a time interval to the given date.
+   * Adds a time interval to the given date. Adding milliseconds has a separated method because
+   * interval in ms is long, not int.
+   *
+   * @see DateAddInMillis()
    *
    * @param date  date to add to
    * @param intervalKind  kind of interval
@@ -86,6 +90,21 @@ public final class Dates {
         date.add(intervalKind, interval);
         break;
     }
+  }
+
+  /**
+   * Adds an interval of milliseconds to the given date. Unlike other time units,
+   * milliseconds are saved as long, not int.
+   *
+   * @see Dates.DateAdd()
+   *
+   * @param date  date to add to
+   * @param millis an interval to add
+   */
+  @SimpleFunction
+  public static void DateAddInMillis(Calendar date, long millis) {
+    long dateInMillis = date.getTimeInMillis();
+    date.setTimeInMillis(dateInMillis+millis);
   }
 
   /**
@@ -141,30 +160,69 @@ public final class Dates {
   }
 
   /**
-   * Converts and formats the given date into a date and time string.
+   * Returns the give duration in a specified time unit. Months and Years cannot be supported
+   * due to their inconsistency.
    *
-   * @see SimpleDateFormat
-   *
-   * @param date  date to format
-   * @return  formatted date
+   * @param duration duration to convert time unit
+   * @param intervalkind time unit
+   * @return duration converted into a different time unit
    */
   @SimpleFunction
-  public static String FormatDateTime(Calendar date) {
-    return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM)
-        .format(date.getTime());
+  public static long ConvertDuration(long duration, int intervalKind) {
+            switch (intervalKind) {
+              default:
+                throw new IllegalArgumentException("illegal date/time interval kind in function Duration()");
+              case DATE_WEEK:
+                  return duration/1000/60/60/24/7;
+              case DATE_DAY:
+                  return duration/1000/60/60/24;
+              case DATE_HOUR:
+                  return duration/1000/60/60;
+              case DATE_MINUTE:
+                  return duration/1000/60;
+              case DATE_SECOND:
+                  return duration/1000;
+            }
   }
 
   /**
-   * Converts and formats the given date into a date string.
+   * Converts and formats an instant into a string of date and time with the specified pattern.
    *
    * @see SimpleDateFormat
    *
    * @param date  date to format
+   * @param pattern format of the date and time e.g. MM/DD/YYYY HH:mm:ss a, MMM d, yyyy HH:mm
    * @return  formatted date
    */
   @SimpleFunction
-  public static String FormatDate(Calendar date) {
-    return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date.getTime());
+  public static String FormatDateTime(Calendar date, String pattern) {
+    SimpleDateFormat formatdate = new SimpleDateFormat();
+    if (pattern.length() == 0) {
+      formatdate.applyPattern("MMM d, yyyy HH:mm:ss a");
+    } else {
+      formatdate.applyPattern(pattern);
+    }
+    return formatdate.format(date.getTime());
+  }
+
+  /**
+   * Converts and formats an instant into a string of date with the specified pattern.
+   *
+   * @see SimpleDateFormat
+   *
+   * @param date  date to format
+   * @param pattern format of the date e.g. MM/DD/YYYY or MMM d, yyyy
+   * @return  formatted date
+   */
+  @SimpleFunction
+  public static String FormatDate(Calendar date, String pattern) {
+    SimpleDateFormat formatdate = new SimpleDateFormat();
+    if (pattern.length() == 0) {
+      formatdate.applyPattern("MMM d, yyyy");
+    } else {
+      formatdate.applyPattern(pattern);
+    }
+      return formatdate.format(date.getTime());
   }
 
   /**
@@ -178,6 +236,49 @@ public final class Dates {
   @SimpleFunction
   public static String FormatTime(Calendar date) {
     return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(date.getTime());
+  }
+
+  /**
+   * Returns the instant of the given date (used in DatePicker component)
+   *
+   * @param year year of the date
+   * @param month month of the date
+   * @param day day of the date
+   * @return  Calendar (instant in time)
+   */
+  @SimpleFunction
+  public static Calendar DateInstant(int year, int month, int day) {
+    String year_str = String.valueOf(year);
+    String month_str = String.valueOf(month);
+    String day_str = String.valueOf(day);
+    String date;
+    if (month < 10)
+      month_str = "0" + month_str;
+    if (day < 10)
+      day_str = "0" + day_str;
+    date = month_str + "/" + day_str + "/" + year_str;
+    return Dates.DateValue(date);
+  }
+
+  /**
+   * Returns the instant of the given time (used in TimePicker component)
+   *
+   * @param year year of the date
+   * @param month month of the date
+   * @param day day of the date
+   * @return  Calendar (instant in time)
+   */
+  @SimpleFunction
+  public static Calendar TimeInstant(int hour, int minute) {
+    String hour_str = String.valueOf(hour);
+    String minute_str = String.valueOf(minute);
+    String time;
+    if (hour < 10)
+      hour_str = "0" + hour_str;
+    if (minute < 10)
+      minute_str = "0" + minute_str;
+    time = hour_str + ":" + minute_str;
+    return Dates.DateValue(time);
   }
 
   /**

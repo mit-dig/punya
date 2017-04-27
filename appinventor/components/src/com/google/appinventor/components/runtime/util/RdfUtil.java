@@ -1,16 +1,33 @@
 package com.google.appinventor.components.runtime.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.security.cert.CertificateException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,9 +40,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
 
@@ -51,6 +70,8 @@ import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.XSD;
+
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 
 public final class RdfUtil {
   public static final String LOG_TAG = RdfUtil.class.getSimpleName();
@@ -474,8 +495,9 @@ public final class RdfUtil {
       return fullUri;
     }
     if(subject.toString().equals(form.FormID())) {
-      Log.d(LOG_TAG, "Form did not have URI fields; generating timestamp URI");
-      subject.append(System.currentTimeMillis());
+      Log.d(LOG_TAG, "Form did not have URI fields; generating timestamp + uuid URI");
+      String uuid = UUID.randomUUID().toString();
+      subject.append(System.currentTimeMillis() + "-" + uuid);
     }
     return subject.toString();
   }
@@ -713,6 +735,153 @@ public final class RdfUtil {
   }
 
   /**
+   * Performs a SPARQL 1.1 Update INSERT DATA operation on a remote triple
+   * store by inserting the triples in <i>model</i> into the optionally named
+   * graph <i>graph</i>
+   * @param uri URI for the endpoint
+   * @param model RDF model to send to the endpoint
+   * @param graph Optional graph URI to insert data into. Pass null to insert
+   * into the default graph.
+   * @return true on success, false otherwise.
+   */
+  public static boolean insertDataToVirtuosoHttps(InputStream inputStream, URI uri, Model model, String graph) {  
+      boolean success = false;
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      model.write(baos, "TTL");
+      Log.d(LOG_TAG, "Byte array size: "+baos.size());
+      // get model contents in turtle
+      String contents = null;
+      try {
+        contents = baos.toString("UTF-8");
+      } catch(UnsupportedEncodingException e) {
+        Log.e(LOG_TAG, "Unable to encode query.", e);
+        return false;
+      }
+      baos = null;
+      Log.d(LOG_TAG, "Model: "+contents);
+      // remove PREFIX statements and move them before an insert data block
+      Pattern prefixPattern = Pattern.compile("@prefix[ \t]+([^:]*:)[ \t]+<([^>]+)>[ \t]+.[ \t\r\n]+", Pattern.CASE_INSENSITIVE);
+      Matcher matcher = prefixPattern.matcher(contents);
+      StringBuffer prefixes = new StringBuffer();
+      StringBuffer sb = new StringBuffer("INSERT INTO GRAPH <");
+      if(graph != null && graph.length() != 0) {
+        sb.append(graph);
+      }
+      else {
+      	sb.append("#");
+      }
+      sb.append("> {\r\n");
+      while(matcher.find()) {
+        prefixes.append("PREFIX ");
+        prefixes.append(matcher.group(1));
+        prefixes.append(" <");
+        prefixes.append(matcher.group(2));
+        prefixes.append(">\r\n");
+        matcher.appendReplacement(sb, "");
+      }
+      matcher.appendTail(sb);
+      prefixes.append(sb);
+      prefixes.append("}\r\n");
+      sb = null;
+      HttpsURLConnection conn = null;
+      Log.i(LOG_TAG, "Sending update to server:");   
+      Log.d(LOG_TAG, prefixes.toString());
+      Log.d(LOG_TAG, "uri: " + uri);
+      try {
+        conn = (HttpsURLConnection) uri.toURL().openConnection();
+        SSLContext context = generateSSLContext(inputStream);;
+        conn.setSSLSocketFactory(context.getSocketFactory());
+        conn.setHostnameVerifier(new BrowserCompatHostnameVerifier());
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setRequestMethod("POST");
+        //conn.setRequestProperty("Content-Length", Integer.toString(prefixes.length()));
+        //conn.setRequestProperty("Content-Type", "application/sparql-query");
+        conn.setRequestProperty("Accept", "*/*");
+        String userInfo = uri.getUserInfo();
+        if(userInfo != null && userInfo.length() != 0) {
+          if(!userInfo.contains(":")) {
+            userInfo = userInfo + ":";
+          }
+          String encodedInfo = Base64.encodeToString(userInfo.getBytes("UTF-8"), Base64.NO_WRAP).trim();
+          Log.d(LOG_TAG, "Authorization = "+encodedInfo);
+          conn.setRequestProperty("Authorization", "Basic "+encodedInfo);
+        }
+        Log.d(LOG_TAG, "The connection URL is "+conn.getURL());
+        conn.connect();
+        OutputStream os = conn.getOutputStream();
+        PrintStream ps = new PrintStream(os);
+        ps.print("query=" + URLEncoder.encode(prefixes.toString()));
+        ps.close();
+        int status = conn.getResponseCode();
+        Log.d(LOG_TAG, "HTTP Status = " + status);
+        if(status == 200) {
+          success = true;
+        } else if(status >= 400) {
+          success = false;
+          Log.w(LOG_TAG, "HTTP status for update was "+status);
+          Log.w(LOG_TAG, "HTTP response msg was "+conn.getResponseMessage());
+          Log.w(LOG_TAG, "HTTP response msg was "+conn.getContent().toString());
+        }
+        conn.disconnect();
+      } catch (MalformedURLException e) {
+        Log.w(LOG_TAG, "Unable to insert triples due to malformed URL.");
+      } catch (ProtocolException e) {
+        Log.w(LOG_TAG, "Unable to perform HTTP POST to given URI.", e);
+      } catch (IOException e) {
+        Log.w(LOG_TAG, "Unable to insert triples due to communication issue.", e);
+      }
+      return success;
+    }
+  
+  public static SSLContext generateSSLContext(InputStream inputStream) {
+  	// Create an SSLContext that uses our TrustManager
+  	Log.d(LOG_TAG, "This is within the generateSSLContext method.");
+  	SSLContext context = null;
+  	Log.d(LOG_TAG, "After the SSLContext initialization.");
+  	try {
+	  	// Load CAs from an InputStream
+	  	// (could be from a resource or ByteArrayInputStream or ...)
+	  	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	  	// From https://www.washington.edu/itconnect/security/ca/load-der.crt
+	  	Log.d(LOG_TAG, "Before loading the pem file");
+	  	InputStream caInput = new BufferedInputStream(inputStream);
+	  	Log.d(LOG_TAG, "The pem file is " + caInput.available());
+	  	Certificate ca;
+	  	try {
+	  		ca = cf.generateCertificate(caInput);	
+	  	} finally {
+	  		caInput.close();
+	  	}
+	  	
+	  	// Create a KeyStore containing our trusted CAs
+	  	String keyStoreType = KeyStore.getDefaultType();
+	  	KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+	  	keyStore.load(null, null);
+	  	keyStore.setCertificateEntry("ca", ca);
+	
+	  	// Create a TrustManager that trusts the CAs in our KeyStore
+	  	String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+	  	TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+	  	tmf.init(keyStore);
+	
+	  	context = SSLContext.getInstance("TLS");
+	  	context.init(null, tmf.getTrustManagers(), null);
+  	} catch (CertificateException e) {
+      Log.e(LOG_TAG, "The CertificateException message is "+e.getLocalizedMessage());
+  	} catch (IOException e) {
+      Log.e(LOG_TAG, "The IOException message is "+e.getLocalizedMessage());  		
+  	} catch (KeyStoreException e) {
+      Log.e(LOG_TAG, "The KeyStoreException message is "+e.getLocalizedMessage());  		
+  	} catch (NoSuchAlgorithmException e) {
+      Log.e(LOG_TAG, "The NoSuchAlgorithmException message is "+e.getLocalizedMessage()); 		
+  	} catch (KeyManagementException e) {
+      Log.e(LOG_TAG, "The KeyManagementException message is "+e.getLocalizedMessage()); 		
+  	} 
+  	return context;
+ }
+  
+  /**
    * Performs a SPARQL 1.1 Update DELETE DATA operation on a remote triple
    * store by deleting the triples in <i>model</i> into the optionally named
    * graph <i>graph</i>
@@ -897,4 +1066,76 @@ public final class RdfUtil {
     //queryStr = "REGISTER QUERY " + regId + " AS " + queryStr;
     return queryStr;
   }
+  
+	public static boolean performHttpsRequest(String urlString, InputStream inputStream,
+			String securityToken, String filePath) throws IOException {
+		boolean success = false;
+		HttpsURLConnection conn = null;
+		DataOutputStream dos = null;
+
+		String lineEnd = "\r\n";
+		String twoHyphens = "--";
+		String boundary = "*****";
+
+		int bytesRead, bytesAvailable, bufferSize;
+		byte[] buffer;
+		int maxBufferSize = 1 * 1024 * 1024;
+		
+		try {
+			URL url = new URL(urlString);
+			conn = (HttpsURLConnection) url.openConnection();
+			conn.setDoInput(true);
+			conn.setDoOutput(true);
+			conn.setUseCaches(false);
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Connection", "Keep-Alive");
+			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="
+					+ boundary);
+			conn.setRequestProperty("securityToken", securityToken);
+			
+			SSLContext context = generateSSLContext(inputStream);
+			conn.setSSLSocketFactory(context.getSocketFactory());
+			conn.setHostnameVerifier(new BrowserCompatHostnameVerifier());
+
+			dos = new DataOutputStream(conn.getOutputStream());
+			dos.writeBytes(twoHyphens + boundary + lineEnd);
+			dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\""
+					+ filePath + "\"" + lineEnd);
+			dos.writeBytes(lineEnd);
+
+			filePath = filePath.replace("file:/", "");
+			FileInputStream fileInputStream = new FileInputStream(new File(filePath));
+			bytesAvailable = fileInputStream.available();
+			bufferSize = Math.min(bytesAvailable, maxBufferSize);
+			buffer = new byte[bufferSize];
+
+			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+			while (bytesRead > 0) {
+				dos.write(buffer, 0, bufferSize);
+				bytesAvailable = fileInputStream.available();
+				bufferSize = Math.min(bytesAvailable, maxBufferSize);
+				bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+			}
+
+			dos.writeBytes(lineEnd);
+			dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+			conn.getInputStream();
+			fileInputStream.close();
+			dos.flush();
+			
+      int status = conn.getResponseCode();
+      Log.d(LOG_TAG, "HTTPS Status = " + status);
+      if(status == 200) {
+        success = true;
+      } else {
+        Log.w(LOG_TAG, "HTTPS status for update was "+status);
+        Log.w(LOG_TAG, "HTTPS response msg was "+conn.getResponseMessage());
+      }
+		} finally {
+			dos.close();
+			conn.disconnect();
+		}
+		return success;
+	}
 }

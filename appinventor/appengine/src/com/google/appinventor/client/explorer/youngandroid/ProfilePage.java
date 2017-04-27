@@ -9,20 +9,23 @@ package com.google.appinventor.client.explorer.youngandroid;
 import static com.google.appinventor.client.Ode.MESSAGES;
 
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.GalleryClient;
 import com.google.appinventor.client.GalleryGuiFactory;
 import com.google.appinventor.client.Ode;
+import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.boxes.PrivateUserProfileTabPanel;
-import com.google.appinventor.client.boxes.ProjectListBox;
-import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.utils.Uploader;
 import com.google.appinventor.shared.rpc.ServerLayout;
 import com.google.appinventor.shared.rpc.UploadResponse;
 import com.google.appinventor.shared.rpc.project.GalleryApp;
 import com.google.appinventor.shared.rpc.project.GalleryAppListResult;
+import com.google.appinventor.shared.rpc.project.GalleryComment;
+import com.google.appinventor.shared.rpc.project.UserProject;
 import com.google.appinventor.shared.rpc.user.User;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
@@ -32,12 +35,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ErrorEvent;
 import com.google.gwt.event.dom.client.ErrorHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -54,6 +59,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
      userNameBox
      userLinkLabel
      userLinkBox
+     userEmailFrequencyBox
+     userEmailFrequencyPrefixLabel
+     userEmailFrequencySuffixLabel
 
    appCardWrapper
      imageUploadBox
@@ -70,17 +78,29 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * It has different modes for public viewing or when user is editing privately
  *
  * @author vincentaths@gmail.com (Vincent Zhang)
+ * @author mrburaimo@gmail.com (Daniel Buraimo)
  */
 public class ProfilePage extends Composite/* implements GalleryRequestListener*/ {
-
+  private  List<GalleryApp> apps;
+  private final List<GalleryApp> selectedApps;
+  private static final int ZERO = 0;
   public static final int PRIVATE = 0;
   public static final int PUBLIC = 1;
+  public static final int REQUEST_BYDEVELOPER = 7;
+  private int appCatalogCounter = 0;
+  private boolean appCatalogExhausted = false;
+  public static final int NUMAPPSTOSHOW = 10;
 
   String userId = "-1";
   final int profileStatus;
 
   final FileUpload imageUpload = new FileUpload();
   // Create GUI wrappers and components
+
+  private GalleryAppTab appCatalogTab;
+  private final TabPanel appTabs;
+  private final FlowPanel appCatalog;
+  private final FlowPanel appCatalogContent;
 
   // The abstract top-level GUI container
   VerticalPanel profileGUI = new VerticalPanel();
@@ -109,12 +129,16 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
   Label userContentHeader = new Label();
   Label usernameLabel = new Label();
   Label userLinkLabel = new Label();
+  Label userEmailDescriptionLabel = new Label();
+  Label userEmailFrequencyPrefixLabel = new Label();
+  Label userEmailFrequencySuffixLabel = new Label();
   Button editProfile = new Button(MESSAGES.buttonEditProfile());
   final TextBox userNameBox = new TextBox();
   final TextBox userLinkBox = new TextBox();
+  final TextBox userEmailFrequencyBox = new TextBox();
   final Label userNameDisplay = new Label();
   Anchor userLinkDisplay = new Anchor();
-  final Button profileSummit = new Button("Update Profile");
+  final Button profileSubmit = new Button(MESSAGES.buttonUpdateProfile());
 
   private static final Logger LOG = Logger.getLogger(ProfilePage.class.getName());
   private static final Ode ode = Ode.getInstance();
@@ -130,6 +154,11 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
    *
    */
   public ProfilePage(final String incomingUserId, final int editStatus) {
+
+    appCatalog = new FlowPanel();
+    appCatalogContent = new FlowPanel();
+    selectedApps = new ArrayList<GalleryApp>();
+    appTabs = new TabPanel();
 
     // Replace the global variable
     if (incomingUserId.equalsIgnoreCase("-1")) {
@@ -151,22 +180,31 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
     }
 
     if (editStatus == PRIVATE) {
-      userContentHeader.setText("Edit your profile");
-      usernameLabel.setText("Your display name");
-      userLinkLabel.setText("More info link");
+      userContentHeader.setText(MESSAGES.labelEditYourProfile());
+      usernameLabel.setText(MESSAGES.labelYourDisplayName());
+      userLinkLabel.setText(MESSAGES.labelMoreInfoLink());
+      userEmailDescriptionLabel.setText(MESSAGES.labelEmailDescription());
+      userEmailFrequencyPrefixLabel.setText(MESSAGES.labelEmailFrequencyPrefix());
+      userEmailFrequencySuffixLabel.setText(MESSAGES.labelEmailFrequencySuffix());
       editProfile.setVisible(false);
 
-      profileSummit.addClickHandler(new ClickHandler() {
+      profileSubmit.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          profileSummit.setEnabled(false);
+          profileSubmit.setEnabled(false);
+          if(!validEmailFrequency(userEmailFrequencyBox.getText())){
+            Window.alert(MESSAGES.errorEmailFrequency());
+            profileSubmit.setEnabled(true);
+            return;
+          }
+
           // Store the name value of user, modify database
           final OdeAsyncCallback<Void> userNameUpdateCallback = new OdeAsyncCallback<Void>(
               // failure message
               MESSAGES.galleryError()) {
                 @Override
                 public void onSuccess(Void arg0) {
-                  profileSummit.setEnabled(true);
+                  profileSubmit.setEnabled(true);
                 }
             };
            ode.getUserInfoService().storeUserName(userNameBox.getText(), userNameUpdateCallback);
@@ -187,6 +225,17 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
                 userLinkBox.getText(), userLinkUpdateCallback);
           }
 
+          // Store the email notification frequency value of user, modofy database
+          final OdeAsyncCallback<Void> userEmailFrequencyUpdateCallback = new OdeAsyncCallback<Void>(
+              // failure message
+              MESSAGES.galleryError()) {
+                @Override
+                public void onSuccess(Void arg0) {
+                }
+            };
+            Ode.getInstance().getUserInfoService().storeUserEmailFrequency(
+                Integer.valueOf(userEmailFrequencyBox.getText()), userEmailFrequencyUpdateCallback);
+
         }
       });
 
@@ -195,7 +244,11 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
       profileInfo.add(userNameBox);
       profileInfo.add(userLinkLabel);
       profileInfo.add(userLinkBox);
-      profileInfo.add(profileSummit);
+      profileInfo.add(userEmailDescriptionLabel);
+      profileInfo.add(userEmailFrequencyPrefixLabel);
+      profileInfo.add(userEmailFrequencyBox);
+      profileInfo.add(userEmailFrequencySuffixLabel);
+      profileInfo.add(profileSubmit);
 
     } else {
       profileSingle.addStyleName("ode-Public");
@@ -226,9 +279,13 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
     userLinkLabel.addStyleName("profile-textlabel");
     userLinkBox.addStyleName("profile-textbox");
     userLinkDisplay.addStyleName("profile-textdisplay");
+    userEmailDescriptionLabel.addStyleName("profile-textlabel-emaildescription");
+    userEmailFrequencyPrefixLabel.addStyleName("profile-textlabel");
+    userEmailFrequencySuffixLabel.addStyleName("profile-textlabel");
+    userEmailFrequencyBox.addStyleName("profile-textbox-small");
     editProfile.addStyleName("profile-submit");
 
-    profileSummit.addStyleName("profile-submit");
+    profileSubmit.addStyleName("profile-submit");
     imageUpload.addStyleName("app-image-upload");
 
     // Add sidebar
@@ -244,6 +301,7 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
     // Add containers to the top-tier GUI, initialize
     profileSingle.add(mainContent);
     if (editStatus == PUBLIC) {
+      profileSingle.add(appTabs);
       profileSingle.add(sidebarTabs);
     }
 
@@ -252,7 +310,6 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
     profileGUI.addStyleName("ode-UserProfileWrapper");
     profileGUI.addStyleName("gallery");
     initWidget(profileGUI);
-
 
     // Retrieve other user info right after GUI is initialized
     final OdeAsyncCallback<User> userInformationCallback = new OdeAsyncCallback<User>(
@@ -264,6 +321,7 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
             // In this case it'll return the user of [userId]
             userContentHeader.setText(user.getUserName());
             makeValidLink(userLinkDisplay, user.getUserLink());
+            userEmailFrequencyBox.setText(String.valueOf(user.getUserEmailFrequency()));
          }
     };
     if (editStatus == PRIVATE) {
@@ -272,21 +330,15 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
       userId = currentUser.getUserId();
       userNameBox.setText(currentUser.getUserName());
       userLinkBox.setText(currentUser.getUserLink());
+      userEmailFrequencyBox.setText(String.valueOf(currentUser.getUserEmailFrequency()));
     } else {
       // Public state
       Ode.getInstance().getUserInfoService().getUserInformationByUserId(userId, userInformationCallback);
-      // Retrieve apps by this author for sidebar
-      final OdeAsyncCallback<GalleryAppListResult> byAuthorCallback = new OdeAsyncCallback<GalleryAppListResult>(
-          // failure message
-          MESSAGES.galleryError()) {
-            @Override
-            public void onSuccess(GalleryAppListResult appsResult) {
-              FlowPanel appsByAuthor = new FlowPanel();
-              galleryGF.generateSidebar(appsResult.getApps(), sidebarTabs, appsByAuthor, "Apps By Author",
-                  MESSAGES.galleryAppsByAuthorSidebar() + " this user", false, true);
-            }
-        };
-      Ode.getInstance().getGalleryService().getDeveloperApps(userId, 0,5, byAuthorCallback);
+      sidebarTabs.setVisible(false);
+      appCatalogTab = new GalleryAppTab(appCatalog, appCatalogContent,userId);
+      appTabs.add(appCatalog,"My Catalog");
+      appTabs.selectTab(0);
+      appTabs.addStyleName("gallery-app-tabs");
     }
 
     //TODO this callback should combine with previous ones. Leave it out for now
@@ -459,8 +511,8 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
     });
     container.add(userAvatar);
 
-    if(gallery.getSystemEnvironmet() != null &&
-        gallery.getSystemEnvironmet().toString().equals("Development")){
+    if(gallery.getSystemEnvironment() != null &&
+        gallery.getSystemEnvironment().toString().equals("Development")){
       final OdeAsyncCallback<String> callback = new OdeAsyncCallback<String>(
         // failure message
         MESSAGES.galleryError()) {
@@ -475,5 +527,203 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
 
   public void loadImage(){
     initImageComponents(userId);
+  }
+
+  private boolean validEmailFrequency(String emailFrequencyString){
+    int emailFrequency = 0;
+    try {
+      emailFrequency = Integer.valueOf(emailFrequencyString);
+      if(emailFrequency < 1) return false;
+    } catch (NumberFormatException e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * A wrapper class of tab, which provides help method to get/set UI components
+   */
+  private class GalleryAppTab{
+    Label buttonNext;
+    Label noResultsFound;
+    Label keywordTotalResultsLabel;
+    Label generalTotalResultsLabel;
+    /**
+     * @param container: the FlowPanel that this app tab will reside.
+     * @param content: the sub-panel that contains the actual app content.
+     * @apram incomingUserId: the user id
+     */
+    GalleryAppTab(FlowPanel container, FlowPanel content, final String incomingUserId){
+      addGalleryAppTab(container, content,incomingUserId);
+    }
+
+    /**
+     * @return Label buttonNext
+     */
+    public Label getButtonNext(){
+      return buttonNext;
+    }
+
+    /**
+     * @return Label noResultsFound
+     */
+    public Label getNoResultsFound(){
+      return noResultsFound;
+    }
+
+    /**
+     * @return Label keywordTotalResultsLabel
+     */
+    public Label getKeywordTotalResultsLabel(){
+      return keywordTotalResultsLabel;
+    }
+
+    /**
+     * Set keywordTotalResultsLabel's text to new text
+     * @param keyword the search keyword
+     * @param num number of results
+     */
+    public void setKeywordTotalResultsLabel(String keyword, int num){
+       keywordTotalResultsLabel.setText(MESSAGES.gallerySearchResultsPrefix() + keyword + MESSAGES.gallerySearchResultsInfix() + num + MESSAGES.gallerySearchResultsSuffix());
+    }
+
+    /**
+     * @return Label generalTotalResultsLabel
+     */
+    public Label getGeneralTotalResultsLabel(){
+      return generalTotalResultsLabel;
+    }
+
+    /**
+     * set generalTotalResultsLabel to new text
+     * @param num number of results
+     */
+    public void setGeneralTotalResultsLabel(int num){
+      generalTotalResultsLabel.setText(num + MESSAGES.gallerySearchResultsSuffix());
+    }
+
+    /**
+     * Creates the GUI components for a regular app tab.
+     * This method resides here because it needs access to global variables.
+     * @param container: the FlowPanel that this app tab will reside.
+     * @param content: the sub-panel that contains the actual app content.
+     */
+    private void addGalleryAppTab(FlowPanel container, FlowPanel content, final String incomingUserId) {
+      // Search specific
+      generalTotalResultsLabel = new Label();
+      container.add(generalTotalResultsLabel);
+
+      final OdeAsyncCallback<GalleryAppListResult> byAuthorCallback = new OdeAsyncCallback<GalleryAppListResult>(
+        // failure message
+        MESSAGES.galleryError()) {
+        @Override
+        public void onSuccess(GalleryAppListResult appsResult) {
+          refreshApps(appsResult,false);
+        }
+      };
+      Ode.getInstance().getGalleryService().getDeveloperApps(userId,appCatalogCounter ,NUMAPPSTOSHOW, byAuthorCallback);
+      container.add(content);
+
+      buttonNext = new Label();
+      buttonNext.setText(MESSAGES.galleryMoreApps());
+      buttonNext.addStyleName("active");
+
+      FlowPanel next = new FlowPanel();
+      next.add(buttonNext);
+      next.addStyleName("gallery-nav-next");
+      container.add(next);
+      buttonNext.addClickHandler(new ClickHandler() {
+        //  @Override
+        public void onClick(ClickEvent event) {
+           if (!appCatalogExhausted) {
+                // If the next page still has apps to retrieve, do it
+                appCatalogCounter += NUMAPPSTOSHOW;
+                Ode.getInstance().getGalleryService().getDeveloperApps(userId,appCatalogCounter ,NUMAPPSTOSHOW, byAuthorCallback);
+              }
+        }
+      });
+    }
+  }
+
+  /**
+   * Loads the proper tab GUI with gallery's app data.
+   * @param apps: list of returned gallery apps from callback.
+   */
+  private void refreshApps(GalleryAppListResult appsResult, boolean refreshable) {
+        appCatalogTab.setGeneralTotalResultsLabel(appsResult.getTotalCount());
+        if (appsResult.getTotalCount() < NUMAPPSTOSHOW) {
+          // That means there's not enough apps to show (reaches the end)
+          appCatalogExhausted = true;
+        } else {
+          appCatalogExhausted = false;
+        }
+        galleryGF.generateHorizontalAppList(appsResult.getApps(), appCatalogContent, refreshable);
+        if(appsResult.getTotalCount() < NUMAPPSTOSHOW || appCatalogCounter + NUMAPPSTOSHOW >= appsResult.getTotalCount()){
+          appCatalogTab.getButtonNext().setVisible(false);
+        }
+  }
+
+  /**
+   * Gets the number of projects
+   *
+   * @return the number of projects
+   */
+  public int getNumProjects() {
+    return apps.size();
+  }
+
+  /**
+   * Gets the number of selected projects
+   *
+   * @return the number of selected projects
+   */
+  public int getNumSelectedApps() {
+    return selectedApps.size();
+  }
+
+  /**
+   * Returns the list of selected projects
+   *
+   * @return the selected projects
+   */
+  public List<GalleryApp> getSelectedApps() {
+    return selectedApps;
+  }
+  /**
+   * select specific tab index based on given index
+   * @param index
+   */
+  public void setSelectTabIndex(int index){
+    appTabs.selectTab(index);
+  }
+  /**
+   * Process the results after retrieving GalleryAppListResult
+   * @param appsResult GalleryAppList Result
+   * @param refreshable whether or not clear container
+   * @see GalleryRequestListener
+   */
+  public void onAppListRequestCompleted(GalleryAppListResult appsResult, boolean refreshable)
+  {
+    List<GalleryApp> apps = appsResult.getApps();
+    if (apps != null)
+      refreshApps(appsResult, refreshable);
+    else
+      OdeLog.log("apps was null");
+  }
+  /**
+   * Process the results after retrieving list of GalleryComment
+   * @see GalleryRequestListener
+   */
+  public void onCommentsRequestCompleted(List<GalleryComment> comments){
+
+  }
+
+  /**
+   * Process the results after retrieving list of UserProject
+   * @see GalleryRequestListener
+   */
+  public void onSourceLoadCompleted(UserProject projectInfo) {
+
   }
 }

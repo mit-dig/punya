@@ -215,4 +215,36 @@ public class PropertyTypeConstants {
    */
   public static final String PROPERTY_TYPE_BASEURI_AUTOGEN = "baseuri_autogen";
 
+  /**
+   * Choices of text-to-speech countries. {@link
+   * com.google.appinventor.client.widgets.properties.CountryChoicePropertyEditor}.
+   */
+  public static final String PROPERTY_TYPE_TEXT_TO_SPEECH_COUNTRIES = "countries";
+
+  /**
+   * Choices of text-to-speech languages. {@link
+   * com.google.appinventor.client.widgets.properties.LanguageChoicePropertyEditor}.
+   */
+  public static final String PROPERTY_TYPE_TEXT_TO_SPEECH_LANGUAGES = "languages";
+
+  /**
+   * Choices of the "Sizing" property in Form.java. Used to specify if we are going to use
+   * the true size of the real screen (responsize) or scale automatically to make all devices
+   * look like an old phone (fixed).
+   */
+  public static final String PROPERTY_TYPE_SIZING = "sizing";
+
+  /**
+   * FirebaseURL -- A type of String property that has a special default value
+   * selected via a checkbox.
+   */
+
+  public static final String PROPERTY_TYPE_FIREBASE_URL = "FirbaseURL";
+
+  /**
+   * Specifies how a picture is scaled when its dimensions are changed.
+   * Choices are 0 - Scale proportionally, 1 - Scale to fit
+   * See {@link com.google.appinventor.client.widgets.properties.ScalingChoicePropertyEditor}
+   */
+   public static final String PROPERTY_TYPE_SCALING = "scaling";
 }

@@ -115,6 +115,8 @@ public class TranslationDesignerPallete {
       // Sensor
     } else if (key.equals("AccelerometerSensor")) {
       value = MESSAGES.accelerometerSensorComponentPallette();
+    } else if (key.equals("GyroscopeSensor")) {
+      value = MESSAGES.gyroscopeSensorComponentPallette();
     } else if (key.equals("LocationSensor")) {
       value = MESSAGES.locationSensorComponentPallette();
     } else if (key.equals("NearField")) {
@@ -154,6 +156,8 @@ public class TranslationDesignerPallete {
       value = MESSAGES.bluetoothServerComponentPallette();
     } else if (key.equals("Notifier")) {
       value = MESSAGES.notifierComponentPallette();
+    } else if (key.equals("ProximitySensor")) {
+      value = MESSAGES.proximitySensorComponentPallette();
     } else if (key.equals("SpeechRecognizer")) {
       value = MESSAGES.speechRecognizerComponentPallette();
     } else if (key.equals("TextToSpeech")) {
@@ -216,6 +220,8 @@ public class TranslationDesignerPallete {
       value = MESSAGES.FusiontablesControlHelpStringComponentPallette();
     } else if (key.equals("GameClient-helpString")) {
       value = MESSAGES.GameClientHelpStringComponentPallette();
+    } else if (key.equals("GyroscopeSensor-helpString")) {
+      value = MESSAGES.GyroscopeSensorHelpStringComponentPallette();
     } else if (key.equals("HorizontalArrangement-helpString")) {
       value = MESSAGES.HorizontalArrangementHelpStringComponentPallette();
     } else if (key.equals("Image-helpString")) {
@@ -236,6 +242,8 @@ public class TranslationDesignerPallete {
       value = MESSAGES.NearFieldHelpStringComponentPallette();
     } else if (key.equals("Notifier-helpString")) {
       value = MESSAGES.NotifierHelpStringComponentPallette();
+    } else if (key.equals("ProximitySensor-helpString")) {
+      value = MESSAGES.ProximitySensorHelpStringComponentPallette();
     } else if (key.equals("NxtColorSensor-helpString")) {
       value = MESSAGES.NxtColorSensorHelpStringComponentPallette();
     } else if (key.equals("NxtDirectCommands-helpString")) {
@@ -304,6 +312,8 @@ public class TranslationDesignerPallete {
       value = MESSAGES.WebViewerHelpStringComponentPallette();
     } else if (key.equals("YandexTranslate-helpString")) {
       value = MESSAGES.YandexTranslateHelpStringComponentPallette();
+    } else if (key.equals("FirebaseDB-helpString")) {
+      value = MESSAGES.FirebaseDBHelpStringComponentPallette();
     }
     return value;
   }

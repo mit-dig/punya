@@ -180,12 +180,14 @@ Blockly.Drawer.instanceNameToXMLArray = function(instanceName) {
   //create event blocks
   var eventObjects = Blockly.ComponentTypes[typeName].componentInfo.events;
   for(var i=0;i<eventObjects.length;i++) {
+    if (eventObjects[i].deprecated === "true") continue;
     mutatorAttributes = {component_type: typeName, instance_name: instanceName, event_name : eventObjects[i].name};
     xmlArray = xmlArray.concat(Blockly.Drawer.blockTypeToXMLArray("component_event",mutatorAttributes));
   }
   //create non-generic method blocks
   var methodObjects = Blockly.ComponentTypes[typeName].componentInfo.methods;
   for(var i=0;i<methodObjects.length;i++) {
+    if (methodObjects[i].deprecated === "true") continue;
     mutatorAttributes = {component_type: typeName, instance_name: instanceName, method_name: methodObjects[i].name, is_generic:"false"};
     xmlArray = xmlArray.concat(Blockly.Drawer.blockTypeToXMLArray("component_method",mutatorAttributes));
   }
@@ -194,6 +196,7 @@ Blockly.Drawer.instanceNameToXMLArray = function(instanceName) {
   var propertyObjects = Blockly.ComponentTypes[typeName].componentInfo.blockProperties;
   for(var i=0;i<propertyObjects.length;i++) {
     //create non-generic get block
+    if (propertyObjects[i].deprecated === "true") continue;
     if(propertyObjects[i].rw == "read-write" || propertyObjects[i].rw == "read-only") {
       mutatorAttributes = {set_or_get:"get", component_type: typeName, instance_name: instanceName, property_name: propertyObjects[i].name, is_generic: "false"};
       xmlArray = xmlArray.concat(Blockly.Drawer.blockTypeToXMLArray("component_set_get",mutatorAttributes));
@@ -219,6 +222,7 @@ Blockly.Drawer.componentTypeToXMLArray = function(typeName) {
   //create generic method blocks
   var methodObjects = Blockly.ComponentTypes[typeName].componentInfo.methods;
   for(var i=0;i<methodObjects.length;i++) {
+    if (methodObjects[i].deprecated === "true") continue;
     mutatorAttributes = {component_type: typeName, method_name: methodObjects[i].name, is_generic:"true"};
     xmlArray = xmlArray.concat(Blockly.Drawer.blockTypeToXMLArray("component_method",mutatorAttributes));
   }
@@ -227,6 +231,7 @@ Blockly.Drawer.componentTypeToXMLArray = function(typeName) {
   var propertyObjects = Blockly.ComponentTypes[typeName].componentInfo.blockProperties;
   for(var i=0;i<propertyObjects.length;i++) {
     //create generic get block
+    if (propertyObjects[i].deprecated === "true") continue;
     if(propertyObjects[i].rw == "read-write" || propertyObjects[i].rw == "read-only") {
       mutatorAttributes = {set_or_get: "get", component_type: typeName, property_name: propertyObjects[i].name, is_generic: "true"};
       xmlArray = xmlArray.concat(Blockly.Drawer.blockTypeToXMLArray("component_set_get",mutatorAttributes));
@@ -276,16 +281,28 @@ Blockly.Drawer.mutatorAttributesToXMLString = function(mutatorAttributes){
 
 // [lyn, 10/22/13] return an XML string including one procedure caller for each procedure declaration
 // in main workspace.
-Blockly.Drawer.procedureCallersXMLString = function(returnsValue) {
+// [jos, 10/18/15] if we pass a proc_name, we only want one procedure returned as xmlString
+Blockly.Drawer.procedureCallersXMLString = function(returnsValue, proc_name) {
   var xmlString = '<xml>'  // Used to accumulate xml for each caller
   var decls = Blockly.AIProcedure.getProcedureDeclarationBlocks(returnsValue);
-  decls.sort(Blockly.Drawer.compareDeclarationsByName); // sort decls lexicographically by procedure name
-  for (var i = 0; i < decls.length; i++) {
-    xmlString += Blockly.Drawer.procedureCallerBlockString(decls[i]);
+
+  if (proc_name) {
+    for (var i = 0; i < decls.length; i++) {
+      if (decls[i].getFieldValue('NAME').toLocaleLowerCase() == proc_name){
+        xmlString += Blockly.Drawer.procedureCallerBlockString(decls[i]);
+        break;
+      }
+    }
+  }
+  else {
+    decls.sort(Blockly.Drawer.compareDeclarationsByName); // sort decls lexicographically by procedure name
+    for (var i = 0; i < decls.length; i++) {
+      xmlString += Blockly.Drawer.procedureCallerBlockString(decls[i]);
+    }
   }
   xmlString += '</xml>';
   return xmlString;
-}
+};
 
 Blockly.Drawer.compareDeclarationsByName = function (decl1, decl2) {
   var name1 = decl1.getFieldValue('NAME').toLocaleLowerCase();
@@ -419,6 +436,17 @@ Blockly.Drawer.defaultBlockXMLStrings = {
          '</block>' +
          '</xml>';}},
 
+    {matchingMutatorAttributes:{component_type:"FirebaseDB", method_name:"GetValue"},
+      mutatorXMLStringFunction: function(mutatorAttributes) {
+        return '' +
+            '<xml>' +
+            '<block type="component_method">' +
+              //mutator generator
+            Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
+            '<value name="ARG1"><block type="text"><title name="TEXT"></title></block></value>' +
+            '</block>' +
+            '</xml>';}},
+
     // Notifer.ShowTextDialog has cancelable default to TRUE
     {matchingMutatorAttributes:{component_type:"Notifier", method_name:"ShowTextDialog"},
      mutatorXMLStringFunction: function(mutatorAttributes) {
@@ -440,6 +468,42 @@ Blockly.Drawer.defaultBlockXMLStrings = {
          //mutator generator
          Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
          '<value name="ARG4"><block type="logic_boolean"><title name="BOOL">TRUE</title></block></value>' +
+         '</block>' +
+         '</xml>';}},
+
+    // Canvas.DrawCircle has fill default to TRUE
+    {matchingMutatorAttributes:{component_type:"Canvas", method_name:"DrawCircle"},
+     mutatorXMLStringFunction: function(mutatorAttributes) {
+       return '' +
+         '<xml>' +
+         '<block type="component_method">' +
+         //mutator generator
+         Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
+         '<value name="ARG3"><block type="logic_boolean"><title name="BOOL">TRUE</title></block></value>' +
+         '</block>' +
+         '</xml>';}},
+
+    // Clock.FormatDate has pattern default to MMM d, yyyy
+    {matchingMutatorAttributes:{component_type:"Clock", method_name:"FormatDate"},
+     mutatorXMLStringFunction: function(mutatorAttributes) {
+       return '' +
+         '<xml>' +
+         '<block type="component_method">' +
+         //mutator generator
+         Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
+         '<value name="ARG1"><block type="text"><field name="TEXT">MMM d, yyyy</field></block></value>' +
+         '</block>' +
+         '</xml>';}},
+
+    // Clock.FormatDateTime has pattern default to MM/dd/yyyy hh:mm:ss a
+    {matchingMutatorAttributes:{component_type:"Clock", method_name:"FormatDateTime"},
+     mutatorXMLStringFunction: function(mutatorAttributes) {
+       return '' +
+         '<xml>' +
+         '<block type="component_method">' +
+         //mutator generator
+         Blockly.Drawer.mutatorAttributesToXMLString(mutatorAttributes) +
+         '<value name="ARG1"><block type="text"><field name="TEXT">MM/dd/yyyy hh:mm:ss a</field></block></value>' +
          '</block>' +
          '</xml>';}}
   ]

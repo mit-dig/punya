@@ -70,13 +70,19 @@ public interface Images extends Resources {
   ImageResource phonebar();
 
   /**
+   * Navigation bar shown below the form in the visual designer
+   */
+  @Source("com/google/appinventor/images/navigationbar.png")
+  ImageResource navigationbar();
+
+  /**
    * Designer palette item: question mark for more component information
    */
   @Source("com/google/appinventor/images/help.png")
   ImageResource help();
 
   /**
-   * Designer palette item: accelerometersensor component
+   * Designer palette item: nearfield component
    */
   @Source("com/google/appinventor/images/nearfield.png")
   ImageResource nearfield();
@@ -124,7 +130,7 @@ public interface Images extends Resources {
   ImageResource checkbox();
 
   /**
-   * Designer palette item: TimePicker Component
+   * Designer palette item: DatePicker Component
    */
   @Source("com/google/appinventor/images/datePicker.png")
   ImageResource datePickerComponent();
@@ -355,6 +361,12 @@ public interface Images extends Resources {
   ImageResource tinyWebDB();
 
   /**
+   * Designer palette item: FirebaseDB Component
+   */
+  @Source("com/google/appinventor/images/firebaseDB.png")
+  ImageResource firebaseDB();
+
+  /**
    * Designer palette item: TextToSpeech component
    */
   @Source("com/google/appinventor/images/textToSpeech.png")
@@ -434,6 +446,12 @@ public interface Images extends Resources {
   ImageResource web();
 
   /**
+   * Designer palette item: GyroscopeSensor component
+   */
+  @Source("com/google/appinventor/images/gyroscopesensor.png")
+  ImageResource gyroscopesensor();
+
+  /**
    * Built in drawer item: control
    */
   @Source("com/google/appinventor/images/control.png")
@@ -495,6 +513,20 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/gmapBig.png")
   ImageResource googleMapBig();
   
+  /**
+  * Designer palette item: Graph component
+  */
+  @Source("com/google/appinventor/images/graph.png")
+  ImageResource graph();
+
+  /**
+  * Designer item: Graph component in designer
+  *
+  */
+  @Source("com/google/appinventor/images/graphBig.png")
+  ImageResource graphBig();
+  
+
   /**
    * Designer palette item: WifiSensor component
    */
@@ -635,6 +667,11 @@ public interface Images extends Resources {
   @Source("com/google/appinventor/images/pebble.png")
   ImageResource pebbleSmartWatch();
 
+  /**
+    * Designer palette item: MediaStore
+    */
+  @Source("com/google/appinventor/images/mediastore.png")
+  ImageResource mediastore();
 
   /**
    * Designer palette item: Sharing Component
@@ -653,6 +690,5 @@ public interface Images extends Resources {
     */
   @Source("com/google/appinventor/images/yandex.png")
   ImageResource yandex();
-
 
 }

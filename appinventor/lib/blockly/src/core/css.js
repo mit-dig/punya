@@ -114,6 +114,15 @@ Blockly.Css.CONTENT = [
   '  display: none;',
   '}',
 
+  '.badBlock>.blocklyPath {',
+  '  stroke-width: 3px;',
+  '  stroke: #f00;',
+  '}',
+
+  '.badBlockl>.blocklyPathLight {',
+  '  display: none;',
+  '}',
+
   '.blocklyDragging>.blocklyPath,',
   '.blocklyDragging>.blocklyPathLight {',
   '  fill-opacity: .8;',
@@ -372,7 +381,10 @@ Blockly.Css.CONTENT = [
   '  fill: #ddd;',
   '  fill-opacity: .8;',
   '}',
-
+  '.blocklybackpackFlyoutBackground {',
+  '  fill: #ddd;',
+  '  fill-opacity: .8;',
+  '}',
   '.blocklyColourBackground {',
   '  fill: #666;',
   '}',

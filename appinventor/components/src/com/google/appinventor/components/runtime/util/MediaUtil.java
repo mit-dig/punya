@@ -36,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Utilities for loading media.
@@ -124,7 +125,29 @@ public class MediaUtil {
     return MediaSource.ASSET;
   }
 
+  private static ConcurrentHashMap<String, String> pathCache = new ConcurrentHashMap<String, String>(2);
+
   private static String findCaseinsensitivePath(Form form, String mediaPath)
+      throws IOException{
+    if( !pathCache.containsKey(mediaPath) ){
+      String newPath = findCaseinsensitivePathWithoutCache(form, mediaPath);
+      if( newPath == null){
+        return null;
+      }
+      pathCache.put(mediaPath, newPath);
+    }
+    return pathCache.get(mediaPath);
+  }
+
+  /**
+   * Don't use this directly! Use findCaseinsensitivePath. It has caching.
+   * This is the original findCaseinsensitivePath, unchanged.
+   * @param form the Form
+   * @param mediaPath the path to the media to resolve
+   * @return the correct path, adjusted for case errors
+   * @throws IOException
+   */
+  private static String findCaseinsensitivePathWithoutCache(Form form, String mediaPath)
       throws IOException{
     String[] mediaPathlist = form.getAssets().list("");
     int l = Array.getLength(mediaPathlist);
@@ -150,10 +173,10 @@ public class MediaUtil {
       return form.getAssets().open(mediaPath);
 
     } catch (IOException e) {
-        if (findCaseinsensitivePath(form, mediaPath) == null) {
+      String path = findCaseinsensitivePath(form, mediaPath);
+      if (path == null) {
           throw e;
         } else {
-          String path = findCaseinsensitivePath(form, mediaPath);
           return form.getAssets().open(path);
         }
     }
@@ -181,8 +204,8 @@ public class MediaUtil {
       case CONTACT_URI:
         // Open the photo for the contact.
         InputStream is = null;
-        if (SdkLevel.getLevel() >= SdkLevel.LEVEL_HONEYCOMB) {
-          is = HoneycombUtil.openContactPhotoInputStreamHelper(form.getContentResolver(),
+        if (SdkLevel.getLevel() >= SdkLevel.LEVEL_HONEYCOMB_MR1) {
+          is = HoneycombMR1Util.openContactPhotoInputStreamHelper(form.getContentResolver(),
               Uri.parse(mediaPath));
         } else {
           is = Contacts.People.openContactPhotoInputStream(form.getContentResolver(),
@@ -293,15 +316,45 @@ public class MediaUtil {
 
     BitmapFactory.Options options;
     try {
-      options = getBitmapOptions(form, is1);
+      options = getBitmapOptions(form, is1, mediaPath);
     } finally {
       is1.close();
     }
 
     InputStream is2 = openMedia(form, mediaPath, mediaSource);
-      BitmapDrawable originalBitmapDrawable = null;
     try {
-      return new BitmapDrawable(decodeStream(is2, null, options));
+      Log.d(LOG_TAG, "mediaPath = " + mediaPath);
+      BitmapDrawable originalBitmapDrawable = new BitmapDrawable(decodeStream(is2, null, options));
+      // If options.inSampleSize == 1, then the image was not unreasonably large and may represent
+      // the actual size the user intended for the image. However we still have to scale it by
+      // the device density.
+      // However if we *did* sample the image to make it smaller, then that means that the image
+      // was not sized specifically for the application. In that case it makes no sense to
+      // scale it, so we don't.
+      // When we scale the image we do the following steps:
+      //   1. set the density in the returned bitmap drawable.
+      //   2. calculate scaled width and height
+      //   3. create a scaled bitmap with the scaled measures
+      //   4. create a new bitmap drawable with the scaled bitmap
+      //   5. set the density in the scaled bitmap.
+
+      originalBitmapDrawable.setTargetDensity(form.getResources().getDisplayMetrics());
+      if ((options.inSampleSize != 1) || (form.deviceDensity() == 1.0f)) {
+        return originalBitmapDrawable;
+      }
+      int scaledWidth = (int) (form.deviceDensity() * originalBitmapDrawable.getIntrinsicWidth());
+      int scaledHeight = (int) (form.deviceDensity() * originalBitmapDrawable.getIntrinsicHeight());
+      Log.d(LOG_TAG, "form.deviceDensity() = " + form.deviceDensity());
+      Log.d(LOG_TAG, "originalBitmapDrawable.getIntrinsicWidth() = " + originalBitmapDrawable.getIntrinsicWidth());
+      Log.d(LOG_TAG, "originalBitmapDrawable.getIntrinsicHeight() = " + originalBitmapDrawable.getIntrinsicHeight());
+      Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmapDrawable.getBitmap(),
+          scaledWidth, scaledHeight, false);
+      BitmapDrawable scaledBitmapDrawable = new BitmapDrawable(scaledBitmap);
+      scaledBitmapDrawable.setTargetDensity(form.getResources().getDisplayMetrics());
+      originalBitmapDrawable = null; // So it will get GC'd on the next line
+      System.gc();                   // We likely used a lot of memory, so gc now.
+      return scaledBitmapDrawable;
+
     } finally {
       if (is2 != null) {
         is2.close();
@@ -342,7 +395,7 @@ public class MediaUtil {
     }
   }
 
-  private static BitmapFactory.Options getBitmapOptions(Form form, InputStream is) {
+  private static BitmapFactory.Options getBitmapOptions(Form form, InputStream is, String mediaPath) {
     // Get the size of the image.
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inJustDecodeBounds = true;
@@ -358,13 +411,26 @@ public class MediaUtil {
     // width/height of the screen.
     // The goal is to never make an image that is actually larger than the screen end up appearing
     // smaller than the screen.
-    int maxWidth = 2 * display.getWidth();
-    int maxHeight = 2 * display.getHeight();
+    // int maxWidth = 2 * display.getWidth();
+    // int maxHeight = 2 * display.getHeight();
+    int maxWidth;
+    int maxHeight;
+    if (form.getCompatibilityMode()) { // Compatibility Mode
+      maxWidth = 360 * 2;     // Originally used 2 times device size, continue to do so here
+      maxHeight = 420 * 2;
+    } else {                    // Responsive Mode
+      maxWidth = (int) (display.getWidth() / form.deviceDensity());
+      maxHeight = (int) (display.getHeight() / form.deviceDensity());
+    }
+
     int sampleSize = 1;
     while ((imageWidth / sampleSize > maxWidth) && (imageHeight / sampleSize > maxHeight)) {
       sampleSize *= 2;
     }
     options = new BitmapFactory.Options();
+    Log.d(LOG_TAG, "getBitmapOptions: sampleSize = " + sampleSize + " mediaPath = " + mediaPath
+      + " maxWidth = " + maxWidth + " maxHeight = " + maxHeight +
+      " display width = " + display.getWidth() + " display height = " + display.getHeight());
     options.inSampleSize = sampleSize;
     return options;
   }
@@ -384,10 +450,10 @@ public class MediaUtil {
       return form.getAssets().openFd(mediaPath);
 
     } catch (IOException e) {
-      if (findCaseinsensitivePath(form, mediaPath) == null){
+      String path = findCaseinsensitivePath(form, mediaPath);
+      if (path == null){
         throw e;
       } else {
-      String path = findCaseinsensitivePath(form, mediaPath);
       return form.getAssets().openFd(path);
       }
     }

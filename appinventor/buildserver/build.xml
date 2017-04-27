@@ -71,6 +71,11 @@
     <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-3.0.5.jar" />
     <copy toFile="${classes.files.dir}/twitter4jmedia.jar" file="${lib.dir}/twitter/twitter4j-media-support-3.0.5.jar" />
     <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
+    <copy toFile="${classes.files.dir}/httpcore-4.3.2.jar" file="${lib.dir}/apache-http/httpcore-4.3.2.jar" />
+    <copy toFile="${classes.files.dir}/httpmime-4.3.4.jar" file="${lib.dir}/apache-http/httpmime-4.3.4.jar" />
+    <copy toFile="${classes.files.dir}/firebase.jar" file="${lib.dir}/firebase/firebase-client-android-2.5.0.jar" />
+    <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
+    <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-api-client-android2-beta.jar" file="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android2-beta.jar" file="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
     <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
@@ -108,7 +113,9 @@
     <copy toFile="${classes.files.dir}/android-support-v4.jar" file="${lib.dir}/android_support/android-support-v4.jar" />
 	<!-- below three are for the dropbox -->
     <copy toFile="${classes.files.dir}/dropbox.jar" file="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
-    <copy toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar" file="${lib.dir}/dropbox/httpmime-4.0.3.jar" />
+<!--    <copy
+toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar"
+file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
     <copy toFile="${classes.files.dir}/json-simple.jar" file="${lib.dir}/dropbox/json_simple-1.1.jar" /> 
     <!-- above three are for dropbox -->   
     
@@ -149,18 +156,41 @@
     </copy>
   </target>
 
+
+  <!-- =====================================================================
+       Checks to see if a debug.keystore file exists in the invoker's
+       home directory (in the .appinventor subdirectory)
+       ===================================================================== -->
+  <target name="CheckKeystore"
+          depends="init">
+    <available file="${user.home}/.appinventor/debug.keystore"
+               property="keystore.exists" />
+  </target>
+
+  <!-- =====================================================================
+       Creates a personal DEBUG keystore in the invoker's .appinventor
+       subdirectory.
+       ===================================================================== -->
+
+  <target name="MakeKeyStore"
+          depends="init,CheckKeystore" unless="${keystore.exists}">
+    <mkdir dir="${user.home}/.appinventor" />
+    <genkey alias="androidkey" dname="CN=Android Debug, O=Android, C=US" storepass="android"
+            keystore="${user.home}/.appinventor/debug.keystore" keyalg="rsa"
+            validity="10000" />
+  </target>
+
   <!-- =====================================================================
        GenPlayAppSrcZip Version for the Google Play Store works over WiFi
        ===================================================================== -->
   <target name="GenPlayAppSrcZip"
-          depends="init">
-    <!-- Note that if you want to pre-generate an android.keystore file for use in signing the
-         AppInventorDebugApp.apk (i.e. the stem cell app) you should put that file in the
-         ${appinventor.dir}/aiplayapp directory and add 'android.keystore' to the includes
-         list below.
-      -->
+          depends="init,MakeKeyStore">
+    <copy tofile="${appinventor.dir}/aiplayapp/android.keystore" file="${user.home}/.appinventor/debug.keystore" />
     <zip destfile="${local.build.dir}/aiplayapp.zip" basedir="${appinventor.dir}/aiplayapp" filesonly="true"
-         includes="src/**/*,youngandroidproject/*,assets/*" />
+         includes="src/**/*,youngandroidproject/*,assets/*,android.keystore" />
+    <!-- We delete the keyfile below so as to not leave it laying around the source
+         tree -->
+    <delete file="${appinventor.dir}/aiplayapp/android.keystore" failonerror="true" />
   </target>
 
   <!-- =====================================================================
@@ -226,6 +256,8 @@
       <sysproperty key="file.encoding" value="UTF-8" />
       <arg value="--dexCacheDir" />
       <arg value="${public.build.dir}/dexCache" />
+      <arg value="--shutdownToken" />
+      <arg value="token" />
     </java>
   </target>
 

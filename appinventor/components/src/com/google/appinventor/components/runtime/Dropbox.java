@@ -93,7 +93,7 @@ import edu.mit.media.funf.storage.UploadService;
     "android.permission.ACCESS_NETWORK_STATE")
  @UsesLibraries(libraries =
     "dropbox.jar," +
-    "apache-httpcomponent-httpmime.jar," +
+    "httpmime-4.3.4.jar," +
     "funf.jar," +
     "json-simple.jar")
 public class Dropbox extends AndroidNonvisibleComponent

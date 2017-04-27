@@ -2,11 +2,15 @@ package com.google.appinventor.components.runtime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import android.util.Log;
 
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -29,8 +33,6 @@ import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-
-import android.util.Log;
 
 @DesignerComponent(version = YaVersion.LINKED_DATA_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
@@ -362,6 +364,53 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     return clazz.isPrimitive() || WRAPPER_TYPES.contains(clazz);
   }
 
+  @SimpleFunction
+  public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filePath) {
+    try {
+      Runnable call = new Runnable() {
+        public void run() {
+        	doInsertData(Url, certificateName, securityToken, filePath);
+        }
+      };
+      AsynchUtil.runAsynchronously(call);
+    } catch (Exception e) {
+    	Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+        	FailedHttsPostingFileToWeb("Please see system log (logcat) for more info.");
+        }
+      });
+    }
+  }
+  
+  private void doInsertData(final String Url, final String certificateName, final String securityToken, final String filePath) {
+		try {
+    	final InputStream inputStream = form.getAssets().open(certificateName);
+			boolean success = RdfUtil.performHttpsRequest(Url, inputStream, securityToken, filePath);
+      if(success) {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+		        FinishedHttsPostingFileToWeb("done");
+          }
+        });
+      } else {
+        form.runOnUiThread(new Runnable() {
+          public void run() {
+		        FailedHttsPostingFileToWeb("Please see system log (logcat) for more info.");
+          }
+        });
+      }
+		} catch (IOException e) {
+			Log.e(LOG_TAG, "Unable to https post file to web." + e.getLocalizedMessage());
+    	final String erroMessage = e.getLocalizedMessage();
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+	        FailedHttsPostingFileToWeb(erroMessage);
+        }
+      });
+		}
+  }
+  
   /**
    * Attempts to insert the statements contained within this Linked Data
    * component into the endpoint with an optional graph.
@@ -475,42 +524,41 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     }
   }
 
-            @SimpleFunction
-            public String ResultsToSimpleJSON(final YailList results) {
-                StringBuilder sb = new StringBuilder("[");
-                for(int i = 0; i < results.size(); i++) {
-                    YailList solution = (YailList) results.getObject( i );
-                    if(i > 0) {
-                        sb.append(",");
-                    }
-                    sb.append("{");
-                    for(int j = 0; j < solution.size(); j++) {
-                        YailList binding = (YailList) solution.getObject( j );
-                        String varName = binding.getString( 0 );
-                        Object varValue = binding.getObject( 1 );
-                        if( j != 0 ) {
-                            sb.append(",");
-                        }
-                        sb.append("\"");
-                        sb.append(varName);
-                        sb.append("\":");
-                        if(isPrimitiveOrWrapper(varValue.getClass())) {
-                            sb.append(varValue);
-                        } else {
-                            sb.append("\"");
-                            sb.append(varValue);
-                            sb.append("\"");
-                        }
-                        sb.append("");
-                    }
-                    sb.append("}");
-                }
-                sb.append("]");
-                String result = sb.toString();
-                Log.d(LOG_TAG, "JSON = " + result);
-                return result;
-            }
-
+	@SimpleFunction
+	public String ResultsToSimpleJSON(final YailList results) {
+		StringBuilder sb = new StringBuilder("[");
+		for (int i = 0; i < results.size(); i++) {
+			YailList solution = (YailList) results.getObject(i);
+			if (i > 0) {
+				sb.append(",");
+			}
+			sb.append("{");
+			for (int j = 0; j < solution.size(); j++) {
+				YailList binding = (YailList) solution.getObject(j);
+				String varName = binding.getString(0);
+				Object varValue = binding.getObject(1);
+				if (j != 0) {
+					sb.append(",");
+				}
+				sb.append("\"");
+				sb.append(varName);
+				sb.append("\":");
+				if (isPrimitiveOrWrapper(varValue.getClass())) {
+					sb.append(varValue);
+				} else {
+					sb.append("\"");
+					sb.append(varValue);
+					sb.append("\"");
+				}
+				sb.append("");
+			}
+			sb.append("}");
+		}
+		sb.append("]");
+		String result = sb.toString();
+		Log.d(LOG_TAG, "JSON = " + result);
+		return result;
+	}
 
   @SimpleEvent
   public void FailedToFeedDataToWeb(String error) {
@@ -617,5 +665,15 @@ public class LinkedData extends AndroidNonvisibleComponent implements
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     model.write(out, "TTL");
     return out.toString();
+  }
+  
+  @SimpleEvent
+  public void FinishedHttsPostingFileToWeb(String message) {
+    EventDispatcher.dispatchEvent(this, "FinishedHttsPostingFileToWeb", message);
+  }
+  
+  @SimpleEvent
+  public void FailedHttsPostingFileToWeb(String errorMessage) {
+    EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb", errorMessage);
   }
 }

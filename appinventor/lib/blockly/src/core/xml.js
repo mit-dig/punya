@@ -124,6 +124,9 @@ Blockly.Xml.blockToDom_ = function(block) {
   if (block.isCollapsed()) {
     element.setAttribute('collapsed', true);
   }
+  if (block.isBadBlock()) {
+    element.setAttribute('badblock', true);
+  }
   if (block.disabled) {
     element.setAttribute('disabled', true);
   }
@@ -220,7 +223,15 @@ Blockly.Xml.domToWorkspace = function(workspace, xml) {
         if (Blockly.RTL) {
           width = workspace.getMetrics().viewWidth;
         }
-        for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
+// The commented line below was replaced because it would reference beyond
+// the end of the childNodes pseudo-array. In Chrome this is fine because
+// the value returned is "undefined" which counts as false. However when
+// using phantomjs (unit test) you wind up fetching memory garbage (!!)
+//
+//        for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
+        var xmlChild;
+        for (var x = 0; x < xml.childNodes.length; x++) {
+          xmlChild = xml.childNodes[x];
           if (xmlChild.nodeName.toLowerCase() == 'block') {
             var block = Blockly.Xml.domToBlock(workspace, xmlChild);
             var blockX = parseInt(xmlChild.getAttribute('x'), 10);
@@ -339,27 +350,6 @@ Blockly.Xml.domToBlockInner = function(workspace, xmlBlock, opt_reuseBlock) {
     block.initSvg();
   }
 
-  var inline = xmlBlock.getAttribute('inline');
-  if (inline) {
-    block.setInputsInline(inline == 'true');
-  }
-  var disabled = xmlBlock.getAttribute('disabled');
-  if (disabled) {
-    block.setDisabled(disabled == 'true');
-  }
-  var deletable = xmlBlock.getAttribute('deletable');
-  if (deletable) {
-    block.setDeletable(deletable == 'true');
-  }
-  var movable = xmlBlock.getAttribute('movable');
-  if (movable) {
-    block.setMovable(movable == 'true');
-  }
-  var editable = xmlBlock.getAttribute('editable');
-  if (editable) {
-    block.setEditable(editable == 'true');
-  }
-
   var blockChild = null;
   for (var x = 0, xmlChild; xmlChild = xmlBlock.childNodes[x]; x++) {
     if (xmlChild.nodeType == 3 && xmlChild.data.match(/^\s*$/)) {
@@ -453,6 +443,10 @@ Blockly.Xml.domToBlockInner = function(workspace, xmlBlock, opt_reuseBlock) {
   var inline = xmlBlock.getAttribute('inline');
   if (inline) {
     block.setInputsInline(inline == 'true');
+  }
+  var badblock = xmlBlock.getAttribute('badblock');
+  if (badblock) {
+    block.badBlock();
   }
   var disabled = xmlBlock.getAttribute('disabled');
   if (disabled) {

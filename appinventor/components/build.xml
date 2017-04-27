@@ -106,7 +106,7 @@
        ===================================================================== -->
   <target name="AndroidRuntime"
           description="Generate runtime library implementing components"
-          depends="CommonConstants,HtmlEntities">
+          depends="CommonConstants,HtmlEntities,common_CommonVersion">
     <property name="AndroidRuntime-class.dir" location="${class.dir}/AndroidRuntime" />
     <mkdir dir="${AndroidRuntime-class.dir}" />
 
@@ -125,7 +125,10 @@
 
         <pathelement location="${lib.dir}/twitter/twitter4j-core-3.0.5.jar" />
         <pathelement location="${lib.dir}/twitter/twitter4j-media-support-3.0.5.jar" />
+        <pathelement location="${lib.dir}/apache-http/httpcore-4.3.2.jar" />
+        <pathelement location="${lib.dir}/apache-http/httpmime-4.3.4.jar" />
         <pathelement location="${lib.dir}/fusiontables/fusiontables.jar" />
+        <pathelement location="${lib.dir}/firebase/firebase-client-android-2.5.0.jar" />
         <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
         <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
         <pathelement location="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
@@ -259,6 +262,8 @@
           <pathelement location="${lib.dir}/acra/acra-4.4.0.jar" />
           <pathelement location="${lib.dir}/twitter/twitter4j-core-3.0.5.jar" />
           <pathelement location="${lib.dir}/twitter/twitter4j-media-support-3.0.5.jar" />
+          <pathelement location="${lib.dir}/apache-http/httpcore-4.3.2.jar" />
+          <pathelement location="${lib.dir}/apache-http/httpmime-4.3.4.jar" />
           <pathelement location="${lib.dir}/fusiontables/fusiontables.jar" />
 <!--      <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" /> -->
           <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
@@ -270,6 +275,7 @@
           <pathelement location="${lib.dir}/twitter/twitter4j-core-android-2.2.6.jar" />
           <!--<pathelement location="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />-->
  	  <pathelement location="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
+          <pathelement location="${lib.dir}/firebase/firebase-client-android-2.5.0.jar" />
           <pathelement location="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
           <pathelement location="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
           <pathelement location="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
@@ -339,7 +345,7 @@
        ===================================================================== -->
   <target name="AnnotationProcessors"
           description="Create plugins for annotation processing"
-          depends="ComponentProcessingLib,CommonConstants,HtmlEntities">
+          depends="ComponentProcessingLib,CommonConstants,HtmlEntities,common_CommonUtils">
 
     <property name="AnnotationProcessors-class.dir"
               location="${class.dir}/AnnotationProcessors" />
@@ -411,7 +417,6 @@
        ===================================================================== -->
   <target name="ComponentList"
           description="Make simple_components.txt and simple_components_build_info.json."
-
           depends="AnnotationProcessors,AndroidRuntime,HtmlEntities,CommonConstants">
     <property name="ComponentList-class.dir" location="${class.dir}/ComponentList" />
     <mkdir dir="${ComponentList-class.dir}" />
@@ -442,7 +447,7 @@
             apt-target="${ComponentTranslation-class.dir}/ComponentsTranslation.java"/>
 
     <copy file="${ComponentTranslation-class.dir}/ComponentsTranslation.java"
-          todir="${appinventor.dir}/appengine/build/src/com/google/appinventor/client/" />
+          todir="${public.build.dir}/ComponentTranslation/src/com/google/appinventor/client/" />
 
   </target>
 

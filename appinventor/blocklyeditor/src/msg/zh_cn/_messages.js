@@ -54,7 +54,8 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
     Blockly.Msg.EXPAND_BLOCK = '展开代码块';
     Blockly.Msg.DISABLE_BLOCK = '禁用代码块';
     Blockly.Msg.ENABLE_BLOCK = '启用代码块';
-    Blockly.Msg.HELP = '帮助';
+    Blockly.Msg.HELP = '帮助';    
+    Blockly.Msg.EXPORT_IMAGE = '下载模块图像';
     Blockly.Msg.COLLAPSE_ALL = '折叠所有块';
     Blockly.Msg.EXPAND_ALL = '展开所有块';
     Blockly.Msg.ARRANGE_H = '横向排列所有块';
@@ -418,30 +419,8 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_MIN = '最小值';
     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_MAX = '最大值';
 
-//TODO: I don't think any of this is useful anymore...Delete?
-    /*Blockly.Msg.LANG_MATH_ONLIST_HELPURL = '';
-     Blockly.Msg.LANG_MATH_ONLIST_INPUT_OFLIST = 'of list';
-     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_SUM = 'sum';
-     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_AVERAGE = 'average';
-     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_MEDIAN = 'median';
-     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_MODE = 'modes';
-     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_STD_DEV = 'standard deviation';
-     Blockly.Msg.LANG_MATH_ONLIST_OPERATOR_RANDOM = 'random item';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_SUM = 'Return the sum of all the numbers in the list.';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_MIN = 'Return the smallest of its arguments..';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_MAX = 'Return the largest of its arguments..';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_AVERAGE = 'Return the arithmetic mean of the list.';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_MEDIAN = 'Return the median number in the list.';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_MODE = 'Return a list of the most common item(s) in the list.';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_STD_DEV = 'Return the standard deviation of the list.';
-     Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_RANDOM = 'Return a random element from the list.';
-
-     Blockly.Msg.LANG_MATH_CONSTRAIN_HELPURL = 'http://en.wikipedia.org/wiki/Clamping_%28graphics%29';
-     Blockly.Msg.LANG_MATH_CONSTRAIN_INPUT_CONSTRAIN = 'constrain';
-     Blockly.Msg.LANG_MATH_CONSTRAIN_INPUT_LOW = 'between (low)';
-     Blockly.Msg.LANG_MATH_CONSTRAIN_INPUT_HIGH = 'and (high)';
-     Blockly.Msg.LANG_MATH_CONSTRAIN_TOOLTIP = 'Constrain a number to be between the specified limits (inclusive).';
-*/
+    Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_MIN = 'Return the smallest of its arguments..';
+    Blockly.Msg.LANG_MATH_ONLIST_TOOLTIP_MAX = 'Return the largest of its arguments..';
 
     Blockly.Msg.LANG_MATH_DIVIDE = '除以';
     Blockly.Msg.LANG_MATH_DIVIDE_OPERATOR_MODULO = '模数';
@@ -489,6 +468,35 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
     Blockly.Msg.LANG_MATH_IS_A_NUMBER_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/math#isnumber';
     Blockly.Msg.LANG_MATH_IS_A_NUMBER_INPUT_NUM = '是否为数字?';
     Blockly.Msg.LANG_MATH_IS_A_NUMBER_TOOLTIP = '判断该对象是否为数字类型';
+    
+    // Blockly.Msg.LANG_MATH_IS_A_DECIMAL_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/math#isnumber';
+    // Blockly.Msg.LANG_MATH_IS_A_DECIMAL_INPUT_NUM = 'is base 10?';
+    // Blockly.Msg.LANG_MATH_IS_A_DECIMAL_TOOLTIP = 'Tests if something is decimal.';
+
+    // Blockly.Msg.LANG_MATH_IS_A_HEXADECIMAL_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/math#isnumber';
+    // Blockly.Msg.LANG_MATH_IS_A_HEXADECIMAL_INPUT_NUM = 'is hexadecimal?';
+    // Blockly.Msg.LANG_MATH_IS_A_HEXADECIMAL_TOOLTIP = 'Tests if something is hexadecimal.';
+
+    // Blockly.Msg.LANG_MATH_IS_A_BINARY_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/math#isnumber';
+    // Blockly.Msg.LANG_MATH_IS_A_BINARY_INPUT_NUM = 'is binary?';
+    // Blockly.Msg.LANG_MATH_IS_A_BINARY_TOOLTIP = 'Tests if something is binary.';
+
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_TITLE_CONVERT = 'convert number';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_OP_DEC_TO_HEX = 'base 10 to hex';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_HELPURL_DEC_TO_HEX = '';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_TOOLTIP_DEC_TO_HEX = 'Returns the conversion from decimal to hexadecimal';
+
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_OP_HEX_TO_DEC = 'hex to base 10';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_HELPURL_HEX_TO_DEC = '';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_TOOLTIP_HEX_TO_DEC = 'Returns the conversion from hexadecimal to decimal';
+
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_OP_DEC_TO_BIN = 'base 10 to binary';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_HELPURL_DEC_TO_BIN = '';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_TOOLTIP_DEC_TO_BIN = 'Returns the conversion from decimal to binary';
+
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_OP_BIN_TO_DEC = 'binary to base 10';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_HELPURL_BIN_TO_DEC = '';
+    // Blockly.Msg.LANG_MATH_CONVERT_NUMBER_TOOLTIP_BIN_TO_DEC = 'Returns the conversion from binary to decimal';  
     
 // Text Blocks.
     Blockly.Msg.LANG_CATEGORY_TEXT = '文本';
@@ -839,10 +847,10 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
     Blockly.Msg.LANG_VARIABLES_GLOBAL_DECLARATION_TOOLTIP = '创建全局变量，并通过挂接的代码块赋值';
 
     Blockly.Msg.LANG_VARIABLES_GET_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/variables#get';
-    Blockly.Msg.LANG_VARIABLES_GET_TITLE_GET = '求';
+    Blockly.Msg.LANG_VARIABLES_GET_TITLE_GET = '取';
     // Blockly.Msg.LANG_VARIABLES_GET_INPUT_ITEM = '项目';
-    Blockly.Msg.LANG_VARIABLES_GET_COLLAPSED_TEXT = '求变量值';
-    Blockly.Msg.LANG_VARIABLES_GET_TOOLTIP = '求变量值';
+    Blockly.Msg.LANG_VARIABLES_GET_COLLAPSED_TEXT = '取变量值';
+    Blockly.Msg.LANG_VARIABLES_GET_TOOLTIP = '取变量值';
 
     Blockly.Msg.LANG_VARIABLES_SET_HELPURL = 'http://appinventor.mit.edu/explore/ai2/support/blocks/variables#set';
     Blockly.Msg.LANG_VARIABLES_SET_TITLE_SET = '设';
@@ -925,7 +933,7 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
     Blockly.Msg.LANG_PROCEDURES_MUTATORCONTAINER_TITLE = '输入项';
     Blockly.Msg.LANG_PROCEDURES_MUTATORARG_TITLE = '输入:';
 
-    Blockly.Msg.LANG_PROCEDURES_HIGHLIGHT_DEF = '突出显示过程';
+    Blockly.Msg.LANG_PROCEDURES_HIGHLIGHT_DEF = '预览代码块功能';
 
     Blockly.Msg.LANG_PROCEDURES_MUTATORCONTAINER_TOOLTIP = '';
     Blockly.Msg.LANG_PROCEDURES_MUTATORARG_TOOLTIP = '';
@@ -968,10 +976,10 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
     Blockly.Msg.LANG_COMPONENT_BLOCK_CHECKBOX_PROPERTIES_HELPURL = '/reference/components/userinterface.html#checkboxproperties';
     Blockly.Msg.LANG_COMPONENT_BLOCK_CHECKBOX_EVENTS_HELPURL = '/reference/components/userinterface.html#checkboxevents';
 
-    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_HELPURL = '/reference/components/userinterface.html#Clock';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_PROPERTIES_HELPURL = '/reference/components/userinterface.html#clockproperties';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_EVENTS_HELPURL = '/reference/components/userinterface.html#clockevents';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_METHODS_HELPURL = '/reference/components/userinterface.html#clockmethods';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_HELPURL = '/reference/components/sensors.html#Clock';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_PROPERTIES_HELPURL = '/reference/components/sensors.html#Clock';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_EVENTS_HELPURL = '/reference/components/sensors.html#Clock';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_CLOCK_METHODS_HELPURL = '/reference/components/sensors.html#Clock';
 
     Blockly.Msg.LANG_COMPONENT_BLOCK_IMAGE_HELPURL = '/reference/components/userinterface.html#Image';
     Blockly.Msg.LANG_COMPONENT_BLOCK_IMAGE_PROPERTIES_HELPURL = '/reference/components/userinterface.html#imageproperties';
@@ -1091,25 +1099,30 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
     Blockly.Msg.LANG_COMPONENT_BLOCK_IMAGESPRITE_METHODS_HELPURL = '/reference/components/animation.html#imagespritemethods';
 
 //Sensor components
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_HELPURL = '/reference/components/sensor.html#AccelerometerSensor';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_PROPERTIES_HELPURL = '/reference/components/sensor.html#accelerometersensorproperties';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_EVENTS_HELPURL = '/reference/components/sensor.html#accelerometersensorevents';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_METHODS_HELPURL = '/reference/components/sensor.html#accelerometersensormethods';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_HELPURL = '/reference/components/sensors.html#AccelerometerSensor';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_PROPERTIES_HELPURL = '/reference/components/sensors.html#accelerometersensorproperties';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_EVENTS_HELPURL = '/reference/components/sensors.html#accelerometersensorevents';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ACCELEROMETERSENSOR_METHODS_HELPURL = '/reference/components/sensors.html#accelerometersensormethods';
 
-    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_HELPURL = '/reference/components/sensor.html#BarcodeScanner';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_PROPERTIES_HELPURL = '/reference/components/sensor.html#barcodescannerproperties';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_EVENTS_HELPURL = '/reference/components/sensor.html#barcodescannerevents';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_METHODS_HELPURL = '/reference/components/sensor.html#barcodescannermethods';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_HELPURL = '/reference/components/sensors.html#BarcodeScanner';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_PROPERTIES_HELPURL = '/reference/components/sensors.html#barcodescannerproperties';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_EVENTS_HELPURL = '/reference/components/sensors.html#barcodescannerevents';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_BARCODESCANNER_METHODS_HELPURL = '/reference/components/sensors.html#barcodescannermethods';
 
-    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_HELPURL = '/reference/components/sensor.html#LocationSensor';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_PROPERTIES_HELPURL = '/reference/components/sensor.html#locationsensorproperties';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_EVENTS_HELPURL = '/reference/components/sensor.html#locationsensorevents';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_METHODS_HELPURL = '/reference/components/sensor.html#locationsensormethods';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_GYROSCOPESENSOR_HELPURL = '/reference/components/sensors.html#GyroscopeSensor';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_GYROSCOPESENSOR_PROPERTIES_HELPURL = '/reference/components/sensors.html#gyroscopesensorproperties';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_GYROSCOPESENSOR_EVENTS_HELPURL = '/reference/components/sensors.html#gyroscopesensorevents';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_GYROSCOPESENSOR_METHODS_HELPURL = '/reference/components/sensors.html#gyroscopesensormethods';
 
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_HELPURL = '/reference/components/sensor.html#OrientationSensor';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_PROPERTIES_HELPURL = '/reference/components/sensor.html#orientationsensorproperties';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_EVENTS_HELPURL = '/reference/components/sensor.html#orientationsensorevents';
-    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_METHODS_HELPURL = '/reference/components/sensor.html#orientationsensormethods';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_HELPURL = '/reference/components/sensors.html#LocationSensor';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_PROPERTIES_HELPURL = '/reference/components/sensors.html#locationsensorproperties';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_EVENTS_HELPURL = '/reference/components/sensors.html#locationsensorevents';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_LOCATIONSENSOR_METHODS_HELPURL = '/reference/components/sensors.html#locationsensormethods';
+
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_HELPURL = '/reference/components/sensors.html#OrientationSensor';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_PROPERTIES_HELPURL = '/reference/components/sensors.html#orientationsensorproperties';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_EVENTS_HELPURL = '/reference/components/sensors.html#orientationsensorevents';
+    Blockly.Msg.LANG_COMPONENT_BLOCK_ORIENTATIONSENSOR_METHODS_HELPURL = '/reference/components/sensors.html#orientationsensormethods';
 
 //Social components
     Blockly.Msg.LANG_COMPONENT_BLOCK_CONTACTPICKER_HELPURL = '/reference/components/social.html#ContactPicker';
@@ -1285,9 +1298,10 @@ Blockly.Msg.zh_cn.switch_language_to_chinese_cn = {
 
 // Blocklyeditor.js
     Blockly.Msg.GENERATE_YAIL = "生成 Yail";
-    Blockly.Msg.DO_IT = "实现功能";
-    Blockly.Msg.CAN_NOT_DO_IT = "不能实现功能";
-    Blockly.Msg.CONNECT_TO_DO_IT = '你必须要连接AI伴侣或者模拟器才能使用"实现功能"';
+    Blockly.Msg.DO_IT = "预览代码块功能";
+    Blockly.Msg.CLEAR_DO_IT_ERROR = "清除錯誤";
+    Blockly.Msg.CAN_NOT_DO_IT = "不能预览代码块功能";
+    Blockly.Msg.CONNECT_TO_DO_IT = '你必须要连接AI伴侣或者模拟器才能使用"预览代码块功能"';
   }
 };
 

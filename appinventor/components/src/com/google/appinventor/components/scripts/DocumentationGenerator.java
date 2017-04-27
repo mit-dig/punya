@@ -151,7 +151,7 @@ public class DocumentationGenerator extends ComponentProcessor {
         // Output the category header.
         String categoryName = categories[column][row].getName();
         writer.write(String.format("<b><font size=\"5\">%s</font></b>\n<ul>\n",
-                                   categoryName));
+                                   categoryName.replace("\u00AE", "&copy;")));
         // Output the components with this category.  This algorithm for getting
         // components by category has poor complexity performance but is probably
         // more efficient in practice than maintaining a hash table mapping
@@ -181,6 +181,7 @@ public class DocumentationGenerator extends ComponentProcessor {
     boolean definitionWritten = false;
     for (Map.Entry<String, Property> entry : component.properties.entrySet()) {
       Property property = entry.getValue();
+      if (property.isDeprecated()) continue;
       if (property.isUserVisible() || component.designerProperties.containsKey(property.name)) {
         if (!definitionWritten) {
           writer.write("<dl>\n");
@@ -206,6 +207,7 @@ public class DocumentationGenerator extends ComponentProcessor {
     boolean definitionWritten = false;
     for (Map.Entry<String, Event> entry : component.events.entrySet()) {
       Event event = entry.getValue();
+      if (event.deprecated) continue;
       if (event.userVisible) {
         if (!definitionWritten) {
           writer.write("<dl>\n");
@@ -227,6 +229,7 @@ public class DocumentationGenerator extends ComponentProcessor {
     boolean definitionWritten = false;
     for (Map.Entry<String, Method> entry : component.methods.entrySet()) {
       Method method = entry.getValue();
+      if (method.deprecated) continue;
       if (method.userVisible) {
         if (!definitionWritten) {
           writer.write("<dl>\n");

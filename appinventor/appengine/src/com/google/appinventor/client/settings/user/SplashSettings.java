@@ -29,6 +29,8 @@ public final class SplashSettings extends Settings {
         "0", null, EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this, SettingsConstants.SPLASH_SETTINGS_DECLINED,
         "", null, EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this, SettingsConstants.SPLASH_SETTINGS_VERSION,
+        "0", null, EditableProperty.TYPE_INVISIBLE));
   }
 
   @Override

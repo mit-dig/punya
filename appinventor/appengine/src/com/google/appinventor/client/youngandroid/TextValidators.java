@@ -59,7 +59,20 @@ public final class TextValidators {
   public static boolean isValidIdentifier(String text) {
     return text.matches("^[a-zA-Z]\\w*$");
   }
-  
+
+  /**
+   * Checks whether the argument is a legal component identifier; please check
+   * Blockly.LexicalVariable.checkIdentifier for the regex reference
+   *
+   * @param text the proposed identifier
+   * @return {@code true} if the argument is a legal identifier, {@code false}
+   *         otherwise
+   */
+  public static boolean isValidComponentIdentifier(String text) {
+    return text.matches("^[^-0-9!&%^/>=<`'\"#:;,\\\\^\\*\\+\\.\\(\\)\\|\\{\\}\\[\\]\\ ]" +
+        "[^-!&%^/>=<'\"#:;,\\\\^\\*\\+\\.\\(\\)\\|\\{\\}\\[\\]\\ ]*$");
+  }
+
   /**
    * Checks whether the argument is a legal filename, meaning
    * it is unchanged by URL encoding and it meets the aapt
@@ -87,5 +100,26 @@ public final class TextValidators {
    */
   public static boolean isValidLengthFilename(String filename){
     return !(filename.length() > MAX_FILENAME_SIZE || filename.length() < MIN_FILENAME_SIZE);
+  }
+
+  /**
+   * Determines human-readable message for specific error.
+   * @param filename The filename (not path) of uploaded file
+   * @return String representing error message, empty string if no error
+   */
+  public static String getErrorMessage(String filename){
+    String errorMessage = "";
+    String noWhitespace = "[\\S]+";
+    String firstCharacterLetter = "[A-Za-z].*";
+    if(!filename.matches("[A-Za-z][A-Za-z0-9_]*") && filename.length() > 0) {
+      if(!filename.matches(noWhitespace)) { //Check to make sure that this project does not contain any whitespace
+        errorMessage = MESSAGES.whitespaceProjectNameError();
+      } else if (!filename.matches(firstCharacterLetter)) { //Check to make sure that the first character is a letter
+        errorMessage = MESSAGES.firstCharProjectNameError();
+      } else { //The text contains a character that is not a letter, number, or underscore
+        errorMessage = MESSAGES.invalidCharProjectNameError();
+      }
+    }
+    return errorMessage;
   }
 }

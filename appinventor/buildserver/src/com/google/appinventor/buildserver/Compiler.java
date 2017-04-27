@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -69,6 +70,9 @@ public final class Compiler {
   private static final String WEBVIEW_ACTIVITY_CLASS =
       "com.google.appinventor.components.runtime.WebViewActivity";
 
+  // Copied from SdkLevel.java (which isn't in our class path so we duplicate it here)
+  private static final String LEVEL_GINGERBREAD_MR1 = "10";
+
   public static final String RUNTIME_FILES_DIR = "/files/";
 
   // Build info constants.  Used for permissions, libraries and assets.
@@ -105,6 +109,13 @@ public final class Compiler {
   // The Google Maps API Key is from the QCRI gmail account
   private static final String DEFAULT_GOOGLE_MAPS_API_KEY = "AIzaSyCmOh64wdlLf5Ay4hXo_1M-vDWerizaUrk";
 
+  private static final String DEFAULT_APP_NAME = "";
+
+  //The API key is initialized here to prevent crashing. 
+  // The Google Maps API Key is from the QCRI gmail account
+  private static final String DEFAULT_GOOGLE_MAPS_API_KEY = "AIzaSyCmOh64wdlLf5Ay4hXo_1M-vDWerizaUrk";
+
+
   private static final String COMPONENT_PERMISSIONS =
           RUNTIME_FILES_DIR + "simple_components_permissions.json";
 
@@ -112,6 +123,7 @@ public final class Compiler {
           RUNTIME_FILES_DIR + "simple_components_templates.json";
 
   private static final String TEMPLATE_DIR = RUNTIME_FILES_DIR + "template/";
+  private static final String DEFAULT_MIN_SDK = "4";
 
   private static final String COMPONENT_BUILD_INFO =
       RUNTIME_FILES_DIR + "simple_components_build_info.json";
@@ -125,6 +137,8 @@ public final class Compiler {
       RUNTIME_FILES_DIR + "AndroidRuntime.jar";
   private static final String ANDROID_RUNTIME =
       RUNTIME_FILES_DIR + "android.jar";
+  private static final String ANDROID_SUPPORT_V4_JAR =
+      RUNTIME_FILES_DIR + "android-support-v4.jar";
   private static final String MAC_AAPT_TOOL =
       "/tools/mac/aapt";
   private static final String WINDOWS_AAPT_TOOL =
@@ -201,6 +215,7 @@ public final class Compiler {
   private Set<String> assetsNeeded; // Set of component assets
   private File libsDir; // The directory that will contain any native libraries for packaging
   private String dexCacheDir;
+  private boolean hasSecondDex = false; // True if classes2.dex should be added to the APK
 
 
   /*
@@ -347,8 +362,8 @@ public final class Compiler {
 
   // This patches around a bug in AAPT (and other placed in Android)
   // where an ampersand in the name string breaks AAPT.
-  private String cleanVname(String vname) {
-    return vname.replace("&", "and");
+  private String cleanName(String name) {
+    return name.replace("&", "and");
   }
 
   /*
@@ -361,15 +376,17 @@ public final class Compiler {
     String className = Signatures.getClassName(mainClass);
     String projectName = project.getProjectName();
     String vCode = (project.getVCode() == null) ? DEFAULT_VERSION_CODE : project.getVCode();
-    String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanVname(project.getVName());
+    String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanName(project.getVName());
+    String aName = (project.getAName() == null) ? DEFAULT_APP_NAME : cleanName(project.getAName());
     String gMapsAPIKey = (project.getMapsKey() == null) ? DEFAULT_GOOGLE_MAPS_API_KEY : project.getMapsKey();
+    String minSDK = DEFAULT_MIN_SDK;
     LOG.log(Level.INFO, "VCode: " + project.getVCode());
     LOG.log(Level.INFO, "VName: " + project.getVName());
     LOG.log(Level.INFO, "MapsKey: " + project.getMapsKey());
 
     // TODO(user): Use com.google.common.xml.XmlWriter
     try {
-      BufferedWriter out = new BufferedWriter(new FileWriter(manifestFile));
+      BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(manifestFile), "UTF-8"));
       out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
       // TODO(markf) Allow users to set versionCode and versionName attributes.
       // See http://developer.android.com/guide/publishing/publishing.html for
@@ -398,21 +415,22 @@ public final class Compiler {
           out.write("  <uses-feature android:name=\"android.hardware.wifi\" />\n"); // We actually require wifi
       }
 
+      // Firebase requires at least API 10 (Gingerbread MR1)
+      if (componentTypes.contains("FirebaseDB") && !isForCompanion) {
+        minSDK = LEVEL_GINGERBREAD_MR1;
+      }
+
       for (String permission : permissionsNeeded) {
         out.write("  <uses-permission android:name=\"" + permission + "\" />\n");
       }
 
-      
       // Google Cloud Messaging
       if (componentTypes.contains("GoogleCloudMessaging")|| componentTypes.contains("PctMessaging")){
     	  out.write("<permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
-    	  out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n"); 
-            
+    	  out.write("<uses-permission android:name=\"com.google.appinventor.aiphoneapp.permission.C2D_MESSAGE\" />\n");
     	  out.write("<permission android:name=\"" + packageName +".permission.C2D_MESSAGE\" android:protectionLevel=\"signature\" />\n");
-    	  out.write("<uses-permission android:name=\""+ packageName +".permission.C2D_MESSAGE\" />\n"); 
+    	  out.write("<uses-permission android:name=\""+ packageName +".permission.C2D_MESSAGE\" />\n");
       }
-      
-      
       // add permission, and uses-permission, uses-feature specifically for Google Map
       // as stated here https://developers.google.com/maps/documentation/android/start
       if (componentTypes.contains("GoogleMap")){
@@ -422,27 +440,11 @@ public final class Compiler {
           out.write(" <uses-permission android:name=\"" + packageName + ".permission.MAPS_RECEIVE\" />\n");
           out.write(" <uses-feature android:glEsVersion=\"0x00020000\" android:required=\"true\" />\n");
       }
-      
 
-      // TODO(markf): Change the minSdkVersion below if we ever require an SDK beyond 1.5.
       // The market will use the following to filter apps shown to devices that don't support
-      // the specified SDK version.  We might also want to allow users to specify minSdkVersion
-      // or have us specify higher SDK versions when the program uses a component that uses
-      // features from a later SDK (e.g. Bluetooth).
-      out.write("  <uses-sdk android:minSdkVersion=\"3\" />\n");
-
-      // If we set the targetSdkVersion to 4, we can run full size apps on tablets.
-      // On non-tablet hi-res devices like a Nexus One, the screen dimensions will be the actual
-      // device resolution. Unfortunately, images, canvas, sprites, and buttons with images are not
-      // sized appropriately. For example, an image component with an image that is 60x60, width
-      // and height properties set to automatic, is sized as 40x40. So they appear on the screen
-      // much smaller than they should be. There is code in Canvas and ImageSprite to work around
-      // this problem, but images and buttons are still an unsolved problem. We'll have to solve
-      // that before we can set the targetSdkVersion to 4 here.
-
-      // out.write("  <uses-sdk android:targetSdkVersion=\"4\" />\n");
-      // out.write("  <uses-sdk android:targetSdkVersion=\"8\" />\n");
-
+      // the specified SDK version.  We right now support building for minSDK 4.
+      // We might also want to allow users to specify minSdk version or targetSDK version.
+      out.write("  <uses-sdk android:minSdkVersion=\"" + minSDK + "\" />\n");
 
       out.write("  <application ");
 
@@ -453,10 +455,16 @@ public final class Compiler {
       // TODONE(jis): Turned off debuggable. No one really uses it and it represents a security
       // risk for App Inventor App end-users.
       out.write("android:debuggable=\"false\" ");
-      out.write("android:label=\"" + projectName + "\" ");
+      if (aName.equals("")) {
+        out.write("android:label=\"" + projectName + "\" ");
+      } else {
+        out.write("android:label=\"" + aName + "\" ");
+      }
       out.write("android:icon=\"@drawable/ya\" ");
       if (isForCompanion) {              // This is to hook into ACRA
         out.write("android:name=\"com.google.appinventor.components.runtime.ReplApplication\" ");
+      } else {
+        out.write("android:name=\"com.google.appinventor.components.runtime.multidex.MultiDexApplication\" ");
       }
       out.write(">\n");
 
@@ -485,7 +493,11 @@ public final class Compiler {
         }
 
         out.write("android:windowSoftInputMode=\"stateHidden\" ");
-        out.write("android:configChanges=\"orientation|keyboardHidden\">\n");
+
+        // The keyboard option prevents the app from stopping when a external (bluetooth)
+        // keyboard is attached.
+        out.write("android:configChanges=\"orientation|keyboardHidden|keyboard\">\n");
+
 
         out.write("      <intent-filter>\n");
         out.write("        <action android:name=\"android.intent.action.MAIN\" />\n");
@@ -780,8 +792,8 @@ public final class Compiler {
     // are copied into temporary storage) and processed via a hacked up version of
     // Android SDK's Dex Ant task
     File tmpDir = createDirectory(buildDir, "tmp");
-    String dexedClasses = tmpDir.getAbsolutePath() + File.separator + "classes.dex";
-    if (!compiler.runDx(classesDir, dexedClasses)) {
+    String dexedClassesDir = tmpDir.getAbsolutePath();
+    if (!compiler.runDx(classesDir, dexedClassesDir, false)) {
       return false;
     }
     setProgress(85);
@@ -800,7 +812,7 @@ public final class Compiler {
     out.println("________Invoking ApkBuilder");
     String apkAbsolutePath = deployDir.getAbsolutePath() + File.separatorChar +
         project.getProjectName() + ".apk";
-    if (!compiler.runApkBuilder(apkAbsolutePath, tmpPackageName, dexedClasses)) {
+    if (!compiler.runApkBuilder(apkAbsolutePath, tmpPackageName, dexedClassesDir)) {
       return false;
     }
     setProgress(95);
@@ -932,10 +944,15 @@ public final class Compiler {
    * Runs ApkBuilder by using the API instead of calling its main method because the main method
    * can call System.exit(1), which will bring down our server.
    */
-  private boolean runApkBuilder(String apkAbsolutePath, String zipArchive, String dexedClasses) {
+  private boolean runApkBuilder(String apkAbsolutePath, String zipArchive, String dexedClassesDir) {
     try {
       ApkBuilder apkBuilder =
-          new ApkBuilder(apkAbsolutePath, zipArchive, dexedClasses, null, System.out);
+          new ApkBuilder(apkAbsolutePath, zipArchive,
+            dexedClassesDir + File.separator + "classes.dex", null, System.out);
+      if (hasSecondDex) {
+        apkBuilder.addFile(new File(dexedClassesDir + File.separator + "classes2.dex"),
+          "classes2.dex");
+      }
       apkBuilder.sealApk();
       return true;
     } catch (Exception e) {
@@ -1024,7 +1041,8 @@ public final class Compiler {
       String classpath =
         getResource(KAWA_RUNTIME) + File.pathSeparator +
         getResource(ACRA_RUNTIME) + File.pathSeparator +
-        getResource(SIMPLE_ANDROID_RUNTIME_JAR) + File.pathSeparator;
+        getResource(SIMPLE_ANDROID_RUNTIME_JAR) + File.pathSeparator +
+        getResource(ANDROID_SUPPORT_V4_JAR) + File.pathSeparator;
 
       // Add component library names to classpath
       System.out.println("Libraries Classpath, n " + librariesNeeded.size());
@@ -1168,7 +1186,7 @@ public final class Compiler {
         apkAbsolutePath,
         zipAlignedPath
     };
-    long startAapt = System.currentTimeMillis();
+    long startZipAlign = System.currentTimeMillis();
     // Using System.err and System.out on purpose. Don't want to pollute build messages with
     // tools output
     if (!Execution.execute(null, zipAlignCommandLine, System.out, System.err)) {
@@ -1184,7 +1202,7 @@ public final class Compiler {
       return false;
     }
     String zipALignTimeMessage = "ZIPALIGN time: " +
-        ((System.currentTimeMillis() - startAapt) / 1000.0) + " seconds";
+        ((System.currentTimeMillis() - startZipAlign) / 1000.0) + " seconds";
     out.println(zipALignTimeMessage);
     LOG.info(zipALignTimeMessage);
     return true;
@@ -1224,22 +1242,44 @@ public final class Compiler {
     return true;
   }
 
-  private boolean runDx(File classesDir, String dexedClasses) {
+  private boolean runDx(File classesDir, String dexedClassesDir, boolean secondTry) {
+    List<File> libList = new ArrayList<File>();
     List<File> inputList = new ArrayList<File>();
+    List<File> class2List = new ArrayList<File>();
     inputList.add(classesDir); //this is a directory, and won't be cached into the dex cache
     inputList.add(new File(getResource(SIMPLE_ANDROID_RUNTIME_JAR)));
+    inputList.add(new File(getResource(ANDROID_SUPPORT_V4_JAR)));
     inputList.add(new File(getResource(KAWA_RUNTIME)));
     inputList.add(new File(getResource(ACRA_RUNTIME)));
 
-    // Add libraries to command line arguments
-    System.out.println("Libraries needed command line n = " + librariesNeeded.size());
     for (String library : librariesNeeded) {
-      inputList.add(new File(getResource(RUNTIME_FILES_DIR + library)));
+      libList.add(new File(getResource(RUNTIME_FILES_DIR + library)));
+    }
+
+    int offset = libList.size();
+    // Note: The choice of 12 libraries is arbitrary. We note that things
+    // worked to put all libraries into the first classes.dex file when we
+    // had 16 libraries and broke at 17. So this is a conservative number
+    // to try.
+    if (!secondTry) {           // First time through, try base + 12 libraries
+      if (offset > 12)
+        offset = 12;
+    } else {
+      offset = 0;               // Add NO libraries the second time through!
+    }
+    for (int i = 0; i < offset; i++) {
+      inputList.add(libList.get(i));
+    }
+
+    if (libList.size() - offset > 0) { // Any left over for classes2?
+      for (int i = offset; i < libList.size(); i++) {
+        class2List.add(libList.get(i));
+      }
     }
 
     DexExecTask dexTask = new DexExecTask();
     dexTask.setExecutable(getResource(DX_JAR));
-    dexTask.setOutput(dexedClasses);
+    dexTask.setOutput(dexedClassesDir + File.separator + "classes.dex");
     dexTask.setChildProcessRamMb(childProcessRamMb);
     if (dexCacheDir == null) {
       dexTask.setDisableDexMerger(true);
@@ -1255,7 +1295,30 @@ public final class Compiler {
     synchronized (SYNC_KAWA_OR_DX) {
       setProgress(50);
       dxSuccess = dexTask.execute(inputList);
-      setProgress(75);
+      if (dxSuccess && (class2List.size() > 0)) {
+        setProgress(60);
+        dexTask.setOutput(dexedClassesDir + File.separator + "classes2.dex");
+        inputList = new ArrayList<File>();
+        dxSuccess = dexTask.execute(class2List);
+        setProgress(75);
+        hasSecondDex = true;
+      } else if (!dxSuccess) {
+        // If we get into this block of code, it means that the Dexer
+        // returned an error. It *might* be because of overflowing the
+        // the fixed table of methods, but we cannot know that for
+        // sure so we try Dexing again, but this time we put all
+        // support libraries into classes2.dex. If this second pass
+        // fails, we return the error to the user.
+        LOG.info("DX execution failed, trying with fewer libraries.");
+        if (secondTry) {        // Already tried the more conservative approach!
+          LOG.warning("YAIL compiler - DX execution failed (secondTry!).");
+          err.println("YAIL compiler - DX execution failed.");
+          userErrors.print(String.format(ERROR_IN_STAGE, "DX"));
+          return false;
+        } else {
+          return runDx(classesDir, dexedClassesDir, true);
+        }
+      }
     }
     if (!dxSuccess) {
       LOG.warning("YAIL compiler - DX execution failed.");

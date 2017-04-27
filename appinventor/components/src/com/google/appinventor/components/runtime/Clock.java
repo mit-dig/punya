@@ -29,11 +29,11 @@ import java.util.Calendar;
  */
 
 @DesignerComponent(version = YaVersion.CLOCK_COMPONENT_VERSION,
-    description = "Non-visible component that provides the instant in "
-    + "time using the internal clock on the phone. It can fire a "
-    + "timer at regularly set intervals and perform time "
-    + "calculations, manipulations, and conversions. Methods to "
-    + "format the date and time are also available.",
+    description = "<p>Non-visible component that provides the instant in time using the internal clock on th"
+    + "e phone. It can fire a timer at regularly set intervals and perform time calculations, manipulations, and conversions.</p> "
+    + "<p>Methods to convert an instant to text are also available. Acceptable patterns are empty string, MM/DD/YYYY HH:mm:ss a, or MMM d, yyyy"
+    + "HH:mm. The empty string will provide the default format, which is \"MMM d, yyyy HH:mm:ss a\" for FormatDateTime \"MMM d, yyyy\" for FormatDate. "
+    + "To see all possible format, please see <a href=\"https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html\" _target=\"_blank\">here</a>. </p> ",
     category = ComponentCategory.SENSORS,
     nonVisible = true,
     iconName = "images/clock.png")
@@ -196,13 +196,13 @@ public final class Clock extends AndroidNonvisibleComponent
    * @return  date
    */
   @SimpleFunction(
-      description = "An instant specified by MM/DD/YYYY hh:mm:ss or MM/DD/YYYY or hh:mm")
+      description = "An instant in time specified by MM/DD/YYYY hh:mm:ss or MM/DD/YYYY or hh:mm")
   public static Calendar MakeInstant(String from) {
     try {
       return Dates.DateValue(from);
     } catch (IllegalArgumentException e) {
       throw new YailRuntimeError(
-          "Argument to MakeInstant should have form MM/DD/YYYY, hh:mm:ss, or MM/DD/YYYY or hh:mm",
+          "Argument to MakeInstant should have form MM/DD/YYYY hh:mm:ss, or MM/DD/YYYY or hh:mm",
           "Sorry to be so picky.");
     }
   }
@@ -231,52 +231,59 @@ public final class Clock extends AndroidNonvisibleComponent
     return instant.getTimeInMillis();
   }
 
-  @SimpleFunction(description = "An instant in time some seconds after the argument")
-  public static Calendar AddSeconds(Calendar instant, int seconds) {
+  @SimpleFunction(description = "An instant in time some duration after the argument")
+  public static Calendar AddDuration(Calendar instant, long quantity) {
     Calendar newInstant = (Calendar) instant.clone();
-    Dates.DateAdd(newInstant, Calendar.SECOND, seconds);
+    Dates.DateAddInMillis(newInstant, quantity);
+    return newInstant;
+  }
+
+  @SimpleFunction(description = "An instant in time some seconds after the argument")
+  public static Calendar AddSeconds(Calendar instant, int quantity) {
+    Calendar newInstant = (Calendar) instant.clone();
+    Dates.DateAdd(newInstant, Calendar.SECOND, quantity);
     return newInstant;
   }
 
   @SimpleFunction(description = "An instant in time some minutes after the argument")
-  public static Calendar AddMinutes(Calendar instant, int minutes) {
+  public static Calendar AddMinutes(Calendar instant, int quantity) {
     Calendar newInstant = (Calendar) instant.clone();
-    Dates.DateAdd(newInstant, Calendar.MINUTE, minutes);
+    Dates.DateAdd(newInstant, Calendar.MINUTE, quantity);
     return newInstant;
   }
 
   @SimpleFunction(description = "An instant in time some hours after the argument")
-  public static Calendar AddHours(Calendar instant, int hours) {
+  public static Calendar AddHours(Calendar instant, int quantity) {
     Calendar newInstant = (Calendar) instant.clone();
-    Dates.DateAdd(newInstant, Calendar.HOUR_OF_DAY, hours);
+    Dates.DateAdd(newInstant, Calendar.HOUR_OF_DAY, quantity);
     return newInstant;
   }
 
   @SimpleFunction(description = "An instant in time some days after the argument")
-  public static Calendar AddDays(Calendar instant, int days) {
+  public static Calendar AddDays(Calendar instant, int quantity) {
     Calendar newInstant = (Calendar) instant.clone();
-    Dates.DateAdd(newInstant, Calendar.DATE, days);
+    Dates.DateAdd(newInstant, Calendar.DATE, quantity);
     return newInstant;
   }
 
   @SimpleFunction(description = "An instant in time some weeks after the argument")
-  public static Calendar AddWeeks(Calendar instant, int weeks) {
+  public static Calendar AddWeeks(Calendar instant, int quantity) {
     Calendar newInstant = (Calendar) instant.clone();
-    Dates.DateAdd(newInstant, Calendar.WEEK_OF_YEAR, weeks);
+    Dates.DateAdd(newInstant, Calendar.WEEK_OF_YEAR, quantity);
     return newInstant;
  }
 
   @SimpleFunction(description = "An instant in time some months after the argument")
-  public static Calendar AddMonths(Calendar instant, int months) {
+  public static Calendar AddMonths(Calendar instant, int quantity) {
     Calendar newInstant = (Calendar) instant.clone();
-    Dates.DateAdd(newInstant, Calendar.MONTH, months);
+    Dates.DateAdd(newInstant, Calendar.MONTH, quantity);
     return newInstant;
  }
 
   @SimpleFunction(description = "An instant in time some years after the argument")
-  public static Calendar AddYears(Calendar instant, int years) {
+  public static Calendar AddYears(Calendar instant, int quantity) {
     Calendar newInstant = (Calendar) instant.clone();
-    Dates.DateAdd(newInstant, Calendar.YEAR, years);
+    Dates.DateAdd(newInstant, Calendar.YEAR, quantity);
     return newInstant;
   }
 
@@ -290,6 +297,61 @@ public final class Clock extends AndroidNonvisibleComponent
   @SimpleFunction (description = "Milliseconds elapsed between instants")
   public static long Duration(Calendar start, Calendar end) {
     return end.getTimeInMillis() - start.getTimeInMillis();
+  }
+
+  /**
+   * Returns the duration converted from milliseconds to seconds.
+   *
+   * @param duration time interval to convert
+   * @return  duration in seconds
+   */
+  @SimpleFunction (description = "convert duration to seconds")
+  public static long DurationToSeconds(long duration) {
+          return Dates.ConvertDuration(duration, Calendar.SECOND);
+  }
+
+  /**
+   * Returns the duration converted from milliseconds to minutes.
+   *
+   * @param duration time interval to convert
+   * @return  duration in minutes
+   */
+  @SimpleFunction (description = "convert duration to minutes")
+  public static long DurationToMinutes(long duration) {
+          return Dates.ConvertDuration(duration, Calendar.MINUTE);
+  }
+
+  /**
+   * Returns the duration converted from milliseconds to hours.
+   *
+   * @param duration time interval to convert
+   * @return  duration in hours
+   */
+  @SimpleFunction (description = "convert duration to hours")
+  public static long DurationToHours(long duration) {
+          return Dates.ConvertDuration(duration, Calendar.HOUR_OF_DAY);
+  }
+
+  /**
+   * Returns the duration converted from milliseconds to days.
+   *
+   * @param duration time interval to convert
+   * @return  duration in days
+   */
+  @SimpleFunction (description = "convert duration to days")
+  public static long DurationToDays(long duration) {
+          return Dates.ConvertDuration(duration, Calendar.DATE);
+  }
+
+  /**
+   * Returns the duration converted from milliseconds to weeks.
+   *
+   * @param duration time interval to convert
+   * @return  duration in weeks
+   */
+  @SimpleFunction (description = "convert duration to weeks")
+  public static long DurationToWeeks(long duration) {
+          return Dates.ConvertDuration(duration, Calendar.WEEK_OF_YEAR);
   }
 
   /**
@@ -394,26 +456,42 @@ public final class Clock extends AndroidNonvisibleComponent
   }
 
   /**
-   * Converts and formats the given instant into a string.   *
+   * Converts and formats an instant into a string of date and time with the specified pattern.   *
    *
    * @param instant  instant to format
+   * @param pattern format of the date and time e.g. MM/DD/YYYY HH:mm:ss a, MMM d, yyyy HH:mm
    * @return  formatted instant
    */
   @SimpleFunction (description = "Text representing the date and time of an"
-      + " instant")
-  public static String FormatDateTime(Calendar instant) {
-    return Dates.FormatDateTime(instant);
+      + " instant in the specified pattern")
+  public static String FormatDateTime(Calendar instant, String pattern) {
+    try {
+      return Dates.FormatDateTime(instant, pattern);
+    } catch (IllegalArgumentException e){
+      throw new YailRuntimeError(
+        "Illegal argument for pattern in Clock.FormatDateTime. Acceptable values are empty string, MM/DD/YYYY HH:mm:ss a, MMM d, yyyy HH:mm "
+        + "For all possible patterns, see https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html",
+        "Sorry to be so picky.");
+    }
   }
 
   /**
-   * Converts and formats the given instant into a string.
+   * Converts and formats an instant into a string of date with the specified pattern.
    *
    * @param instant  instant to format
+   * @param pattern format of the date e.g. MM/DD/YYYY or MMM d, yyyy
    * @return  formatted instant
    */
-  @SimpleFunction (description = "Text representing the date of an instant")
-  public static String FormatDate(Calendar instant) {
-    return Dates.FormatDate(instant);
+  @SimpleFunction (description = "Text representing the date of an instant in the specified pattern")
+  public static String FormatDate(Calendar instant, String pattern) {
+    try {
+      return Dates.FormatDate(instant, pattern);
+    } catch (IllegalArgumentException e){
+      throw new YailRuntimeError(
+        "Illegal argument for pattern in Clock.FormatDate. Acceptable values are empty string, MM/dd/YYYY, or MMM d, yyyy. "
+        + "For all possible patterns, see https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html"
+        ,"Sorry to be so picky.");
+    }
   }
 
   /**

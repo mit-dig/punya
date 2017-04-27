@@ -5,13 +5,16 @@
 
   <!-- Configure serving/caching of GWT files -->
   <static-files>
-    <include path="/blockly-all.js">
+    <include path="/blockly-*.js" expiration="365d">
       <http-header name="Content-Type" value="application/javascript; charset=UTF-8" />
     </include>
-    <include path="**" />
-
-    <!-- The following line requires App Engine 1.3.2 SDK -->
+    <include path="/fonts/*" expiration="365d">
+      <http-header name="Content-Type" value="font/ttf" />
+    </include>
+    <!-- These are not cached on purpose -->
     <include path="/ode/**.nocache.*" expiration="0s" />
+    <include path="/blocklyframe.html" expiration="0s" />
+    <include path="/index.html" expiration="0s" />
 
     <include path="/ode/**.cache.*" expiration="365d" />
     <exclude path="/ode/**.gwt.rpc" />
@@ -52,13 +55,15 @@
     <!-- Name of storage bucket in Google Cloud Store -->
     <property name="gcs.bucket" value="" />
     <!-- Whether or not to use GCS for storage -->
-    <property name="use.gcs" value="false" />
+    <property name="use.gcs" value="true" />
 
     <!-- Name of gallery bucket in Google Cloud Store -->
     <property name="gallery.bucket" value="" />
     <!-- Whether or not to use the gallery -->
     <property name="use.gallery" value="false" />
 
+    <!-- Gallery Admin Email -->
+    <property name="gallery.admin.email" value="" />
 
 
     <!-- set to true if users need to accept a Terms of Service the first time
@@ -67,6 +72,11 @@
 
     <!-- host[:port] to use for connecting to the build server -->
     <property name="build.server.host" value="localhost:9990" />
+
+    <!-- host[:port] to tell build server the app host url to callback
+         when deploy AppInventor on other GAE implementation such as
+         AppScale.Keep it blank when deploy on GAE -->
+    <property name="appengine.host" value="" />
 
     <!-- Interval is seconds between checking for a message of the day.
          Set set to 0 to disable checking for a MOTD.  If you do enable
@@ -85,7 +95,21 @@
 
     <property name="wifi.enabled" value="true" />
 
+    <!-- Firebase Secret for the shared datastore -->
+    <property name="firebase.secret" value="" />
+    <property name="firebase.url" value="" />
 
+    <property name="library.url" value="http://appinventor.mit.edu/explore/library" />
+    <property name="get_started.url" value="http://appinventor.mit.edu/explore/get-started" />
+    <property name="tutorials.url" value="http://appinventor.mit.edu/explore/ai2/tutorials" />
+    <property name="troubleshooting.url" value="http://appinventor.mit.edu/explore/ai2/support/troubleshooting" />
+    <property name="forums.url" value="https://groups.google.com/forum/#!forum/mitappinventortest" />
+    <property name="feedback.url" value="http://something.example.com" />
+    <property name="release.notes.url" value="http://appinventor.mit.edu/ai2/ReleaseNotes.html" />
+    <property name="tos.url" value="/about/termsofservice.html" />
+    <property name="logo.url" value="http://appinventor.mit.edu" />
+    <property name="guide.url" value="http://appinventor.mit.edu/explore/library" />
+    <property name="reference.components.url" value="/reference/components/" />
 
   </system-properties>
 

@@ -108,20 +108,16 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append("],\n  \"events\": [");
     separator = "";
     for (Event event : component.events.values()) {
-      if (event.userVisible) {
-        sb.append(separator);
-        outputBlockEvent(event.name, event, sb);
-        separator = ",\n    ";
-      }
+      sb.append(separator);
+      outputBlockEvent(event.name, event, sb, event.userVisible, event.deprecated);
+      separator = ",\n    ";
     }
     sb.append("],\n  \"methods\": [");
     separator = "";
     for (Method method : component.methods.values()) {
-      if (method.userVisible) {
-        sb.append(separator);
-        outputBlockMethod(method.name, method, sb);
-        separator = ",\n    ";
-      }
+      sb.append(separator);
+      outputBlockMethod(method.name, method, sb, method.userVisible, method.deprecated);
+      separator = ",\n    ";
     }
     sb.append("]}\n");
   }
@@ -147,24 +143,42 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append(prop.isUserVisible() ? prop.getRwString() : "invisible");
     sb.append("\", \"category\": \"");
     sb.append(prop.getCategory().getName());
-    sb.append("\"}");
+    // [lyn, 2015/12/20] Added deprecated field to JSON.
+    // If we want to save space in simple-components.json,
+    // we could include this field only when it is "true"
+    sb.append("\", \"deprecated\": \"" + prop.isDeprecated() + "\"");
+    sb.append("}");
   }
   
-  private void outputBlockEvent(String eventName, Event event, StringBuilder sb) {
+  private void outputBlockEvent(String eventName, Event event, StringBuilder sb,
+                                boolean userVisible, boolean deprecated) {
     sb.append("{ \"name\": \"");
     sb.append(eventName);
     sb.append("\", \"description\": ");
     sb.append(formatDescription(event.description));
+    // [lyn, 2015/12/20] Remove userVisible field from JSON, which is no longer used for events.
+    // sb.append(", \"userVisible\": \"" + userVisible + "\"");
+    // [lyn, 2015/12/20] Added deprecated field to JSON.
+    // If we want to save space in simple-components.json,
+    // we could include this field only when it is "true"
+    sb.append(", \"deprecated\": \"" + deprecated + "\"");
     sb.append(", \"params\": ");
     outputParameters(event.parameters, sb);
     sb.append("}\n");
   }
   
-  private void outputBlockMethod(String methodName, Method method, StringBuilder sb) {
+  private void outputBlockMethod(String methodName, Method method, StringBuilder sb,
+                                 boolean userVisible, boolean deprecated) {
     sb.append("{ \"name\": \"");
     sb.append(methodName);
     sb.append("\", \"description\": ");
     sb.append(formatDescription(method.description));
+    // [lyn, 2015/12/20] Remove userVisible field from JSON, which is no longer used for methods.
+    // sb.append(", \"userVisible\": \"" + userVisible + "\"");
+    // [lyn, 2015/12/20] Added deprecated field to JSON.
+    // If we want to save space in simple-components.json,
+    // we could include this field only when it is "true"
+    sb.append(", \"deprecated\": \"" + deprecated + "\"");
     sb.append(", \"params\": ");
     outputParameters(method.parameters, sb);
     if (method.getReturnType() != null) {

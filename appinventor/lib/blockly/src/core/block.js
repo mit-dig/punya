@@ -346,6 +346,22 @@ Blockly.Block.prototype.unselect = function() {
 };
 
 /**
+ * Mark this block as Bad.  Highlight it visually in Red.
+ */
+Blockly.Block.prototype.badBlock = function() {
+  goog.asserts.assertObject(this.svg_, 'Block is not rendered.');
+  this.svg_.addBadBlock();
+};
+
+/**
+ * Check to see if this block is bad.
+ */
+Blockly.Block.prototype.isBadBlock = function() {
+  goog.asserts.assertObject(this.svg_, 'Block is not rendered.');
+  return this.svg_.isBadBlock();
+};
+
+/**
  * Dispose of this block.
  * @param {boolean} healStack If true, then try to heal any gap by connecting
  *     the next statement with the previous statement.  Otherwise, dispose of
@@ -664,6 +680,12 @@ Blockly.Block.prototype.onMouseUp_ = function(e) {
       // resize to contain the newly positioned block.  Force a second resize
       // now that the block has been deleted.
       Blockly.fireUiEvent(window, 'resize');
+    } else if (this_.workspace.backpack && this_.workspace.backpack.isOpen) {
+      var backpack = this_.workspace.backpack
+	//      var xy = this.getRelativeToSurfaceXY();
+      goog.Timer.callOnce(backpack.close, 100, backpack);
+      backpack.addToBackpack(Blockly.selected);
+      Blockly.mainWorkspace.backpack.onMouseUp(e, Blockly.selected.startDragMouseX, Blockly.selected.startDragMouseY);
     }
     if (Blockly.highlightedConnection_) {
       Blockly.highlightedConnection_.unhighlight();
@@ -730,7 +752,7 @@ Blockly.Block.prototype.showContextMenu_ = function(e) {
   var block = this;
   var options = [];
 
-  if (this.isDeletable() && this.isMovable() && !block.isInFlyout) {
+  if (!this.isBadBlock() && this.isDeletable() && this.isMovable() && !block.isInFlyout) {
     // Option to duplicate this block.
     var duplicateOption = {
       text: Blockly.Msg.DUPLICATE_BLOCK,
@@ -809,6 +831,20 @@ Blockly.Block.prototype.showContextMenu_ = function(e) {
       };
       options.push(disableOption);
     }
+
+    // Option to copy to backpack.
+    var backpackOption = {
+      enabled:true,
+      text: Blockly.Msg.COPY_TO_BACKPACK +
+        " (" + Blockly.mainWorkspace.backpack.count() + ")",
+      callback: function() {
+        if (Blockly.selected && Blockly.selected.isDeletable() &&
+            Blockly.selected.workspace == Blockly.mainWorkspace) {
+          Blockly.mainWorkspace.backpack.addToBackpack(Blockly.selected);
+        }
+      }
+    };
+    options.push(backpackOption);
 
     // Option to delete this block.
     // Count the number of blocks that are nested in this block.
@@ -1003,6 +1039,10 @@ Blockly.Block.prototype.onMouseMove_ = function(e) {
       // Flip the trash can lid if needed.
       if (this_.workspace.trashcan && this_.isDeletable()) {
         this_.workspace.trashcan.onMouseMove(e);
+      }
+      // Flip the backpack image if needed
+      if (this_.workspace.backpack) {
+        this_.workspace.backpack.onMouseMove(e);
       }
     }
     // This event has been handled.  No need to bubble up to the document.

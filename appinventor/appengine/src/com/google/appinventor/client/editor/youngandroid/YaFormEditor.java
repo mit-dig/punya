@@ -104,6 +104,15 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
 
   private MockForm form;  // initialized lazily after the file is loaded from the ODE server
 
+  // [lyn, 2014/10/13] Need to remember JSON initially loaded from .scm file *before* it is upgraded
+  // by YoungAndroidFormUpgrader within upgradeFile. This JSON contains pre-upgrade component
+  // version info that is needed by Blockly.SaveFile.load to perform upgrades in the Blocks Editor.
+  // This was unnecessary in AI Classic because the .blk file contained component version info
+  // as well as the .scm file. But in AI2, the .bky file contains no component version info,
+  // and we rely on the pre-upgraded .scm file for this info.
+  private String preUpgradeJsonString;
+
+
   /**
    * Creates a new YaFormEditor.
    *
@@ -217,7 +226,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
           + "current file editor!");
     }
   }
-  
+
   @Override
   public void onClose() {
     form.removeFormChangeListener(this);
@@ -227,7 +236,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
 
   @Override
   public String getRawFileContent() {
-    String encodedProperties = encodeFormAsJsonString();
+    String encodedProperties = encodeFormAsJsonString(false);
     JSONObject propertiesObject = JSON_PARSER.parse(encodedProperties).asObject();
     return YoungAndroidSourceAnalyzer.generateSourceFile(propertiesObject);
   }
@@ -248,8 +257,6 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     Map<String, MockComponent> map = Maps.newHashMap();
     if (loadComplete) {
       populateComponentsMap(form, map);
-    } else {
-      OdeLog.log("YaFormEditor: about to return an empty map!!!!!");
     }
     return map;
   }
@@ -267,6 +274,10 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   @Override
   public SimpleNonVisibleComponentsPanel getNonVisibleComponentsPanel() {
     return nonVisibleComponentsPanel;
+  }
+
+  public SimpleVisibleComponentsPanel getVisibleComponentsPanel() {
+    return visibleComponentsPanel;
   }
 
   @Override
@@ -314,6 +325,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   public void onComponentRenamed(MockComponent component, String oldName) {
     if (loadComplete) {
       onFormStructureChange();
+      updatePropertiesPanel(component);
     } else {
       OdeLog.elog("onComponentRenamed called when loadComplete is false");
     }
@@ -371,6 +383,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
       final Command afterUpgradeComplete) {
     JSONObject propertiesObject = YoungAndroidSourceAnalyzer.parseSourceFile(
         fileContentHolder.getFileContent(), JSON_PARSER);
+    preUpgradeJsonString =  propertiesObject.toJson(); // [lyn, [2014/10/13] remember pre-upgrade component versions.
     if (YoungAndroidFormUpgrader.upgradeSourceProperties(propertiesObject.getProperties())) {
       String upgradedContent = YoungAndroidSourceAnalyzer.generateSourceFile(propertiesObject);
       fileContentHolder.setFileContent(upgradedContent);
@@ -453,6 +466,17 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     for (String name : properties.keySet()) {
       if (name.charAt(0) != '$') { // Ignore special properties (name, type and nested components)
         mockComponent.changeProperty(name, properties.get(name).asString().getString());
+      }
+    }
+
+
+
+    //This is for old project which doesn't have the AppName property
+    if (mockComponent instanceof MockForm) {
+      if (!properties.keySet().contains("AppName")) {
+        String fileId = getFileId();
+        String projectName = fileId.split("/")[3];
+        mockComponent.changeProperty("AppName", projectName);
       }
     }
 
@@ -540,21 +564,27 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
    * Encodes the form's properties as a JSON encoded string. Used by YaBlocksEditor as well,
    * to send the form info to the blockly world during code generation.
    */
-  protected String encodeFormAsJsonString() {
+  protected String encodeFormAsJsonString(boolean forYail) {
     StringBuilder sb = new StringBuilder();
     sb.append("{");
     sb.append("\"YaVersion\":\"").append(YaVersion.YOUNG_ANDROID_VERSION).append("\",");
     sb.append("\"Source\":\"Form\",");
     sb.append("\"Properties\":");
-    encodeComponentProperties(form, sb);
+    encodeComponentProperties(form, sb, forYail);
     sb.append("}");
     return sb.toString();
+  }
+
+  // [lyn, 2014/10/13] returns the *pre-upgraded* JSON for this form.
+  // needed to allow associated blocks editor to get this info.
+  protected String preUpgradeJsonString() {
+    return preUpgradeJsonString;
   }
 
   /*
    * Encodes a component and its properties into a JSON encoded string.
    */
-  private void encodeComponentProperties(MockComponent component, StringBuilder sb) {
+  private void encodeComponentProperties(MockComponent component, StringBuilder sb, boolean forYail) {
     // The component encoding starts with component name and type
     String componentType = component.getType();
     EditableProperties properties = component.getProperties();
@@ -569,7 +599,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     // Next the actual component properties
     //
     // NOTE: It is important that these be encoded before any children components.
-    String propertiesString = properties.encodeAsPairs();
+    String propertiesString = properties.encodeAsPairs(forYail);
     if (propertiesString.length() > 0) {
       sb.append(',');
       sb.append(propertiesString);
@@ -582,7 +612,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
       String separator = "";
       for (MockComponent child : children) {
         sb.append(separator);
-        encodeComponentProperties(child, sb);
+        encodeComponentProperties(child, sb, forYail);
         separator = ",";
       }
       sb.append(']');

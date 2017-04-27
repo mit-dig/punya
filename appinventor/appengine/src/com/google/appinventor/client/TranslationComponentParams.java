@@ -68,11 +68,16 @@ public class TranslationComponentParams {
     map.put("clip", MESSAGES.clipParams());
     map.put("image", MESSAGES.imageParams());
     map.put("draggedSprite", MESSAGES.draggedSpriteParams());
+    map.put("draggedAnySprite", MESSAGES.draggedAnySpriteParams());
     map.put("flungSprite", MESSAGES.flungSpriteParams());
     map.put("touchedSprite", MESSAGES.touchedSpriteParams());
+    map.put("touchedAnySprite", MESSAGES.touchedAnySpriteParams());
     map.put("x", MESSAGES.xParams());
     map.put("y", MESSAGES.yParams());
+    map.put("centerX", MESSAGES.centerXParams());
+    map.put("centerY", MESSAGES.centerYParams());
     map.put("r", MESSAGES.rParams());
+    map.put("radius", MESSAGES.radiusParams());
     map.put("x1", MESSAGES.x1Params());
     map.put("x2", MESSAGES.x2Params());
     map.put("y1", MESSAGES.y1Params());
@@ -187,6 +192,11 @@ public class TranslationComponentParams {
     map.put("translation", MESSAGES.translationParams());
     map.put("languageToTranslateTo", MESSAGES.languageToTranslateToParams());
     map.put("textToTranslate", MESSAGES.textToTranslateParams());
+    map.put("uri", MESSAGES.uriParams());
+    map.put("xAngularVelocity", MESSAGES.xAngularVelocityParams());
+    map.put("yAngularVelocity", MESSAGES.yAngularVelocityParams());
+    map.put("zAngularVelocity", MESSAGES.zAngularVelocityParams());
+    map.put("timestamp", MESSAGES.timestampParams());
     return map;
   }
 }

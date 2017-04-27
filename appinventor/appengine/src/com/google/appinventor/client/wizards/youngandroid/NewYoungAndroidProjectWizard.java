@@ -6,20 +6,29 @@
 
 package com.google.appinventor.client.wizards.youngandroid;
 
+import java.util.regex.Pattern;
+
 import com.google.appinventor.client.Ode;
+
 import static com.google.appinventor.client.Ode.MESSAGES;
+
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.explorer.youngandroid.ProjectToolbar;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.LabeledTextBox;
+import com.google.appinventor.client.widgets.Validator;
 import com.google.appinventor.client.wizards.NewProjectWizard;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.common.utils.StringUtils;
 import com.google.appinventor.shared.rpc.project.youngandroid.NewYoungAndroidProjectParameters;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
+import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -37,13 +46,30 @@ public final class NewYoungAndroidProjectWizard extends NewProjectWizard {
   /**
    * Creates a new YoungAndroid project wizard.
    */
-  public NewYoungAndroidProjectWizard() {
+  public NewYoungAndroidProjectWizard(final ProjectToolbar toolbar) {
     super(MESSAGES.newYoungAndroidProjectWizardCaption());
 
     // Initialize the UI
     setStylePrimaryName("ode-DialogBox");
 
-    projectNameTextBox = new LabeledTextBox(MESSAGES.projectNameLabel());
+    projectNameTextBox = new LabeledTextBox(MESSAGES.projectNameLabel(), new Validator() {
+      @Override
+      public boolean validate(String value) {
+        errorMessage = TextValidators.getErrorMessage(value);
+        if (errorMessage.length()>0){
+          disableOkButton();
+          return false;
+        }
+          enableOkButton();
+          return true;
+      }
+
+      @Override
+      public String getErrorMessage() {
+        return errorMessage;
+      }
+    });
+
     projectNameTextBox.getTextBox().addKeyDownHandler(new KeyDownHandler() {
       @Override
       public void onKeyDown(KeyDownEvent event) {
@@ -56,10 +82,32 @@ public final class NewYoungAndroidProjectWizard extends NewProjectWizard {
       }
     });
 
+    projectNameTextBox.getTextBox().addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) { //Validate the text each time a key is lifted
+        projectNameTextBox.validate();
+      }
+    });
+
     VerticalPanel page = new VerticalPanel();
 
     page.add(projectNameTextBox);
     addPage(page);
+
+    // Create cancel command handler. This handler
+    // arranges to re-enable the project start button
+    // Note that toolbar will be null if we are called
+    // from the Project menu instead of the Start button
+    // on the project toolbar
+
+    if (toolbar != null) {
+      initCancelCommand(new Command() {
+        @Override
+        public void execute() {
+          toolbar.enableStartButton();
+        }
+      });
+    }
 
     // Create finish command (create a new Young Android project)
     initFinishCommand(new Command() {
@@ -104,12 +152,12 @@ public final class NewYoungAndroidProjectWizard extends NewProjectWizard {
   public void show() {
     super.show();
     // Wizard size (having it resize between page changes is quite annoying)
-    int width = 320;
+    int width = 340;
     int height = 40;
     this.center();
 
     setPixelSize(width, height);
-    super.setPagePanelHeight(40);
+    super.setPagePanelHeight(85);
 
     DeferredCommand.addCommand(new Command() {
       public void execute() {
