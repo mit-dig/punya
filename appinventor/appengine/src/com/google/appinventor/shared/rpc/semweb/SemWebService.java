@@ -44,4 +44,6 @@ public interface SemWebService extends RemoteService {
    * of properties matched by the search.
    */
   List<Map<String, String>> searchProperties(String text);
+  
+  List<String> getProperties(String concept);
 }

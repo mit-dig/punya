@@ -33,7 +33,7 @@ import android.util.Log;
  */
 @DesignerComponent(version = YaVersion.LINKED_DATA_LISTPICKER_COMPONENT_VERSION,
     category = ComponentCategory.LINKEDDATA,
-    description = "")
+    description = "Provides a list picker backed by the results of a SPARQL query, limit to first 100 results.")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 @UsesLibraries(libraries = "xercesImpl.jar," + "slf4j-android.jar," + 
@@ -68,6 +68,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     isSubject = false;
     conceptUri = "";
     propertyUri = "";
+    relationUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
     items = new ArrayList<LabeledUri>();
     form = container.$form();
   }
@@ -205,7 +206,8 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
         //"UNION { ?uri foaf:name ?lbl } UNION { ?uri dc:title ?lbl } " +
         "FILTER(lang(?lbl) = \"\" || langMatches(lang(?lbl), \"" +
         Locale.getDefault().getLanguage() + "\"))" +
-        "} GROUP BY ?uri ORDER BY ?label";
+        "} GROUP BY ?uri ORDER BY ?label LIMIT 100";
+    Log.d(LOG_TAG, "The Query is " + query);
     Collection<Solution> solutions = null;
     try {
       ResultSet results = RdfUtil.executeSELECT(endpoint, query);

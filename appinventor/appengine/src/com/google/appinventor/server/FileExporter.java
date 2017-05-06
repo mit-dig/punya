@@ -56,6 +56,10 @@ public interface FileExporter {
                                           boolean includeYail,
                                           boolean fatalError)
       throws IOException;
+  
+  ProjectSourceZip exportProjectSourceScreenZip(String userId, long projectId,
+      																		@Nullable String zipName)
+      throws IOException;
 
   /**
    * Exports all of the user's projects' source files as a zip of zips.

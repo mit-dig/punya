@@ -36,6 +36,9 @@ public interface FileImporter {
   UserProject importProject(String userId, String projectName, InputStream uploadedFileStream)
       throws FileImporterException, IOException;
 
+  UserProject importProjectScreen(String userId, long projectId, String projectName, InputStream uploadedFileStream)
+      throws FileImporterException, IOException;
+
   /**
    * Creates the project on the server and imports its content. Sets the project
    * history with the provided {@code projectHistory} value.

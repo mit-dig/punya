@@ -6,10 +6,8 @@
 
 package com.google.appinventor.components.runtime.util;
 
-import android.util.Log;
-
-
-import java.text.*;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**

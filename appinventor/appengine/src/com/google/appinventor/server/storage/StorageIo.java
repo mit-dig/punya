@@ -527,6 +527,9 @@ public interface StorageIo {
                                           boolean includeYail,
                                           boolean fatalError) throws IOException;
 
+  ProjectSourceZip exportProjectSourceScreenZip(String userId, long projectId,
+      @Nullable String zipName) throws IOException;
+
   /**
    * Find a user's id given their email address. Note that this query is case
    * sensitive!

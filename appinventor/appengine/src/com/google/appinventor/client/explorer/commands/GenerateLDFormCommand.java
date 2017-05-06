@@ -8,7 +8,11 @@ package com.google.appinventor.client.explorer.commands;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import com.google.appinventor.client.DesignToolbar;
@@ -24,6 +28,8 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocks
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
+import com.google.appinventor.shared.rpc.semweb.SemWebServiceAsync;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -31,26 +37,34 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.xedge.jquery.ui.client.model.LabelValuePair;
 
 /**
- * A command that creates a new form.
+ * A command that auto generate a LD form.
  *
- * @author lizlooney@google.com (Liz Looney)
+ * @author weihuali0509@gmail.com (Weihua Li)
  */
-public final class AddFormCommand extends ChainableCommand {
+public final class GenerateLDFormCommand extends ChainableCommand {
 
-
-  private static final int MAX_FORM_COUNT = 10;
+  private static final int MAX_FORM_COUNT = 1;
+  private int OkButtonSwitcher = 0;
+  private NewLDFormDialog LDFormDialog;
+  private VerticalPanel cBoxPanel = new VerticalPanel();
+  private List<String> checkBoxCollection = new ArrayList<String>();
 
   /**
-   * Creates a new command for creating a new form
+   * Creates a new command for auto generating a LD form
    */
-  public AddFormCommand() {
+  public GenerateLDFormCommand() {
   }
 
   @Override
@@ -61,7 +75,8 @@ public final class AddFormCommand extends ChainableCommand {
   @Override
   public void execute(ProjectNode node) {
     if (node instanceof YoungAndroidProjectNode) {
-      new NewFormDialog((YoungAndroidProjectNode) node).center();
+      LDFormDialog = new NewLDFormDialog((YoungAndroidProjectNode) node);
+      LDFormDialog.center();
     } else {
       executionFailedOrCanceled();
       throw new IllegalArgumentException("node must be a YoungAndroidProjectNode");
@@ -71,17 +86,17 @@ public final class AddFormCommand extends ChainableCommand {
   /**
    * Dialog for getting the name for the new form.
    */
-  private class NewFormDialog extends DialogBox {
+  private class NewLDFormDialog extends DialogBox {
     // UI elements
-    private final LabeledTextBox newNameTextBox;
-
+    private final TextBox ontologyTextBox;
     private final Set<String> otherFormNames;
+    private Button okButtonForUri;
 
-    NewFormDialog(final YoungAndroidProjectNode projectRootNode) {
+    NewLDFormDialog(final YoungAndroidProjectNode projectRootNode) {
       super(false, true);
 
       setStylePrimaryName("ode-DialogBox");
-      setText(MESSAGES.newFormTitle());
+      setText(MESSAGES.newLDFormTitle());
       VerticalPanel contentPanel = new VerticalPanel();
 
       final String prefix = "Screen";
@@ -106,10 +121,13 @@ public final class AddFormCommand extends ChainableCommand {
       }
 
       String defaultFormName = prefix + (highIndex + 1);
+      Ode ode = Ode.getInstance();
+      YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
 
-      newNameTextBox = new LabeledTextBox(MESSAGES.formNameLabel());
-      newNameTextBox.setText(defaultFormName);
-      newNameTextBox.getTextBox().addKeyUpHandler(new KeyUpHandler() {
+      ontologyTextBox = new TextBox();
+      ontologyTextBox.setText("");
+      ontologyTextBox.setVisibleLength(150);
+      ontologyTextBox.addKeyUpHandler(new KeyUpHandler() {
         @Override
         public void onKeyUp(KeyUpEvent event) {
           int keyCode = event.getNativeKeyCode();
@@ -121,46 +139,37 @@ public final class AddFormCommand extends ChainableCommand {
           }
         }
       });
-      contentPanel.add(newNameTextBox);
-
+      
+      Label uriLabel = new Label(MESSAGES.LDOntologyLabel());
+      contentPanel.add(uriLabel);
+      contentPanel.add(ontologyTextBox);
       String cancelText = MESSAGES.cancelButton();
       String okText = MESSAGES.okButton();
 
-      // Keeps track of the total number of screens.
-      int formCount = otherFormNames.size() + 1;
-      if (formCount > MAX_FORM_COUNT) {
-        HorizontalPanel errorPanel = new HorizontalPanel();
-        HTML tooManyScreensLabel = new HTML(MESSAGES.formCountErrorLabel());
-        errorPanel.add(tooManyScreensLabel);
-        errorPanel.setSize("100%", "24px");
-        contentPanel.add(errorPanel);
-
-        okText = MESSAGES.addScreenButton();
-        cancelText = MESSAGES.cancelScreenButton();
-
-        // okText = "Add";
-        // cancelText = "Don't Add";
-      }
-
-      Button cancelButton = new Button(cancelText);
-      cancelButton.addClickHandler(new ClickHandler() {
+      Button cancelButtonForUri = new Button(cancelText);
+      cancelButtonForUri.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           hide();
           executionFailedOrCanceled();
         }
       });
-      Button okButton = new Button(okText);
-      okButton.addClickHandler(new ClickHandler() {
+
+      okButtonForUri = new Button(okText);
+      okButtonForUri.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           handleOkClick(projectRootNode);
         }
       });
+      
       HorizontalPanel buttonPanel = new HorizontalPanel();
-      buttonPanel.add(cancelButton);
-      buttonPanel.add(okButton);
+      buttonPanel.add(cancelButtonForUri);
+      buttonPanel.add(okButtonForUri);
       buttonPanel.setSize("100%", "24px");
+      
+      cBoxPanel.setVisible(false);
+      contentPanel.add(cBoxPanel);
       contentPanel.add(buttonPanel);
       contentPanel.setSize("320px", "100%");
 
@@ -168,47 +177,76 @@ public final class AddFormCommand extends ChainableCommand {
     }
 
     private void handleOkClick(YoungAndroidProjectNode projectRootNode) {
-      String newFormName = newNameTextBox.getText();
-      if (validate(newFormName)) {
-        hide();
-        addFormAction(projectRootNode, newFormName);
+      Ode ode = Ode.getInstance();
+      YoungAndroidSourceNode sourceNode = ode.getCurrentYoungAndroidSourceNode();
+      if (OkButtonSwitcher==0) {
+        AsyncCallback<List<String>> continuation = new AsyncCallback<List<String>>() {
+
+					@Override
+					public void onFailure(Throwable arg0) {
+						addCheckBoxesToPanel(new ArrayList<String>());
+					}
+
+					@Override
+					public void onSuccess(List<String> arg0) {
+		        addCheckBoxesToPanel(arg0);
+					}
+        };
+        SemWebServiceAsync service = Ode.getInstance().getSemanticWebService();
+        service.getProperties(ontologyTextBox.getText(), continuation);
+        center(); 
+        OkButtonSwitcher++;
       } else {
-        newNameTextBox.setFocus(true);
+        addLDFormAction(projectRootNode, sourceNode.getFormName());
+        hide();
       }
     }
-
-    private boolean validate(String newFormName) {
-      // Check that it meets the formatting requirements.
-      if (!TextValidators.isValidIdentifier(newFormName)) {
-        Window.alert(MESSAGES.malformedFormNameError());
-        return false;
+    
+    private void addCheckBoxesToPanel(List<String> properties) {
+      for(int i = 0; i<properties.size(); i++){
+        final CheckBox cBox = new CheckBox(properties.get(i)+"");
+        cBox.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            addCheckBoxToCollection(((CheckBox) event.getSource()).getText());
+          }
+        });
+        cBoxPanel.add(cBox);
       }
-
-      // Check that it's unique.
-      if (otherFormNames.contains(newFormName)) {
-        Window.alert(MESSAGES.duplicateFormNameError());
-        return false;
+      if (properties.size() == 0) {
+        hide();
+        executionFailedOrCanceled();
+        Window.confirm(MESSAGES.confirmCheckInputValue());
+        return;
       }
-
-      return true;
+      cBoxPanel.setVisible(true);
+      ontologyTextBox.setFocus(true);
+    }
+    
+    private void addCheckBoxToCollection(String cBox) {
+    	if (checkBoxCollection.contains(cBox)) {
+    		checkBoxCollection.remove(cBox);
+    	} else {
+        checkBoxCollection.add(cBox);
+    	}
     }
 
     /**
      * Adds a new form to the project.
      *
-     * @param formName the new form name
+     * @param newFormName the new form name
      */
-    protected void addFormAction(final YoungAndroidProjectNode projectRootNode, 
-        final String formName) {
+    protected void addLDFormAction(final YoungAndroidProjectNode projectRootNode, 
+        final String targetFormName) {
       final Ode ode = Ode.getInstance();
       final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
-      String qualifiedFormName = packageNode.getPackageName() + '.' + formName;
-      final String formFileId = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
-      final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+      
+      String targetQualifiedFormName = packageNode.getPackageName() + '.' + targetFormName;
+      final String targetFormFileId = YoungAndroidFormNode.getFormFileId(targetQualifiedFormName);
 
       OdeAsyncCallback<Long> callback = new OdeAsyncCallback<Long>(
           // failure message
-          MESSAGES.addFormError()) {
+          MESSAGES.copyFormError()) {
         @Override
         public void onSuccess(Long modDate) {
           final Ode ode = Ode.getInstance();
@@ -216,9 +254,7 @@ public final class AddFormCommand extends ChainableCommand {
 
           // Add the new form and blocks nodes to the project
           final Project project = ode.getProjectManager().getProject(projectRootNode);
-          project.addNode(packageNode, new YoungAndroidFormNode(formFileId));
-          project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
-
+          
           // Add the screen to the DesignToolbar and select the new form editor. 
           // We need to do this once the form editor and blocks editor have been
           // added to the project editor (after the files are completely loaded).
@@ -232,22 +268,13 @@ public final class AddFormCommand extends ChainableCommand {
             public void execute() {
               ProjectEditor projectEditor = 
                   ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
-              FileEditor formEditor = projectEditor.getFileEditor(formFileId);
-              FileEditor blocksEditor = projectEditor.getFileEditor(blocksFileId);
-              if (formEditor != null && blocksEditor != null && !ode.screensLocked()) {
-                DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
-                long projectId = formEditor.getProjectId();
-                designToolbar.addScreen(projectId, formName, formEditor, 
-                    blocksEditor);
-                designToolbar.switchToScreen(projectId, formName, DesignToolbar.View.FORM);
-                executeNextCommand(projectRootNode);
-              } else {
-                // The form editor and/or blocks editor is still not there. Try again later.
-                Scheduler.get().scheduleDeferred(this);
-              }
+              DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
+              FileEditor formEditor = projectEditor.getFileEditor(targetFormFileId);
+              long projectId = formEditor.getProjectId();
+              executeNextCommand(projectRootNode);
+              Window.Location.reload();
             }
           });
-
         }
 
         @Override
@@ -259,17 +286,18 @@ public final class AddFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
-      ode.getProjectService().addFile(projectRootNode.getProjectId(), formFileId, callback);
+      if (checkBoxCollection.size() > 0) {
+        ode.getProjectService().addLDForm(projectRootNode.getProjectId(), targetFormFileId, checkBoxCollection, ontologyTextBox.getText(), callback);
+      }
     }
 
     @Override
     public void show() {
       super.show();
-
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {
-          newNameTextBox.setFocus(true);
+          ontologyTextBox.setFocus(true);
         }
       });
     }

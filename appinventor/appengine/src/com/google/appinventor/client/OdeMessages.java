@@ -105,6 +105,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Add Screen ...")
   @Description("Label of the button for adding a new screen")
   String addFormButton();
+  
+  @DefaultMessage("Copy Screen ...")
+  @Description("Label of the button for copying a new screen")
+  String copyFormButton();
 
   @DefaultMessage("Remove Screen")
   @Description("Label of the button for removing a screen")
@@ -446,6 +450,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Import project (.aia) from my computer ...")
   @Description("Name of Import Project menuitem")
   String importProjectMenuItem();
+  
+  @DefaultMessage("Import Screen (.aiax) from my computer ...")
+  @Description("Name of Import Screen menuitem")
+  String importScreenMenuItem();
 
   @DefaultMessage("Delete project")
   @Description("Name of Delete project menuitem")
@@ -470,6 +478,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Export selected project (.aia) to my computer")
   @Description("Name of Export Project menuitem")
   String exportProjectMenuItem();
+  
+  @DefaultMessage("Export selected screen (.aiax) to my computer")
+  @Description("Name of Export Screen menuitem")
+  String exportScreenMenuItem();
 
   @DefaultMessage("Export all projects")
   @Description("Name of Export all Project menuitem")
@@ -1211,10 +1223,22 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("New Screen")
   @Description("Title of new Screen dialog.")
   String newFormTitle();
+  
+  @DefaultMessage("Generate LD form in the current screen")
+  @Description("Title of Auto LD form generator Screen dialog.")
+  String newLDFormTitle();
+  
+  @DefaultMessage("Enter Linked Data Concept URI:")
+  @Description("Label for the Linked Data Ontology URL in new screen dialog.")
+  String LDOntologyLabel();
 
-  @DefaultMessage("Screen name:")
+  @DefaultMessage("New screen name:")
   @Description("Label in front of name in new screen dialog.")
   String formNameLabel();
+  
+  @DefaultMessage("Target screen name:")
+  @Description("Label in front of name in new screen dialog.")
+  String oldFormNameLabel();
 
   @DefaultMessage("WARNING: The number of screens in this app might exceed the limits of App Inventor. " +
                   "Click <a target=\"_blank\" href=\"/reference/other/manyscreens.html\">here</a> for advice about " +
@@ -1231,11 +1255,19 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Duplicate Screen name!")
   @Description("Error shown when a new form name would be the same as an existing one")
   String duplicateFormNameError();
+  
+  @DefaultMessage("No such Screen name exist!")
+  @Description("Error shown when copying an non-existing one")
+  String noSuchFormNameError();
 
   @DefaultMessage("Server error: could not add form. Please try again later!")
   @Description("Error message reported when adding a form failed on the server.")
   String addFormError();
 
+  @DefaultMessage("Server error: could not copy form. Please try again later!")
+  @Description("Error message reported when copying a form failed on the server.")
+  String copyFormError();
+  
   // Used in explorer/commands/BuildCommand.java, and
   // explorer/commands/WaitForBuildResultCommand.java
 
@@ -1459,6 +1491,10 @@ public interface OdeMessages extends Messages {
       "There is no undo for deleting your keystore file.")
   @Description("Confirmation message for delete keystore")
   String confirmDeleteKeystore();
+  
+  @DefaultMessage("There is something wrong. Please double check the input value and restart the form generator.")
+  @Description("")
+  String confirmCheckInputValue(); 
 
   // Used in output/OdeLog.java
 
@@ -1610,6 +1646,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Import Project...")
   @Description("Caption for project upload wizard.")
   String projectUploadWizardCaption();
+  
+  @DefaultMessage("Import Screen...")
+  @Description("Caption for screen upload wizard.")
+  String screenUploadWizardCaption();
 
   // Used in GalleryToolBar.java
   @DefaultMessage("Search")
@@ -1854,6 +1894,11 @@ public interface OdeMessages extends Messages {
   @Description("Error message reported when the file selected for upload is not a project archive.")
   String notProjectArchiveError();
 
+  @DefaultMessage("The selected file is not a screen source file!\n" +
+      "Project source files are aiaX files.")
+  @Description("Error message reported when the file selected for upload is not a screen archive.")
+  String notScreenArchiveError();
+
   // Used in RemixedYoungAndroidProjectWizard.java
   @DefaultMessage("Loading App ...")
   @Description("loading indicator when opening the app")
@@ -2054,6 +2099,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Settings")
   @Description("Change the project settings")
   String changeSettingsButton();
+  
+  @DefaultMessage("Generate LD Form")
+  @Description("Auto LD form generator")
+  String generateLDForm();
 
   // This error message is displayed as HTML
 

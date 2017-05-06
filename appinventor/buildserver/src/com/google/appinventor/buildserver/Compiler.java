@@ -103,7 +103,6 @@ public final class Compiler {
 
   private static final String DEFAULT_VERSION_CODE = "1";
   private static final String DEFAULT_VERSION_NAME = "1.0";
-
   private static final String DEFAULT_APP_NAME = "";
 
   //The API key is initialized here to prevent crashing. 
@@ -371,12 +370,10 @@ public final class Compiler {
     String className = Signatures.getClassName(mainClass);
     String projectName = project.getProjectName();
     String vCode = (project.getVCode() == null) ? DEFAULT_VERSION_CODE : project.getVCode();
-
     String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanName(project.getVName());
     String aName = (project.getAName() == null) ? DEFAULT_APP_NAME : cleanName(project.getAName());
     String gMapsAPIKey = (project.getMapsKey() == null) ? DEFAULT_GOOGLE_MAPS_API_KEY : project.getMapsKey();
     String minSDK = DEFAULT_MIN_SDK;
-
     LOG.log(Level.INFO, "VCode: " + project.getVCode());
     LOG.log(Level.INFO, "VName: " + project.getVName());
     LOG.log(Level.INFO, "MapsKey: " + project.getMapsKey());

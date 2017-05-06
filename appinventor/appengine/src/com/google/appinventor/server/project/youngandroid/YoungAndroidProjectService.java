@@ -51,6 +51,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -65,9 +66,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -284,7 +288,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
       String newContent = getProjectPropertiesFileContents(projectName, qualifiedName, newIcon,
         newVCode, newVName, newUsesLocation, newMapsKey, newAName, newSizing);
       storageIo.uploadFileForce(projectId, PROJECT_PROPERTIES_FILE_NAME, userId,
-    	  newContent, StorageUtil.DEFAULT_CHARSET);
+        newContent, StorageUtil.DEFAULT_CHARSET);
     }
   }
 
@@ -507,6 +511,392 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     } else {
       return super.addFile(userId, projectId, fileId);
     }
+  }
+  
+  @Override
+  public long copyScreen(String userId, long projectId, String targetFileId, String fileId) {
+    if (fileId.endsWith(FORM_PROPERTIES_EXTENSION) ||
+        fileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
+      // If the file to be added is a form file or a blocks file, add a new form file, a new
+      // blocks file, and a new yail file (as a placeholder for later code generation)
+      String qualifiedFormName = YoungAndroidSourceNode.getQualifiedName(fileId);
+      String formFileName = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
+      String blocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+      String yailFileName = YoungAndroidYailNode.getYailFileId(qualifiedFormName);
+      
+      String targetQualifiedFormName = YoungAndroidSourceNode.getQualifiedName(targetFileId);
+      String targetFormFileName = YoungAndroidFormNode.getFormFileId(targetQualifiedFormName);
+      String targetBlocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(targetQualifiedFormName);
+      String targetYailFileName = YoungAndroidYailNode.getYailFileId(targetQualifiedFormName);
+
+      List<String> sourceFiles = storageIo.getProjectSourceFiles(userId, projectId);
+      if (!sourceFiles.contains(formFileName) &&
+          !sourceFiles.contains(blocklyFileName) &&
+          !sourceFiles.contains(yailFileName)) {
+
+        if (sourceFiles.contains(targetFormFileName) &&
+            sourceFiles.contains(targetBlocklyFileName) &&
+            sourceFiles.contains(targetYailFileName)) {
+          
+          //Screen1, or Screen2
+          int lastDotPos = qualifiedFormName.lastIndexOf('.');
+          String simpleFormName = qualifiedFormName.substring(lastDotPos + 1);
+          lastDotPos = targetQualifiedFormName.lastIndexOf('.');
+          String simpleTargetFormName = targetQualifiedFormName.substring(lastDotPos + 1);
+          
+          String formFileContents = load(userId, projectId, targetFormFileName)
+              .replace(simpleTargetFormName, simpleFormName);
+          storageIo.addSourceFilesToProject(userId, projectId, false, formFileName);
+          storageIo.uploadFileForce(projectId, formFileName, userId, formFileContents,
+              StorageUtil.DEFAULT_CHARSET);
+
+          String blocklyFileContents = load(userId, projectId, targetBlocklyFileName)
+              .replace(simpleTargetFormName, simpleFormName);
+          storageIo.addSourceFilesToProject(userId, projectId, false, blocklyFileName);
+          storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
+              StorageUtil.DEFAULT_CHARSET);
+
+          String yailFileContents = load(userId, projectId, targetYailFileName)
+              .replace(simpleTargetFormName, simpleFormName);
+          storageIo.addSourceFilesToProject(userId, projectId, false, yailFileName);
+          return storageIo.uploadFileForce(projectId, yailFileName, userId, yailFileContents,
+              StorageUtil.DEFAULT_CHARSET);
+        } else {
+          throw new IllegalStateException("One or more files to be copied don't exist.");
+        }
+      } else {
+        throw new IllegalStateException("One or more files to be added already exists.");
+      }
+    } else {
+      return super.addFile(userId, projectId, fileId);
+    }
+  }
+  
+  @Override
+  public long addLDForm(String userId, long projectId, String targetFileId, List<String> uriCollection, String conceptURI) {
+    if (targetFileId.endsWith(FORM_PROPERTIES_EXTENSION) ||
+        targetFileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
+      // If the file to be added is a form file or a blocks file, add a new form file, a new
+      // blocks file, and a new yail file (as a placeholder for later code generation)      
+      String targetQualifiedFormName = YoungAndroidSourceNode.getQualifiedName(targetFileId);
+      String targetFormFileName = YoungAndroidFormNode.getFormFileId(targetQualifiedFormName);
+      String targetBlocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(targetQualifiedFormName);
+      String targetYailFileName = YoungAndroidYailNode.getYailFileId(targetQualifiedFormName);
+
+      List<String> sourceFiles = storageIo.getProjectSourceFiles(userId, projectId);
+      if (sourceFiles.contains(targetFormFileName) &&
+          sourceFiles.contains(targetBlocklyFileName) &&
+          sourceFiles.contains(targetYailFileName)) {
+          
+          String formFileContents = load(userId, projectId, targetFormFileName);
+          LOG.info("The original form file content is " + formFileContents);
+          
+          String newString = formFileContents.replace("#|", "");
+          newString = newString.replace("$JSON", "");
+          newString = newString.replace("|#", "");
+          
+          String LDName = "";
+          String LDFieldName = "";
+          
+          try {
+            JSONObject originalObj = new JSONObject(newString);
+            JSONObject originalObj2 = (JSONObject) originalObj.get("Properties");
+            
+            
+            JSONArray originalObj3;
+            
+            try {
+              originalObj3 = (JSONArray) originalObj2.get("$Components");
+            } catch (JSONException e) {
+            	originalObj3 = new JSONArray();
+            }
+
+            List<String> returns = generateFormContent(conceptURI, uriCollection);
+            String formContent = returns.get(0);
+            LDFieldName = returns.get(1);
+            LOG.info("The generateFormContent " + formContent);
+            JSONObject formObj = new JSONObject(formContent);
+            
+            JSONArray tmpObj = (JSONArray) formObj.get("$Components");
+            originalObj3.put(originalObj3.length(), tmpObj.get(0));
+            
+            returns = generateLDContent();
+            String LDContent = returns.get(0);
+            LDName = returns.get(1);
+            LOG.info("The generateLDContent " + LDContent);
+            formObj = new JSONObject(LDContent);
+            
+            tmpObj = (JSONArray) formObj.get("$Components");
+            originalObj3.put(originalObj3.length(), tmpObj.get(0));
+            
+            originalObj2.put("$Components", originalObj3);
+            originalObj.put("Properties", originalObj2);
+            
+            String result = "#|" + "\n" + "$JSON" + "\n" + originalObj.toString() + "\n" + "|#";
+            LOG.info("The smaller form file content is " + result);
+            LOG.info("The uri collection is " + uriCollection.toString());
+            formFileContents = result;
+          } catch (JSONException e) {
+            LOG.info("The exception is "+e.toString());
+          }
+          
+          long uploadResult = storageIo.uploadFileForce(projectId, targetFormFileName, userId, formFileContents,
+              StorageUtil.DEFAULT_CHARSET);
+          
+          String blkFileContents = load(userId, projectId, targetBlocklyFileName);
+          LOG.info("The original blk content is \n"+ blkFileContents);
+
+          String[] lines = blkFileContents.split("\\r?\\n");
+          String lastLine1 = lines[lines.length-1];
+          String lastLine2 = lines[lines.length-2];
+          List<String> allLinesPart1 = Arrays.asList(lines).subList(0, lines.length-2);
+
+          String[] tempBlkContent = generateBlockContent("LinkedData"+LDName, "LinkedDataForm"+LDFieldName);
+          List<String> allLinesPart2 = Arrays.asList(tempBlkContent);
+
+          List<String> allLines = new ArrayList<String>();
+          allLines.addAll(allLinesPart1);
+          allLines.addAll(allLinesPart2);
+          allLines.add(lastLine2);
+          allLines.add(lastLine1);
+          
+          String finalBlkContent = allLines.toString();
+          finalBlkContent = finalBlkContent.replace(",", "\n");
+          finalBlkContent = finalBlkContent.replace("[", "");
+          finalBlkContent = finalBlkContent.replace("]", "");
+          
+          LOG.info("The new blk content is \n"+ finalBlkContent);
+          uploadResult = storageIo.uploadFileForce(projectId, targetBlocklyFileName, userId, finalBlkContent,
+              StorageUtil.DEFAULT_CHARSET);
+          
+          return uploadResult;
+      } else {
+          throw new IllegalStateException("One or more files to be copied don't exist.");
+      }
+    } else {
+      return super.addFile(userId, projectId, targetFileId);
+    }
+  }
+  
+  public List<String> generateLDContent() {
+    String contentPart = 
+    "{"+
+      "\"$Components\": ["+
+        "{"+
+          "\"$Name\": \"LinkedData$LDID$\","+
+          "\"$Type\": \"LinkedData\","+
+          "\"$Version\": \"3\","+
+          "\"Uuid\": \"$LDUUID$\""+
+        "}"+
+      "]"+
+    "}";
+    String LDIDRegex = "$LDID$";
+    String LDUUIDRegex = "$LDUUID$";
+
+    String LDID = generateRandomLetterOrNum();
+    contentPart = contentPart.replace(LDIDRegex, LDID);
+    contentPart = contentPart.replace(LDUUIDRegex, System.currentTimeMillis()+"");
+    List<String> returns = new ArrayList<String>(); 
+    returns.add(contentPart);
+    returns.add(LDID);
+    return returns;
+  }
+  
+  public List<String> generateFormContent(String conceptURI, List<String> uriCollection) {
+    String contentPart1 = 
+    "{"+
+      "\"$Components\": ["+
+        "{"+
+          "\"$Name\": \"LinkedDataForm$formID$\","+
+          "\"$Type\": \"LinkedDataForm\","+
+          "\"$Version\": \"3\","+
+          "\"Uuid\": \"$formUUID$\","+
+          "\"FormID\": \"http:\\/\\/punya.appinventor.mit.edu\\/LDFormGenerator_$formTimestamp$\\/\","+
+          "\"ObjectType\":" + "\"" + conceptURI + "\"" + ","+
+          "\"Width\": \"-2\",";
+    
+    String contentPart2 = 
+          "\"$Components\": ["+
+            "{"+
+              "\"$Name\": \"TableArrangement$tableID$\","+
+              "\"$Type\": \"TableArrangement\","+
+              "\"$Version\": \"1\","+
+              "\"Uuid\": \"$tableUUID$\","+
+              "\"Rows\": \"$tableRowNum$\","+
+              "\"Width\": \"-2\","+
+              "\"$Components\": [";
+     
+    String contentPart3 = 
+                "{"+
+                  "\"$Name\": \"Label$labelID$\","+
+                  "\"$Type\": \"Label\","+
+                  "\"$Version\": \"2\","+
+                  "\"Uuid\": \"$labelUUID$\","+
+                  "\"Text\": \"$labelText$\","+
+                  "\"Column\": \"$labelCol$\","+
+                  "\"Row\": \"$labelRow$\""+
+                "}";
+
+    String contentPart4 = 
+                "{"+
+                  "\"$Name\": \"TextBox$TextBoxID$\","+
+                  "\"$Type\": \"TextBox\","+
+                  "\"$Version\": \"6\","+
+                  "\"Uuid\": \"$TextBoxUUID$\","+
+                  "\"Hint\": \"Hint for TextBox1\","+
+                  "\"PropertyURI\": \"$TextBoxURI$\","+
+                  "\"Column\": \"$TextBoxCol$\","+
+                  "\"Row\": \"$TextBoxRow$\""+
+                "}";
+      
+     String contentPart6 = 
+              "]"+
+            "}"+ 
+          "]"+
+        "}"+
+      "]"+
+    "}";
+
+    String formIDRegex = "$formID$";
+    String formUUIDRegex = "$formUUID$";
+    String formTimestampRegex = "$formTimestamp$";
+
+    String tableIDRegex = "$tableID$"; 
+    String tableUUIDRegex = "$tableUUID$"; 
+    String tableRowNumRegex = "$tableRowNum$"; 
+
+    String tempFormID = generateRandomLetterOrNum();
+    contentPart1 = contentPart1.replace(formIDRegex, tempFormID);
+    contentPart1 = contentPart1.replace(formUUIDRegex, System.currentTimeMillis()+"");
+    contentPart1 = contentPart1.replace(formTimestampRegex, System.currentTimeMillis()+"");
+
+    contentPart2 = contentPart2.replace(tableIDRegex, generateRandomLetterOrNum());
+    contentPart2 = contentPart2.replace(tableUUIDRegex, System.currentTimeMillis()+"");
+    contentPart2 = contentPart2.replace(tableRowNumRegex, uriCollection.size()+"");
+
+    String textBoxUri = conceptURI;
+    String formContent = generateLabelTextbox(uriCollection, contentPart3, contentPart4);
+    String returnPart1 = contentPart1 + contentPart2 + formContent + contentPart6;
+    
+    List<String> returns = new ArrayList<String>(); 
+    returns.add(returnPart1);
+    returns.add(tempFormID);
+    return returns;
+  }
+  
+  public String generateLabelTextbox(List<String> uriCollection, String contentPart3, String contentPart4) {
+    String labelIDRegex = "$labelID$"; 
+    String labelUUIDRegex = "$labelUUID$"; 
+    String labelTextRegex = "$labelText$"; 
+    String labelColRegex = "$labelCol$"; 
+    String labelRowRegex = "$labelRow$"; 
+    
+    String textBoxIDRegex = "$TextBoxID$"; 
+    String textBoxUUIDRegex = "$TextBoxUUID$"; 
+    String textBoxURIRegex = "$TextBoxURI$"; 
+    String textBoxColRegex = "$TextBoxCol$"; 
+    String textBoxRowRegex = "$TextBoxRow$"; 
+    
+    String labelText = "";
+    String textBoxUri = "";
+    
+    String formContent = "";
+    String formContentPart1 = "";
+    String formContentPart2 = "";
+    
+   for (int i = 0; i < uriCollection.size(); i++) {
+  	 textBoxUri = uriCollection.get(i);
+  	 
+  	 if (textBoxUri.contains("#")) {
+    	 String[] items = textBoxUri.split("#");
+    	 labelText = items[items.length-1];
+  	 } else {
+    	 String[] items = textBoxUri.split("/");
+    	 labelText = items[items.length-1];
+  	 }
+
+     formContentPart1 = contentPart3.replace(labelIDRegex, generateRandomLetterOrNum());
+     formContentPart1 = formContentPart1.replace(labelUUIDRegex, System.currentTimeMillis()+"");
+     formContentPart1 = formContentPart1.replace(labelTextRegex, labelText);
+     formContentPart1 = formContentPart1.replace(labelColRegex, "0");
+     formContentPart1 = formContentPart1.replace(labelRowRegex, i+"");
+     
+     formContentPart2 = contentPart4.replace(textBoxIDRegex, generateRandomLetterOrNum());
+     formContentPart2 = formContentPart2.replace(textBoxUUIDRegex, System.currentTimeMillis()+"");
+     formContentPart2 = formContentPart2.replace(textBoxURIRegex, textBoxUri);
+     formContentPart2 = formContentPart2.replace(textBoxColRegex, "1");
+     formContentPart2 = formContentPart2.replace(textBoxRowRegex, i+"");
+
+     formContent = formContent + formContentPart1 + "," + formContentPart2 + "," ;    	 
+   }
+   
+   if (formContent.endsWith(",") && formContent.length() > 2) {
+  	 formContent = formContent.substring(0, formContent.length()-1);
+   }
+  	return formContent;
+  }
+  
+  public String[] generateBlockContent(String linkedDataFieldName, String linkedDataFormFieldName) {
+    String LDNameReg = "LinkedData1";
+    String LDFormNameReg = "LinkedDataFormECCCEH";
+    
+    String contentPart = 
+    " <block type=\"local_declaration_statement\" id=\"143\" inline=\"false\" x=\"-5\" y=\"-320\">\n"+
+    " <mutation>\n"+
+    "   <localname name=\"isAddDataFromLDSuccessful\"></localname>\n"+
+    " </mutation>\n"+
+    " <field name=\"VAR0\">isAddDataFromLDSuccessful</field>\n"+
+    " <value name=\"DECL0\">\n"+
+    "   <block type=\"component_method\" id=\"60\" inline=\"false\">\n"+
+    "     <mutation component_type=\"LinkedData\" method_name=\"AddDataFromLinkedDataForm\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>\n"+
+    "     <field name=\"COMPONENT_SELECTOR\">LinkedData1</field>\n"+
+    "     <value name=\"ARG0\">\n"+
+    "       <block type=\"component_component_block\" id=\"98\">\n"+
+    "         <mutation component_type=\"LinkedDataForm\" instance_name=\"LinkedDataFormECCCEH\"></mutation>\n"+
+    "         <field name=\"COMPONENT_SELECTOR\">LinkedDataFormECCCEH</field>\n"+
+    "       </block>\n"+
+    "     </value>\n"+
+    "   </block>\n"+
+    " </value>\n"+
+    " <statement name=\"STACK\">\n"+
+    "   <block type=\"component_method\" id=\"30\" inline=\"false\">\n"+
+    "     <mutation component_type=\"LinkedData\" method_name=\"AddDataToWeb\" is_generic=\"false\" instance_name=\"LinkedData1\"></mutation>\n"+
+    "     <field name=\"COMPONENT_SELECTOR\">LinkedData1</field>\n"+
+    "     <value name=\"ARG0\">\n"+
+    "       <block type=\"text\" id=\"159\">\n"+
+    "         <field name=\"TEXT\"></field>\n"+
+    "       </block>\n"+
+    "     </value>\n"+
+    "     <value name=\"ARG1\">\n"+
+    "       <block type=\"logic_boolean\" id=\"166\">\n"+
+    "         <field name=\"BOOL\">TRUE</field>\n"+
+    "       </block>\n"+
+    "     </value>\n"+
+    "    </block>\n"+
+    "  </statement>\n"+
+    " </block>";
+    
+    contentPart = contentPart.replace(LDNameReg, linkedDataFieldName);
+    contentPart = contentPart.replace(LDFormNameReg, linkedDataFormFieldName);
+    LOG.info("The blk LD content is \n" + contentPart);
+    
+    String[] lines = contentPart.split("\\r?\\n");
+    return lines;
+  }
+  
+  // 6 random letters &/ numbers
+  public String generateRandomLetterOrNum() {
+    String val = "";
+    // char or numbers (5), random 0-9 A-Z
+    for(int i = 0; i<6;){
+      int ranAny = 48 + (new Random()).nextInt(90-65);
+      if(!(57 < ranAny && ranAny<= 65)){
+        char c = (char)ranAny;      
+        val += c;
+        i++;
+      }
+    }
+    return val;
   }
 
   @Override

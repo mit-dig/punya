@@ -33,4 +33,6 @@ public interface SemWebServiceAsync {
    * @param callback Handler to fire when data is received.
    */
   void searchProperties(String text, AsyncCallback<List<Map<String, String>>> callback);
+  
+  void getProperties(String concept, AsyncCallback<List<String>> callback);
 }
