@@ -2052,7 +2052,7 @@ public class ObjectifyStorageIo implements  StorageIo {
             projectName.t = pd.name;
           }
         }
-      });
+      }, false);
 
       // Process the file contents outside of the job since we can't read
       // blobs in the job.

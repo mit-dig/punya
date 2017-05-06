@@ -109,12 +109,6 @@ public final class Compiler {
   // The Google Maps API Key is from the QCRI gmail account
   private static final String DEFAULT_GOOGLE_MAPS_API_KEY = "AIzaSyCmOh64wdlLf5Ay4hXo_1M-vDWerizaUrk";
 
-  private static final String DEFAULT_APP_NAME = "";
-
-  //The API key is initialized here to prevent crashing. 
-  // The Google Maps API Key is from the QCRI gmail account
-  private static final String DEFAULT_GOOGLE_MAPS_API_KEY = "AIzaSyCmOh64wdlLf5Ay4hXo_1M-vDWerizaUrk";
-
 
   private static final String COMPONENT_PERMISSIONS =
           RUNTIME_FILES_DIR + "simple_components_permissions.json";
