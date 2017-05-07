@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
+import com.google.appinventor.client.editor.simple.components.MockComponent;
+import com.google.appinventor.client.explorer.project.ComponentDatabaseChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -18,11 +19,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Panel to display properties.
  *
  */
-public class PropertiesPanel extends Composite {
+public class PropertiesPanel extends Composite implements ComponentDatabaseChangeListener {
 
   // UI elements
   private final VerticalPanel panel;
@@ -138,5 +142,25 @@ public class PropertiesPanel extends Composite {
    */
   public void setPropertiesCaption(String name) {
     componentName.setText(name);
+  }
+
+  @Override
+  public void onComponentTypeAdded(List<String> componentTypes) {
+
+  }
+
+  @Override
+  public boolean beforeComponentTypeRemoved(List<String> componentTypes) {
+    return true;
+  }
+
+  @Override
+  public void onComponentTypeRemoved(Map<String, String> componentTypes) {
+
+  }
+
+  @Override
+  public void onResetDatabase() {
+
   }
 }

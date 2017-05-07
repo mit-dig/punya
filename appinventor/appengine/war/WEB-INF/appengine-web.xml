@@ -11,10 +11,25 @@
     <include path="/fonts/*" expiration="365d">
       <http-header name="Content-Type" value="font/ttf" />
     </include>
+    <include path="/media/*" expiration="365d" />
+    <include path="/companions/*" />
+    <include path="/images/*" expiration="365d" />
+    <include path="/Ya_tos_form.html" expiration="1d" />
+    <include path="/favicon.ico" expiration="365d" />
+    <include path="/gwt.css" expiration="1d" />
+    <include path="/Ya.css" expiration="1d" />
+    <include path="/templates/**" expiration="1d" />
+    <include path="/reference/**" expiration="1d" />
+    <include path="/closure-library/closure/goog/base.js" expiration="1d" />
+    <include path="/closure-library/closure/goog/css/dialog.css" expiration="1d" />
+    <include path="/closure-library/closure/goog/deps.js" expiration="1d" />
+    <include path="/robots.txt" expiration="30d" />
+
     <!-- These are not cached on purpose -->
     <include path="/ode/**.nocache.*" expiration="0s" />
     <include path="/blocklyframe.html" expiration="0s" />
     <include path="/index.html" expiration="0s" />
+    <include path="/android" expiration="0s" />
 
     <include path="/ode/**.cache.*" expiration="365d" />
     <exclude path="/ode/**.gwt.rpc" />
@@ -26,6 +41,10 @@
     <exclude path="/whitelist" />
 
   </static-files>
+
+  <!-- Permit sessions for location authentication -->
+  <!-- Not any more -->
+  <sessions-enabled>false</sessions-enabled>
 
   <!-- Configuration and flags -->
   <system-properties>
@@ -70,6 +89,22 @@
       they access App Inventor -->
     <property name="require.tos" value="true" />
 
+    <!-- Flags that select authentication method
+         set auth.usegoogle to true to use Google Accounts
+         set auth.uselocal to permit local users (username is email address) and password.
+         If both are set, the login page will have a link to permit people to use
+         their Google Account.
+         It is an error for neither to be set. Instead of a login page, visitors
+         to the site will receive an error page.
+     -->
+
+    <property name="auth.usegoogle" value="true" />
+    <property name="auth.uselocal" value="true" />
+
+    <!-- Flags associated with localauth code -->
+    <property name="localauth.mailserver" value="https://osiris.mit.edu/passmail/" />
+    <property name="localauth.mailserver.password" value="changeme" />
+
     <!-- host[:port] to use for connecting to the build server -->
     <property name="build.server.host" value="localhost:9990" />
 
@@ -89,10 +124,28 @@
          buildserver to match -->
     <property name="build.send.git.version" value="true" />
 
+    <!-- Session Management Variables. -->
+    <!-- We define three variables here.
+         All variables are defined in minutes
+         session.idletimeout - defines how long until an idle session
+                               is considered invalid.
+         session.renew       - defines the time after which a new session
+                               cookie is generated.
+         session.noop        - defines the time interval between no-op calls
+                               from Ode. 0 means never perform a no-op (the default)
+
+         Note: If renew is > idletimeout, then people will get logged
+         out involuntarily after idletimeout because their session
+         will never renew and therefore is considered idle.
+    -->
+
+    <property name="session.idletimeout" value="120" />
+    <property name="session.renew" value="30" />
+    <property name="session.noop" value="0" />
+
     <!-- Set this to true to enable the use of Wifi connections from the blocks editor to
          the phone. The phone must have an up-to-date copy of the MIT AICompanion App to
          use this feature. -->
-
     <property name="wifi.enabled" value="true" />
 
     <!-- Firebase Secret for the shared datastore -->
@@ -102,6 +155,7 @@
     <property name="library.url" value="http://appinventor.mit.edu/explore/library" />
     <property name="get_started.url" value="http://appinventor.mit.edu/explore/get-started" />
     <property name="tutorials.url" value="http://appinventor.mit.edu/explore/ai2/tutorials" />
+    <property name="extensions.url" value="http://appinventor.mit.edu/extensions" />
     <property name="troubleshooting.url" value="http://appinventor.mit.edu/explore/ai2/support/troubleshooting" />
     <property name="forums.url" value="https://groups.google.com/forum/#!forum/mitappinventortest" />
     <property name="feedback.url" value="http://something.example.com" />

@@ -62,6 +62,7 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
 
     config.setLibraryUrl(Flag.createFlag("library.url", "").get());
     config.setGetStartedUrl(Flag.createFlag("getstarted.url", "").get());
+    config.setExtensionsUrl(Flag.createFlag("extensions.url", "").get());
     config.setTutorialsUrl(Flag.createFlag("tutorials.url", "").get());
     config.setTroubleshootingUrl(Flag.createFlag("troubleshooting.url", "").get());
     config.setForumsUrl(Flag.createFlag("forums.url", "").get());
@@ -72,10 +73,25 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
     config.setGuideUrl(Flag.createFlag("guide.url", "").get());
     config.setReferenceComponentsUrl(Flag.createFlag("reference.components.url", "").get());
     config.setFirebaseURL(Flag.createFlag("firebase.url", "").get());
+    config.setNoop(Flag.createFlag("session.noop", 0).get());
 
     // Check to see if we need to upgrade this user's project to GCS
     storageIo.checkUpgrade(userInfoProvider.getUserId());
     return config;
+  }
+
+  /**
+   * Returns the user's backpack as an XML string.
+   *
+   * @return backpack
+   */
+  @Override
+  public String getUserBackpack() {
+    if (!hasUserFile(StorageUtil.USER_BACKPACK_FILENAME)) {
+      return "[]";
+    } else {
+      return storageIo.downloadUserFile(userInfoProvider.getUserId(), StorageUtil.USER_BACKPACK_FILENAME, "UTF-8");
+    }
   }
 
   /**
@@ -117,6 +133,16 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
   @Override
   public String loadUserSettings() {
     return storageIo.loadSettings(userInfoProvider.getUserId());
+  }
+
+  /**
+   * Stores the user's backpack as an xml string
+   * @param backpack the xml string representing the backpack
+   */
+
+  @Override
+  public void storeUserBackpack(String backpack) {
+    storageIo.uploadUserFile(userInfoProvider.getUserId(), StorageUtil.USER_BACKPACK_FILENAME, backpack, "UTF-8");
   }
 
   /**
@@ -170,8 +196,7 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
   public void deleteUserFile(String fileName) {
     storageIo.deleteUserFile(userInfoProvider.getUserId(), fileName);
   }
-
-  
+ 
     /**
      * Get the SHA1 fingerprint for the user's keystore
      */
@@ -245,5 +270,14 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
         }
         return null;
     }
+
+  /**
+   * No-Op (No Operation). However because we are going through
+   * OdeAuthFilter to get this far, a session cookie due for renewal
+   * will be renewed.
+   */
+  @Override
+  public void noop() {
+  }
 
 }

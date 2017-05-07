@@ -86,8 +86,13 @@ Blockly.Versioning.upgrade = function (preUpgradeFormJsonString, blocksContent) 
         preUpgradeVersion + ","  + systemVersion + "," + rep + ")");
     if (preUpgradeVersion > systemVersion) {
       // What to do in this case? Currently, throw an exception, but might want to do something else:
-      throw "Unexpected situation in Blockly.Versioning.upgrade: preUpgradeVersion of " + componentType +
-          " = " + preUpgradeVersion + " > systemVersion = " + systemVersion;
+      // JIS: We simply ignore this situation. It happens when someone imports a project that was
+      // touched by a newer version of App Inventor. By the time we are run here the user has already
+      // been shown a warning that the project may not work as expected. However if we throw the
+      // exception below we *guarantee* that the project will fail to load. Let's give them a
+      // chance instead (so the lines below are commented out).
+      // throw "Unexpected situation in Blockly.Versioning.upgrade: preUpgradeVersion of " + componentType +
+      //     " = " + preUpgradeVersion + " > systemVersion = " + systemVersion;
     } else if (preUpgradeVersion < systemVersion) {
       // Need to upgrade this component
       Blockly.Versioning.log("upgrading component type " + componentType + " from version " +
@@ -1383,6 +1388,16 @@ Blockly.Versioning.AllUpgradeMaps =
 
   // Form is renamed to Screen. See below.
 
+  "FirebaseDB": {
+
+    1: "noUpgrade",
+    // AI2 Added AppendValue, RemoveFirst and FirstRemoved
+    2: "noUpgrade",
+    // AI2 Added ClearTag function, GetTagList and Persist
+    3: "noUpgrade"
+
+  },
+
   "FusiontablesControl": {
 
     // AI1: No changes required
@@ -1420,6 +1435,13 @@ Blockly.Versioning.AllUpgradeMaps =
     3: "noUpgrade"
 
   }, // End HorizontalArrangement upgraders
+
+  "HorizontalScrollArrangement": {
+
+    // This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End HorizontalScrollArrangement upgraders
 
   "Image": {
 
@@ -1504,7 +1526,10 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // AI2: For LABEL_COMPONENT_VERSION 3:
     // - The HasMargins property was added
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // AI2: Add HTMLFormat property
+    4: "noUpgrade"
 
   }, // End Label upgraders
 
@@ -1686,7 +1711,10 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // AI1: The TimeInterval and DistanceInterval properties were added.
     // No changes required.
-    2: "noUpgrade"
+    2: "noUpgrade",
+    // AI2:
+    // The speed parameter to the LocationChanged event
+    3: "noUpgrade"
 
   }, // End LocationSensor upgraders
 
@@ -1779,6 +1807,62 @@ Blockly.Versioning.AllUpgradeMaps =
 
   }, // End NxtUltrasonicSensor upgraders
 
+  "Ev3Motors": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3Motors upgraders
+
+  "Ev3ColorSensor": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3ColorSensor upgraders
+
+  "Ev3GyroSensor": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3GyroSensor upgraders
+
+  "Ev3TouchSensor": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3TouchSensor upgraders
+
+  "Ev3UltrasonicSensor": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3UltrasonicSensor upgraders
+
+  "Ev3Sound": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3Sound upgraders
+
+  "Ev3UI": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3UI upgraders
+
+  "Ev3Commands": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End Ev3Commands upgraders
+
   "OrientationSensor": {
 
     // AI1: The Yaw property was renamed to Azimuth.
@@ -1812,7 +1896,11 @@ Blockly.Versioning.AllUpgradeMaps =
   "Pedometer": {
 
     //This is initial version. Placeholder for future upgrades
-    1: "noUpgrade"
+    1: "noUpgrade",
+
+    // AI2: The step sensing algorithm was updated to be more accurate.
+    // The GPS related functionality was removed.
+    2: "noUpgrade"
 
   }, // End PhoneCall upgraders
 
@@ -1966,13 +2054,19 @@ Blockly.Versioning.AllUpgradeMaps =
     // - Screen.CompatibilityMode property was added no block needs to be changed.
     17: "noUpgrade",
 
+    // FOR FORM_COMPONENT_VERSION 18:
     // Screen.CompatibililtyMode replaced with Screen.Sizing no blocks need to be
     // changed.
     18: "noUpgrade",
 
     // For FORM_COMPONENT_VERSION 19:
     // - The Screen1.HideKeyboard method was added and no block needs to be changed.
-    19: "noUpgrade"
+    19: "noUpgrade",
+
+    // For FORM_COMPONENT_VERSION 20:
+    // - The Screen1.ShowListsAsJson property was added and no block needs to be changed.
+    20: "noUpgrade"
+
 
   }, // End Screen
 
@@ -2196,6 +2290,13 @@ Blockly.Versioning.AllUpgradeMaps =
     3: "noUpgrade"
 
   }, // End VerticalArrangement upgraders
+
+  "VerticalScrollArrangement": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  }, // End VerticalScrollArrangement upgraders
 
   "VideoPlayer": {
 

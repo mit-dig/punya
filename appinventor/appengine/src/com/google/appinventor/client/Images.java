@@ -76,6 +76,12 @@ public interface Images extends Resources {
   ImageResource navigationbar();
 
   /**
+   * Spinning/wait graphic to indicate long-running operations.
+   */
+  @Source("com/google/appinventor/images/spin_16.gif")
+  ImageResource waitingIcon();
+
+  /**
    * Designer palette item: question mark for more component information
    */
   @Source("com/google/appinventor/images/help.png")
@@ -134,6 +140,18 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/datePicker.png")
   ImageResource datePickerComponent();
+
+  /**
+   * Designer palette item: Delete Component
+   */
+  @Source("com/google/appinventor/images/delete.png")
+  ImageResource deleteComponent();
+
+  /**
+   * Designer palette item: Extension Component
+   */
+  @Source("com/google/appinventor/images/extension.png")
+  ImageResource extension();
 
   /**
    * Designer palette item: form component
@@ -412,6 +430,12 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/legoMindstormsNxt.png")
   ImageResource legoMindstormsNxt();
+
+  /**
+   * Designer palette item: Lego Mindstorms EV3 components
+   */
+  @Source("com/google/appinventor/images/legoMindstormsEv3.png")
+  ImageResource legoMindstormsEv3();
 
   /**
    * Designer palette item: Bluetooth components

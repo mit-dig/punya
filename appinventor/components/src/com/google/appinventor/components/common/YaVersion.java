@@ -450,7 +450,28 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 179 (mit-cml/master YaVersion 150):
   // - IMAGE_COMPONENT_VERSION was incremented to 3
 
-  public static final int YOUNG_ANDROID_VERSION = 179;
+  // For YOUNG_ANDROID_VERSION 151:
+  // - LOCATIONSENSOR_COMPONENT_VERSION was incremented to 3
+  // For YOUNG_ANDROID_VERSION 152:
+  // - FIREBASE_COMPONENT_VERSION was incremented to 2
+  // For YOUNG_ANDROID_VERSION 153:
+  // - The components Ev3Motors, Ev3{Color,Gyro,Touch,Ultrasonic}
+  //   Sensor Ev3UI, Ev3Commands were added for EV3 support
+  // For YOUNG_ANDROID_VERSION 154:
+  // - PEDOMETER_COMPONENT_VERSION was incremented to 2
+  // For YOUNG_ANDROID_VERSION 155:
+  // - Extensions Support (non-visible only) added
+  // For YOUNG_ANDROID_VERSION 156:
+  // - FIREBASE_COMPONENT_VERSION was incremented to 3
+  // For YOUNG_ANDROID_VERSION 157:
+  // - LABEL_COMPONENT_VERSION was incremented to 4
+  // For YOUNG_ANDROID_VERSION 158:
+  // Added HorizontalScrollArrangement and VerticalScrollArrangement
+  // For YOUNG_ANDROID_VERSION 159:
+  // - FORM_COMPONENT_VERSION was incremented to 20
+
+  public static final int YOUNG_ANDROID_VERSION = 188;
+
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -511,6 +532,7 @@ public class YaVersion {
   // The number-convert blocks was added
   // For BLOCKS_LANGUAGE_VERSION 20:
   // - Spelling of "Obsfucate" was corrected to Obfuscate in Text Block
+
   public static final int BLOCKS_LANGUAGE_VERSION = 20;
 
   // ................................. Component Version Numbers ..................................
@@ -738,7 +760,9 @@ public class YaVersion {
   //   Sizing property
   // For FORM_COMPONENT_VERSION 19:
   // - Added HideKeyboard method
-  public static final int FORM_COMPONENT_VERSION = 19;
+  // For FORM_COMPONENT_VERSION 20:
+  // - The Screen.ShowListsAsJson property was added
+  public static final int FORM_COMPONENT_VERSION = 20;
 
 
   // For FUSIONTABLESCONTROL_COMPONENT_VERSION 2:
@@ -756,8 +780,11 @@ public class YaVersion {
   // For HORIZONTALARRANGEMENT_COMPONENT_VERSION 2:
   // - The AlignHorizontal property was added
   // - The AlignVertical property was added
+  // For HORIZONTALARRANGEMENT_COMPONENT_VERSION 3:
   // - Added background color & image
   public static final int HORIZONTALARRANGEMENT_COMPONENT_VERSION = 3;
+
+  public static final int HORIZONTALSCROLLARRANGEMENT_COMPONENT_VERSION = 1;
 
   // For IMAGE_COMPONENT_VERSION 2:
   // - The RotationAngle property was added.
@@ -794,7 +821,10 @@ public class YaVersion {
   // - The Alignment property was renamed to TextAlignment.
   // For LABEL_COMPONENT_VERSION 3:
   // - The HasMargins property was added
-  public static final int LABEL_COMPONENT_VERSION = 3;
+  // For LABEL_COMPONENT_VERSION 4:
+  // - The HTML format is defined.
+
+  public static final int LABEL_COMPONENT_VERSION = 4;
 
   // For LISTPICKER_COMPONENT_VERSION 2:
   // - The Alignment property was renamed to TextAlignment.
@@ -830,7 +860,9 @@ public class YaVersion {
 
   // For LOCATIONSENSOR_COMPONENT_VERSION 2:
   // - The TimeInterval and DistanceInterval properties were added.
-  public static final int LOCATIONSENSOR_COMPONENT_VERSION = 2;
+  // For LOCATIONSENSOR_COMPONENT_VERSION 3:
+  // - The speed parameter was added to the LocationChanged event
+  public static final int LOCATIONSENSOR_COMPONENT_VERSION = 3;
 
   // For NEARFIELD_COMPONENT_VERSION 1:
   public static final int NEARFIELD_COMPONENT_VERSION = 1;
@@ -856,6 +888,22 @@ public class YaVersion {
   public static final int NXT_TOUCHSENSOR_COMPONENT_VERSION = 1;
 
   public static final int NXT_ULTRASONICSENSOR_COMPONENT_VERSION = 1;
+
+  public static final int EV3_MOTORS_COMPONENT_VERSION = 1;
+
+  public static final int EV3_COLORSENSOR_COMPONENT_VERSION = 1;
+
+  public static final int EV3_GYROSENSOR_COMPONENT_VERSION = 1;
+
+  public static final int EV3_TOUCHSENSOR_COMPONENT_VERSION = 1;
+
+  public static final int EV3_ULTRASONICSENSOR_COMPONENT_VERSION = 1;
+
+  public static final int EV3_SOUND_COMPONENT_VERSION = 1;
+
+  public static final int EV3_UI_COMPONENT_VERSION = 1;
+
+  public static final int EV3_COMMANDS_COMPONENT_VERSION = 1;
 
   // For ORIENTATIONSENSOR_COMPONENT_VERSION = 2:
   // - The Yaw property was renamed to Azimuth.
@@ -894,7 +942,10 @@ public class YaVersion {
   // - Added RequestFocus Function (via TextBoxBase)
   public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 3;
 
-  public static final int PEDOMETER_COMPONENT_VERSION = 1;
+  // For PEDOMETER_COMPONENT_VERSION 2:
+  // - The step sensing algorithm was updated to be more accurate.
+  // - The GPS related functionality was removed.
+  public static final int PEDOMETER_COMPONENT_VERSION = 2;
 
   // For PHONECALL_COMPONENT_VERSION 2:
   // - The PhoneCallStarted event was added.
@@ -1008,9 +1059,14 @@ public class YaVersion {
   // - The TinyWebDB.ShowAlert method was removed. Notifier.ShowAlert should be used instead.
   public static final int TINYWEBDB_COMPONENT_VERSION = 2;
 
-  // // For FIREBASE_COMPONENT_VERSION 1:
+  // For FIREBASE_COMPONENT_VERSION 1:
   // - FirebaseDB component introduced
-  public static final int FIREBASE_COMPONENT_VERSION = 1;
+  // For FIREBASE_COMPONENT_VERSION 2:
+  // - The AppendValue and RemoveFirst functions along
+  //   with the FirstRemoved event were added
+  // For FIREBASE_COMPONENT_VERSION 3:
+  // - Added the ClearTag function, GetTagList and Persist
+  public static final int FIREBASE_COMPONENT_VERSION = 3;
 
   // For TWITTER_COMPONENT_VERSION 2:
   // - The Authorize method and IsAuthorized event handler were added to support
@@ -1046,8 +1102,11 @@ public class YaVersion {
   // For VERTICALARRANGEMENT_COMPONENT_VERSION 2:
   // - The AlignHorizontal property was added
   // - The AlignVertical property was added
+  // For VERTICALARRANGEMENT_COMPONENT_VERSION 3:
   // - Added background color & image
   public static final int VERTICALARRANGEMENT_COMPONENT_VERSION = 3;
+
+  public static final int VERTICALSCROLLARRANGEMENT_COMPONENT_VERSION = 1;
 
   // For VIDEOPLAYER_COMPONENT_VERSION 2:
   // - The VideoPlayer.VideoPlayerError event was added.
@@ -1123,10 +1182,19 @@ public class YaVersion {
   // key as the Companion it is replacing, as the Package Manager
   // is invoked from the running Companion.
 
-  public static final String PREFERRED_COMPANION = "2.36punya1";
+  // ACCEPTABLE_COMPANION_PACKAGE is the package name for the
+  // appropriate Companion. Different versions (forks) of App Inventor
+  // should use their own Companion. This variable holds the value
+  // of the Android Package for this version of App Inventor. The
+  // default value here is for the MIT App Inventor service run
+  // by MIT
+
+  public static final String ACCEPTABLE_COMPANION_PACKAGE = "edu.mit.appinventor.aicompanion3";
+
+  public static final String PREFERRED_COMPANION = "2.41punya1";
   public static final String COMPANION_UPDATE_URL = "";
   public static final String COMPANION_UPDATE_URL1 = "";
-  public static final String [] ACCEPTABLE_COMPANIONS = { "2.36punya1" };
+  public static final String [] ACCEPTABLE_COMPANIONS = { "2.41punya1" };
 
   // Splash Screen Values
   public static final int SPLASH_SURVEY = 1;

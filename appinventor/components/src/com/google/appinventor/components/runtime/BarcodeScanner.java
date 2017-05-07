@@ -12,6 +12,10 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesLibraries;
+import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.UsesActivities;
+import com.google.appinventor.components.annotations.androidmanifest.ActivityElement;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
@@ -20,6 +24,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 import android.util.Log;
+import android.content.ComponentName;
 
 /**
  * Component for scanning a barcode and getting back the resulting string.
@@ -32,6 +37,16 @@ import android.util.Log;
     nonVisible = true,
     iconName = "images/barcodeScanner.png")
 @SimpleObject
+@UsesActivities(activities = {
+    @ActivityElement(name = "com.google.zxing.client.android.AppInvCaptureActivity",
+                     screenOrientation = "landscape",
+                     stateNotNeeded = "true",
+                     configChanges = "orientation|keyboardHidden",
+                     theme = "@android:style/Theme.NoTitleBar.Fullscreen",
+                     windowSoftInputMode = "stateAlwaysHidden")
+})
+@UsesPermissions(permissionNames = "android.permission.CAMERA")
+@UsesLibraries(libraries = "Barcode.jar,core.jar")
 public class BarcodeScanner extends AndroidNonvisibleComponent
     implements ActivityResultListener, Component {
 

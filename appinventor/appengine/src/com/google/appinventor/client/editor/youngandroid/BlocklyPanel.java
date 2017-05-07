@@ -14,11 +14,14 @@ import com.google.appinventor.client.TopToolbar;
 import com.google.appinventor.client.TranslationComponentParams;
 import com.google.appinventor.client.TranslationDesignerPallete;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
+import com.google.appinventor.client.explorer.project.ComponentDatabaseChangeListener;
 import com.google.appinventor.client.output.OdeLog;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.appinventor.components.common.YaVersion;
 
 import com.google.common.collect.Maps;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 
@@ -49,7 +52,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  *
  * @author sharon@google.com (Sharon Perl)
  */
-public class BlocklyPanel extends HTMLPanel {
+public class BlocklyPanel extends HTMLPanel implements ComponentDatabaseChangeListener{
   public static enum OpType {ADD, REMOVE, RENAME}
 
   // The currently displayed form (project/screen)
@@ -70,8 +73,7 @@ public class BlocklyPanel extends HTMLPanel {
     public boolean error = false;     // true if got an error loading blocks
   }
 
-  private static final SimpleComponentDatabase COMPONENT_DATABASE =
-    SimpleComponentDatabase.getInstance();
+  private final SimpleComponentDatabase COMPONENT_DATABASE;
 
   private static final String EDITOR_HTML =
     "<style>\n" +
@@ -136,6 +138,7 @@ public class BlocklyPanel extends HTMLPanel {
     super(EDITOR_HTML.replace("FORM_NAME", formName));
     this.formName = formName;
     this.myBlocksEditor = blocksEditor;
+    COMPONENT_DATABASE = SimpleComponentDatabase.getInstance(blocksEditor.getProjectId());
     componentOps.put(formName, new ArrayList<ComponentOp>());
     // note: using Maps.newHashMap() gives a type error in Eclipse in the following line
     currentComponents.put(formName, new HashMap<String, ComponentOp>());
@@ -155,6 +158,7 @@ public class BlocklyPanel extends HTMLPanel {
     for (int i = 0; i < YaVersion.ACCEPTABLE_COMPANIONS.length; i++) {
       addAcceptableCompanion(YaVersion.ACCEPTABLE_COMPANIONS[i]);
     }
+    addAcceptableCompanionPackage(YaVersion.ACCEPTABLE_COMPANION_PACKAGE);
   }
 
   /*
@@ -236,8 +240,21 @@ public class BlocklyPanel extends HTMLPanel {
   public static String getBackpack() {
     return backpack;
   }
-  public static void setBackpack(String bp_contents) {
+  public static void setBackpack(String bp_contents, boolean doStore) {
     backpack = bp_contents;
+    if (doStore) {
+      Ode.getInstance().getUserInfoService().storeUserBackpack(backpack,
+        new AsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void nothing) {
+            // Nothing to do...
+          }
+          @Override
+          public void onFailure(Throwable caught) {
+            OdeLog.elog("Failed setting the backpack");
+          }
+        });
+    }
   }
 
   /**
@@ -617,6 +634,10 @@ public class BlocklyPanel extends HTMLPanel {
     doHardReset(formName);
   }
 
+  public void verifyAllBlocks() {
+    doVerifyAllBlocks(formName);
+  }
+
   public static boolean checkIsAdmin() {
     return Ode.getInstance().getUser().getIsAdmin();
   }
@@ -641,6 +662,10 @@ public class BlocklyPanel extends HTMLPanel {
 
   public static void popScreen() {
     DesignToolbar.popScreen();
+  }
+
+  public void getBlocksImage(Callback callback) {
+    doFetchBlocksImage(formName, callback);
   }
 
   // The code below (4 methods worth) is for creating a GWT dialog box
@@ -726,8 +751,8 @@ public class BlocklyPanel extends HTMLPanel {
     return YaBlocksEditor.getComponentInfo(typeName);
   }
 
-  public static String getComponentsJSONString() {
-    return YaBlocksEditor.getComponentsJSONString();
+  public static String getComponentsJSONString(String projectId) {
+    return YaBlocksEditor.getComponentsJSONString(Long.parseLong(projectId));
   }
 
   public static String getComponentInstanceTypeName(String formName, String instanceName) {
@@ -808,10 +833,31 @@ public class BlocklyPanel extends HTMLPanel {
     return TranslationDesignerPallete.getCorrespondingString(key);
   }
 
+  @Override
+  public void onComponentTypeAdded(List<String> componentTypes) {
+    populateComponentTypes(formName);
+    verifyAllBlocks();
+
+  }
+
+  @Override
+  public boolean beforeComponentTypeRemoved(List<String> componentTypes) {
+    return true;
+  }
+
+  @Override
+  public void onComponentTypeRemoved(Map<String, String> componentTypes) {
+    populateComponentTypes(formName);
+  }
+
+  @Override
+  public void onResetDatabase() {
+    populateComponentTypes(formName);
+  }
   // ------------ Native methods ------------
 
   /**
-   * Take a Javascript function, embedded in an opague JavaScriptObject,
+   * Take a Javascript function, embedded in an opaque JavaScriptObject,
    * and call it.
    *
    * @param callback the Javascript callback.
@@ -851,7 +897,7 @@ public class BlocklyPanel extends HTMLPanel {
     $wnd.BlocklyPanel_getComponentInfo =
         $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getComponentInfo(Ljava/lang/String;));
     $wnd.BlocklyPanel_getComponentsJSONString =
-        $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getComponentsJSONString());
+        $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getComponentsJSONString(Ljava/lang/String;));
     $wnd.BlocklyPanel_getYaVersion =
         $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getYaVersion());
     $wnd.BlocklyPanel_getBlocksLanguageVersion =
@@ -869,7 +915,7 @@ public class BlocklyPanel extends HTMLPanel {
     $wnd.BlocklyPanel_getBackpack =
       $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::getBackpack());
     $wnd.BlocklyPanel_setBackpack =
-      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::setBackpack(Ljava/lang/String;));
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::setBackpack(Ljava/lang/String;Z));
   }-*/;
 
   private native void initJS() /*-{
@@ -924,6 +970,7 @@ public class BlocklyPanel extends HTMLPanel {
   // [lyn, 2014/10/27] added formJson for upgrading
   public static native void doLoadBlocksContent(String formName, String formJson, String blocksContent) /*-{
     $wnd.Blocklies[formName].SaveFile.load(formJson, blocksContent);
+    $wnd.Blocklies[formName].Component.verifyAllBlocks();
   }-*/;
 
   public static native String doGetBlocksContent(String formName) /*-{
@@ -984,6 +1031,10 @@ public class BlocklyPanel extends HTMLPanel {
     $wnd.COMPANION_UPDATE_URL = url;
   }-*/;
 
+  static native void addAcceptableCompanionPackage(String comp) /*-{
+    $wnd.ACCEPTABLE_COMPANION_PACKAGE = comp;
+  }-*/;
+
   static native void addAcceptableCompanion(String comp) /*-{
     if ($wnd.ACCEPTABLE_COMPANIONS === null ||
         $wnd.ACCEPTABLE_COMPANIONS === undefined) {
@@ -1011,4 +1062,30 @@ public class BlocklyPanel extends HTMLPanel {
   public static native String getURL() /*-{
     return $wnd.location.href;
   }-*/;
+
+  /*
+   * Update Component Types in Blockly ComponentTypes
+   */
+  public static native void populateComponentTypes(String formName) /*-{
+      $wnd.Blocklies[formName].ComponentTypes.populateTypes(top.location.hash.substr(1));
+  }-*/;
+
+  /*
+   * Update Component Types in Blockly ComponentTypes
+   */
+  public static native void doVerifyAllBlocks(String formName) /*-{
+      $wnd.Blocklies[formName].Component.verifyAllBlocks();
+  }-*/;
+
+  public static native void doFetchBlocksImage(String formName, Callback<String,String> callback) /*-{
+      var callb = $entry(function(result, error) {
+          if (error) {
+             callback.@com.google.gwt.core.client.Callback::onFailure(Ljava/lang/Object;)(error);
+          } else {
+             callback.@com.google.gwt.core.client.Callback::onSuccess(Ljava/lang/Object;)(result);
+          }
+      });
+      $wnd.Blocklies[formName].ExportBlocksImage.getUri(callb);
+  }-*/;
+
 }

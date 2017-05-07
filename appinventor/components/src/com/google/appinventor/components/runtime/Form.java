@@ -4,9 +4,6 @@
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
-// ***********************************************
-// If we're not going to go this route with onDestroy, then at least get rid of the DEBUG flag.
-
 package com.google.appinventor.components.runtime;
 
 import java.io.IOException;
@@ -96,12 +93,14 @@ import com.google.appinventor.components.runtime.util.ViewUtil;
  * places and make the appropriate code changes.
  *
  */
+
 @DesignerComponent(version = YaVersion.FORM_COMPONENT_VERSION,
     category = ComponentCategory.LAYOUT,
     description = "Top-level component containing all other components in the program",
     showOnPalette = false)
 @SimpleObject
-@UsesPermissions(permissionNames = "android.permission.INTERNET,android.permission.ACCESS_WIFI_STATE,android.permission.ACCESS_NETWORK_STATE")
+@UsesPermissions(permissionNames = "android.permission.INTERNET,android.permission.ACCESS_WIFI_STATE," +
+    "android.permission.ACCESS_NETWORK_STATE")
 public class Form extends FragmentActivity
   implements Component, ComponentContainer, HandlesEventDispatching,
   OnGlobalLayoutListener {
@@ -171,6 +170,8 @@ public class Form extends FragmentActivity
 
   private ScaledFrameLayout scaleLayout;
   private static boolean sCompatibilityMode;
+
+  private static boolean showListsAsJson = false;
 
   // Application lifecycle related fields
   private final HashMap<Integer, ActivityResultListener> activityResultMap = Maps.newHashMap();
@@ -433,8 +434,8 @@ public class Form extends FragmentActivity
   }
 
   private void defaultPropertyValues() {
-    Scrollable(false); // frameLayout is created in Scrollable()
-    Sizing("Fixed");
+    Scrollable(false);       // frameLayout is created in Scrollable()
+    Sizing("Fixed");         // Note: Only the Screen1 value is used as this is per-project
     BackgroundImage("");
     AboutScreen("");
     BackgroundImage("");
@@ -444,6 +445,7 @@ public class Form extends FragmentActivity
     Title("");
     ShowStatusBar(true);
     TitleVisible(true);
+    ShowListsAsJson(false);  // Note: Only the Screen1 value is used as this is per-project
   }
 
   @Override
@@ -913,9 +915,9 @@ public class Form extends FragmentActivity
     });
   }
 
-  // This is like dispatchErrorOccurred, except that it defaults to showing
+  // This is like dispatchErrorOccurredEvent, except that it defaults to showing
   // a message dialog rather than an alert.   The app writer can override either of these behaviors,
-  // but using the event dialog version frees the app writer of the need to explicitly override
+  // but using the event dialog version frees the app writer from the need to explicitly override
   // the alert behavior in the case
   // where a message dialog is what's generally needed.
   public void dispatchErrorOccurredEventDialog(final Component component, final String functionName,
@@ -934,7 +936,18 @@ public class Form extends FragmentActivity
     });
   }
 
-
+  // This runtimeFormErrorOccurred can be called from runtime.scm in
+  // the case of a runtime error.  The event is always signaled in the
+  // active form. It triggers the normal Form error system which fires
+  // the ErrorOccurred event. This can be handled by the App Inventor
+  // programmer. If it isn't a Notifier (toast) is displayed showing
+  // the error.
+  public void runtimeFormErrorOccurredEvent(String functionName, int errorNumber, String message) {
+    Log.d("FORM_RUNTIME_ERROR", "functionName is " + functionName);
+    Log.d("FORM_RUNTIME_ERROR", "errorNumber is " + errorNumber);
+    Log.d("FORM_RUNTIME_ERROR", "message is " + message);
+    dispatchErrorOccurredEvent((Component) activeForm, functionName, errorNumber, message);
+  }
 
   /**
    * Scrollable property getter method.
@@ -1475,11 +1488,11 @@ public class Form extends FragmentActivity
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SIZING,
       defaultValue = "Fixed")
   @SimpleProperty(userVisible = false,
-    // This desc won't apprear as a tooltip, since there's no block, but we'll keep it with the source.
-    description = "If set to fixed,  screen layouts will be created for a single fixed-size screen and autoscaled. " +
-                  "If set to responsive, screen layouts will use the actual resolution of the device.  " +
-                  "See the documentation on responsive design in App Inventor for more information. " +
-                  "This property appears on Screen1 only and controls the sizing for all screens in the app.")
+  // This desc won't apprear as a tooltip, since there's no block, but we'll keep it with the source.
+  description = "If set to fixed,  screen layouts will be created for a single fixed-size screen and autoscaled. " +
+      "If set to responsive, screen layouts will use the actual resolution of the device.  " +
+      "See the documentation on responsive design in App Inventor for more information. " +
+      "This property appears on Screen1 only and controls the sizing for all screens in the app.")
   public void Sizing(String value) {
     // This is used by the project and build server.
     // We also use it to adjust sizes
@@ -1509,15 +1522,48 @@ public class Form extends FragmentActivity
   // }
 
   /**
+   * ShowListsAsJson Property Setter
+   * This only appears in the designer for screen 1
+   * @param
+   */
+
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+    defaultValue = "False")
+  @SimpleProperty(category = PropertyCategory.APPEARANCE, userVisible = false,
+  // This description won't appear as a tooltip, since there's no block, but we'll keep it with the source.
+    description = "If false, lists will be converted to strings using Lisp "
+      + "notation, i.e., as symbols separated by spaces, e.g., (a 1 b2 (c "
+      + "d). If true, lists will appear as in Json or Python, e.g.  [\"a\", 1, "
+      + "\"b\", 2, [\"c\", \"d\"]].  This property appears only in Screen 1, "
+      + "and the value for Screen 1 determines the behavior for all "
+      + "screens. The property defaults to \"false\" meaning that the App "
+      + "Inventor programmer must explicitly set it to \"true\" if JSON/Python "
+      + "syntax is desired. At some point in the future we will alter the "
+      + "system so that new projects are created with this property set to "
+      + "\"true\" by default. Existing projects will not be impacted. The App "
+      + "Inventor programmer can also set it back to \"false\" in newer "
+      + "projects if desired. "
+    )
+  public void ShowListsAsJson(boolean asJson) {
+    showListsAsJson = asJson;
+  }
+
+
+  @SimpleProperty(category = PropertyCategory.APPEARANCE, userVisible = false)
+  public boolean ShowListsAsJson() {
+    return showListsAsJson;
+  }
+
+  /**
    * Specifies the App Name.
    *
    * @param aName the display name of the installed application in the phone
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-    defaultValue = "")
+      defaultValue = "")
   @SimpleProperty(userVisible = false,
-    description = "This is the display name of the installed application in the phone." +
-        "If the AppName is blank, it will be set to the name of the project when the project is built.")
+  description = "This is the display name of the installed application in the phone." +
+      "If the AppName is blank, it will be set to the name of the project when the project is built.")
   public void AppName(String aName) {
     // We don't actually need to do anything.
   }
@@ -1742,6 +1788,7 @@ public class Form extends FragmentActivity
       throw new IllegalStateException("activeForm is null");
     }
   }
+
 
   /**
    * Returns the value that was passed to this screen when it was opened

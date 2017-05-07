@@ -143,6 +143,15 @@ public interface ProjectService extends RemoteService {
   long deleteFiles(String sessionId, long projectId, String directory) throws InvalidSessionException;
 
   /**
+   * Deletes all files and folders that are contained in the given directory.The given directory itself is deleted.
+   * @param sessionId current session id
+   * @param projectId project ID
+   * @param directory path of the directory
+   * @return modification date for project
+   */
+  long deleteFolder(String sessionId, long projectId, String directory) throws InvalidSessionException;
+
+  /**
    * Loads the file information associated with a node in the project tree. The
    * actual return value depends on the file kind. Source (text) files should
    * typically return their contents. Image files will be more likely to return
@@ -251,6 +260,19 @@ public interface ProjectService extends RemoteService {
    */
   public long save(String sessionId, List<FileDescriptorWithContent> filesAndContent) throws InvalidSessionException,
       BlocksTruncatedException;
+
+  /**
+   * Saves a screenshot of the blocks
+   * This is called on the client side when a user leaves a blocks editor
+   *
+   * @param sessionId the current session id used to detect multiple sessions
+   * @param projectId the project ID
+   * @param fileId the fileId (filename) of the screenshot
+   * @param content the base64 encoded screenshot
+   */
+
+  public RpcResult screenshot(String sessionId, long projectId, String fileId, String content)
+    throws InvalidSessionException;
 
   /**
    * Invokes a build command for the project on the back-end.

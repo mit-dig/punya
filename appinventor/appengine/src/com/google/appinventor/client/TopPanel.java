@@ -96,6 +96,12 @@ public class TopPanel extends Composite {
     links.setStyleName("ode-TopPanelLinks");
     links.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
 
+    if (Ode.getInstance().isReadOnly()) {
+      Label readOnly = new Label(MESSAGES.readOnlyMode());
+      readOnly.setStyleName("ode-TopPanelWarningLabel");
+      links.add(readOnly);
+    }
+
     // My Projects Link
     TextButton myProjects = new TextButton(MESSAGES.myProjectsTabName());
     myProjects.setStyleName("ode-TopPanelButton");
@@ -341,7 +347,13 @@ public class TopPanel extends Composite {
   private static class SignOutAction implements Command {
     @Override
     public void execute() {
-      Window.Location.replace(SIGNOUT_URL);
+      // Maybe take a screenshot
+      Ode.getInstance().screenShotMaybe(new Runnable() {
+          @Override
+          public void run() {
+            Window.Location.replace(SIGNOUT_URL);
+          }
+        }, true);               // Wait for i/o
     }
   }
 

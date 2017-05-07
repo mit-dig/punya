@@ -64,6 +64,11 @@ public class EditableProperties extends Properties<EditableProperty> {
     }
   }
 
+  public void removeProperty(String propertyName) {
+    super.removeProperty(propertyName);
+  }
+
+
   /**
    * Adds a {@link PropertyChangeListener} to the listener list.
    *

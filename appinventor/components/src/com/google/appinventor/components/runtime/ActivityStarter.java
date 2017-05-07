@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -436,19 +437,28 @@ public class ActivityStarter extends AndroidNonvisibleComponent
       requestCode = form.registerForActivityResult(this);
     }
 
-    try {
-      container.$context().startActivityForResult(intent, requestCode);
-      String openAnim = container.$form().getOpenAnimType();
-      AnimationUtil.ApplyOpenScreenAnimation(container.$context(), openAnim);
-    } catch (ActivityNotFoundException e) {
+    if (intent == null) {
       form.dispatchErrorOccurredEvent(this, "StartActivity",
+        ErrorMessages.ERROR_ACTIVITY_STARTER_NO_ACTION_INFO);
+    } else {
+      try {
+        container.$context().startActivityForResult(intent, requestCode);
+        String openAnim = container.$form().getOpenAnimType();
+        AnimationUtil.ApplyOpenScreenAnimation(container.$context(), openAnim);
+      } catch (ActivityNotFoundException e) {
+        form.dispatchErrorOccurredEvent(this, "StartActivity",
           ErrorMessages.ERROR_ACTIVITY_STARTER_NO_CORRESPONDING_ACTIVITY);
+      }
     }
   }
 
   private Intent buildActivityIntent() {
     Uri uri = (dataUri.length() != 0) ? Uri.parse(dataUri) : null;
     Intent intent = (uri != null) ? new Intent(action, uri) : new Intent(action);
+
+    if (TextUtils.isEmpty(Action())) {
+      return null;
+    }
 
     if (dataType.length() != 0) {
       if (uri != null) {
@@ -461,6 +471,8 @@ public class ActivityStarter extends AndroidNonvisibleComponent
     if (activityPackage.length() != 0 || activityClass.length() != 0) {
       ComponentName component = new ComponentName(activityPackage, activityClass);
       intent.setComponent(component);
+    } else if (Action() == "android.intent.action.MAIN") {
+      return null;
     }
 
     if (extraKey.length() != 0 && extraValue.length() != 0) {

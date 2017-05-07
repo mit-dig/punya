@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2016 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -20,6 +20,8 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -38,6 +40,10 @@ import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.UsesBroadcastReceivers;
+import com.google.appinventor.components.annotations.androidmanifest.ActionElement;
+import com.google.appinventor.components.annotations.androidmanifest.IntentFilterElement;
+import com.google.appinventor.components.annotations.androidmanifest.ReceiverElement;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.PropertyTypeConstants;
@@ -119,9 +125,17 @@ import android.widget.Toast;
   "google-http-client-beta.jar," +
   "google-http-client-android2-beta.jar," +
   "google-http-client-android3-beta.jar," +
-  "google-oauth-client-beta.jar")// +
-//  "guava-14.0.1.jar")
-
+  "google-oauth-client-beta.jar," +
+  "guava-14.0.1.jar")
+@UsesBroadcastReceivers(receivers = {
+    @ReceiverElement(name = "com.google.appinventor.components.runtime.util.SmsBroadcastReceiver",
+                     intentFilters = {
+                         @IntentFilterElement(actionElements = {
+                             @ActionElement(name = "android.provider.Telephony.SMS_RECEIVED"),
+                             @ActionElement(name = "com.google.android.apps.googlevoice.SMS_RECEIVED")
+                         })
+    })
+})
 public class Texting extends AndroidNonvisibleComponent
   implements Component, OnResumeListener, OnPauseListener, OnInitializeListener, OnStopListener {
 

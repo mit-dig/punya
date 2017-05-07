@@ -26,6 +26,13 @@ public interface UserInfoService extends RemoteService {
   Config getSystemConfig(String sessionId);
 
   /**
+   * Retrieve's the stored Backpack
+   *
+   * @return the backpack as an xml string
+   */
+  String getUserBackpack();
+
+  /**
    * Retrieves information about the current user
    *
    * (Obsoleted by getSystemConfig())
@@ -47,6 +54,12 @@ public interface UserInfoService extends RemoteService {
    * @return  user's settings
    */
   String loadUserSettings();
+
+  /**
+   * Store the user's backpack
+   * @param backpack string containing the backpack xml
+   */
+  void storeUserBackpack(String backpack);
 
   /**
    * Stores the user's settings.
@@ -86,4 +99,10 @@ public interface UserInfoService extends RemoteService {
   * Get the SHA1 fingerprint for the user's keystore
   */
   String getUserFingerprintSHA1();
+
+  /**
+   * No-Op Do nothing, but will refresh the session cookie as a side-effect
+   */
+  void noop();
+
 }

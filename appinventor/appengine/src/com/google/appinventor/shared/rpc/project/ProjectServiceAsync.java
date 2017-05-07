@@ -92,6 +92,11 @@ public interface ProjectServiceAsync {
   void deleteFiles(String sessionId, long projectId, String directory, AsyncCallback<Long> callback);
 
   /**
+   * @see ProjectService#deleteFolder(String, long, String)
+   */
+  void deleteFolder(String sessionId, long projectId, String directory, AsyncCallback<Long> callback);
+
+  /**
    * @see ProjectService#load(long, String)
    */
   void load(long projectId, String fileId, AsyncCallback<String> callback);
@@ -135,6 +140,13 @@ public interface ProjectServiceAsync {
    * @see ProjectService#save(String, List)
    */
   void save(String sessionId, List<FileDescriptorWithContent> filesAndContent, AsyncCallback<Long> callback);
+
+  /**
+   * @see ProjectService#screnshot(String, long, String, String)
+   */
+
+  void screenshot(String sessionId, long projectId, String fileId, String content,
+    AsyncCallback<RpcResult> callback);
 
   /**
    * @see ProjectService#build(long, String, String)

@@ -177,6 +177,23 @@ public abstract class CommonProjectService {
   }
 
   /**
+   * Deletes all files and folders that are inside the given directory. The given directory itself is deleted.
+   * @param userId the user Id
+   * @param projectId project ID
+   * @param directoy path of the directory
+   */
+  public long deleteFolder(String userId, long projectId, String directory) {
+    // TODO(user) : This is also not efficient
+    for (String fileId : storageIo.getProjectSourceFiles(userId, projectId)) {
+      if (fileId.startsWith(directory)) {
+        storageIo.deleteFile(userId, projectId, fileId);
+        storageIo.removeSourceFilesFromProject(userId, projectId, false, fileId);
+      }
+    }
+    return storageIo.getProjectDateCreated(userId, projectId);
+  }
+
+  /**
    * Loads the file information associated with a node in the project tree. The
    * actual return value depends on the file kind. Source (text) files should
    * typically return their contents. Image files will be more likely to return
@@ -301,6 +318,28 @@ public abstract class CommonProjectService {
           content, StorageUtil.DEFAULT_CHARSET);
     }
   }
+
+  /**
+   * Saves a screenshot of a current blocks editor. This is called from the client side
+   * whenever the user leaves a blocks editor. The data is shipped to us in base64 encoding
+   * which we decode and then store in the project.
+   *
+   * @param userId user who owns the projectId
+   * @param projectId project id for the project
+   * @param fileId the filename to store the screenshot in
+   * @param content the base64 encoded content
+   */
+
+  public RpcResult screenshot(String userId, long projectId, String fileId, String content) {
+    byte [] binContent = Base64Util.decodeLines(content);
+    try {
+      storageIo.uploadRawFile(projectId, fileId, userId, true, binContent);
+    } catch (BlocksTruncatedException e) {
+      // should never happen because force is set to true
+    }
+    return RpcResult.createSuccessfulRpcResult("", "");
+  }
+
 
   /**
    * Invokes a build command for the project.
