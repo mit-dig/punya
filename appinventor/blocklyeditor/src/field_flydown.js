@@ -101,6 +101,12 @@ Blockly.FieldFlydown.prototype.showEditor_ = function() {
 };
 
 Blockly.FieldFlydown.prototype.init = function(block) {
+  // Don't double initialize.
+  if (this.mouseOverWrapper_) {
+    return;
+  }
+
+  // Initialize parent.
   Blockly.FieldFlydown.superClass_.init.call(this, block);
 
   // Remove inherited field css classes ...
@@ -116,6 +122,8 @@ Blockly.FieldFlydown.prototype.init = function(block) {
       Blockly.bindEvent_(this.fieldGroup_, 'mouseover', this, this.onMouseOver_);
   this.mouseOutWrapper_ =
       Blockly.bindEvent_(this.fieldGroup_, 'mouseout', this, this.onMouseOut_);
+  this.mouseDownWrapper_ =
+      Blockly.bindEvent_(this.fieldGroup_, 'mousedown', this, this.onMouseDown_);
 };
 
 Blockly.FieldFlydown.prototype.onMouseOver_ = function(e) {
@@ -128,9 +136,14 @@ Blockly.FieldFlydown.prototype.onMouseOver_ = function(e) {
 };
 
 Blockly.FieldFlydown.prototype.onMouseOut_ = function(e) {
-  // Clear any pending timer event to show flydown
+  // Clear any pending timer event to show flydown.
   window.clearTimeout(Blockly.FieldFlydown.showPid_);
   e.stopPropagation();
+};
+
+Blockly.FieldFlydown.prototype.onMouseDown_ = function(e) {
+  // Clear any pending timer event to show flydown, but do not stop propagation.
+  window.clearTimeout(Blockly.FieldFlydown.showPid_);
 };
 
 /**
@@ -241,6 +254,20 @@ Blockly.FieldFlydown.prototype.dispose = function() {
   if (Blockly.FieldFlydown.openFieldFlydown_ == this) {
     Blockly.FieldFlydown.hide();
   }
+
+  if (this.mouseOverWrapper_) {
+    Blockly.unbindEvent_(this.mouseOverWrapper_);
+    this.mouseOverWrapper_ = null;
+  }
+  if (this.mouseOutWrapper_) {
+    Blockly.unbindEvent_(this.mouseOutWrapper_);
+    this.mouseOutWrapper_ = null;
+  }
+  if (this.mouseDownWrapper_) {
+    Blockly.unbindEvent_(this.mouseDownWrapper_);
+    this.mouseDownWrapper_ = null;
+  }
+
   // Call parent's destructor.
   Blockly.FieldTextInput.prototype.dispose.call(this);
 };

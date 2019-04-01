@@ -503,7 +503,7 @@ Blockly.ai_inject = function(container, workspace) {
   Blockly.Tooltip.createDom();
   workspace.drawer_ = new Blockly.Drawer(workspace, { scrollbars: true });
   workspace.flyout_ = workspace.drawer_.flyout_;
-  var flydown = new Blockly.Flydown(new Blockly.Options({scrollbars: false}));
+  var flydown = new Blockly.Flydown(new Blockly.Options({scrollbars: true}));
   // ***** [lyn, 10/05/2013] NEED TO WORRY ABOUT MULTIPLE BLOCKLIES! *****
   workspace.flydown_ = flydown;
   Blockly.utils.insertAfter_(flydown.createDom('g'), workspace.svgBubbleCanvas_);

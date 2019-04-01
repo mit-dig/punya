@@ -319,8 +319,6 @@ public final class ErrorMessages {
   public static final int ERROR_INSUFFICIENT_CHART_ENTRY_VALUES = 4103;
   public static final int ERROR_INVALID_CHART_DATA_COLOR = 4104;
 
-  // Start the next group of errors at 4200
-
   public static final int ERROR_GOOGLE_MAP_NOT_INSTALLED = 12010;
   public static final int ERROR_GOOGLE_PLAY_NOT_INSTALLED = 12011;
   public static final int ERROR_GOOGLE_MAP_INVALID_INPUT = 12012;
@@ -338,7 +336,13 @@ public final class ErrorMessages {
   // for reasoning
   public static final int ERROR_REASONER_FAILED = 12100;
   public static final int ERROR_REASONER_NO_MODEL = 12101;
-  
+
+  // GraphQL errors
+  public static final int ERROR_GQL_INVALID_HTTP_HEADERS = 13601;
+  public static final int ERROR_GQL_UNABLE_TO_POST = 13602;
+
+  // Start the next group of errors at 4200
+
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
   static {
@@ -813,6 +817,12 @@ public final class ErrorMessages {
     // Reasoning
     errorMessages.put(ERROR_REASONER_FAILED, "Reasoning failed due to error: %s");
     errorMessages.put(ERROR_REASONER_NO_MODEL, "No Model specified for reasoning.");
+
+    // GraphQL errors
+    errorMessages.put(ERROR_GQL_INVALID_HTTP_HEADERS,
+        "Invalid HTTP header format. Must be a JSON string of name and value(s).");
+    errorMessages.put(ERROR_GQL_UNABLE_TO_POST,
+        "Unable to POST query. Got exception %s");
   }
 
   private ErrorMessages() {

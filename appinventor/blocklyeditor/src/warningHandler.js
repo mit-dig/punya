@@ -18,8 +18,8 @@ goog.require('Blockly.Blocks.Utilities');
 
 Blockly.WarningHandler = function(workspace) {
   this.workspace = workspace;
-  this.allBlockErrors = [{name:'checkReplErrors'}];
-  this.allBlockWarnings = [{name:'checkBlockAtRoot'},{name:'checkEmptySockets'}];
+  this.allBlockErrors = [{name: 'checkReplErrors'}];
+  this.allBlockWarnings = [{name: 'checkBlockAtRoot'}, {name: 'checkEmptySockets'}];
   this.cachedGlobalNames = [];
   this.showWarningsToggle = false;
   this.warningIdHash = Object.create(null);
@@ -86,7 +86,7 @@ Blockly.WarningHandler.prototype.updateCurrentWarningAndError = function() {
  * @public
  */
 Blockly.WarningHandler.prototype.toggleWarning = function() {
-  if(this.showWarningsToggle) {
+  if (this.showWarningsToggle) {
     this.showWarningsToggle = false;
     this.hideWarnings();
   } else {
@@ -103,8 +103,8 @@ Blockly.WarningHandler.prototype.toggleWarning = function() {
 //Hide warnings on the blocks
 Blockly.WarningHandler.prototype.hideWarnings = function() {
   var blockArray = this.workspace.getAllBlocks();
-  for(var i=0;i<blockArray.length;i++) {
-    if(blockArray[i].warning) {
+  for (var i = 0; i < blockArray.length; i++) {
+    if (blockArray[i].warning) {
       blockArray[i].setWarningText(null);
     }
   }
@@ -128,7 +128,7 @@ Blockly.WarningHandler.prototype.checkAllBlocksForWarningsAndErrors = function()
       this.cachedGlobalNames = Blockly.FieldLexicalVariable.getGlobalNames();
       this.cacheGlobalNames = true;
     }
-    for(var i=0;i<allBlocks.length;i++) {
+    for (var i = 0; i < allBlocks.length; i++) {
       var blockErrorResult = this.checkErrors(allBlocks[i]);
     }
   } finally {
@@ -279,15 +279,15 @@ Blockly.WarningHandler.prototype.checkErrors = function(block) {
   }
   var showWarnings = this.showWarningsToggle;
 
-  if(!block.getSvgRoot() || block.readOnly){
+  if (!block.getSvgRoot() || block.readOnly) {
     //remove from error count
-    if(block.hasWarning) {
+    if (block.hasWarning) {
       block.hasWarning = false;
       this.warningCount--;
       delete this.warningIdHash[block.id];
       this.updateWarningErrorCount();
     }
-    if(block.hasError) {
+    if (block.hasError) {
       block.hasError = false;
       this.errorCount--;
       delete this.errorIdHash[block.id];
@@ -297,10 +297,10 @@ Blockly.WarningHandler.prototype.checkErrors = function(block) {
   }
 
   //give the block empty arrays of errors and warnings to check if they aren't defined.
-  if(!block.errors){
+  if (!block.errors) {
     block.errors = [];
   }
-  if(!block.warnings){
+  if (!block.warnings) {
     block.warnings = [];
   }
 
@@ -309,16 +309,16 @@ Blockly.WarningHandler.prototype.checkErrors = function(block) {
   var warningTestArray = block.warnings.concat(this.allBlockWarnings);
 
   //check if there are any errors
-  for(var i=0;i<errorTestArray.length;i++){
-    if(this[errorTestArray[i].name].call(this,block,errorTestArray[i])){
+  for (var i = 0; i < errorTestArray.length; i++) {
+    if (this[errorTestArray[i].name].call(this, block, errorTestArray[i])) {
 
       //remove warning marker, if present
-      if(block.warning) {
+      if (block.warning) {
         block.setWarningText(null);
       }
       //If the block doesn't have an error already,
       //add one to the error count
-      if(!block.hasError) {
+      if (!block.hasError) {
         block.hasError = true;
         this.errorCount++;
         this.errorIdHash[block.id] = true;
@@ -326,7 +326,7 @@ Blockly.WarningHandler.prototype.checkErrors = function(block) {
       }
       //If the block has a warning,
       //subtract from the error count
-      if(block.hasWarning) {
+      if (block.hasWarning) {
         block.hasWarning = false;
         this.warningCount--;
         delete this.warningIdHash[block.id];
@@ -338,21 +338,21 @@ Blockly.WarningHandler.prototype.checkErrors = function(block) {
   }
 
   //remove the error icon, if there is one
-  if(block.error) {
+  if (block.error) {
     block.setErrorIconText(null);
   }
   //If the block has an error,
   //subtract from the error count
-  if(block.hasError) {
+  if (block.hasError) {
     block.hasError = false;
     this.errorCount--;
     delete this.errorIdHash[block.id];
     this.updateWarningErrorCount();
   }
   //if there are no errors, check for warnings
-  for(var i=0;i<warningTestArray.length;i++){
-    if(this[warningTestArray[i].name].call(this,block,warningTestArray[i])){
-      if(!block.hasWarning) {
+  for (var i = 0; i < warningTestArray.length; i++) {
+    if (this[warningTestArray[i].name].call(this, block, warningTestArray[i])) {
+      if (!block.hasWarning) {
         block.hasWarning = true;
         this.warningCount++;
         this.warningIdHash[block.id] = true;
@@ -363,10 +363,10 @@ Blockly.WarningHandler.prototype.checkErrors = function(block) {
   }
 
   //remove the warning icon, if there is one
-  if(block.warning) {
+  if (block.warning) {
     block.setWarningText(null);
   }
-  if(block.hasWarning) {
+  if (block.hasWarning) {
     block.hasWarning = false;
     this.warningCount--;
     delete this.warningIdHash[block.id];
@@ -417,11 +417,11 @@ Blockly.WarningHandler.prototype['checkIfUndefinedBlock'] = function(block) {
 
 
 //Check if the block has an invalid drop down value, if so, create an error
-Blockly.WarningHandler.prototype['checkDropDownContainsValidValue'] = function(block, params){
+Blockly.WarningHandler.prototype['checkDropDownContainsValidValue'] = function(block, params) {
   if (Blockly.dragMode_ === Blockly.DRAG_FREE && Blockly.selected === block) {
     return false;  // wait until the user is done dragging to check validity.
   }
-  for(var i=0;i<params.dropDowns.length;i++){
+  for (var i = 0; i < params.dropDowns.length; i++) {
     var dropDown = block.getField(params.dropDowns[i]);
     var dropDownList = dropDown.menuGenerator_();
     var text = dropDown.getText();
@@ -504,8 +504,7 @@ Blockly_containedInLoop = function(block) {
   var enclosingBlock = block.getSurroundParent();
   if (enclosingBlock == null) {
     return false;
-  }
-  else if (Blockly_loopBlockTypes.indexOf(enclosingBlock.type) >= 0) {
+  } else if (Blockly_loopBlockTypes.indexOf(enclosingBlock.type) >= 0) {
     return true;
   } else {
     return Blockly_containedInLoop(enclosingBlock);
@@ -547,7 +546,7 @@ Blockly.WarningHandler.prototype['checkComponentNotExistsError'] = function(bloc
 // block independently determined the duplicate blocks, that behavior would be
 // quadratic, and based on empirical tests could significantly slow down error
 // checking for screens with lots (many dozens) of handlers.
-Blockly.WarningHandler.prototype['determineDuplicateComponentEventHandlers'] = function(){
+Blockly.WarningHandler.prototype['determineDuplicateComponentEventHandlers'] = function() {
   var topBlocks = this.workspace.getTopBlocks(false);
   var len = topBlocks.length;
   var eventHandlers = {}; // Object for storing event handler info
@@ -569,7 +568,7 @@ Blockly.WarningHandler.prototype['determineDuplicateComponentEventHandlers'] = f
       */
       // At this point, propertyName is something like Button:Click:Button2 for nonsingleton components
       var handler = eventHandlers[propertyName];
-      if (! handler) {
+      if (!handler) {
         eventHandlers[propertyName] = {block: topBlock, isDuplicate: false};
       } else {
         if (!handler.isDuplicate) {
@@ -675,16 +674,16 @@ Blockly.WarningHandler.checkDuplicateErrorHandler = function(params){
 //    ]
 
 //This is the error that can be set from the REPL. It will be removed when the block changes.
-Blockly.WarningHandler.prototype.setBlockError = function(block, message){
-  if(block.warning) {
+Blockly.WarningHandler.prototype.setBlockError = function(block, message) {
+  if (block.warning) {
     block.setWarningText(null);
   }
-  if(block.hasWarning) {
+  if (block.hasWarning) {
     block.hasWarning = false;
     this.warningCount--;
     this.updateWarningErrorCount();
   }
-  if(!block.hasError) {
+  if (!block.hasError) {
     block.hasError = true;
     this.errorCount++;
     this.updateWarningErrorCount();
@@ -693,20 +692,20 @@ Blockly.WarningHandler.prototype.setBlockError = function(block, message){
 };
 
 // Check a disposed block for any errors or warnings and update state accordingly.
-Blockly.WarningHandler.prototype.checkDisposedBlock = function(block){
-  if(block.warning) {
+Blockly.WarningHandler.prototype.checkDisposedBlock = function(block) {
+  if (block.warning) {
     block.setWarningText(null);
   }
-  if(block.error) {
+  if (block.error) {
     block.setErrorIconText(null);
   }
-  if(block.hasWarning) {
+  if (block.hasWarning) {
     block.hasWarning = false;
     this.warningCount--;
     delete this.warningIdHash[block.id];
     this.updateWarningErrorCount();
   }
-  if(block.hasError) {
+  if (block.hasError) {
     block.hasError = false;
     this.errorCount--;
     delete this.errorIdHash[block.id];
@@ -743,18 +742,18 @@ Blockly.WarningHandler.prototype['checkGenericComponentSocket'] = function(block
 //Each function returns true if there is an warning, and sets the warning text on the block
 
 //Check if the block contains any empty sockets
-Blockly.WarningHandler.prototype['checkEmptySockets'] = function(block){
+Blockly.WarningHandler.prototype['checkEmptySockets'] = function(block) {
   var containsEmptySockets = false;
-  for(var i=0;i<block.inputList.length;i++){
+  for (var i = 0; i < block.inputList.length; i++) {
     var inputName = block.inputList[i].name;
-    if(block.inputList[i].type == Blockly.INPUT_VALUE && block.inputList[i].connection && !block.getInputTargetBlock(inputName)){
+    if (block.inputList[i].type == Blockly.INPUT_VALUE && block.inputList[i].connection && !block.getInputTargetBlock(inputName)) {
       containsEmptySockets = true;
       break;
     }
   }
 
-  if(containsEmptySockets) {
-    if(this.showWarningsToggle) {
+  if (containsEmptySockets) {
+    if (this.showWarningsToggle) {
       var warningMessage = Blockly.Msg.MISSING_SOCKETS_WARNINGS;
       block.setWarningText(warningMessage);
     }
@@ -765,7 +764,7 @@ Blockly.WarningHandler.prototype['checkEmptySockets'] = function(block){
 };
 
 //Check if the block is a root block that isn't a procedure definition, variable declaration, or event
-Blockly.WarningHandler.prototype['checkBlockAtRoot'] = function(block){
+Blockly.WarningHandler.prototype['checkBlockAtRoot'] = function(block) {
   var rootBlock = block.getRootBlock();
   if(block == rootBlock && block.blockType != "event" && block.type !="global_declaration" &&
      block.type != "procedures_defnoreturn" && block.type != "procedures_defreturn" &&
@@ -786,5 +785,58 @@ Blockly.WarningHandler.prototype['checkReplErrors'] = function(block) {
     block.setErrorIconText(block.replError);
     return true;
   }
+  return false;
+};
+
+// Check if all required GraphQL arguments are filled.
+Blockly.WarningHandler.prototype['checkGraphQLArgs'] = function(block) {
+  // If schema is not yet available, do not perform the check.
+  if (!Blockly.GraphQLBlock.schemas.hasOwnProperty(block.gqlUrl)) {
+    return false;
+  }
+
+  // Fetch the schema and the type.
+  var schema = Blockly.GraphQLBlock.schemas[block.gqlUrl];
+  var type = schema.types[block.gqlBaseType];
+
+  // Build a set of the object's required arguments.
+  var requiredArguments = {};
+
+  // Filter for required arguments.
+  for (var i = 0; i < type.inputFields.length; i++) {
+    if (type.inputFields[i].type.kind === 'NON_NULL') {
+      requiredArguments[type.inputFields[i].name] = true;
+    }
+  }
+
+  // Go through all items.
+  for(var i = 0; i < block.itemCount_; i++) {
+    // Get the target pair.
+    var targetBlock = block.getInputTargetBlock('ADD' + i);
+
+    // Skip null target blocks.
+    if (!targetBlock) {
+      continue;
+    }
+
+    // Don't perform the check if anything which is not a GraphQL pair is attached. This means that the user is using
+    // advanced features at their own risk. It is better not to bother them with warnings.
+    if (targetBlock.type !== 'gql_pair') {
+      return false;
+    }
+
+    // Remove from required arguments.
+    delete requiredArguments[targetBlock.getGqlKey()];
+  }
+
+  // Get the first remaining item and set the warning message.
+  for (var argument in requiredArguments) {
+    if (requiredArguments.hasOwnProperty(argument)) {
+      block.setWarningText('Required GraphQL argument `' + argument + '` missing.');
+      return true;
+    }
+  }
+
+  // No errors encountered.
   return false;
 };

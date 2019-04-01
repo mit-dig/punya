@@ -933,6 +933,12 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     DOM.eventCancelBubble(event, true);
   }
 
+  /**
+   * Called when the mock component has been completed and all of its properties have been set.
+   */
+  public void onComponentCreated() {
+  }
+
   // SourcesMouseEvents implementation
 
   /**

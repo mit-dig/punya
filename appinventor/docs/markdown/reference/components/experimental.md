@@ -9,6 +9,7 @@ title: Experimental
 Table of Contents:
 
 * [FirebaseDB](#FirebaseDB)
+* [GraphQL](#GraphQL)
 
 ## FirebaseDB  {#FirebaseDB}
 
@@ -106,3 +107,40 @@ The Firebase component communicates with a Web service to store
    This function permits us to unauthenticate, which tosses the cached
  credentials. The next time authentication is needed we will use our
  current FirebaseToken and get fresh credentials.
+
+## GraphQL  {#GraphQL}
+
+The [`GraphQL`](#GraphQL) component communicates with a GraphQL endpoint to execute queries and mutations. It represents
+ returned data as a dictionary. All queries have an associated operation name and are executed asynchronously.
+ Completed queries trigger different events depending on whether there the queries had any errors.
+
+
+
+### Properties  {#GraphQL-Properties}
+
+{:.properties}
+
+{:id="GraphQL.GqlEndpointUrl" .text .do} *GqlEndpointUrl*
+: Specifies the URL for this GraphQL component.
+
+{:id="GraphQL.GqlHttpHeaders" .text .do} *GqlHttpHeaders*
+: Specifies the HTTP headers for this GraphQL component as a JSON dictionary.
+
+### Events  {#GraphQL-Events}
+
+{:.events}
+
+{:id="GraphQL.GqlGotError"} GqlGotError(*gqlQueryName*{:.text},*gqlError*{:.list})
+: Triggers an event indicating that there were one or more errors when executing the query. This method should be
+ executed in the application's main thread.
+
+{:id="GraphQL.GqlGotResponse"} GqlGotResponse(*gqlQueryName*{:.text},*gqlResponse*{:.any})
+: Triggers an event indicating that the given operation has successfully executed and returned data. This method
+ should be executed in the application's main thread.
+
+### Methods  {#GraphQL-Methods}
+
+{:.methods}
+
+{:id="GraphQL.GqlQuery" class="method"} <i/> GqlQuery(*gqlQueryName*{:.text},*gqlQuery*{:.text})
+: Executes an arbitrary query against the GraphQL endpoint.

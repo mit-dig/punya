@@ -483,6 +483,12 @@ public interface Images extends Resources {
   ImageResource firebaseDB();
 
   /**
+   * Designer palette item: GraphQL component
+   */
+  @Source("com/google/appinventor/images/graphQL.png")
+  ImageResource graphQL();
+
+  /**
    * Designer palette item: TextToSpeech component
    */
   @Source("com/google/appinventor/images/textToSpeech.png")

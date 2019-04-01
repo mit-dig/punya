@@ -986,6 +986,9 @@
 (define-alias JavaIterator <java.util.Iterator>)
 (define-alias JavaMap <java.util.Map>)
 
+(define-alias GraphQL <com.google.appinventor.components.runtime.GraphQL>)
+(define-alias GqlLiteral <com.google.appinventor.components.runtime.GraphQL$GqlLiteral>)
+
 ;;; This is what CodeBlocks sends to Yail to represent the value of an uninitialized variable
 ;;; Perhaps we should arrange things so that codeblocks never sends this.
 ;;; The variable name here should match YAIL_NULL in BlockParser.java

@@ -297,6 +297,17 @@ Blockly.Drawer.prototype.instanceRecordToXMLArray = function(instanceRecord) {
     var mutatorAttributes = {component_type: typeName, instance_name: instanceRecord.name};
     Array.prototype.push.apply(xmlArray, this.blockTypeToXMLArray("component_component_block", mutatorAttributes));
   }
+
+  // For GraphQL blocks, generate dynamic blocks as necessary.
+  if (instanceRecord.typeName === 'GraphQL') {
+    // Get all dynamic blocks.
+    var uid = this.workspace_.getComponentDatabase().getUidForName(instanceRecord.name);
+    var dynamicBlocks = Blockly.GraphQLBlock.instanceBlocks(uid);
+
+    // Add all dynamic blocks to the output array.
+    Array.prototype.push.apply(xmlArray, dynamicBlocks);
+  }
+
   return xmlArray;
 };
 

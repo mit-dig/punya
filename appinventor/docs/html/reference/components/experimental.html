@@ -132,6 +132,7 @@
 
 <ul>
   <li><a href="#FirebaseDB">FirebaseDB</a></li>
+  <li><a href="#GraphQL">GraphQL</a></li>
 </ul>
 
 <h2 id="FirebaseDB">FirebaseDB</h2>
@@ -217,6 +218,39 @@
  credentials. The next time authentication is needed we will use our
  current FirebaseToken and get fresh credentials.</p>
   </dd>
+</dl>
+
+<h2 id="GraphQL">GraphQL</h2>
+
+<p>The <a href="#GraphQL"><code class="highlighter-rouge">GraphQL</code></a> component communicates with a GraphQL endpoint to execute queries and mutations. It represents
+ returned data as a dictionary. All queries have an associated operation name and are executed asynchronously.
+ Completed queries trigger different events depending on whether there the queries had any errors.</p>
+
+<h3 id="GraphQL-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="GraphQL.GqlEndpointUrl" class="text do"><em>GqlEndpointUrl</em></dt>
+  <dd>Specifies the URL for this GraphQL component.</dd>
+  <dt id="GraphQL.GqlHttpHeaders" class="text do"><em>GqlHttpHeaders</em></dt>
+  <dd>Specifies the HTTP headers for this GraphQL component as a JSON dictionary.</dd>
+</dl>
+
+<h3 id="GraphQL-Events">Events</h3>
+
+<dl class="events">
+  <dt id="GraphQL.GqlGotError">GqlGotError(<em class="text">gqlQueryName</em>,<em class="list">gqlError</em>)</dt>
+  <dd>Triggers an event indicating that there were one or more errors when executing the query. This method should be
+ executed in the application’s main thread.</dd>
+  <dt id="GraphQL.GqlGotResponse">GqlGotResponse(<em class="text">gqlQueryName</em>,<em class="any">gqlResponse</em>)</dt>
+  <dd>Triggers an event indicating that the given operation has successfully executed and returned data. This method
+ should be executed in the application’s main thread.</dd>
+</dl>
+
+<h3 id="GraphQL-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="GraphQL.GqlQuery" class="method"><i></i> GqlQuery(<em class="text">gqlQueryName</em>,<em class="text">gqlQuery</em>)</dt>
+  <dd>Executes an arbitrary query against the GraphQL endpoint.</dd>
 </dl>
 
 </article>
