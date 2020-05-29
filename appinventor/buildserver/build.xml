@@ -192,7 +192,7 @@
       <sysproperty key="file.encoding" value="UTF-8" />
       <jvmarg value="-Djava.awt.headless=true" />
       <arg value="--childProcessRamMb" />
-      <arg value="1024" />
+      <arg value="2048" />
       <arg value="--inputZipFile" />
       <arg value="${local.build.dir}/aiplayapp.zip" />
       <arg value="--userName" />
@@ -225,7 +225,7 @@
       <sysproperty key="file.encoding" value="UTF-8" />
       <jvmarg value="-Djava.awt.headless=true" />
       <arg value="--childProcessRamMb" />
-      <arg value="1024" />
+      <arg value="2048" />
       <arg value="--inputZipFile" />
       <arg value="${local.build.dir}/aiplayapp.zip" />
       <arg value="--userName" />
@@ -263,7 +263,7 @@
       <sysproperty key="file.encoding" value="UTF-8" />
       <jvmarg value="-Djava.awt.headless=true" />
       <arg value="--childProcessRamMb" />
-      <arg value="1024" />
+      <arg value="2048" />
       <arg value="--inputZipFile" />
       <arg value="${local.build.dir}/aiplayapp.zip" />
       <arg value="--userName" />
