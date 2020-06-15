@@ -95,7 +95,7 @@ SensorComponent, OnDestroyListener{
   protected boolean enabled = false; // run once
   protected boolean enabledSchedule = false; // run periodically
   boolean privacySafe = false; // by default sensitive values clear text
-  
+
   private final String TAG = "ProbeBase";
   /*
    * Binding to FunfMananger service
@@ -509,9 +509,7 @@ SensorComponent, OnDestroyListener{
     
     if(enabledVibrate)
       notification.defaults |= Notification.DEFAULT_VIBRATE;
-    
-    notification.setLatestEventInfo(mainUIThreadActivity, (CharSequence)title, 
-                      (CharSequence)text, mContentIntent);
+
     Log.i(TAG, "after updated notification contents");
     mNM.notify(PROBE_NOTIFICATION_ID, notification);
     Log.i(TAG, "notified");

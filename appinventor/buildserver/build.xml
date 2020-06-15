@@ -3,6 +3,7 @@
 <!-- ======================================================================
      Copyright 2011 Google Inc.  All Rights Reserved.
      Author: markf@google.com (Mark Friedman)
+     Copyright 2012-2017 Massachusetts Institute of Technology, All rights reserved.
 
      App Inventor build server
      ====================================================================== -->
@@ -46,7 +47,7 @@
        the jars needed to compile the build server classes.
        ===================================================================== -->
   <target name="BuildServer"
-          depends="init,CopyToRunLibDir,components_AndroidRuntime,components_ComponentList">
+          depends="init,CopyToRunLibDir,components_AndroidRuntime">
     <property name="BuildServer-class.dir" location="${class.dir}/BuildServer" />
     <mkdir dir="${BuildServer-class.dir}" />
 
@@ -62,67 +63,22 @@
     <copy todir="${classes.files.dir}" flatten="true">
       <fileset dir="${src.dir}/${buildserver.pkg}/resources" includes="*"/>
       <fileset dir="${build.dir}/components"
-               includes="AndroidRuntime.jar,Barcode.jar,simple_components.txt,simple_components_build_info.json,simple_components.json"/>
+               includes="AndroidRuntime.jar,simple_components.txt,simple_components_build_info.json,simple_components.json"/>
+      <!-- Map assets for build server -->
+      <fileset dir="${lib.dir}/leaflet" includes="leaflet.js,leaflet.css" />
+      <fileset dir="${lib.dir}/leaflet/assets" includes="*"/>
+      <!-- Component/extension assets (for testing) -->
+      <fileset dir="${appinventor.dir}/components/src" includes="**/assets/*"/>
     </copy>
-    <copy toFile="${classes.files.dir}/kawa.jar" file="${lib.dir}/kawa/kawa-1.11-modified.jar" />
-    <copy toFile="${classes.files.dir}/funf.jar" file="${lib.dir}/funf/funf.jar" />
-    <copy toFile="${classes.files.dir}/acra-4.4.0.jar" file="${lib.dir}/acra/acra-4.4.0.jar" />
-
-    <copy toFile="${classes.files.dir}/twitter4j.jar" file="${lib.dir}/twitter/twitter4j-core-3.0.5.jar" />
-    <copy toFile="${classes.files.dir}/twitter4jmedia.jar" file="${lib.dir}/twitter/twitter4j-media-support-3.0.5.jar" />
-    <copy toFile="${classes.files.dir}/fusiontables.jar" file="${lib.dir}/fusiontables/fusiontables-v1-rev22-1.12-beta.jar" />
-    <copy toFile="${classes.files.dir}/httpcore-4.3.2.jar" file="${lib.dir}/apache-http/httpcore-4.3.2.jar" />
-    <copy toFile="${classes.files.dir}/httpmime-4.3.4.jar" file="${lib.dir}/apache-http/httpmime-4.3.4.jar" />
-    <copy toFile="${classes.files.dir}/firebase.jar" file="${lib.dir}/firebase/firebase-client-android-2.5.0.jar" />
-    <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/oauth/google-api-client-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/oauth/google-http-client-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-api-client-android2-beta.jar" file="${lib.dir}/oauth/google-api-client-android2-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-android2-beta.jar" file="${lib.dir}/oauth/google-http-client-android2-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-android3-beta.jar" file="${lib.dir}/oauth/google-http-client-android3-1.10.3-beta.jar" />
-    <copy toFile="${classes.files.dir}/jena-core.jar" file="${lib.dir}/jena/jena-core-2.10.0-android.jar" />
-    <copy toFile="${classes.files.dir}/jena-arq.jar" file="${lib.dir}/jena/jena-arq-2.10.0-android.jar" />
-    <copy toFile="${classes.files.dir}/jena-iri.jar" file="${lib.dir}/jena/jena-iri-0.9.5.jar" />
-    <!--
-    <copy toFile="${classes.files.dir}/jena-interfaces.jar" file="${lib.dir}/jena/jena-interfaces-2.10.0.jar" />
-    <copy toFile="${classes.files.dir}/httpclient.jar" file="${lib.dir}/jena/httpclient-4.2.3.jar" />
-    <copy toFile="${classes.files.dir}/httpcore.jar" file="${lib.dir}/jena/httpcore-4.2.2.jar" />
-    -->
-    <copy toFile="${classes.files.dir}/xercesImpl.jar" file="${lib.dir}/jena/xercesLite.jar" />
-    <copy toFile="${classes.files.dir}/slf4j-android.jar" file="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
-	
-	<!-- the below three are replaced with newer version for Google Drive API to work
-	 These three are also specified in FusionTableControl component-->	 
-    <copy toFile="${classes.files.dir}/google-api-client-beta.jar" file="${lib.dir}/googledrive/google-api-client-1.14.1-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-http-client-beta.jar" file="${lib.dir}/googledrive/google-http-client-1.14.1-beta.jar" />
-    <copy toFile="${classes.files.dir}/google-oauth-client-beta.jar" file="${lib.dir}/googledrive/google-oauth-client-1.14.1-beta.jar" />
-    <!-- Used by Google Drive Component -->
-    <copy toFile="${classes.files.dir}/google-api-client-android-beta-14.jar" file="${lib.dir}/googledrive/google-api-client-android-1.14.1-beta.jar" />    
-    <copy toFile="${classes.files.dir}/google-http-client-android-beta-14.jar" file="${lib.dir}/googledrive/google-http-client-android-1.14.1-beta.jar" /> 
-    <copy toFile="${classes.files.dir}/google-http-client-gson-beta-14.jar" file="${lib.dir}/googledrive/google-http-client-gson-1.14.1-beta.jar" /> 
-	<copy toFile="${classes.files.dir}/google-api-services-drive-v2.jar" file="${lib.dir}/googledrive/google-api-services-drive-v2-rev73-1.14.2-beta.jar" />
-
-    <!--<copy toFile="${classes.files.dir}/guava-14.0.1.jar" file="${lib.dir}/guava/guava-14.0.1.jar" />-->
-    <copy toFile="${classes.files.dir}/gson-2.1.jar" file="${lib.dir}/gson/gson-2.1.jar" />
-    <copy toFile="${classes.files.dir}/json.jar" file="${lib.dir}/json/json.jar" />
-    <copy toFile="${classes.files.dir}/google-oauth-client-beta.jar" file="${lib.dir}/oauth/google-oauth-client-1.10.1-beta.jar" />
-    <copy toFile="${classes.files.dir}/guava-14.0.1.jar" file="${lib.dir}/guava/guava-14.0.1.jar" />
-    <copy toFile="${classes.files.dir}/core.jar" file="${lib.dir}/QRGenerator/core.jar" />
-    <copy toFile="${classes.files.dir}/android.jar" file="${lib.dir}/android/5.1.1/android.jar" />
-    <copy toFile="${classes.files.dir}/dx.jar" file="${lib.dir}/android/tools/dx.jar" />
-    <copy toFile="${classes.files.dir}/CommonVersion.jar" file="${build.dir}/common/CommonVersion.jar" />
-    <copy toFile="${classes.files.dir}/google-play-services.jar" file="${lib.dir}/googledrive/google-play-services.jar" />
-    <copy toFile="${classes.files.dir}/android-support-v4.jar" file="${lib.dir}/android_support/android-support-v4.jar" />
-	<!-- below three are for the dropbox -->
-    <copy toFile="${classes.files.dir}/dropbox.jar" file="${lib.dir}/dropbox/dropbox-android-sdk-1.5.3.jar" />
-<!--    <copy
-toFile="${classes.files.dir}/apache-httpcomponent-httpmime.jar"
-file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
-    <copy toFile="${classes.files.dir}/json-simple.jar" file="${lib.dir}/dropbox/json_simple-1.1.jar" /> 
-    <!-- above three are for dropbox -->   
-
+    <!-- Component library dependencies -->
+    <copy todir="${classes.files.dir}">
+      <fileset dir="${build.dir}/components/deps" />
+    </copy>
     <property name="classes.tools.dir" location="${BuildServer-class.dir}/tools" />
     <copy todir="${classes.tools.dir}">
       <fileset dir="${lib.dir}/android/tools" includes="*/aapt" />
+      <fileset dir="${lib.dir}/android/tools" includes="*/libwinpthread-1.dll" />
+      <fileset dir="${lib.dir}/android/tools" includes="*/lib64/*" />
     </copy>
     <chmod dir="${classes.tools.dir}" includes="*/aapt" perm="ugo+rx"/>
     <copy todir="${classes.tools.dir}">
@@ -141,15 +97,22 @@ file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
                         needed to compile the build server classes
        ===================================================================== -->
   <target name="CopyToRunLibDir"
-          depends="init,common_CommonUtils,common_CommonVersion">
+          depends="init,common_CommonUtils,common_CommonVersion,components_CommonConstants">
     <mkdir dir="${run.lib.dir}" />
     <copy todir="${run.lib.dir}" flatten="true">
       <fileset dir="${local.lib.dir}" includes="*.jar"/>
       <fileset dir="${build.dir}" includes="common/CommonUtils.jar" />
       <fileset dir="${build.dir}" includes="common/CommonVersion.jar" />
+      <fileset dir="${build.dir}" includes="components/CommonConstants.jar" />
       <fileset dir="${lib.dir}" includes="bouncycastle/bcprov-jdk15on-149.jar"/>
       <fileset dir="${lib.dir}" includes="bouncycastle/bcpkix-jdk15on-149.jar"/>
+      <fileset dir="${lib.dir}" includes="android/tools/common-24.3.0.jar"/>
       <fileset dir="${lib.dir}" includes="android/tools/sdklib.jar"/>
+      <fileset dir="${lib.dir}" includes="android/tools/builder-1.3.0.jar"/>
+      <fileset dir="${lib.dir}" includes="android/tools/builder-model-1.3.0.jar"/>
+      <fileset dir="${lib.dir}" includes="android/tools/sdk-common-24.3.0.jar"/>
+      <fileset dir="${lib.dir}" includes="android/tools/layoutlib-api-24.3.0.jar"/>
+      <fileset dir="${lib.dir}" includes="ecj/ecj-4.5.1.jar"/>
       <fileset dir="${lib.dir}" includes="guava/guava-14.0.1.jar"/>
       <fileset dir="${lib.dir}" includes="commons-io/commons-io-2.0.1.jar"/>
       <fileset dir="${lib.dir}" includes="args4j/args4j-2.0.18.jar"/>
@@ -181,14 +144,22 @@ file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
             validity="10000" />
   </target>
 
+  <target name="CheckPlayAppSrcZip">
+    <uptodate property="PlayAppSrcZip.uptodate" targetfile="${local.build.dir}/aiplayapp.zip">
+      <srcfiles file="${user.home}/.appinventor/debug.keystore" />
+      <srcfiles dir="${appinventor.dir}/aiplayapp" includes="src/**/*,youngandroidproject/*,assets/**/*" />
+    </uptodate>
+  </target>
+
   <!-- =====================================================================
        GenPlayAppSrcZip Version for the Google Play Store works over WiFi
        ===================================================================== -->
   <target name="GenPlayAppSrcZip"
-          depends="init,MakeKeyStore">
+          depends="init,MakeKeyStore,CheckPlayAppSrcZip"
+          unless="PlayAppSrcZip.uptodate">
     <copy tofile="${appinventor.dir}/aiplayapp/android.keystore" file="${user.home}/.appinventor/debug.keystore" />
     <zip destfile="${local.build.dir}/aiplayapp.zip" basedir="${appinventor.dir}/aiplayapp" filesonly="true"
-         includes="src/**/*,youngandroidproject/*,assets/*,android.keystore" />
+         includes="src/**/*,youngandroidproject/*,assets/**/*,android.keystore" />
     <!-- We delete the keyfile below so as to not leave it laying around the source
          tree -->
     <delete file="${appinventor.dir}/aiplayapp/android.keystore" failonerror="true" />
@@ -219,6 +190,7 @@ file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
         <fileset dir="${run.lib.dir}" includes="*.jar" />
       </classpath>
       <sysproperty key="file.encoding" value="UTF-8" />
+      <jvmarg value="-Djava.awt.headless=true" />
       <arg value="--childProcessRamMb" />
       <arg value="1024" />
       <arg value="--inputZipFile" />
@@ -228,6 +200,83 @@ file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
       <arg value="--isForCompanion" />
       <arg value="--outputDir" />
       <arg value="${public.build.dir}" />
+      <arg value="--dexCacheDir" />
+      <arg value="${public.build.dir}/dexCache" />
+    </java>
+  </target>
+
+  <target name="CheckPlayAppExtras">
+    <uptodate property="PlayAppExtras.uptodate" targetfile="${public.build.dir}/MITAI2Companion-full.apk">
+      <srcfiles file="${local.build.dir}/aiplayapp.zip"/>
+      <srcfiles dir="${run.lib.dir}" includes="*.jar"/>
+    </uptodate>
+  </target>
+
+  <!-- =====================================================================
+       PlayAppExtras: builds ../build/buildserver/MITAI2Companion-full.apk
+       ===================================================================== -->
+  <target name="PlayAppExtras"
+          depends="CheckPlayAppExtras,PlayApp"
+          unless="PlayAppExtras.uptodate">
+    <java classname="com.google.appinventor.buildserver.Main" fork="true" failonerror="true">
+      <classpath>
+        <fileset dir="${run.lib.dir}" includes="*.jar" />
+      </classpath>
+      <sysproperty key="file.encoding" value="UTF-8" />
+      <jvmarg value="-Djava.awt.headless=true" />
+      <arg value="--childProcessRamMb" />
+      <arg value="1024" />
+      <arg value="--inputZipFile" />
+      <arg value="${local.build.dir}/aiplayapp.zip" />
+      <arg value="--userName" />
+      <arg value="App Inventor" />
+      <arg value="--isForCompanion" />
+      <arg value="--includeDangerousPermissions" />
+      <arg value="--extensions" />
+      <arg value="edu.mit.appinventor.companionextras.CompanionExtras" />
+      <arg value="--outputDir" />
+      <arg value="${public.build.dir}" />
+      <arg value="--outputFileName" />
+      <arg value="MITAI2Companion-full.apk" />
+      <arg value="--dexCacheDir" />
+      <arg value="${public.build.dir}/dexCache" />
+    </java>
+  </target>
+
+  <target name="CheckEmulator">
+    <uptodate property="Emulator.uptodate" targetfile="${public.build.dir}/Emulator.apk">
+      <srcfiles file="${local.build.dir}/aiplayapp.zip"/>
+      <srcfiles dir="${run.lib.dir}" includes="*.jar"/>
+    </uptodate>
+  </target>
+
+  <!-- =====================================================================
+       Emulator: builds ../build/buildserver/Emulator.apk
+       ===================================================================== -->
+  <target name="Emulator"
+          depends="CheckEmulator,PlayAppExtras"
+          unless="Emulator.uptodate">
+    <java classname="com.google.appinventor.buildserver.Main" fork="true" failonerror="true">
+      <classpath>
+        <fileset dir="${run.lib.dir}" includes="*.jar" />
+      </classpath>
+      <sysproperty key="file.encoding" value="UTF-8" />
+      <jvmarg value="-Djava.awt.headless=true" />
+      <arg value="--childProcessRamMb" />
+      <arg value="1024" />
+      <arg value="--inputZipFile" />
+      <arg value="${local.build.dir}/aiplayapp.zip" />
+      <arg value="--userName" />
+      <arg value="App Inventor" />
+      <arg value="--isForCompanion" />
+      <arg value="--isForEmulator" />
+      <arg value="--includeDangerousPermissions" />
+      <arg value="--extensions" />
+      <arg value="edu.mit.appinventor.companionextras.CompanionExtras" />
+      <arg value="--outputDir" />
+      <arg value="${public.build.dir}" />
+      <arg value="--outputFileName" />
+      <arg value="Emulator.apk" />
       <arg value="--dexCacheDir" />
       <arg value="${public.build.dir}/dexCache" />
     </java>
@@ -257,6 +306,7 @@ file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
         <fileset dir="${run.lib.dir}" includes="*.jar" />
       </classpath>
       <sysproperty key="file.encoding" value="UTF-8" />
+      <jvmarg value="-Djava.awt.headless=true" />
       <arg value="--dexCacheDir" />
       <arg value="${public.build.dir}/dexCache" />
       <arg value="--shutdownToken" />
@@ -306,11 +356,19 @@ file="${lib.dir}/dropbox/httpmime-4.0.3.jar" /> -->
     <fileset dir="${run.lib.dir}" includes="*.jar"/>
     <pathelement location="${build.dir}/common/CommonTestUtils.jar" />
     <pathelement location="${build.dir}/components/AndroidRuntime.jar"/>
+    <fileset dir="${build.dir}/components/deps" includes="*.jar" />
     <pathelement location="${lib.dir}/kawa/kawa-1.11-modified.jar" />
     <pathelement location="${lib.dir}/guava/guava-14.0.1.jar" />
     <pathelement location="${lib.dir}/commons-io/commons-io-2.0.1.jar" />
     <pathelement location="${lib.dir}/json/json.jar" />
     <pathelement location="${lib.dir}/junit/junit-4.8.2.jar" />
+    <pathelement location="${lib.dir}/junit4/tl4j-junit4-1.1.3.jar" />
+    <pathelement location="${lib.dir}/bouncycastle/bcprov-jdk15on-149.jar" />
+    <pathelement location="${lib.dir}/powermock/cglib-nodep-2.2.jar" />
+    <pathelement location="${lib.dir}/powermock/easymock-3.0.jar" />
+    <pathelement location="${lib.dir}/powermock/javassist-3.18.0-GA.jar" />
+    <pathelement location="${lib.dir}/powermock/objenesis-1.2.jar" />
+    <pathelement location="${lib.dir}/powermock/powermock-easymock-1.4.10-full.jar" />
   </path>
 
   <path id="BuildServerTests.path">

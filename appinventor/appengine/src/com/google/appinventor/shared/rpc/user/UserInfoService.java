@@ -105,4 +105,15 @@ public interface UserInfoService extends RemoteService {
    */
   void noop();
 
+  /**
+   * Retrieve the contents of a shared backpack.
+   */
+  public String getSharedBackpack(String backPackId);
+
+  /**
+   * Store the contents of a shared backpack.
+   */
+
+  public void storeSharedBackpack(String backPackId, String content);
+
 }

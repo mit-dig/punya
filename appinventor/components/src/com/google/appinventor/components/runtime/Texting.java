@@ -1,31 +1,35 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2016 MIT, All rights reserved
+// Copyright 2011-2019 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-
+import android.Manifest;
+import android.net.Uri;
+import android.text.TextUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
 
+import com.google.appinventor.components.runtime.util.FileUtil;
 import com.google.appinventor.components.runtime.util.OAuth2Helper;
 import com.google.appinventor.components.runtime.util.OnInitializeListener;
 import com.google.appinventor.components.runtime.util.SdkLevel;
@@ -65,8 +69,44 @@ import android.util.Log;
 import android.widget.Toast;
 
 /**
- * A component capable of sending and receiving text messages via SMS.
-
+ * ![Texting component icon](images/texting.png)
+ *
+ * A component that will, when the {@link #SendMessage()} method is called, launch the device's
+ * preferred texting app to send the text message specified in the {@link #SendMessage()} property
+ * to the phone number specified in the {@link #PhoneNumber()} property. You may also send text
+ * messages without user interaction by calling {@link #SendMessageDirect()} instead, but this
+ * adds dangerous permissions to your final app.
+ *
+ * If the {@link #ReceivingEnabled()} property is set to 1 messages will not be received. If
+ * {@link #ReceivingEnabled()} is set to 2 messages will be received only when the application is
+ * running. Finally if {@link #ReceivingEnabled()} is set to 3, messages will be received when the
+ * application is running and when the application is not running they will be queued and a
+ * notification displayed to the user.
+ *
+ * When a message arrives, the {@link #MessageReceived(String, String)} event is raised and
+ * provides the sending number and message.
+ *
+ * An app that includes this component will receive messages even when it is in the background
+ * (i.e. when it's not visible on the screen) and, moreso, even if the app is not running, so long
+ * as it's installed on the phone. If the phone receives a text message when the app is not in the
+ * foreground, the phone will show a notification in the notification bar. Selecting the
+ * notification will bring up the app. As an app developer, you'll probably want to give your users
+ * the ability to control ReceivingEnabled so that they can make the phone ignore text messages.
+ *
+ * If the {@link #GoogleVoiceEnabled()} property is true, messages can be sent over Wifi using
+ * Google Voice. This option requires that the user have a Google Voice account and that the mobile
+ * Voice app is installed on the phone. The Google Voice option works only on phones that support
+ * Android 2.0 (Eclair) or higher. **Unfortunately, receiving no longer works in Google Voice due to
+ * changes introduced in Google Voice App.**
+ *
+ * To specify the phone number (e.g., 650-555-1212), set the PhoneNumber property to a Text string
+ * with the specified digits (e.g., 6505551212). Dashes, dots, and parentheses may be included
+ * (e.g., (650)-555-1212) but will be ignored; spaces may not be included.
+ *
+ * Another way for an app to specify a phone number would be to include a {@link PhoneNumberPicker}
+ * component, which lets the users select a phone numbers from the ones stored in the the phone's
+ * contacts.
+ *
  * @author markf@google.com (Mark Friedman)
  * @author ram8647@gmail.com (Ralph Morelli)
  */
@@ -114,32 +154,25 @@ import android.widget.Toast;
 
 @SimpleObject
 @UsesPermissions(permissionNames =
-  "android.permission.RECEIVE_SMS, android.permission.SEND_SMS, " +
   "com.google.android.apps.googlevoice.permission.RECEIVE_SMS, " +
   "com.google.android.apps.googlevoice.permission.SEND_SMS, " +
   "android.permission.ACCOUNT_MANAGER, android.permission.MANAGE_ACCOUNTS, " +
   "android.permission.GET_ACCOUNTS, android.permission.USE_CREDENTIALS")
 @UsesLibraries(libraries =
   "google-api-client-beta.jar," +
-  "google-api-client-android2-beta.jar," +
   "google-http-client-beta.jar," +
-  "google-http-client-android2-beta.jar," +
-  "google-http-client-android3-beta.jar," +
   "google-oauth-client-beta.jar," +
   "guava-14.0.1.jar")
-@UsesBroadcastReceivers(receivers = {
-    @ReceiverElement(name = "com.google.appinventor.components.runtime.util.SmsBroadcastReceiver",
-                     intentFilters = {
-                         @IntentFilterElement(actionElements = {
-                             @ActionElement(name = "android.provider.Telephony.SMS_RECEIVED"),
-                             @ActionElement(name = "com.google.android.apps.googlevoice.SMS_RECEIVED")
-                         })
-    })
-})
 public class Texting extends AndroidNonvisibleComponent
-  implements Component, OnResumeListener, OnPauseListener, OnInitializeListener, OnStopListener {
+  implements Component, OnResumeListener, OnPauseListener, OnInitializeListener, OnStopListener,
+    Deleteable, ActivityResultListener {
 
   public static final String TAG = "Texting Component";
+
+  /**
+   * Magic number "TEXT" used to report when a text message has been sent.
+   */
+  public static final int TEXTING_REQUEST_CODE = 0x54455854;
 
   public static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
   public static final String GV_SMS_RECEIVED = "com.google.android.apps.googlevoice.SMS_RECEIVED";
@@ -149,7 +182,7 @@ public class Texting extends AndroidNonvisibleComponent
   public static final String GV_INTENT_FILTER = "com.google.android.apps.googlevoice.SMS_RECEIVED";
   public static final String GV_PACKAGE_NAME = "com.google.android.apps.googlevoice";
   public static final String GV_SMS_SEND_URL = "https://www.google.com/voice/b/0/sms/send/";
-  public static final String GV_URL = "https://www.google.com/voice/b/0";
+  public static final String GV_URL = "https://www.google.com/voice/b/0/redirection/voice";
 
 
   // Meta data key and value that identify an app for handling incoming SMS
@@ -204,6 +237,12 @@ public class Texting extends AndroidNonvisibleComponent
 
   private ComponentContainer container; // Need this for error reporting
 
+  // Do we have SEND_SMS permission enabled?
+  private boolean havePermission = false;
+
+  // Do we have RECEIVE_SMS permission enabled?
+  private boolean haveReceivePermission = false;
+
   /**
    * Creates a new TextMessage component.
    *
@@ -230,7 +269,7 @@ public class Texting extends AndroidNonvisibleComponent
       googleVoiceEnabled = prefs.getBoolean(PREF_GVENABLED, false);
       Log.i(TAG, "Starting with receiving Enabled=" + receivingEnabled + " GV enabled=" + googleVoiceEnabled);
     } else {
-      receivingEnabled = ComponentConstants.TEXT_RECEIVING_FOREGROUND;
+      receivingEnabled = ComponentConstants.TEXT_RECEIVING_OFF;
       googleVoiceEnabled = false;
     }
 
@@ -266,6 +305,14 @@ public class Texting extends AndroidNonvisibleComponent
     nm.cancel(SmsBroadcastReceiver.NOTIFICATION_ID);
   }
 
+  // Called from runtime.scm
+  public void Initialize() {
+    if (receivingEnabled > ComponentConstants.TEXT_RECEIVING_OFF && !haveReceivePermission) {
+      // Request receive SMS permission if we are configured to receive but do not have permission
+      requestReceiveSmsPermission("Initialize");
+    }
+  }
+
   /**
    * Sets the phone number to send the text message to when the SendMessage function is called.
    *
@@ -295,7 +342,9 @@ public class Texting extends AndroidNonvisibleComponent
   }
 
   /**
-   * The text message to that will be sent when the SendMessage method is called.
+   * The message that will be sent when the {@link #SendMessage()} method is called.
+   * The maximum length of a standard SMS message is usually 170. It may be less for languages
+   * using diacritical marks.
    *
    * @param message the message to send when the SendMessage function is called.
    */
@@ -309,6 +358,7 @@ public class Texting extends AndroidNonvisibleComponent
 
   /**
    * The text message that will be sent when the SendMessage method is called.
+   * @suppressdoc
    */
   @SimpleProperty
   public String Message() {
@@ -316,10 +366,30 @@ public class Texting extends AndroidNonvisibleComponent
   }
 
   /**
-   * Send a text message
+   * Launch the phone's default text messaging app with the message and phone number prepopulated.
    */
   @SimpleFunction
   public void SendMessage() {
+    String phoneNumber = this.phoneNumber;
+    String message = this.message;
+
+    Uri uri = Uri.parse("smsto:" + phoneNumber);
+    Intent i = new Intent(Intent.ACTION_SENDTO, uri);
+    i.putExtra("sms_body", message);
+    if (i.resolveActivity(form.getPackageManager()) != null) {
+      form.registerForActivityResult(this, TEXTING_REQUEST_CODE);
+      form.startActivityForResult(i, TEXTING_REQUEST_CODE);
+    }
+  }
+
+  /**
+   * Send a text message. **Using this block will add
+   * [dangerous permissions](https://developer.android.com/guide/topics/permissions/overview#dangerous_permissions)
+   * that will require additional approval if your app is submitted to the Google Play Store.**
+   */
+  @UsesPermissions({Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE})
+  @SimpleFunction
+  public void SendMessageDirect() {
     Log.i(TAG, "Sending message "  + message + " to " + phoneNumber);
 
     // To avoid possible timing issues, save phoneNumber and message locally
@@ -355,7 +425,7 @@ public class Texting extends AndroidNonvisibleComponent
       // We're sending via built-in Sms
     } else {
       Log.i(TAG, "Sending via SMS");
-      this.sendViaSms();
+      this.sendViaSms("SendMessage");
     }
   }
 
@@ -373,8 +443,9 @@ public class Texting extends AndroidNonvisibleComponent
   }
 
   /**
-   * Event that's raised when a text message is received by the phone.
-   * 
+   * Event that's raised when a text message is received by the phone. **Using this block will add
+   * [dangerous permissions](//developer.android.com/guide/topics/permissions/overview#dangerous_permissions)
+   * that will require additional approval if your app is submitted to the Google Play Store.**
    * 
    * @param number the phone number that the text message was sent from.
    * @param messageText the text of the message.
@@ -395,8 +466,11 @@ public class Texting extends AndroidNonvisibleComponent
   }
 
   /**
-   * If this property is true, then SendMessage will attempt to send messages using
-   * Google voice.
+   * If true, then {@link #SendMessage()} will attempt to send messages over Wifi using Google
+   * Voice. This requires that the Google Voice app must be installed and set up on the phone or
+   * tablet, with a Google Voice account. If `GoogleVoiceEnabled` is false, the device must have
+   * phone and texting service in order to send or receive messages with this component. Google
+   * Voice is available only in the USA, and some phone networks do not support it.
    *
    * @return 'true' or 'false' depending on whether you want to
    * use Google Voice for sending/receiving messages.
@@ -420,6 +494,14 @@ public class Texting extends AndroidNonvisibleComponent
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
   @SimpleProperty()
+  @UsesBroadcastReceivers(receivers = {
+      @ReceiverElement(name = "com.google.appinventor.components.runtime.util.SmsBroadcastReceiver",
+          intentFilters = {
+              @IntentFilterElement(actionElements = {
+                  @ActionElement(name = "com.google.android.apps.googlevoice.SMS_RECEIVED")
+              })
+          })
+  })
   public void GoogleVoiceEnabled(boolean enabled) {
     if (SdkLevel.getLevel() >= SdkLevel.LEVEL_ECLAIR) {
       this.googleVoiceEnabled = enabled;
@@ -436,6 +518,7 @@ public class Texting extends AndroidNonvisibleComponent
    * Gets whether you want the {@link #MessageReceived(String,String)} event to
    * get run when a new text message is received.
    *
+   * @suppressdoc
    * @return 1,2 or 3 indicating that receiving is disabled (1) or foreground only
    *          (2) or always (3).
    *          {@link #MessageReceived(String,String)} event to get run when a
@@ -457,14 +540,32 @@ public class Texting extends AndroidNonvisibleComponent
   }
 
   /**
-   * Sets whether you want the {@link #MessageReceived(String,String)} event to
-   * get run when a new text message is received.
+   * If set to 1 (OFF) no messages will be received. If set to 2 (FOREGROUND) or 3 (ALWAYS) the
+   * component will respond to messages if it is running. In the case of 2 (FOREGROUND), messages
+   * received while the app is not running are discarded. In the case of 3 (ALWAYS), messages
+   * receive while the app is not running will show a notification. Selecting the notification
+   * will bring up the app and signal the {@link #MessageReceived(String, String)} event. Messages
+   * received when the app is dormant will be queued, and so several
+   * {@link #MessageReceived(String, String)} events might appear when the app awakens. As an app
+   * developer, it would be a good idea to give your users control over this property, so they can
+   * make their phones ignore text messages when your app is installed.
    *
    * @param enabled  0 = never receive, 1 = receive foreground only, 2 = receive always
    *
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_TEXT_RECEIVING, defaultValue = "2") // Default is FOREGROUND
+  @UsesPermissions(Manifest.permission.RECEIVE_SMS)
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_TEXT_RECEIVING,
+      alwaysSend = true,
+      defaultValue = "1") // Default is OFF (was FOREGROUND prior to Jan 2019)
   @SimpleProperty()
+  @UsesBroadcastReceivers(receivers = {
+      @ReceiverElement(name = "com.google.appinventor.components.runtime.util.SmsBroadcastReceiver",
+          intentFilters = {
+              @IntentFilterElement(actionElements = {
+                  @ActionElement(name = "android.provider.Telephony.SMS_RECEIVED"),
+              })
+          })
+  })
   public void ReceivingEnabled(int enabled) {
     if ((enabled < ComponentConstants.TEXT_RECEIVING_OFF) ||
         (enabled > ComponentConstants.TEXT_RECEIVING_ALWAYS)) {
@@ -479,6 +580,9 @@ public class Texting extends AndroidNonvisibleComponent
     editor.putInt(PREF_RCVENABLED, enabled);
     editor.remove(PREF_RCVENABLED_LEGACY); // Remove any legacy value
     editor.commit();
+    if (enabled > ComponentConstants.TEXT_RECEIVING_OFF && !haveReceivePermission) {
+      requestReceiveSmsPermission("ReceivingEnabled");
+    }
   }
 
   public static int isReceivingEnabled(Context context) {
@@ -556,16 +660,8 @@ public class Texting extends AndroidNonvisibleComponent
     Log.i(TAG, "Retrieving cached messages");
     String cache = "";
     try {
-      FileInputStream fis = activity.openFileInput(CACHE_FILE);
-      byte[] bytes = new byte[8192];
-      if (fis == null) {
-        Log.e(TAG, "Null file stream returned from openFileInput");
-        return null;
-      }
-      int n = fis.read(bytes);
-      Log.i(TAG, "Read " + n + " bytes from " + CACHE_FILE);
-      cache = new String(bytes, 0, n);
-      fis.close();
+      byte[] bytes = FileUtil.readFile(CACHE_FILE);
+      cache = new String(bytes);
       activity.deleteFile(CACHE_FILE);
       messagesCached = 0;
       Log.i(TAG, "Retrieved cache " + cache);
@@ -659,6 +755,15 @@ public class Texting extends AndroidNonvisibleComponent
     }
   }
 
+  @Override
+  public void resultReturned(int requestCode, int resultCode, Intent data) {
+    if (requestCode == TEXTING_REQUEST_CODE) {
+      handleSentMessage(form, null, resultCode, data == null ? "" :
+          data.getStringExtra("sms_body"));
+      form.unregisterForActivityResult(this);
+    }
+  }
+
   /**
    * Utility class built from Free Software (GPLv3 or later)
    * by cannibalizing parts of Voice.java of the free software
@@ -669,12 +774,14 @@ public class Texting extends AndroidNonvisibleComponent
    */
   class GoogleVoiceUtil {
     private final int MAX_REDIRECTS = 5;
+    private static final String COOKIES_HEADER = "Set-Cookie";
 
     String general; // Google's GV page
     String rnrSEE;  // Value that passed into SMS's
     String authToken;
     int redirectCounter;
     private boolean isInitialized;
+    CookieManager cookies = new CookieManager();
 
     /**
      * The constructor sometimes fails to getGeneral
@@ -704,16 +811,17 @@ public class Texting extends AndroidNonvisibleComponent
      */
     private String sendGvSms(String smsData) {
       Log.i(TAG, "sendGvSms()");
-      String response = "";
+      StringBuilder response = new StringBuilder();
       try {
         // Add the RNR_SE to the message
         smsData += "&" + URLEncoder.encode("_rnr_se", UTF8) + "=" + URLEncoder.encode(rnrSEE, UTF8);
         Log.i(TAG, "smsData = " + smsData);
         URL smsUrl = new URL(GV_SMS_SEND_URL);
 
-        URLConnection smsConn = smsUrl.openConnection();
+        HttpURLConnection smsConn = (HttpURLConnection) smsUrl.openConnection();
         smsConn.setRequestProperty( "Authorization", "GoogleLogin auth=" + authToken );
         smsConn.setRequestProperty("User-agent", USER_AGENT);
+        setCookies(smsConn);
         smsConn.setDoOutput(true);
         smsConn.setConnectTimeout(SERVER_TIMEOUT_MS);
 
@@ -722,24 +830,26 @@ public class Texting extends AndroidNonvisibleComponent
         callwr.write(smsData);
         callwr.flush();
 
+        processCookies(smsConn);
         BufferedReader callrd = new BufferedReader(new InputStreamReader(smsConn.getInputStream()));
 
         String line;
         while ((line = callrd.readLine()) != null) {
-          response += line + "\n\r";
+          response.append(line);
+          response.append("\n");  // HTTP uses \r\n, but Android is built on Linux, so use Unix line endings
         }
         Log.i(TAG, "sendGvSms:  Sent SMS, response = " + response);
 
         callwr.close();
         callrd.close();
 
-        if (response.equals("")) {
+        if (response.length() == 0) {
           throw new IOException("No Response Data Received.");
-        } else 
-          return response;
+        } else {
+          return response.toString();
+        }
       } catch (IOException e) {
-        Log.i(TAG, "IO Error on Send " + e.getMessage());
-        e.printStackTrace();
+        Log.i(TAG, "IO Error on Send " + e.getMessage(), e);
         return "IO Error Message not sent";
       }
     }
@@ -785,6 +895,33 @@ public class Texting extends AndroidNonvisibleComponent
     }
 
     /**
+     * Sets the Cookie HTTP header if any cookies are currently stored in the
+     * cookie manager.
+     *
+     * @param conn HTTP connection over which to send cookies
+     */
+    void setCookies(HttpURLConnection conn) {
+      if (cookies.getCookieStore().getCookies().size() > 0) {
+        conn.setRequestProperty("Cookie", TextUtils.join(";", cookies.getCookieStore().getCookies()));
+      }
+    }
+
+    /**
+     * Processes the Set-Cookie header(s), if any, received via an
+     * HttpURLConnection and stores them in the cookie manager.
+     *
+     * @param conn HTTP connection over which to receive cookies
+     */
+    void processCookies(HttpURLConnection conn) {
+      List<String> cookiesHeader = conn.getHeaderFields().get(COOKIES_HEADER);
+      if (cookiesHeader != null) {
+        for (String cookie : cookiesHeader) {
+          cookies.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
+        }
+      }
+    }
+
+    /**
      * HTTP GET request for a given URL String.
      *
      * @param urlString
@@ -801,6 +938,7 @@ public class Texting extends AndroidNonvisibleComponent
         conn.setRequestProperty( "Authorization", "GoogleLogin auth="+authToken );
         conn.setRequestProperty("User-agent", USER_AGENT);
         conn.setInstanceFollowRedirects(false); // will follow redirects of same protocol http to http, but does not follow from http to https for example if set to true
+        setCookies(conn);
 
         // Get the response
         conn.connect();
@@ -809,6 +947,8 @@ public class Texting extends AndroidNonvisibleComponent
       } catch (Exception e) {
         throw new IOException(urlString + " : " + conn.getResponseMessage() + "("+responseCode+") : IO Error."); 
       }
+
+      processCookies(conn);
 
       InputStream is;
       if(responseCode==200) {
@@ -901,8 +1041,32 @@ public class Texting extends AndroidNonvisibleComponent
    * Sends a text message via SMS. No authentication required.
    * This method is called only when the UseGoogleVoice option is disabled.
    */
-  private void sendViaSms() {
+  private void sendViaSms(final String caller) {
     Log.i(TAG, "Sending via built-in Sms");
+
+    // Need to make sure we have the SEND_SMS permission
+    if (!havePermission) {
+      final Form form = container.$form();
+      final Texting me = this;
+      form.runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            form.askPermission(Manifest.permission.SEND_SMS,
+              new PermissionResultHandler() {
+                @Override
+                public void HandlePermissionResponse(String permission, boolean granted) {
+                  if (granted) {
+                    me.havePermission = true;
+                    me.sendViaSms(caller);
+                  } else {
+                    form.dispatchPermissionDeniedEvent(me, caller, Manifest.permission.SEND_SMS);
+                  }
+                }
+              });
+          }
+        });
+      return;
+    }
 
     ArrayList<String> parts = smsManager.divideMessage(message);
     int numParts = parts.size();
@@ -928,6 +1092,26 @@ public class Texting extends AndroidNonvisibleComponent
     // This may result in an error -- a "sent" or "error" message will be displayed
     activity.registerReceiver(sendReceiver, new IntentFilter(SENT));
     smsManager.sendMultipartTextMessage(phoneNumber, null, parts, pendingIntents, null);
+  }
+
+  private void requestReceiveSmsPermission(final String caller) {
+    form.runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        form.askPermission(Manifest.permission.RECEIVE_SMS,
+            new PermissionResultHandler() {
+              @Override
+              public void HandlePermissionResponse(String permission, boolean granted) {
+                if (granted) {
+                  haveReceivePermission = true;
+                } else {
+                  form.dispatchPermissionDeniedEvent(Texting.this, caller, Manifest.permission.RECEIVE_SMS);
+                }
+              }
+            });
+      }
+    });
+
   }
 
   /**
@@ -1039,6 +1223,11 @@ public class Texting extends AndroidNonvisibleComponent
     editor.putInt(PREF_RCVENABLED, receivingEnabled);
     editor.putBoolean(PREF_GVENABLED, googleVoiceEnabled);
     editor.commit();
+  }
+
+  @Override
+  public void onDelete() {
+    form.unregisterForActivityResult(this);
   }
 
 }

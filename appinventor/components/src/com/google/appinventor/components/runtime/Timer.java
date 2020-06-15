@@ -560,10 +560,8 @@ public final class Timer extends AndroidNonvisibleComponent implements
 		if(enabledVibrate)
 			notification.defaults |= Notification.DEFAULT_VIBRATE;
 		
-		notification.setLatestEventInfo(mainUIThreadActivity, (CharSequence)title, 
-											(CharSequence)text, mContentIntent);
 		Log.i(TAG, "after updated notification contents");
-		mNM.notify(TIMER_NOTIFICATION_ID, notification);
+		mNM.notify(hashCode(), notification);
 		Log.i(TAG, "notified");
 	
 	}

@@ -570,10 +570,8 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
         if (enabledVibrate)
             notification.defaults |= Notification.DEFAULT_VIBRATE;
 
-        notification.setLatestEventInfo(mainUIThreadActivity,
-                (CharSequence) title, (CharSequence) text, mContentIntent);
         Log.i(TAG, "after updated notification contents");
-        mNM.notify(PROBE_NOTIFICATION_ID, notification);
+        mNM.notify(hashCode(), notification);
         Log.i(TAG, "notified");
     }
     

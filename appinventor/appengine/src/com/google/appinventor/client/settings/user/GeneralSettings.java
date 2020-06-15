@@ -26,11 +26,17 @@ public final class GeneralSettings extends Settings {
     super(SettingsConstants.USER_GENERAL_SETTINGS);
 
     addProperty(new EditableProperty(this, SettingsConstants.GENERAL_SETTINGS_CURRENT_PROJECT_ID,
-        "0", null, EditableProperty.TYPE_INVISIBLE));
+        "0", null, EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this, SettingsConstants.USER_TEMPLATE_URLS,"",
-        null, EditableProperty.TYPE_INVISIBLE));
+        null, EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this, SettingsConstants.DISABLED_USER_URL, "",
-        null, EditableProperty.TYPE_INVISIBLE));
+        null, EditableProperty.TYPE_INVISIBLE, null, null));
+    addProperty(new EditableProperty(this, SettingsConstants.USER_LAST_LOCALE, "en",
+        null, EditableProperty.TYPE_INVISIBLE, null, null));
+    addProperty(new EditableProperty(this, SettingsConstants.USER_DYSLEXIC_FONT, "false",
+        null, EditableProperty.TYPE_INVISIBLE, null, null));
+    addProperty(new EditableProperty(this, SettingsConstants.USER_AUTOLOAD_PROJECT, "true",
+        null, EditableProperty.TYPE_INVISIBLE, null, null));
   }
 
   @Override
@@ -40,8 +46,6 @@ public final class GeneralSettings extends Settings {
       // Account is disabled, show dialog box and stop further processing
       // i.e., do not open previous project.
       Ode.getInstance().disabledAccountDialog(disabledUrl);
-    } else {
-      Ode.getInstance().openPreviousProject();
     }
   }
 }

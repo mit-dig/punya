@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -12,18 +12,28 @@ import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.ErrorMessages;
-import com.google.appinventor.components.runtime.util.SdkLevel;
 
+import android.Manifest;
 import android.widget.AutoCompleteTextView;
 
 /**
- * Text box using auto-completion to pick out an email address from contacts.
+ * An `EmailPicker` is a kind of text box. If the user begins entering the name or email address of
+ * a contact, the phone will show a dropdown menu of choices that complete the entry. If there are
+ * many contacts, the dropdown can take several seconds to appear, and can show intermediate
+ * results while the matches are being computed.
+ *
+ * The initial contents of the text box and the contents< after user entry is in the {@link #Text()}
+ * property. If the {@link #Text()} property is initially empty, the contents of the {@link #Hint()}
+ * property will be faintly shown in the text box as a hint to the user.
+ *
+ * Other properties affect the appearance of the text box ({@link #TextAlignment()},
+ * {@link #BackgroundColor()}, etc.) and whether it can be used ({@link #Enabled()}).
+ *
+ * Text boxes like this are usually used with [`Button`](userinterface.html#Button) components, with
+ * the user clicking on the button when text entry is complete.
  *
  * @author sharon@google.com (Sharon Perl)
  */
-
-
 @DesignerComponent(version = YaVersion.EMAILPICKER_COMPONENT_VERSION,
     description = "An EmailPicker is a kind of text box.  " +
     "If the user begins entering the name " +
@@ -56,11 +66,24 @@ public class EmailPicker extends TextBoxBase {
   public EmailPicker(ComponentContainer container) {
     super(container, new AutoCompleteTextView(container.$context()));
     addressAdapter = new EmailAddressAdapter(container.$context());
-    ((AutoCompleteTextView) super.view).setAdapter(addressAdapter);
+  }
+
+  @SuppressWarnings("unused")  // Will be called from Scheme
+  public void Initialize() {
+    container.$form().askPermission(Manifest.permission.READ_CONTACTS, new PermissionResultHandler() {
+      @Override
+      public void HandlePermissionResponse(String permission, boolean granted) {
+        if (granted) {
+          ((AutoCompleteTextView) view).setAdapter(addressAdapter);
+        } else {
+          container.$form().dispatchPermissionDeniedEvent(EmailPicker.this, "Initialize", permission);
+        }
+      }
+    });
   }
 
   /**
-   * Event raised when this component is selected for input, such as by
+   * Event raised when the `%type%` is selected for input, such as by
    * the user touching it.
    */
   @SimpleEvent

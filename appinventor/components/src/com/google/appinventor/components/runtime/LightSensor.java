@@ -1,218 +1,116 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Copyright 2019 MIT, All rights reserved
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.components.runtime;
 
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-
-import com.google.appinventor.components.annotations.*;
+import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.SimpleEvent;
+import com.google.appinventor.components.annotations.SimpleObject;
+import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.common.ComponentCategory;
-import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
-import edu.mit.media.funf.FunfManager;
-import edu.mit.media.funf.json.IJsonObject;
-import edu.mit.media.funf.probe.Probe.DataListener;
-import edu.mit.media.funf.probe.builtin.LightSensorProbe;
-import edu.mit.media.funf.probe.builtin.ProbeKeys;
-import edu.mit.media.funf.probe.builtin.RunningApplicationsProbe;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
-
-@DesignerComponent(version = YaVersion.LIGHTSENSOR_COMPONENT_VERSION, 
-		description = "Return information of the current illuminances (lux) by using the light sensor " , 
-		category = ComponentCategory.SENSORS, nonVisible = true, iconName = "images/lightsensorProbe.png")
+/**
+ * Physical world component that can measure the light level.
+ *
+ * @internaldoc
+ * It is implemented using
+ * android.hardware.SensorListener
+ * (http://developer.android.com/reference/android/hardware/SensorListener.html).
+ */
+@DesignerComponent(version = YaVersion.LIGHTSENSOR_COMPONENT_VERSION,
+    description = "A sensor component that can measure the light level.",
+    category = ComponentCategory.SENSORS,
+    nonVisible = true,
+    iconName = "images/lightsensor.png")
 @SimpleObject
-@UsesLibraries(libraries = "funf.jar")
-public class LightSensor extends ProbeBase {
-	
-	
-	private final String TAG = "LightSensor";
-	private LightSensorProbe probe;
-	private final String LIGHTSENSOR_PROBE = "edu.mit.media.funf.probe.builtin.LightSensorProbe";
+public class LightSensor extends BufferedSingleValueSensor {
+  private static final int BUFFER_SIZE = 10;
+  private volatile long timestamp;
 
-	
-	private int lux;
-	private long timestamp;
-	
-	//default settings for schedule 
-	private final int SCHEDULE_INTERVAL = 1800; //read illuminances every 1800 seconds (30 minutes)
-	private final int SCHEDULE_DURATION = 15; //scan for 15 seconds everytime
-	
-	public LightSensor(ComponentContainer container) {
-		super(container);
-		// TODO Auto-generated constructor stub
-		
-		form.registerForOnDestroy(this);
-		 
-		mainUIThreadActivity = container.$context();
-		Log.i(TAG, "Before create probe");
-		gson = new GsonBuilder().registerTypeAdapterFactory(
-				FunfManager.getProbeFactory(mainUIThreadActivity)).create();
-		JsonObject config = new JsonObject();
+  //default settings for schedule
+  private final int SCHEDULE_INTERVAL = 1800; //read illuminances every 1800 seconds (30 minutes)
+  private final int SCHEDULE_DURATION = 15; //scan for 15 seconds everytime
 
-		probe = gson.fromJson(config, LightSensorProbe.class);
+  /**
+   * Creates a new LightSensor component.
+   *
+   * @param container  ignored (because this is a non-visible component)
+   */
+  public LightSensor(ComponentContainer container) {
+    super(container.$form(), Sensor.TYPE_LIGHT, BUFFER_SIZE);
+  }
 
-		interval = SCHEDULE_INTERVAL;
-		duration = SCHEDULE_DURATION;
-		
-		
-		
-	}
-	
-	private DataListener listener = new DataListener() {
-		@Override
-		public void onDataCompleted(IJsonObject completeProbeUri,
-				JsonElement arg1) {
-			//do nothing. LightSensorProbe does not have onDataComplete event
-		}
-
-		@Override
-		public void onDataReceived(IJsonObject completeProbeUri,
-				IJsonObject data) {
-			Log.i(TAG, "receive data of illuminances");
-			/* returned json format 
- 			 {"accuracy":0,"lux":100.0,"timestamp":946695643.291918}
-			 */
-			//debug
-
-			Log.i(TAG, "DATA: " + data.toString());
-			//debug
-			
-			//save data to DB is enabledSaveToDB is true
-			if(enabledSaveToDB){
-				
-				saveToDB(completeProbeUri, data);
-			}
-
-			Message msg = myHandler.obtainMessage();
-			msg.obj = data;	
-			myHandler.sendMessage(msg);
-
- 
-		}
-
-	};
-	
-	final Handler myHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-
-			IJsonObject data = (IJsonObject) msg.obj;
-			Log.i(TAG, "Update component's varibles.....");
-			
-			lux = data.get(ProbeKeys.LightSensorKeys.LUX).getAsInt();
-			timestamp = data.get(ProbeKeys.LightSensorKeys.TIMESTAMP).getAsLong();
-	
-			Log.i(TAG, " before call LightInfoReceived()");
-			LightInfoReceived();
-			Log.i(TAG, " after call LightInfoReceived()");
-
-		}
-
-	};	
-	
-	
-	/**
-	 * Indicates whether the sensor should "run once" to read the current illuminance
-	 */
-
-  @SimpleFunction(description = "Enable light sensor probe to run once")
   @Override
-	public void Enabled(boolean enabled) {
-		// TODO Auto-generated method stub
-		if (this.enabled != enabled)
-			this.enabled = enabled;
+  protected void onValueChanged(float value) {
+    timestamp = System.currentTimeMillis();
+    LightChanged(value);
+  }
+  
+  /**
+   * Indicates the light level changed.
+   *
+   * @param lux the new light level in lux
+   */
+  @SimpleEvent(description = "Called when a change is detected in the light level.")
+  public void LightChanged(float lux) {
+    EventDispatcher.dispatchEvent(this, "LightChanged", lux);
+  }
 
-		if (enabled) {
-			probe.registerListener(listener);
-			Log.i(TAG, "register listener for run-once");
-		} else {
-			probe.unregisterListener(listener);
-			Log.i(TAG, "unregister run-once listener");
-		}
-		
-	}
+  /**
+   * Returns the last measured brightness in lux.
+   * The sensor must be enabled and available to return meaningful values.
+   *
+   * @return lux
+   */
+  @SimpleProperty(description = "The most recent light level, in lux, if the sensor is available " +
+       "and enabled.")
+   public float Lux() {
+    return getValue();
+  }
 
-	@Override
-	public void unregisterDataRequest() {
-		// TODO Auto-generated method stub
-		Log.i(TAG, "Unregistering data requests.");
-		mBoundFunfManager.unrequestAllData2(listener);
+  /**
+   * Returns the brightness in lux by averaging the previous 10 measured values.
+   * The sensor must be enabled and available to return meaningful values.
+   *
+   * @return lux
+   */
+  @SimpleProperty(description = "The average of the 10 most recent light levels measured, in lux.")
+   public float AverageLux() {
+    return getAverageValue();
+  }
 
-		Log.i(TAG, "After Unregistering data requests.");
-		
-	}
-
-	@Override
-	public void registerDataRequest(int interval, int duration) {
-		// TODO Auto-generated method stub
-		Log.i(TAG, "Registering data requests.");
-		JsonElement dataRequest = null;
-
-		dataRequest = getDataRequest(interval, duration, LIGHTSENSOR_PROBE);
-		Log.i(TAG, "Data request: " + dataRequest.toString());
-		mBoundFunfManager.requestData(listener, dataRequest);
-	}
+  /**
+   * Returns the timestamp of latest reading.
+   */
+  @SimpleProperty(description = "The timestamp of this sensor event.")
+  public float Timestamp() {
+    return timestamp;
+  }
 	
-	/**
-	 * Indicates that the illuminance(light) info has been received.
-	 */
-	@SimpleEvent
-	public void LightInfoReceived() {
-		if (enabled || enabledSchedule) {
-
-			mainUIThreadActivity.runOnUiThread(new Runnable() {
-				public void run() {
-					Log.i(TAG, "LightInfoReceived() is called");
-					EventDispatcher.dispatchEvent(LightSensor.this,
-							"LightInfoReceived");
-				}
-			});
-
-		}
-
-	}
+  /**
+   * Returns the default interval between each scan for this probe.
+   */
+  @SimpleProperty(description = "The default interval (in seconds) between each scan for this probe")
+  @Deprecated
+  public float DefaultInterval() {
+    return SCHEDULE_INTERVAL;
+  }
 	
-	/**
-	 * Returns whether the screen is currently on
-	 */
-	@SimpleProperty(description = "The illuminance(lux) of light in the current environment.")
-	public int Lux() {
-		Log.i(TAG, "returning lux: " + lux);
-		return lux;
-	}
-	
-	/**
-	 * Returns the timestamp of latest reading 
-	 */
-	@SimpleProperty(description = "The timestamp of this sensor event.")
-	public float Timestamp() {
-		Log.i(TAG, "returning timestamp: " + timestamp);
-		return timestamp;
-	}
-	
-	/*
-	 * Returns the default interval between each scan for this probe
-	 */
-	@SimpleProperty(description = "The default interval (in seconds) between each scan for this probe")
-	public float DefaultInterval(){
-		
-		return SCHEDULE_INTERVAL;
-	}
-	
-	/*
-	 * Returns the default duration of each scan for this probe
-	 */
-	@SimpleProperty(description = "The default duration (in seconds) of each scan for this probe")
-	public float DefaultDuration(){
-		
-		return SCHEDULE_DURATION;
-	}
+  /**
+   * Returns the default duration of each scan for this probe
+   */
+  @SimpleProperty(description = "The default duration (in seconds) of each scan for this probe")
+  @Deprecated
+  public float DefaultDuration() {
+    return SCHEDULE_DURATION;
+  }
 }

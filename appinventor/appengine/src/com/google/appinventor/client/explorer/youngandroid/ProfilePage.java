@@ -506,7 +506,7 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
     // the error will occur and we'll load default image
     userAvatar.addErrorHandler(new ErrorHandler() {
       public void onError(ErrorEvent event) {
-        userAvatar.setUrl(GalleryApp.DEFAULTUSERIMAGE);
+        userAvatar.setResource(GalleryImages.get().androidIcon());
       }
     });
     container.add(userAvatar);
@@ -518,7 +518,9 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
         MESSAGES.galleryError()) {
           @Override
           public void onSuccess(String newUrl) {
-            userAvatar.setUrl(newUrl + "?" + System.currentTimeMillis());
+            if (userAvatar != null) {
+              userAvatar.setUrl(newUrl + "?" + System.currentTimeMillis());
+            }
           }
         };
       Ode.getInstance().getGalleryService().getBlobServingUrl(url, callback);
@@ -665,27 +667,18 @@ public class ProfilePage extends Composite/* implements GalleryRequestListener*/
   }
 
   /**
-   * Gets the number of projects
+   * Gets the number of selected apps
    *
-   * @return the number of projects
-   */
-  public int getNumProjects() {
-    return apps.size();
-  }
-
-  /**
-   * Gets the number of selected projects
-   *
-   * @return the number of selected projects
+   * @return the number of selected apps
    */
   public int getNumSelectedApps() {
     return selectedApps.size();
   }
 
   /**
-   * Returns the list of selected projects
+   * Returns the list of selected apps
    *
-   * @return the selected projects
+   * @return the selected apps
    */
   public List<GalleryApp> getSelectedApps() {
     return selectedApps;

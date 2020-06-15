@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2015 MIT, All rights reserved
+// Copyright 2011-2020 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -53,7 +53,7 @@ public class ComponentImportWizard extends Wizard {
     @Override
     public void onSuccess(ComponentImportResponse response) {
       if (response.getStatus() == ComponentImportResponse.Status.FAILED){
-        Window.alert(MESSAGES.componentImportError());
+        Window.alert(MESSAGES.componentImportError() + "\n" + response.getMessage());
         return;
       }
       else if (response.getStatus() != ComponentImportResponse.Status.IMPORTED &&
@@ -65,8 +65,12 @@ public class ComponentImportWizard extends Wizard {
         Window.alert(MESSAGES.componentImportUnknownURLError());
       }
       else if (response.getStatus() == ComponentImportResponse.Status.UPGRADED) {
-        String componentName = SimpleComponentDatabase.getInstance().getComponentName(response.getComponentType());
-        Window.alert(MESSAGES.componentUpgradedAlert() + componentName + " !");
+        StringBuilder sb = new StringBuilder(MESSAGES.componentUpgradedAlert());
+        for (String name : response.getComponentTypes().values()) {
+          sb.append("\n");
+          sb.append(name);
+        }
+        Window.alert(sb.toString());
       }
 
       List<ProjectNode> compNodes = response.getNodes();
@@ -79,7 +83,8 @@ public class ComponentImportWizard extends Wizard {
       if (project == null) {
         return; // Project does not exist!
       }
-      if (response.getStatus() == ComponentImportResponse.Status.UPGRADED) {
+      if (response.getStatus() == ComponentImportResponse.Status.UPGRADED ||
+          response.getStatus() == ComponentImportResponse.Status.IMPORTED) {
         YoungAndroidComponentsFolder componentsFolder = ((YoungAndroidProjectNode) project.getRootNode()).getComponentsFolder();
         YaProjectEditor projectEditor = (YaProjectEditor) ode.getEditorManager().getOpenProjectEditor(destinationProjectId);
         if (projectEditor == null) {
@@ -87,26 +92,12 @@ public class ComponentImportWizard extends Wizard {
         }
         for (ProjectNode node : compNodes) {
           project.addNode(componentsFolder, node);
-          if (node.getName().equals("component.json") && StringUtils.countMatches(node.getFileId(), "/") == 3) {
+          if ((node.getName().equals("component.json") || node.getName().equals("components.json"))
+              && StringUtils.countMatches(node.getFileId(), "/") == 3) {
             projectEditor.addComponent(node, null);
           }
         }
-
-      } else if (response.getStatus() == ComponentImportResponse.Status.IMPORTED) {
-        for (ProjectNode node : compNodes) {
-          if (node.getName().equals("component.json") && StringUtils.countMatches(node.getFileId(), "/") == 3) {
-            String fileId = node.getFileId();
-            int start = fileId.indexOf(external_components) + external_components.length();
-            int end = fileId.indexOf('/', start);
-            String typeName = fileId.substring(start, end);
-            new ComponentRenameWizard(typeName, destinationProjectId, compNodes).center();
-
-          }
-        }
       }
-
-
-
     }
   }
 
@@ -124,8 +115,8 @@ public class ComponentImportWizard extends Wizard {
     final FileUpload fileUpload = createFileUpload();
     final Grid urlGrid = createUrlGrid();
     final TabPanel tabPanel = new TabPanel();
-    tabPanel.add(fileUpload, "From my computer");
-    tabPanel.add(urlGrid, "URL");
+    tabPanel.add(fileUpload, MESSAGES.componentImportFromComputer());
+    tabPanel.add(urlGrid, MESSAGES.componentImportFromURL());
     tabPanel.selectTab(FROM_MY_COMPUTER_TAB);
     tabPanel.addStyleName("ode-Tabpanel");
 
@@ -239,6 +230,7 @@ public class ComponentImportWizard extends Wizard {
   private FileUpload createFileUpload() {
     FileUpload upload = new FileUpload();
     upload.setName(ServerLayout.UPLOAD_COMPONENT_ARCHIVE_FORM_ELEMENT);
+    upload.getElement().setAttribute("accept", COMPONENT_ARCHIVE_EXTENSION);
     return upload;
   }
 

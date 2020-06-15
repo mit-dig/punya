@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2013 MIT, All rights reserved
+// Copyright 2011-2019 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -20,6 +20,7 @@ import com.google.appinventor.shared.storage.StorageUtil;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.NoSuchElementException;
@@ -47,13 +48,23 @@ public class BuildOutputServlet extends OdeServlet {
 
   private final FileExporter fileExporter = new FileExporterImpl();
 
-  private final StorageIo storageIo = StorageIoInstanceHolder.INSTANCE;
+  private final StorageIo storageIo = StorageIoInstanceHolder.getInstance();
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     // Set a default http header to avoid security vulnerabilities.
     CACHE_HEADERS.setNotCacheable(resp);
     resp.setContentType(CONTENT_TYPE);
+    if ("store=1".equals(req.getQueryString())) {  // Play Store companion adds this for Chrome to
+                                                   // do the right thing w.r.t. the download
+      String body = "<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=" +
+          req.getRequestURI() + "\" /></head><body></body></html>";
+      resp.setContentLength(body.length());
+      ServletOutputStream os = resp.getOutputStream();
+      os.write(body.getBytes());
+      os.close();
+      return;
+    }
 
     RawFile downloadableFile;
 
@@ -64,6 +75,10 @@ public class BuildOutputServlet extends OdeServlet {
       String uri = req.getRequestURI();
       // First, call split with no limit parameter.
       String[] uriComponents = uri.split("/");
+      if (uriComponents.length < 3) {
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
       nonceValue = uriComponents[2];
 
       storageIo.cleanupNonces(); // This removes expired Nonce objects
@@ -82,8 +97,11 @@ public class BuildOutputServlet extends OdeServlet {
       }
       downloadableFile = fileExporter.exportProjectOutputFile(nonce.getUserId(), nonce.getProjectId(), null);
 
-    } catch (IllegalArgumentException e) {
-      throw CrashReport.createAndLogError(LOG, req, "nonceValue=" + nonceValue, e);
+    } catch (FileNotFoundException e) {
+      // This can happen if a new build is running while an attempt is made to download
+      // a previous built version of the project
+      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      return;
     }
 
     String fileName = downloadableFile.getFileName();

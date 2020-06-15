@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2017 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -45,6 +45,16 @@ public interface ProjectServiceAsync {
    * @see ProjectService#copyProject(long, String)
    */
   void copyProject(long oldProjectId, String newName, AsyncCallback<UserProject> callback);
+
+  /**
+   * @see ProjectService#moveToTrash(long)
+   */
+  void moveToTrash(long projectId, AsyncCallback<UserProject> callback);
+
+  /**
+   * @see ProjectService#restoreProject(long)
+   */
+  void restoreProject(long projectId, AsyncCallback<UserProject> callback);
 
   /**
    * @see ProjectService#deleteProject(long)
@@ -149,9 +159,9 @@ public interface ProjectServiceAsync {
     AsyncCallback<RpcResult> callback);
 
   /**
-   * @see ProjectService#build(long, String, String)
+   * @see ProjectService#build(long, String, String, boolean)
    */
-  void build(long projectId, String nonce, String target, AsyncCallback<RpcResult> callback);
+  void build(long projectId, String nonce, String target, boolean secondBuildserver, AsyncCallback<RpcResult> callback);
 
   /**
    * @see ProjectService#getBuildResult(long, String)
@@ -172,6 +182,11 @@ public interface ProjectServiceAsync {
    * @see ProjectService#addLDForm(long, String)
    */
   void addLDForm(long projectId, String targetFormFileId, List<String> uriCollection, String conceptURI, AsyncCallback<Long> callback);
+
+  /**
+   * @see ProjectService#importMedia(String, long, String, boolean)
+   */
+  void importMedia(String sessionId, long projectId, String url, boolean save, AsyncCallback<TextFile> odeAsyncCallback);
 
   void newProjectFromGallery(String appName, String aiaPath, long attributionId, AsyncCallback<UserProject> callback);
 

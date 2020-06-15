@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2017 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 package com.google.appinventor.components.common;
@@ -82,10 +82,22 @@ public class PropertyTypeConstants {
   public static final String PROPERTY_TYPE_FLOAT = "float";
 
   /**
+   * A latitude, longitude pair expressed as a comma-separated string.
+   * @see com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidGeographicPointPropertyEditor
+   */
+  public static final String PROPERTY_TYPE_GEOGRAPHIC_POINT = "geographic_point";
+
+  /**
    * Integer values.
    * @see com.google.appinventor.client.widgets.properties.IntegerPropertyEditor
    */
   public static final String PROPERTY_TYPE_INTEGER = "integer";
+
+  /**
+   * Floating-point values limited to valid latitudes [-90, 90].
+   * @see com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidFloatRangePropertyEditor
+   */
+  public static final String PROPERTY_TYPE_LATITUDE = "latitude";
 
   /**
    * Lego NXT sensor ports.
@@ -142,6 +154,50 @@ public class PropertyTypeConstants {
    * com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidColorChoicePropertyEditor#EV3_GENERATED_COLORS
    */
   public static final String PROPERTY_TYPE_LEGO_EV3_GENERATED_COLOR = "lego_ev3_generated_color";
+
+  /**
+   * Choices.
+   * @see
+   * com.google.appinventor.client.widgets.properties.ChoicePropertyEditor
+   */
+  public static final String PROPERTY_TYPE_CHOICES = "choices";
+
+  /**
+   * Length editor (e.g., width, height)
+   * @see com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidLengthPropertyEditor
+   */
+  public static final String PROPERTY_TYPE_LENGTH = "length";
+
+  /**
+   * Floating-point values in the range of valid longitudes [-180, 180].
+   * @see com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidFloatRangePropertyEditor
+   */
+  public static final String PROPERTY_TYPE_LONGITUDE = "longitude";
+
+  /**
+   * Unit system for the map scale bar.
+   */
+  public static final String PROPERTY_TYPE_MAP_UNIT_SYSTEM = "map_unit_system";
+
+  /**
+   * Map types supported by the Map component.
+   * @see
+   * com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidMapTypePropertyEditor
+   */
+  public static final String PROPERTY_TYPE_MAP_TYPE = "map_type";
+
+  /**
+   * Integer values limited to the range of valid map zoom levels [1, 18].
+   * @see com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidMapZoomPropertyEditor
+   */
+  public static final String PROPERTY_TYPE_MAP_ZOOM = "map_zoom";
+
+  /**
+   * GeoJSON from media or URL for the FeatureCollection component.
+   * @see
+   *  com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidGeoJSONPropertyEditor
+   */
+  public static final String PROPERTY_TYPE_GEOJSON_TYPE = "geojson_type";
 
   /**
    * Non-negative (positive or zero) floating-point values.
@@ -202,6 +258,12 @@ public class PropertyTypeConstants {
   public static final String PROPERTY_TYPE_TEXT = "text";
 
   public static final String PROPERTY_TYPE_TEXTAREA = "textArea";
+
+  /**
+   * The Subset JSON property editor pops up a web form for the selection of
+   * components and blocks to be included in the subset.
+   */
+  public static final String PROPERTY_TYPE_SUBSET_JSON = "subset_json";
 
   /**
    * Choices of text alignment (left, center, right) offered by {@link
@@ -289,4 +351,16 @@ public class PropertyTypeConstants {
    * See {@link com.google.appinventor.client.widgets.properties.ScalingChoicePropertyEditor}
    */
    public static final String PROPERTY_TYPE_SCALING = "scaling";
+
+  /**
+   * Choices of theming for App Inventor apps.
+   * See {@link com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidThemeChoicePropertyEditor}
+   */
+  public static final String PROPERTY_TYPE_THEME = "theme";
+
+  /**
+   * Choices of navigation methods. {@link
+   * com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidNavigationMethodChoicePropertyEditor}
+   */
+  public static final String PROPERTY_TYPE_NAVIGATION_METHOD = "navigation_method";
 }

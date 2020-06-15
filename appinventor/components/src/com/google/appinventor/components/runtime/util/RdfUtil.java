@@ -353,7 +353,7 @@ public final class RdfUtil {
     return true;
   }
 
-  private static boolean triplifyContainerOrForm(ComponentContainer container, String subject,
+  private static boolean triplifyContainerOrForm(ComponentContainer<AndroidViewComponent> container, String subject,
       Model model) {
     for(AndroidViewComponent i : container) {
       if(i instanceof LinkedDataForm) {
@@ -394,7 +394,7 @@ public final class RdfUtil {
    * @param model
    * @return
    */
-  public static boolean triplifyContainer(ComponentContainer container, String subject,
+  public static boolean triplifyContainer(ComponentContainer<AndroidViewComponent> container, String subject,
       Model model) {
     Log.d(LOG_TAG, "Triplifying container "+container+" with subject <"+subject+">");
     return triplifyContainerOrForm(container, subject, model);
@@ -449,7 +449,7 @@ public final class RdfUtil {
    * @param builder Builder used to generate a URI for the calling form
    * @return
    */
-  private static String processSubfieldForSubject(ComponentContainer container,
+  private static String processSubfieldForSubject(ComponentContainer<AndroidViewComponent> container,
       final StringBuilder builder) {
     Log.v(LOG_TAG, ">>> Processing container "+container);
     Log.v(LOG_TAG, "builder = "+builder.toString());

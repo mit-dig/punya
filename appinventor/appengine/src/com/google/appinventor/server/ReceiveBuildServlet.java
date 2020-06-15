@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2019 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -37,7 +37,7 @@ public class ReceiveBuildServlet extends OdeServlet {
   private static final Logger LOG = Logger.getLogger(ReceiveBuildServlet.class.getName());
 
   private final OdeAuthFilter odeFilter = new OdeAuthFilter();
-  private final transient StorageIo storageIo = StorageIoInstanceHolder.INSTANCE;
+  private final transient StorageIo storageIo = StorageIoInstanceHolder.getInstance();
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -74,11 +74,16 @@ public class ReceiveBuildServlet extends OdeServlet {
           LOG.info("Saving android.keystore for user: " + userId);
           storageIo.addFilesToUser(userId, StorageUtil.ANDROID_KEYSTORE_FILENAME);
           storageIo.uploadRawUserFile(userId, fileName, fileBytes);
+        } else if (fileName.equals("build.status")) {
+          int progress = Integer.parseInt((new String(fileBytes)).trim());
+          LOG.info("Received a build.status file contents = " + progress);
+          storageIo.storeBuildStatus(userId, projectId, progress);
         } else {
           String filePath = buildFileDirPath + "/" + fileName;
           LOG.info("Saving build output files: " + filePath);
           storageIo.addOutputFilesToProject(userId, projectId, filePath);
           storageIo.uploadRawFileForce(projectId, filePath, userId, fileBytes);
+          storageIo.storeBuildStatus(userId, projectId, 0); // Reset for the next build
         }
       }
     } finally {

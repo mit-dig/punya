@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2019 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -26,6 +26,7 @@ import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
 import com.google.appinventor.shared.rpc.project.NewProjectParameters;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.ProjectService;
+import com.google.appinventor.shared.rpc.project.TextFile;
 import com.google.appinventor.shared.rpc.project.UserProject;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.util.Base64Util;
@@ -58,7 +59,7 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
 
   private static final long serialVersionUID = -8316312003804169166L;
 
-  private final transient StorageIo storageIo = StorageIoInstanceHolder.INSTANCE;
+  private final transient StorageIo storageIo = StorageIoInstanceHolder.getInstance();
 
   // RPC implementation for YoungAndroid projects
   private final transient YoungAndroidProjectService youngAndroidProject =
@@ -127,7 +128,7 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
     // NOTE: GWT's Base64Utils uses a non-standard algorithm.
     // @see:  https://code.google.com/p/google-web-toolkit/issues/detail?id=3880
     byte[] binData = null;
-    binData = Base64Util.decode(zipData);
+    binData = Base64Util.decodeLines(zipData);
 
     // Import the project
     ByteArrayInputStream bais = null;
@@ -205,6 +206,28 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
   public void deleteProject(long projectId) {
     final String userId = userInfoProvider.getUserId();
     getProjectRpcImpl(userId, projectId).deleteProject(userId, projectId);
+  }
+
+  /**
+   * Moves the project to trash.
+   * @param projectId  project ID
+   */
+  @Override
+  public UserProject moveToTrash(long projectId) {
+      String userId = userInfoProvider.getUserId();
+      storageIo.setMoveToTrashFlag(userId,projectId,true);
+      return storageIo.getUserProject(userId,projectId);
+  }
+
+  /**
+   * Moves the project back to My Projects Tab.
+   * @param projectId  project ID
+   */
+  @Override
+  public UserProject restoreProject(long projectId) {
+      String userId = userInfoProvider.getUserId();
+      storageIo.setMoveToTrashFlag(userId,projectId,false);
+      return storageIo.getUserProject(userId,projectId);
   }
 
  /**
@@ -512,11 +535,11 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
    * @return  results of build
    */
   @Override
-  public RpcResult build(long projectId, String nonce, String target) {
+  public RpcResult build(long projectId, String nonce, String target, boolean secondBuildserver) {
     // Dispatch
     final String userId = userInfoProvider.getUserId();
     return getProjectRpcImpl(userId, projectId).build(
-      userInfoProvider.getUser(), projectId, nonce, target);
+      userInfoProvider.getUser(), projectId, nonce, target, secondBuildserver);
   }
 
   /**
@@ -535,7 +558,7 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
     // Dispatch
     final String userId = userInfoProvider.getUserId();
     return getProjectRpcImpl(userId, projectId).getBuildResult(
-        userInfoProvider.getUser(), projectId, target);
+      userInfoProvider.getUser(), projectId, target);
   }
 
   /*
@@ -599,6 +622,14 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
   public long addLDForm(long projectId, String targetFormFileId, List<String> uriCollection, String conceptURI) {
     final String userId = userInfoProvider.getUserId();
     return getProjectRpcImpl(userId, projectId).addLDForm(userId, projectId, targetFormFileId, uriCollection, conceptURI);
+  }
+
+  @Override
+  public TextFile importMedia(String sessionId, long projectId, String url, boolean save)
+      throws InvalidSessionException, IOException {
+    validateSessionId(sessionId);
+    final String userId = userInfoProvider.getUserId();
+    return getProjectRpcImpl(userId, projectId).importMedia(userId, projectId, url, save);
   }
 
   /**

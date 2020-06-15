@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2019 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -56,7 +56,7 @@ public class OdeAuthFilter implements Filter {
   private static Crypter crypter = null; // accessed through getCrypter only
   private static final Object crypterSync = new Object();
 
-  private final StorageIo storageIo = StorageIoInstanceHolder.INSTANCE;
+  private final StorageIo storageIo = StorageIoInstanceHolder.getInstance();
 
   // Whether this server should use a whitelist to determine who can
   // access it. Value is specified in the <system-properties> section
@@ -145,7 +145,16 @@ public class OdeAuthFilter implements Filter {
     // find the UserData object.
     String lemail = localUser.getUserEmail();
     if (lemail.equals("")) {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      // We send a SC_PRECONDITION_FAILED which will cause the login page to
+      // be displayed (or the use of Google Authentication if that is the only
+      // mechanism enabled). This should *not* happen in production. However
+      // it happens all the time in development when people do an "ant clean"
+      // followed by an "ant". This results in their development datastore being
+      // erased. But their browser still contains a valid authentication cookie,
+      // but the userId no longer exists. It is then automatically created
+      // in code called before here, but the e-mail address is not set. So
+      // we error out here.
+      response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
       return;
     }
 

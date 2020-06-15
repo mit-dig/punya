@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="/static/css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/css/mit_app_inventor.css">
+    <script type="text/javascript">
+     <!--//--><![CDATA[// ><!--
+
+                                   var gotoappinventor = function() {
+                                       var referrer = document.location.pathname;
+                                       var patt = /.*hour-of-code.*/;
+                                       if (referrer.match(patt)) {
+                                           window.open("http://code.appinventor.mit.edu/", "new");
+                                       } else {
+                                           window.open("http://ai2.appinventor.mit.edu/", "new");
+                                       }
+                                   }
+     //--><!]]>
+    </script>
+    <title>Linked Data</title></head>
+<body class="mit_app_inventor"><nav class="navbar navbar-expand-xl navbar-light">
+    <a class="navbar-brand" href="http://appinventor.mit.edu/">
+	<img src="/static/images/logo2.png" alt="Logo">
+    </a>
+    <button type="button" class="btn create-btn" style="margin-right: 20px;" onclick="gotoappinventor();">Create Apps!</button>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
+            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle Navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarContent">
+	<ul class="navbar-nav" style="margin-left: auto;">
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    About
+		</a>
+		<div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/about-us">About App Inventor</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/our-team">Our Team</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/master-trainers">Master Trainers</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/app-month-gallery">App of the Month</a>
+                    <a class="dropdown-item"
+                       href="http://appinventor.mit.edu/ai2/ReleaseNotes">Release Notes</a>
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/about/termsofservice" target="_blank">Terms of Service</a>
+		</div>
+	    </li>
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    Educators
+		</a>
+		<div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/teach" target="_blank">Teach</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/ai2/tutorials">Tutorials</a>
+		</div>
+	    </li>
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu/news" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    News
+		</a>
+		<div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/news">In the news</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/events">Events</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/stories">Stories from the field</a>
+		</div>
+	    </li>
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu/explore/resources" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    Resources
+		</a>
+		<div class="dropdown-menu">
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/get-started">Get Started</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/library">Documentation</a>
+		    <a class="dropdown-item" href="https://community.appinventor.mit.edu"
+                       target="_blank">Forums</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/ai2/tutorials">Tutorials</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/books">App Inventor Books</a>
+		    <a class="dropdown-item"
+                       href="https://github.com/mit-cml/appinventor-sources"
+                       target="_blank">Open Source Information</a>
+	            <a class="dropdown-item" href="http://appinventor.mit.edu/explore/research">Research</a>
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/hour-of-code">Hour of Code</a>
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/resources">Additional Resources</a>
+		</div>
+	    </li>
+            <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    Blogs
+		</a>
+                <div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/blog">App Inventor Blog</a>
+	        </div>
+            </li>
+        </ul>
+        <div style="display: inline-flex;margin-left:auto;margin-right:0">
+	    <a href="https://giving.mit.edu/give/to?fundId=3832320" target="_blank">
+                <button type="button" class="btn donate-btn" style="margin-right: 20px;">Donate</button></a>
+            <script>
+             (function() {
+                 var cx = '005719495929270354943:tlvxrelje-e';
+                 var gcse = document.createElement('script');
+                 gcse.type = 'text/javascript';
+                 gcse.async = true;
+                 gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+                            '//www.google.com/cse/cse.js?cx=' + cx;
+                 var s = document.getElementsByTagName('script')[0];
+                 s.parentNode.insertBefore(gcse, s);
+             })();
+            </script>
+            <gcse:searchbox-only></gcse:searchbox-only>
+        </div>
+	<!-- <form class="form-inline" action="/action_page.php">
+	     <div class="form-group has-search">
+	     <span class="fa fa-search form-control-feedback"></span>
+	     <input type="text" class="form-control" placeholder="Search">
+	     </div>
+	     </form> -->
+    </div>
+</nav>
+<div class="default-page">
+            <div class="header">
+	        <h1 class="font-weight-bold text-center offset-xl-2 col-xl-8">Linked Data</h1>
+            </div>
+            <div class="container-fluid">
+                <article class="documentation">
+<p><a href="index.html">« Back to index</a></p>
+<h1 id="linked-data">Linked Data</h1>
+
+<p>Table of Contents:</p>
+
+<ul>
+  <li><a href="#LinkedData">LinkedData</a></li>
+  <li><a href="#LinkedDataForm">LinkedDataForm</a></li>
+  <li><a href="#LinkedDataListPicker">LinkedDataListPicker</a></li>
+  <li><a href="#LinkedDataStreamingClient">LinkedDataStreamingClient</a></li>
+</ul>
+
+<h2 id="LinkedData">LinkedData</h2>
+
+<p>Component for LinkedData</p>
+
+<h3 id="LinkedData-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="LinkedData.EndpointURL" class="text"><em>EndpointURL</em></dt>
+  <dd>Specifies the URL of a SPARQL endpoint.
+ The default value is the DBpedia endpoint.</dd>
+</dl>
+
+<h3 id="LinkedData-Events">Events</h3>
+
+<dl class="events">
+  <dt id="LinkedData.FailedHttsPostingFileToWeb">FailedHttsPostingFileToWeb(<em class="text">errorMessage</em>)</dt>
+  <dd>Event for FailedHttsPostingFileToWeb</dd>
+  <dt id="LinkedData.FailedToAddDataToWeb">FailedToAddDataToWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
+  <dd>Event for FailedToAddDataToWeb</dd>
+  <dt id="LinkedData.FailedToDeleteDataFromLocal">FailedToDeleteDataFromLocal()</dt>
+  <dd>Event for FailedToDeleteDataFromLocal</dd>
+  <dt id="LinkedData.FailedToDeleteDataFromWeb">FailedToDeleteDataFromWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
+  <dd>Event for FailedToDeleteDataFromWeb</dd>
+  <dt id="LinkedData.FailedToFeedDataToWeb">FailedToFeedDataToWeb(<em class="text">error</em>)</dt>
+  <dd>Event for FailedToFeedDataToWeb</dd>
+  <dt id="LinkedData.FailedToWriteDataToWeb">FailedToWriteDataToWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
+  <dd>This event is raised when the LinkedData component fails to publish a
+ graph to a remote SPARQL endpoint.</dd>
+  <dt id="LinkedData.FinishedAddingDataToWeb">FinishedAddingDataToWeb(<em class="text">graph</em>)</dt>
+  <dd>Event for FinishedAddingDataToWeb</dd>
+  <dt id="LinkedData.FinishedDeletingDataFromLocal">FinishedDeletingDataFromLocal()</dt>
+  <dd>Event for FinishedDeletingDataFromLocal</dd>
+  <dt id="LinkedData.FinishedDeletingDataFromWeb">FinishedDeletingDataFromWeb(<em class="text">graph</em>)</dt>
+  <dd>Event for FinishedDeletingDataFromWeb</dd>
+  <dt id="LinkedData.FinishedFeedingDataToWeb">FinishedFeedingDataToWeb()</dt>
+  <dd>Event for FinishedFeedingDataToWeb</dd>
+  <dt id="LinkedData.FinishedHttsPostingFileToWeb">FinishedHttsPostingFileToWeb(<em class="text">message</em>)</dt>
+  <dd>Event for FinishedHttsPostingFileToWeb</dd>
+  <dt id="LinkedData.FinishedWritingDataToWeb">FinishedWritingDataToWeb(<em class="text">graph</em>)</dt>
+  <dd>This event is raised when a graph is successfully published on a remote
+ endpoint.</dd>
+  <dt id="LinkedData.RetrievedRawResults">RetrievedRawResults(<em class="text">type</em>,<em class="text">contents</em>)</dt>
+  <dd>This event is raised after a SPARQL engine finishes processing a query
+ and the client has received the results, but before those results have
+ been processed into objects so that they may be used in conjunction with
+ other linked-data-enabled components.</dd>
+  <dt id="LinkedData.RetrievedResults">RetrievedResults(<em class="text">type</em>,<em class="list">bindings</em>)</dt>
+  <dd>This event is raised after a SPARQL engine finishes processing
+ a query and the client has received the results.</dd>
+  <dt id="LinkedData.UnsupportedQueryType">UnsupportedQueryType()</dt>
+  <dd>Event raised when a SPARQL query to be executed is not supported
+ by the Linked Data component.</dd>
+</dl>
+
+<h3 id="LinkedData-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="LinkedData.AddDataFromComponent" class="method returns boolean"><i></i> AddDataFromComponent(<em class="component">component</em>,<em class="text">subject</em>)</dt>
+  <dd>Takes a component implementing the LDComponent interface and uses the properties defined
+ there to insert a triple into the model using the given subject.</dd>
+  <dt id="LinkedData.AddDataFromLinkedDataForm" class="method returns boolean"><i></i> AddDataFromLinkedDataForm(<em class="component">form</em>)</dt>
+  <dd>Takes a LinkedDataForm component and converts it and any nested elements into
+ triples within the model encapsulated by this LinkedData component.</dd>
+  <dt id="LinkedData.AddDataToWeb" class="method"><i></i> AddDataToWeb(<em class="text">graph</em>,<em class="boolean">noResolveUpdate</em>)</dt>
+  <dd>Attempts to insert the statements contained within this Linked Data
+ component into the endpoint with an optional graph.</dd>
+  <dt id="LinkedData.DeleteDataFromLocal" class="method"><i></i> DeleteDataFromLocal()</dt>
+  <dd>Deletes all data from the referent model</dd>
+  <dt id="LinkedData.DeleteDataFromWeb" class="method"><i></i> DeleteDataFromWeb(<em class="text">graph</em>,<em class="boolean">noResolveUpdate</em>)</dt>
+  <dd>Attempts to delete the statements contained within this Linked Data
+ component from the endpoint with an optional graph.</dd>
+  <dt id="LinkedData.ExecuteSPARQLQuery" class="method"><i></i> ExecuteSPARQLQuery(<em class="text">query</em>)</dt>
+  <dd>Execute a SPARQL query on the set EndpointURL of this Linked Data component.
+ Currently only supports SELECT queries, and converts all integer types into Long
+ and decimal types into Double.</dd>
+  <dt id="LinkedData.FeedDataToWeb" class="method"><i></i> FeedDataToWeb()</dt>
+  <dd>Attempts to feed the statements contained within this Linked Data
+ component into the endpoint (most likely CSPARQL).</dd>
+  <dt id="LinkedData.HttpsPostFileToWeb" class="method"><i></i> HttpsPostFileToWeb(<em class="text">Url</em>,<em class="text">certificateName</em>,<em class="text">securityToken</em>,<em class="text">filepath</em>)</dt>
+  <dd>Method for HttpsPostFileToWeb</dd>
+  <dt id="LinkedData.ReadDataFromLocal" class="method returns boolean"><i></i> ReadDataFromLocal(<em class="text">path</em>)</dt>
+  <dd>Read contents of the specified path (local or remote) into the referent model.
+ Note the implementation is identical to ReadDataFromWeb</dd>
+  <dt id="LinkedData.ReadDataFromWeb" class="method returns boolean"><i></i> ReadDataFromWeb(<em class="text">path</em>)</dt>
+  <dd>Read contents of the specified path (local or remote) into the referent model.
+ Note the implementation is identical to ReadDataFromLocal</dd>
+  <dt id="LinkedData.ResultsToSimpleJSON" class="method returns text"><i></i> ResultsToSimpleJSON(<em class="list">results</em>)</dt>
+  <dd>Method for ResultsToSimpleJSON</dd>
+  <dt id="LinkedData.ToString" class="method returns text"><i></i> ToString()</dt>
+  <dd>Returns the contents of this LinkedData component as a string. Useful
+ for debugging purposes.</dd>
+  <dt id="LinkedData.WriteDataToLocal" class="method returns boolean"><i></i> WriteDataToLocal(<em class="text">path</em>)</dt>
+  <dd>Saves the model to the given path on the file system.</dd>
+  <dt id="LinkedData.WriteDataToWeb" class="method"><i></i> WriteDataToWeb(<em class="text">graph</em>)</dt>
+  <dd>Write the model represented by the LinkedData component to the
+ RDF graph store represented by EndpointURL using the given graph URI.
+ Any existing triples will get replaced?</dd>
+</dl>
+
+<h2 id="LinkedDataForm">LinkedDataForm</h2>
+
+<p>Linked Data Form provides a layout in which contained form elements will be
+ used to generate structured data. This form is used in conjunction with
+ the LinkedData component.</p>
+
+<h3 id="LinkedDataForm-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="LinkedDataForm.FormID" class="text"><em>FormID</em></dt>
+  <dd>Gets the Base URI of this form.</dd>
+  <dt id="LinkedDataForm.GenerateSubjectURI" class="text ro bo"><em>GenerateSubjectURI</em></dt>
+  <dd>Returns a URI for the form either by examining its Subject property or
+ generated from its contents.</dd>
+  <dt id="LinkedDataForm.Height" class="number bo"><em>Height</em></dt>
+  <dd>Specifies the <code class="highlighter-rouge">LinkedDataForm</code>’s vertical height, measured in pixels.</dd>
+  <dt id="LinkedDataForm.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
+  <dd>Specifies the <code class="highlighter-rouge">LinkedDataForm</code>’s vertical height as a percentage
+ of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
+  <dt id="LinkedDataForm.InverseProperty" class="boolean"><em>InverseProperty</em></dt>
+  <dd>Gets whether or not this form represents an inverse property.</dd>
+  <dt id="LinkedDataForm.ObjectType" class="text"><em>ObjectType</em></dt>
+  <dd>Returns the concept URI for this form.</dd>
+  <dt id="LinkedDataForm.PropertyURI" class="text"><em>PropertyURI</em></dt>
+  <dd>Gets the Property URI for linking a parent form to this form.</dd>
+  <dt id="LinkedDataForm.Subject" class="text bo"><em>Subject</em></dt>
+  <dd>Gets the Subject URI for this form.</dd>
+  <dt id="LinkedDataForm.Visible" class="boolean"><em>Visible</em></dt>
+  <dd>Specifies whether the <code class="highlighter-rouge">LinkedDataForm</code> should be visible on the screen.  Value is <code class="logic block highlighter-rouge">true</code>
+ if the <code class="highlighter-rouge">LinkedDataForm</code> is showing and <code class="logic block highlighter-rouge">false</code> if hidden.</dd>
+  <dt id="LinkedDataForm.Width" class="number bo"><em>Width</em></dt>
+  <dd>Specifies the horizontal width of the <code class="highlighter-rouge">LinkedDataForm</code>, measured in pixels.</dd>
+  <dt id="LinkedDataForm.WidthPercent" class="number wo bo"><em>WidthPercent</em></dt>
+  <dd>Specifies the horizontal width of the <code class="highlighter-rouge">LinkedDataForm</code> as a percentage
+ of the <a href="userinterface.html#Screen.Width"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Width</code></a>.</dd>
+  <dt id="LinkedDataForm.generateRandomUUID" class="text ro bo"><em>generateRandomUUID</em></dt>
+  <dd>Property for generateRandomUUID</dd>
+</dl>
+
+<h3 id="LinkedDataForm-Events">Events</h3>
+
+<p class="events">None</p>
+
+<h3 id="LinkedDataForm-Methods">Methods</h3>
+
+<p class="methods">None</p>
+
+<h2 id="LinkedDataListPicker">LinkedDataListPicker</h2>
+
+<p>Provides a list picker backed by the results of a SPARQL query.</p>
+
+<h3 id="LinkedDataListPicker-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="LinkedDataListPicker.BackgroundColor" class="color"><em>BackgroundColor</em></dt>
+  <dd>Specifies the <code class="highlighter-rouge">LinkedDataListPicker</code>’s background color as an alpha-red-green-blue
+ integer.  If an <a href="#LinkedDataListPicker.Image"><code class="highlighter-rouge">Image</code></a> has been set, the color
+ change will not be visible until the <a href="#LinkedDataListPicker.Image"><code class="highlighter-rouge">Image</code></a> is removed.</dd>
+  <dt id="LinkedDataListPicker.Enabled" class="boolean"><em>Enabled</em></dt>
+  <dd>Specifies whether the <code class="highlighter-rouge">LinkedDataListPicker</code> should be active and clickable.</dd>
+  <dt id="LinkedDataListPicker.EndpointURL" class="text"><em>EndpointURL</em></dt>
+  <dd>Gets the endpoint URL for the list picker.</dd>
+  <dt id="LinkedDataListPicker.FontBold" class="boolean"><em>FontBold</em></dt>
+  <dd>Specifies whether the text of the <code class="highlighter-rouge">LinkedDataListPicker</code> should be bold.
+ Some fonts do not support bold.</dd>
+  <dt id="LinkedDataListPicker.FontItalic" class="boolean"><em>FontItalic</em></dt>
+  <dd>Specifies whether the text of the <code class="highlighter-rouge">LinkedDataListPicker</code> should be italic.
+ Some fonts do not support italic.</dd>
+  <dt id="LinkedDataListPicker.FontSize" class="number"><em>FontSize</em></dt>
+  <dd>Specifies the text font size of the <code class="highlighter-rouge">LinkedDataListPicker</code>, measured in sp(scale-independent pixels).</dd>
+  <dt id="LinkedDataListPicker.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dd>Specifies the text font face of the <code class="highlighter-rouge">LinkedDataListPicker</code> as default, serif, sans
+ serif, or monospace.</dd>
+  <dt id="LinkedDataListPicker.Height" class="number bo"><em>Height</em></dt>
+  <dd>Specifies the <code class="highlighter-rouge">LinkedDataListPicker</code>’s vertical height, measured in pixels.</dd>
+  <dt id="LinkedDataListPicker.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
+  <dd>Specifies the <code class="highlighter-rouge">LinkedDataListPicker</code>’s vertical height as a percentage
+ of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
+  <dt id="LinkedDataListPicker.Image" class="text"><em>Image</em></dt>
+  <dd>Specifies the path of the <code class="highlighter-rouge">LinkedDataListPicker</code>’s image. If there is both an <code class="highlighter-rouge">Image</code> and a
+ <a href="#LinkedDataListPicker.BackgroundColor"><code class="highlighter-rouge">BackgroundColor</code></a> specified, only the <code class="highlighter-rouge">Image</code> will be visible.</dd>
+  <dt id="LinkedDataListPicker.ObjectType" class="text"><em>ObjectType</em></dt>
+  <dd>Property for ObjectType</dd>
+  <dt id="LinkedDataListPicker.PropertyURI" class="text"><em>PropertyURI</em></dt>
+  <dd>Property for PropertyURI</dd>
+  <dt id="LinkedDataListPicker.RelationToObject" class="text"><em>RelationToObject</em></dt>
+  <dd>Property for RelationToObject</dd>
+  <dt id="LinkedDataListPicker.SelectionIndex" class="number ro bo"><em>SelectionIndex</em></dt>
+  <dd>Returns the index of the user’s selection.</dd>
+  <dt id="LinkedDataListPicker.SelectionLabel" class="text ro bo"><em>SelectionLabel</em></dt>
+  <dd>Returns the label of the user’s selection.</dd>
+  <dt id="LinkedDataListPicker.SelectionURI" class="text ro bo"><em>SelectionURI</em></dt>
+  <dd>Returns the URI of the user’s selection.</dd>
+  <dt id="LinkedDataListPicker.Shape" class="number do"><em>Shape</em></dt>
+  <dd>Specifies the shape of the <code class="highlighter-rouge">LinkedDataListPicker</code>. The valid values for this property are <code class="highlighter-rouge">0</code> (default),
+ <code class="highlighter-rouge">1</code> (rounded), <code class="highlighter-rouge">2</code> (rectangle), and <code class="highlighter-rouge">3</code> (oval). The <code class="highlighter-rouge">Shape</code> will not be visible if an
+ <a href="#LinkedDataListPicker.Image"><code class="highlighter-rouge">Image</code></a> is used.</dd>
+  <dt id="LinkedDataListPicker.ShowFeedback" class="boolean"><em>ShowFeedback</em></dt>
+  <dd>Specifies if a visual feedback should be shown when a <code class="highlighter-rouge">LinkedDataListPicker</code> with an assigned
+ <a href="#LinkedDataListPicker.Image"><code class="highlighter-rouge">Image</code></a> is pressed.</dd>
+  <dt id="LinkedDataListPicker.SubjectIdentifier" class="boolean"><em>SubjectIdentifier</em></dt>
+  <dd>
+    <p>If the list picker is placed within a Linked Data Form, the Subject Identifier value indicates whether the selected item in the list picker should be used as an input when the Linked Data component generates a new subject identifier for the thing described by the form.</p>
+  </dd>
+  <dt id="LinkedDataListPicker.Text" class="text"><em>Text</em></dt>
+  <dd>Specifies the text displayed by the <code class="highlighter-rouge">LinkedDataListPicker</code>.</dd>
+  <dt id="LinkedDataListPicker.TextAlignment" class="number do"><em>TextAlignment</em></dt>
+  <dd>Specifies the alignment of the <code class="highlighter-rouge">LinkedDataListPicker</code>’s text. Valid values are:
+ <code class="highlighter-rouge">0</code> (normal; e.g., left-justified if text is written left to right),
+ <code class="highlighter-rouge">1</code> (center), or
+ <code class="highlighter-rouge">2</code> (opposite; e.g., right-justified if text is written left to right).</dd>
+  <dt id="LinkedDataListPicker.TextColor" class="color"><em>TextColor</em></dt>
+  <dd>Specifies the text color of the <code class="highlighter-rouge">LinkedDataListPicker</code> as an alpha-red-green-blue
+ integer.</dd>
+  <dt id="LinkedDataListPicker.Visible" class="boolean"><em>Visible</em></dt>
+  <dd>Specifies whether the <code class="highlighter-rouge">LinkedDataListPicker</code> should be visible on the screen.  Value is <code class="logic block highlighter-rouge">true</code>
+ if the <code class="highlighter-rouge">LinkedDataListPicker</code> is showing and <code class="logic block highlighter-rouge">false</code> if hidden.</dd>
+  <dt id="LinkedDataListPicker.Width" class="number bo"><em>Width</em></dt>
+  <dd>Specifies the horizontal width of the <code class="highlighter-rouge">LinkedDataListPicker</code>, measured in pixels.</dd>
+  <dt id="LinkedDataListPicker.WidthPercent" class="number wo bo"><em>WidthPercent</em></dt>
+  <dd>Specifies the horizontal width of the <code class="highlighter-rouge">LinkedDataListPicker</code> as a percentage
+ of the <a href="userinterface.html#Screen.Width"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Width</code></a>.</dd>
+</dl>
+
+<h3 id="LinkedDataListPicker-Events">Events</h3>
+
+<dl class="events">
+  <dt id="LinkedDataListPicker.AfterPicking">AfterPicking()</dt>
+  <dd>Event to be raised after the <code class="highlighter-rouge">LinkedDataListPicker</code> activity returns its
+ result and the properties have been filled in.</dd>
+  <dt id="LinkedDataListPicker.AfterQuery">AfterQuery()</dt>
+  <dd>This event is raised after the query is executed on the remote endpoint.</dd>
+  <dt id="LinkedDataListPicker.BeforePicking">BeforePicking()</dt>
+  <dd>Event to raise when the <code class="highlighter-rouge">LinkedDataListPicker</code> is clicked or the picker is shown
+ using the <a href="#LinkedDataListPicker.Open"><code class="highlighter-rouge">Open</code></a> method.  This event occurs before the picker is displayed, and
+ can be used to prepare the picker before it is shown.</dd>
+  <dt id="LinkedDataListPicker.BeforeQuery">BeforeQuery()</dt>
+  <dd>This event is raised before the query is executed on the remote endpoint.</dd>
+  <dt id="LinkedDataListPicker.GotFocus">GotFocus()</dt>
+  <dd>Indicates the cursor moved over the <code class="highlighter-rouge">LinkedDataListPicker</code> so it is now possible
+ to click it.</dd>
+  <dt id="LinkedDataListPicker.LostFocus">LostFocus()</dt>
+  <dd>Indicates the cursor moved away from the <code class="highlighter-rouge">LinkedDataListPicker</code> so it is now no
+ longer possible to click it.</dd>
+  <dt id="LinkedDataListPicker.TouchDown">TouchDown()</dt>
+  <dd>Indicates that the <code class="highlighter-rouge">LinkedDataListPicker</code> was pressed down.</dd>
+  <dt id="LinkedDataListPicker.TouchUp">TouchUp()</dt>
+  <dd>Indicates that the <code class="highlighter-rouge">LinkedDataListPicker</code> has been released.</dd>
+  <dt id="LinkedDataListPicker.UnableToRetrieveContent">UnableToRetrieveContent(<em class="text">error</em>)</dt>
+  <dd>Raised in the event a query fails.</dd>
+</dl>
+
+<h3 id="LinkedDataListPicker-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="LinkedDataListPicker.Open" class="method"><i></i> Open()</dt>
+  <dd>Opens the <code class="highlighter-rouge">LinkedDataListPicker</code>, as though the user clicked on it.</dd>
+</dl>
+
+<h2 id="LinkedDataStreamingClient">LinkedDataStreamingClient</h2>
+
+<p>Component for LinkedDataStreamingClient</p>
+
+<h3 id="LinkedDataStreamingClient-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="LinkedDataStreamingClient.RegId" class="text ro bo"><em>RegId</em></dt>
+  <dd>Property for RegId</dd>
+  <dt id="LinkedDataStreamingClient.ReturnMessage" class="text ro bo"><em>ReturnMessage</em></dt>
+  <dd>Property for ReturnMessage</dd>
+  <dt id="LinkedDataStreamingClient.SenderID" class="text"><em>SenderID</em></dt>
+  <dd>Property for SenderID</dd>
+  <dt id="LinkedDataStreamingClient.ServerURL" class="text"><em>ServerURL</em></dt>
+  <dd>Property for ServerURL</dd>
+</dl>
+
+<h3 id="LinkedDataStreamingClient-Events">Events</h3>
+
+<dl class="events">
+  <dt id="LinkedDataStreamingClient.GotResponseFromServer">GotResponseFromServer(<em class="text">url</em>,<em class="number">responseCode</em>,<em class="text">responseType</em>,<em class="text">responseContent</em>)</dt>
+  <dd>Event indicating that a SendMessageToServer call has finished.</dd>
+  <dt id="LinkedDataStreamingClient.RegInfoReceived">RegInfoReceived()</dt>
+  <dd>Indicates when the server registration has been successful.</dd>
+  <dt id="LinkedDataStreamingClient.StreamingInfoReceived">StreamingInfoReceived()</dt>
+  <dd>Indicates that the GCM info has been received.</dd>
+  <dt id="LinkedDataStreamingClient.SubscriptionResponseReceived">SubscriptionResponseReceived(<em class="text">url</em>,<em class="number">responseCode</em>,<em class="text">responseType</em>,<em class="text">responseContent</em>)</dt>
+  <dd>Event for SubscriptionResponseReceived</dd>
+</dl>
+
+<h3 id="LinkedDataStreamingClient-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="LinkedDataStreamingClient.CreateNotification" class="method"><i></i> CreateNotification(<em class="text">title</em>,<em class="text">text</em>,<em class="boolean">enabledSound</em>,<em class="boolean">enabledVibrate</em>,<em class="text">packageName</em>,<em class="text">className</em>,<em class="text">extraKey</em>,<em class="text">extraVal</em>)</dt>
+  <dd>Create a notication with message to wake up another activity when tap on the notification</dd>
+  <dt id="LinkedDataStreamingClient.Enabled" class="method"><i></i> Enabled(<em class="boolean">enable</em>)</dt>
+  <dd>Enable Google Cloud Messaging to receive push notification</dd>
+  <dt id="LinkedDataStreamingClient.Register" class="method"><i></i> Register()</dt>
+  <dd>Authenticate to Google Cloud Messaging</dd>
+  <dt id="LinkedDataStreamingClient.SendMessageToServer" class="method"><i></i> SendMessageToServer(<em class="text">text</em>)</dt>
+  <dd>Performs an HTTP POST request using the GCM Server url property and the specified text.</dd>
+  <dt id="LinkedDataStreamingClient.SubscribeToQuery" class="method"><i></i> SubscribeToQuery(<em class="text">querytext</em>,<em class="text">streamName</em>,<em class="text">window</em>,<em class="text">step</em>)</dt>
+  <dd>Performs an HTTP POST query subscription request using the GCM Server url property and the given query.
+ Query is converted to a CONSTRUCT query because an arbitrary UUID injection is necessary.</dd>
+</dl>
+
+<p>select * is currently not supported</p>
+
+<dl>
+  <dt id="LinkedDataStreamingClient.UnRegister" class="method"><i></i> UnRegister()</dt>
+  <dd>Remove authentication for this app instance</dd>
+  <dt id="LinkedDataStreamingClient.isRegistered" class="method returns boolean"><i></i> isRegistered()</dt>
+  <dd>Method for isRegistered</dd>
+  <dt id="LinkedDataStreamingClient.isServiceReady" class="method returns boolean"><i></i> isServiceReady()</dt>
+  <dd>Method for isServiceReady</dd>
+</dl>
+
+</article>
+<script>
+  // Handle redirection to documentation based on locale query parameter (if specified)
+  (function() {
+      var locale = window.location.search.match('[&?]locale=([a-zA-Z-]*)');
+      if (locale) {
+          if (locale[1].indexOf('en') === 0) {
+              // English needs to stay at the top level to not break existing links
+              var page = window.location.pathname.split('/');
+              if (page.length === 5) {
+                  page.splice(2, 1);
+              } else {
+                  // already on english
+                  return;
+              }
+              window.location.href = page.join('/');
+          } else {
+              var page = window.location.pathname.split('/');
+              if (page.length === 4) {
+                  page.splice(2, 0, locale[1]);
+              } else if (page[2].toLowerCase() != locale[1].toLowerCase()) {
+                  page[2] = locale[1];
+              } else {
+                  return;  // already on the desired language
+              }
+              // Test that the page exists before redirecting.
+              var xhr = new XMLHttpRequest();
+              xhr.open('HEAD', page.join('/'), false);
+              xhr.onreadystatechange = function() {
+                  if (xhr.readyState == 4) {
+                      if ((xhr.status == 200 || xhr.status == 204)) {
+                          window.location.href = page.join('/');
+                      } else if (xhr.status  >= 400) {
+                          page.splice(2, 1);  // go to english version
+                          window.location.href = page.join('/');
+                      }
+                  }
+              };
+              xhr.send();
+          }
+      }
+  })();
+
+  // Handle embedded documentation in help by removing website template
+  if (window.self !== window.top) {
+      setTimeout(function() {
+          var videos = document.querySelectorAll('video');
+          for (var i = 0; i < videos.length; i++) {
+              if (parseInt(videos[i].getAttribute('width')) > 360) {
+                  var aspect = parseInt(videos[i].getAttribute('height')) / parseInt(videos[i].getAttribute('width'));
+                  videos[i].setAttribute('width', '360');
+                  videos[i].setAttribute('height', '' + (360 * aspect));
+              }
+          }
+          var h1 = document.querySelector('h1');
+          var article = document.querySelector('article');
+          article.insertBefore(h1, article.firstElementChild);
+          document.body.innerHTML = article.outerHTML;
+      });
+  }
+</script>
+
+            </div>
+            <div class="footer background-green">
+    <div class="row container">
+	<div class="col-xl-3">
+	    <h3>MIT App Inventor</h3>
+	    <!-- <form class="form-inline" action="/action_page.php">
+		 <div class="form-group has-search">
+		 <span class="fa fa-search form-control-feedback"></span>
+		 <input type="text" class="form-control" placeholder="Search">
+		 </div>
+		 </form> -->
+	</div>
+	<div class="col-xl-6 legal text-center">
+	    <ul>
+		<li>
+		    <a href="http://web.mit.edu" class="btn btn-link" role="button"
+                       target="_blank">© 2012-2020 Massachusetts Institute of Technology</a>
+		</li>
+		<li>
+		    <a href="http://creativecommons.org/licenses/by-sa/3.0/"
+                       target="_blank" class="btn btn-link" role="button">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0</a>
+		</li>
+		<li>
+		    <a href="http://appinventor.mit.edu/about/termsofservice"
+                       target="_blank" class="btn btn-link" role="button">Terms of Service and Privacy Policy</a>
+		</li>
+	    </ul>
+	</div>
+	<div class="col-xl-3 links">
+            <a href="https://community.appinventor.mit.edu" target="_blank">Support / Help</a><br>
+            <a href="mailto:appinventor@mit.edu">Other Inquiries</a>
+	    <div>
+		<span>Twitter:</span>
+		<a href="https://twitter.com/mitappinventor"
+                   target="_blank" class="btn btn-link" role="button">@MITAppInventor</a>
+		<div>
+		    <div>
+			<span>GitHub:</span>
+			<a href="https://github.com/mit-cml" class="btn btn-link" role="button"
+                           target="_blank">mit-cml</a>
+			<div>
+			</div>
+	            </div>
+	        </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="/static/js/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="/static/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script async src="/static/js/widgets.js" charset="utf-8"></script>
+</div>
+    </body>
+</html>

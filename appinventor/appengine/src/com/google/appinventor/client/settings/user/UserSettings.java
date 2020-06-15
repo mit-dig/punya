@@ -32,12 +32,17 @@ public final class UserSettings extends CommonSettings implements SettingsAccess
     addSettings(SettingsConstants.USER_GENERAL_SETTINGS, new GeneralSettings(user));
     addSettings(SettingsConstants.USER_YOUNG_ANDROID_SETTINGS, new YoungAndroidSettings(user));
     addSettings(SettingsConstants.SPLASH_SETTINGS, new SplashSettings(user));
+    addSettings(SettingsConstants.BLOCKS_SETTINGS, new BlocksSettings(user));
   }
 
   // SettingsAccessProvider implementation
 
   @Override
   public void loadSettings() {
+    loadSettings(null);
+  }
+
+  public void loadSettings(final Command next) {
     loading = true;
     Ode.getInstance().getUserInfoService().loadUserSettings(
         new OdeAsyncCallback<String>(MESSAGES.settingsLoadError()) {
@@ -49,6 +54,10 @@ public final class UserSettings extends CommonSettings implements SettingsAccess
             changed = false;
             loaded = true;
             loading = false;
+
+            if (Ode.handleUserLocale() && next != null) {
+              next.execute();
+            }
           }
 
           @Override

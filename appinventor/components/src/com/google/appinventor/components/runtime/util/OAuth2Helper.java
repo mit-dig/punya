@@ -1,9 +1,9 @@
 package com.google.appinventor.components.runtime.util;
 
+import com.google.api.client.googleapis.extensions.android.accounts.GoogleAccountManager;
 import java.io.IOException;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.extensions.android2.auth.GoogleAccountManager;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;

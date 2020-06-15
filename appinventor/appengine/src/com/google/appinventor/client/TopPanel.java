@@ -19,11 +19,15 @@ import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.user.Config;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.Dictionary;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
@@ -40,6 +44,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.MissingResourceException;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -61,8 +66,7 @@ public class TopPanel extends Composite {
   private static final String WIDGET_NAME_LANGUAGE = "Language";
 
   private static final String SIGNOUT_URL = "/ode/_logout";
-  private static final String LOGO_IMAGE_URL = "/images/logo.png";
-  private static final String LANGUAGES_IMAGE_URL = "/images/languages.svg";
+  private static final String LOGO_IMAGE_URL = "/static/images/codi_long.png";
 
   private static final String WINDOW_OPEN_FEATURES = "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes";
   private static final String WINDOW_OPEN_LOCATION = "_ai2";
@@ -70,6 +74,24 @@ public class TopPanel extends Composite {
   private final VerticalPanel rightPanel;  // remember this so we can add MOTD later if needed
 
   final Ode ode = Ode.getInstance();
+
+  interface Translations extends ClientBundle {
+    Translations INSTANCE = GWT.create(Translations.class);
+
+    @Source("languages.json")
+    TextResource languages();
+  }
+
+  static {
+    loadLanguages(Translations.INSTANCE.languages().getText());
+    LANGUAGES = Dictionary.getDictionary("LANGUAGES");
+  }
+
+  private static native void loadLanguages(String resource)/*-{
+    $wnd['LANGUAGES'] = JSON.parse(resource);
+  }-*/;
+
+  private static final Dictionary LANGUAGES;
 
   /**
    * Initializes and assembles all UI elements shown in the top panel.
@@ -115,6 +137,17 @@ public class TopPanel extends Composite {
 
     myProjects.setStyleName("ode-TopPanelButton");
     links.add(myProjects);
+
+    // View Trash Link
+    TextButton viewTrash = new TextButton(MESSAGES.viewTrashTabName());
+    viewTrash.setStyleName("ode-TopPanelButton");
+    viewTrash.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        ode.switchToTrash();
+      }
+    });
+    links.add(viewTrash);
 
     // Code on gallerydev branch
     // Gallery Link
@@ -233,26 +266,11 @@ public class TopPanel extends Composite {
 
   private String getDisplayName(String localeName){
     String nativeName=LocaleInfo.getLocaleNativeDisplayName(localeName);
-    if (localeName == "zh_CN") {
-      nativeName = MESSAGES.SwitchToSimplifiedChinese();
-    } else if (localeName == "zh_TW") {
-      nativeName = MESSAGES.SwitchToTraditionalChinese();
-    } else if (localeName == "es_ES") {
-      nativeName = MESSAGES.SwitchToSpanish();
-    } else if (localeName == "fr_FR") {
-      nativeName = MESSAGES.SwitchToFrench();
-    } else if (localeName == "it_IT") {
-      nativeName = MESSAGES.SwitchToItalian();
-    } else if (localeName == "ru") {
-      nativeName = MESSAGES.SwitchToRussian();
-    } else if (localeName == "ko_KR") {
-      nativeName = MESSAGES.SwitchToKorean();
-    } else if (localeName == "sv") {
-      nativeName = MESSAGES.SwitchToSwedish();
-    } else if (localeName == "pt_BR") {
-      nativeName = MESSAGES.switchToPortugueseBR();
+    try {
+      return LANGUAGES.get(localeName);
+    } catch (MissingResourceException e) {
+      return nativeName;
     }
-    return nativeName;
   }
 
   public void updateAccountMessageButton(){
@@ -267,12 +285,11 @@ public class TopPanel extends Composite {
   }
 
   private void addLogo(HorizontalPanel panel) {
-    // Logo should be a link to App Inv homepage. Currently, after the user
-    // has logged in, the top level *is* ODE; so for now don't make it a link.
-    // Add timestamp to logo url to get around browsers that agressively cache
-    // the image! This same trick is used in StorageUtil.getFilePath().
+    // Logo is a link to App Inv homepage. Add timestamp to logo url
+    // to get around browsers that agressively cache the image! This
+    // same trick is used in StorageUtil.getFilePath().
     Image logo = new Image(LOGO_IMAGE_URL + "?t=" + System.currentTimeMillis());
-    logo.setSize("40px", "40px");
+    logo.setSize("180px", "40px");
     logo.setStyleName("ode-Logo");
     String logoUrl = ode.getSystemConfig().getLogoUrl();
     if (!Strings.isNullOrEmpty(logoUrl)) {

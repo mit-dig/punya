@@ -1,5 +1,5 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2015 MIT, All rights reserved
+// Copyright 2015-2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -32,10 +31,10 @@ public class ExternalComponentGenerator {
   private static String androidRuntimeClassDirPath;
   private static String buildServerClassDirPath;
   private static String externalComponentsTempDirPath;
+  private static boolean useFQCN = false;
 
-  private static ArrayList<String> externalComponents = new ArrayList<String>();
-  private static ArrayList<JSONObject> externalComponentDescriptors = new ArrayList<JSONObject>();
-  private static ArrayList<JSONObject> externalComponentBuildInfos = new ArrayList<JSONObject>();
+  private static Map<String, List<ExternalComponentInfo>> externalComponentsByPackage =
+      new TreeMap<>();
 
   /**
   * The definitions of the arguments used by this script
@@ -54,122 +53,218 @@ public class ExternalComponentGenerator {
     androidRuntimeClassDirPath = args[3];
     buildServerClassDirPath = args[4];
     externalComponentsTempDirPath = args[5];
+    useFQCN = Boolean.parseBoolean(args[6]);
     JSONArray simpleComponentDescriptors = new JSONArray(simple_component_json);
     JSONArray simpleComponentBuildInfos = new JSONArray(simple_component_build_info_json);
+    Map<String, JSONObject> buildInfos = buildInfoAsMap(simpleComponentBuildInfos);
     for (int i = 0; i < simpleComponentDescriptors.length(); i++) {
       JSONObject componentDescriptor = (JSONObject) simpleComponentDescriptors.get(i);
       if(componentDescriptor.get("external").toString().equals("true")) {
-        externalComponents.add(componentDescriptor.get("type").toString());
-        externalComponentDescriptors.add(componentDescriptor);
-      }
-    }
-    for (int i = 0; i < simpleComponentBuildInfos.length(); i++) {
-      JSONObject componentBuildInfo = (JSONObject) simpleComponentBuildInfos.get(i);
-      if (externalComponents.contains(componentBuildInfo.get("type").toString())) {
-        externalComponentBuildInfos.add(componentBuildInfo);
+        ExternalComponentInfo info = new ExternalComponentInfo(componentDescriptor, buildInfos.get(componentDescriptor.getString("type")));
+        if (!externalComponentsByPackage.containsKey(info.packageName)) {
+          externalComponentsByPackage.put(info.packageName, new ArrayList<ExternalComponentInfo>());
+        }
+        externalComponentsByPackage.get(info.packageName).add(info);
       }
     }
 
-    generateExternalComponentsList();
     generateAllExtensions();
   }
 
+  /**
+   * Container class to store information about an extension.
+   */
+  private static class ExternalComponentInfo {
+    private String type;
+    private String packageName;
+    private JSONObject descriptor;
+    private JSONObject buildInfo;
 
-  private static void generateExternalComponentsList() throws IOException{
-    // Create external_components.txt
-    System.out.println("\nExtensions : Generating external_components.txt");
-    FileWriter externalComponentList =  new FileWriter(externalComponentsDirPath + File.separator + "external_components.txt");
-    for (int j = 0; j < externalComponents.size(); j++) {
-      externalComponentList.write(externalComponents.get(j));
-      externalComponentList.write("\n");
+    ExternalComponentInfo(JSONObject descriptor, JSONObject buildInfo) {
+      this.descriptor = descriptor;
+      this.buildInfo = buildInfo;
+      this.type = descriptor.optString("type");
+      this.packageName = type.substring(0, type.lastIndexOf('.'));
     }
-    externalComponentList.flush();
-    externalComponentList.close();
-    System.out.println("Extensions : Successfully created external_components.txt");
   }
 
-  private static void generateAllExtensions() throws IOException {
+  private static Map<String, JSONObject> buildInfoAsMap(JSONArray buildInfos) throws JSONException {
+    Map<String, JSONObject> result = new HashMap<>();
+    for (int i = 0; i < buildInfos.length(); i++) {
+      JSONObject componentBuildInfo = buildInfos.getJSONObject(i);
+      result.put(componentBuildInfo.getString("type"), componentBuildInfo);
+    }
+    return result;
+  }
+
+  private static void generateAllExtensions() throws IOException, JSONException {
     System.out.println("\nExtensions : Generating extensions");
-    for (int i = 0; i < externalComponents.size(); ++i) {
-      String componentType = externalComponents.get(i);
-      String logComponentType =  "[" + componentType + "]";
+    for (Map.Entry<String, List<ExternalComponentInfo>> entry : externalComponentsByPackage.entrySet()) {
+      String name = useFQCN && entry.getValue().size() == 1 ? entry.getValue().get(0).type : entry.getKey();
+      String logComponentType =  "[" + name + "]";
       System.out.println("\nExtensions : Generating files " + logComponentType);
-      JSONObject componentDescriptor = getComponentDescriptor(componentType);
-      JSONObject componentBuildInfo = getComponentBuildInfo(componentType);
-      if (componentDescriptor == null || componentBuildInfo == null) {
-        System.out.println("Extensions : Failed generating files " + logComponentType);
+      generateExternalComponentDescriptors(name, entry.getValue());
+      for (ExternalComponentInfo info : entry.getValue()) {
+        copyIcon(name, info.descriptor);
+        copyAssets(name, info.descriptor);
       }
-      System.out.println("Extensions : Generating component.json " + logComponentType);
-      generateExternalComponentDescriptor(componentDescriptor);
-      System.out.println("Extensions : Generating build files " + logComponentType);
-      generateExternalComponentBuildFiles(componentBuildInfo);
-      System.out.println("Extensions : Generating other files " + logComponentType);
-      generateExternalComponentOtherFiles(componentDescriptor);
-
+      generateExternalComponentBuildFiles(name, entry.getValue());
+      generateExternalComponentOtherFiles(name);
     }
   }
 
-
-
-  private static void generateExternalComponentDescriptor(JSONObject componentDescriptor) throws IOException {
-    // Create component.json
-    String extensionDirPath = externalComponentsDirPath + File.separator + componentDescriptor.get("type").toString();
-    new File(extensionDirPath).mkdirs();
-    FileWriter componentJsonFile = new FileWriter(extensionDirPath + File.separator + "component.json");
+  private static void generateExternalComponentDescriptors(String packageName, List<ExternalComponentInfo> infos)
+      throws IOException, JSONException {
+    StringBuilder sb = new StringBuilder("[");
+    boolean first = true;
+    for (ExternalComponentInfo info : infos) {
+      if (!first) {
+        sb.append(',');
+      } else {
+        first = false;
+      }
+      sb.append(info.descriptor.toString(1));
+    }
+    sb.append(']');
+    String components = sb.toString();
+    String extensionDirPath = externalComponentsDirPath + File.separator + packageName;
+    ensureDirectory(extensionDirPath, "Unable to create extension directory");
+    FileWriter jsonWriter = null;
     try {
-      componentJsonFile.write(componentDescriptor.toString(1));
-      System.out.println("Extensions : Successfully created "+ componentDescriptor.get("type") +" json file");
-    } catch (IOException e) {
+      jsonWriter = new FileWriter(extensionDirPath + File.separator + "components.json");
+      jsonWriter.write(components);
+    } catch(IOException e) {
       e.printStackTrace();
     } finally {
-      componentJsonFile.flush();
-      componentJsonFile.close();
+      if (jsonWriter != null) {
+        jsonWriter.close();
+      }
+    }
+    // Write legacy format to transition developers
+    try {
+      jsonWriter = new FileWriter(extensionDirPath + File.separator + "component.json");
+      jsonWriter.write(infos.get(0).descriptor.toString(1));
+    } catch(IOException e) {
+      e.printStackTrace();
+    } finally {
+      if (jsonWriter != null) {
+        jsonWriter.close();
+      }
     }
   }
 
 
-
-  private static void generateExternalComponentBuildFiles(JSONObject componentBuildInfo) throws IOException {
-    String componentType = componentBuildInfo.get("type").toString();
-    String extensionDirPath = externalComponentsDirPath + File.separator + componentType;
-    String extensionTempDirPath = externalComponentsTempDirPath + File.separator + componentType;
+  private static void generateExternalComponentBuildFiles(String packageName, List<ExternalComponentInfo> extensions) throws IOException {
+    String extensionDirPath = externalComponentsDirPath + File.separator + packageName;
+    String extensionTempDirPath = externalComponentsTempDirPath + File.separator + packageName;
     String  extensionFileDirPath = extensionDirPath + File.separator + "files";
-    JSONArray librariesNeeded = componentBuildInfo.getJSONArray("libraries");
-    String extensionClassPath = componentType.substring(0,componentType.lastIndexOf(".")).replace('.', File.separatorChar);
-    String extensionTempClassDirPath = extensionTempDirPath + File.separator + extensionClassPath;
-    new File(extensionTempClassDirPath).mkdirs();
-    copyRelatedExternalClasses(androidRuntimeClassDirPath, componentType, extensionTempClassDirPath);
+    copyRelatedExternalClasses(androidRuntimeClassDirPath, packageName, extensionTempDirPath);
 
-    for (int j = 0; j < librariesNeeded.length(); ++j) { // Copy Library files for Unjar and Jaring
-      String library = librariesNeeded.getString(j);
-      copyFile(buildServerClassDirPath + File.separator + library,
-          extensionTempDirPath + File.separator + library);
+    JSONArray buildInfos = new JSONArray();
+    for (ExternalComponentInfo info : extensions) {
+      JSONObject componentBuildInfo = info.buildInfo;
+      try {
+        JSONArray librariesNeeded = componentBuildInfo.getJSONArray("libraries");
+        for (int j = 0; j < librariesNeeded.length(); ++j) {
+          // Copy Library files for Unjar and Jaring
+          String library = librariesNeeded.getString(j);
+          copyFile(buildServerClassDirPath + File.separator + library,
+              extensionTempDirPath + File.separator + library);
+        }
+        //empty the libraries meta-data to avoid redundancy
+        componentBuildInfo.put("libraries", new JSONArray());
+      } catch(JSONException e) {
+        // bad
+        throw new IllegalStateException("Unexpected JSON exception parsing simple_components.json",
+            e);
+      }
+      buildInfos.put(componentBuildInfo);
     }
-
-//      copyFile(externalComponentsTempDirPath + File.separator + componentType + ".jar",
-//          componentFileDirectory + File.separator + "AndroidRuntime.jar");
-    componentBuildInfo.put("libraries", new JSONArray()); //empty the libraries meta-data to avoid redundancy
 
     // Create component_build_info.json
-    new File(extensionFileDirPath).mkdirs();
-    FileWriter extensionBuildInfoFile = new FileWriter(extensionFileDirPath + File.separator + "component_build_info.json");
+    ensureDirectory(extensionFileDirPath, "Unable to create path for component_build_info.json");
+    FileWriter extensionBuildInfoFile = null;
     try {
-      extensionBuildInfoFile.write(componentBuildInfo.toString(1));
-      System.out.println("Extensions : Successfully created " + componentType + " build info file");
+      extensionBuildInfoFile = new FileWriter(extensionFileDirPath + File.separator + "component_build_infos.json");
+      extensionBuildInfoFile.write(buildInfos.toString());
+      System.out.println("Extensions : Successfully created " + packageName + " build info file");
 
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
-      extensionBuildInfoFile.flush();
-      extensionBuildInfoFile.close();
+      if (extensionBuildInfoFile != null) {
+        extensionBuildInfoFile.flush();
+        extensionBuildInfoFile.close();
+      }
+    }
+    // Write out legacy component_build_info.json to transition developers
+    try {
+      extensionBuildInfoFile = new FileWriter(extensionFileDirPath + File.separator + "component_build_info.json");
+      extensionBuildInfoFile.write(buildInfos.get(0).toString());
+    } catch (IOException|JSONException e) {
+      e.printStackTrace();
+    } finally {
+      if (extensionBuildInfoFile != null) {
+        extensionBuildInfoFile.close();
+      }
     }
   }
 
+  private static void copyIcon(String packageName, JSONObject componentDescriptor)
+      throws IOException, JSONException {
+    String icon = componentDescriptor.getString("iconName");
+    if (icon.equals("") || icon.startsWith("http:") || icon.startsWith("https:")) {
+      // Icon will be loaded from the web
+      return;
+    }
+    String packagePath = packageName.replace('.', File.separatorChar);
+    File sourceDir = new File(externalComponentsDirPath + File.separator + ".." + File.separator + ".." + File.separator + "src" + File.separator + packagePath);
+    File image = new File(sourceDir, icon);
+    if (image.exists()) {
+      File dstIcon = new File(externalComponentsDirPath + File.separator + packageName + File.separator + icon);
+      ensureDirectory(dstIcon.getParent(), "Unable to create directory " + dstIcon.getParent());
+      System.out.println("Extensions : " + "Copying file " + image.getAbsolutePath());
+      copyFile(image.getAbsolutePath(), dstIcon.getAbsolutePath());
+    } else {
+      System.out.println("Extensions : Skipping missing icon " + icon);
+    }
+  }
 
-  private static void generateExternalComponentOtherFiles(JSONObject componentDescriptor) throws IOException {
+  private static void copyAssets(String packageName, JSONObject componentDescriptor)
+      throws IOException, JSONException {
+    JSONArray assets = componentDescriptor.optJSONArray("assets");
+    if (assets == null) {
+      return;
+    }
 
-    String componentType = componentDescriptor.get("type").toString();
-    String extensionDirPath = externalComponentsDirPath + File.separator + componentType;
+    // Get asset source directory
+    String packagePath = packageName.replace('.', File.separatorChar);
+    File sourceDir = new File(externalComponentsDirPath + File.separator + ".." + File.separator + ".." + File.separator + "src" + File.separator + packagePath);
+    File assetSrcDir = new File(sourceDir, "assets");
+    if (!assetSrcDir.exists() || !assetSrcDir.isDirectory()) {
+      return;
+    }
+
+    // Get asset dest directory
+    File destDir = new File(externalComponentsDirPath + File.separator + packageName + File.separator);
+    File assetDestDir = new File(destDir, "assets");
+    ensureFreshDirectory(assetDestDir.getPath(),
+        "Unable to delete the assets directory for the extension.");
+
+    // Copy assets
+    for (int i = 0; i < assets.length(); i++) {
+      String asset = assets.getString(i);
+      if (!asset.isEmpty()) {
+        if (!copyFile(assetSrcDir.getAbsolutePath() + File.separator + asset,
+            assetDestDir.getAbsolutePath() + File.separator + asset)) {
+          throw new IllegalStateException("Unable to copy asset to destination.");
+        }
+      }
+    }
+  }
+
+  private static void generateExternalComponentOtherFiles(String packageName) throws IOException {
+    String extensionDirPath = externalComponentsDirPath + File.separator + packageName;
 
     // Create extension.properties
     StringBuilder extensionPropertiesString = new StringBuilder();
@@ -177,7 +272,7 @@ public class ExternalComponentGenerator {
     FileWriter extensionPropertiesFile = new FileWriter(extensionDirPath + File.separator + "extension.properties");
     try {
       extensionPropertiesFile.write(extensionPropertiesString.toString());
-      System.out.println("Extensions : Successfully created " + componentType + " extension properties file");
+      System.out.println("Extensions : Successfully created " + packageName + " extension properties file");
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
@@ -196,22 +291,6 @@ public class ExternalComponentGenerator {
     byte[] encoded = Files.readAllBytes(Paths.get(path));
     return new String(encoded, encoding);
   }
-
-  /**
-  * Read external_components.txt (a file containing the type of the extension)
-  * and returns an ArrayList containing those components
-  *
-  * @param fileName the path of the file to be read
-  */
-  private static ArrayList<String> fileToArray(String fileName) throws FileNotFoundException{
-    Scanner sc = new Scanner(new File(fileName));
-    ArrayList<String> components = new ArrayList<String>();
-    while (sc.hasNextLine()) {
-      components.add(sc.nextLine());
-    }
-    return components;
-  }
-
 
   /**
    * Copy one file to another. If destination file does not exist, it is created.
@@ -243,20 +322,28 @@ public class ExternalComponentGenerator {
    * Copy a compiled classes related to a given extension in his package folder
    *
    * @param srcPath the folder in which to check compiled classes
-   * @param componentType the classpath of the extension
+   * @param extensionPackage the classpath of the extension
    * @param destPath where the compiled classes will be copied
    */
-  private static void copyRelatedExternalClasses(final String srcPath, String componentType, final String destPath) throws IOException {
+  private static void copyRelatedExternalClasses(final String srcPath, String extensionPackage,
+                                                 final String destPath) throws IOException {
     File srcFolder = new File(srcPath);
-    for (File fileEntry : srcFolder.listFiles()){
+    File[] files = srcFolder.listFiles();
+    if (files == null) {
+      return;
+    }
+    for (File fileEntry : files){
       if (fileEntry.isFile()) {
-        if (isRelatedExternalClass(fileEntry.getAbsolutePath(), componentType)) {
-          System.out.println("Extensions : " + "Copying file " + getClassPackage(fileEntry.getAbsolutePath()).replace(".", File.separator)
+        if (isRelatedExternalClass(fileEntry.getAbsolutePath(), extensionPackage)) {
+          System.out.println("Extensions : " + "Copying file " +
+              getClassPackage(fileEntry.getAbsolutePath()).replace(".", File.separator)
               + File.separator + fileEntry.getName());
           copyFile(fileEntry.getAbsolutePath(), destPath + File.separator + fileEntry.getName());
         }
       } else if (fileEntry.isDirectory()) {
-        copyRelatedExternalClasses(fileEntry.getAbsolutePath(), componentType, destPath);
+        String newDestPath=destPath + fileEntry.getAbsolutePath().substring(srcFolder.getAbsolutePath().length());
+        ensureDirectory(newDestPath, "Unable to create temporary path for extension build");
+        copyRelatedExternalClasses(fileEntry.getAbsolutePath(), extensionPackage, newDestPath);
       }
     }
   }
@@ -266,56 +353,62 @@ public class ExternalComponentGenerator {
    * Current implementation returns true for all files in the same package as that of the external component
    * A better implementation is possible but might be more complex
    * @param testClassAbsolutePath absolute path of the class file
-   * @param externalComponentType classpath of the external component
-   * @return
+   * @param extensionPackage package of the external component
+   * @return {@code true} if the Java class file at {@code testClassAbsolutePath} is a member of
+   * {@code extensionPackage}, {@code false} otherwise
    */
-  private static boolean isRelatedExternalClass(final String testClassAbsolutePath, final String externalComponentType ) {
-    String componentName = externalComponentType.substring(externalComponentType.lastIndexOf('.') + 1);
-    String componentPath = externalComponentType.replace(".", File.separator);
-    String componentPackagePath = componentPath.substring(0, componentPath.lastIndexOf(File.separator));
+  private static boolean isRelatedExternalClass(final String testClassAbsolutePath, final String extensionPackage ) {
+    if (!testClassAbsolutePath.endsWith(".class")) {  // Ignore things that aren't class files...
+      return false;
+    }
+    String componentPackagePath = extensionPackage.replace(".", File.separator);
 
     String testClassPath = getClassPackage(testClassAbsolutePath);
-    testClassPath.replace(".", File.separator);
-    if (testClassPath.startsWith(componentPackagePath)) {
-      return true;
-    }
-    return false;
+    testClassPath = testClassPath.replace(".", File.separator);
+    return testClassPath.startsWith(componentPackagePath);
   }
 
   private static String getClassPackage(String classAbsolutePath) {
-    String parentPath = "/appinventor/components/build/classes/AndroidRuntime/";
+    String parentPath = androidRuntimeClassDirPath;
+    if (!parentPath.endsWith("/")) {
+      parentPath += "/";
+    }
     parentPath = parentPath.replace("/", File.separator);
     String componentPackage = classAbsolutePath.substring(classAbsolutePath.indexOf(parentPath) + parentPath.length());
     componentPackage = componentPackage.substring(0, componentPackage.lastIndexOf(File.separator));
-    componentPackage.replace(File.separator, ".");
+    componentPackage = componentPackage.replace(File.separator, ".");
     return  componentPackage;
-
   }
 
-  private static JSONObject getComponentDescriptor(String componentType) {
-    JSONObject componentDescriptor = null;
-    for (int i = 0; i < externalComponentDescriptors.size(); ++i) {
-      JSONObject descriptor = externalComponentDescriptors.get(i);
-      if (descriptor.getString("type").equals(componentType)) {
-        componentDescriptor = descriptor;
-        return componentDescriptor;
+  private static boolean deleteRecursively(File dirOrFile) {
+    if (dirOrFile.isFile()) {
+      return dirOrFile.delete();
+    } else {
+      boolean result = true;
+      File[] children = dirOrFile.listFiles();
+      if (children != null) {
+        for (File child : children) {
+          result = result && deleteRecursively(child);
+        }
       }
+      return result && dirOrFile.delete();
     }
-    return componentDescriptor;
   }
 
-  private static JSONObject getComponentBuildInfo(String componentType) {
-    JSONObject componentBuildInfo = null;
-    for (int i = 0; i < externalComponentBuildInfos.size(); ++i) {
-      JSONObject buildInfo = externalComponentBuildInfos.get(i);
-      if (buildInfo.getString("type").equals(componentType)) {
-        componentBuildInfo = buildInfo;
-        return componentBuildInfo;
-      }
+  private static void ensureFreshDirectory(String path, String errorMessage) throws IOException {
+    File file = new File(path);
+    if (file.exists() && !deleteRecursively(file)) {
+      throw new IOException(errorMessage);
     }
-    return componentBuildInfo;
+    if (!file.mkdirs()) {
+      throw new IOException(errorMessage);
+    }
   }
 
-
+  private static void ensureDirectory(String path, String errorMessage) throws IOException {
+    File file = new File(path);
+    if (!file.exists() && !file.mkdirs()) {
+      throw new IOException(errorMessage);
+    }
+  }
 }
-

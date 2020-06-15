@@ -1,25 +1,24 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 // This work is licensed under a Creative Commons Attribution 3.0 Unported License.
 
 package com.google.appinventor.components.runtime.util;
+import android.os.Looper;
 import com.google.appinventor.components.runtime.ReplForm;
+
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Properties;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URL;
-import java.net.URLConnection;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -28,9 +27,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
-import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.AsynchUtil;
-
 import kawa.standard.Scheme;
 import gnu.expr.Language;
 
@@ -38,6 +34,9 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AppInvHTTPD extends NanoHTTPD {
 
@@ -119,6 +118,7 @@ public class AppInvHTTPD extends NanoHTTPD {
 
 
     if (uri.equals("/_newblocks")) { // Handle AJAX calls from the newblocks code
+      adoptMainThreadClassLoader();
       String inSeq = parms.getProperty("seq", "0");
       int iseq = Integer.parseInt(inSeq);
       String blockid = parms.getProperty("blockid");
@@ -182,7 +182,6 @@ public class AppInvHTTPD extends NanoHTTPD {
       Log.d(LOG_TAG, "To Eval: " + code);
 
       Response res;
-      form.loadComponents();  // load all components before Eval
       try {
         // Don't evaluate a simple "#f" which is used by the poller
         if (input_code.equals("#f")) {
@@ -249,78 +248,8 @@ public class AppInvHTTPD extends NanoHTTPD {
           });
       }
       return (res);
-    } else if (uri.equals("/_update") || uri.equals("/_install")) { // Install a package, including a new companion
-      String url = parms.getProperty("url", "");
-      String inMac = parms.getProperty("mac", "");
-      String compMac;
-      if (!url.equals("") && (hmacKey != null) && !inMac.equals("")) {
-        try {
-          SecretKeySpec key = new SecretKeySpec(hmacKey, "RAW");
-          Mac hmacSha1 = Mac.getInstance("HmacSHA1");
-          hmacSha1.init(key);
-          byte [] tmpMac = hmacSha1.doFinal(url.getBytes());
-          StringBuffer sb = new StringBuffer(tmpMac.length * 2);
-          Formatter formatter = new Formatter(sb);
-          for (byte b : tmpMac)
-            formatter.format("%02x", b);
-          compMac = sb.toString();
-        } catch (Exception e) {
-          Log.e(LOG_TAG, "Error verifying update", e);
-          form.dispatchErrorOccurredEvent(form, "AppInvHTTPD",
-            ErrorMessages.ERROR_REPL_SECURITY_ERROR, "Exception working on HMAC for update");
-          Response res = new Response(HTTP_OK, MIME_JSON, "{\"status\" : \"BAD\", \"message\" : \"Security Error: Exception processing MAC\"}");
-          res.addHeader("Access-Control-Allow-Origin", "*");
-          res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
-          res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
-          res.addHeader("Allow", "POST,OPTIONS,GET,HEAD,PUT");
-          return(res);
-        }
-        Log.d(LOG_TAG, "Incoming Mac (update) = " + inMac);
-        Log.d(LOG_TAG, "Computed Mac (update) = " + compMac);
-        if (!inMac.equals(compMac)) {
-          Log.e(LOG_TAG, "Hmac does not match");
-          form.dispatchErrorOccurredEvent(form, "AppInvHTTPD",
-            ErrorMessages.ERROR_REPL_SECURITY_ERROR, "Invalid HMAC (update)");
-          Response res = new Response(HTTP_OK, MIME_JSON, "{\"status\" : \"BAD\", \"message\" : \"Security Error: Invalid MAC\"}");
-          res.addHeader("Access-Control-Allow-Origin", "*");
-          res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
-          res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
-          res.addHeader("Allow", "POST,OPTIONS,GET,HEAD,PUT");
-          return(res);
-        }
-        doPackageUpdate(url);
-        Response res = new Response(HTTP_OK, MIME_JSON, "{\"status\" : \"OK\", \"message\" : \"Update Should Happen\"}");
-        res.addHeader("Access-Control-Allow-Origin", "*");
-        res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
-        res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
-        res.addHeader("Allow", "POST,OPTIONS,GET,HEAD,PUT");
-        return (res);
-      } else {
-          Response res = new Response(HTTP_OK, MIME_JSON, "{\"status\" : \"BAD\", \"message\" : \"Missing Parameters\"}");
-          res.addHeader("Access-Control-Allow-Origin", "*");
-          res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
-          res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
-          res.addHeader("Allow", "POST,OPTIONS,GET,HEAD,PUT");
-          return(res);
-      }
-    } else if (uri.equals("/_package")) { // Handle installing a package
-      Response res;
-      String packageapk = parms.getProperty("package", null);
-      if (packageapk == null) {
-        res = new Response(HTTP_OK, MIME_PLAINTEXT, "NOT OK"); // Should really return an error code, but we don't look at it yet
-        return (res);
-      }
-      Log.d(LOG_TAG, rootDir + "/" + packageapk);
-      Intent intent = new Intent(Intent.ACTION_VIEW);
-      Uri packageuri = Uri.fromFile(new File(rootDir + "/" + packageapk));
-      intent.setDataAndType(packageuri, "application/vnd.android.package-archive");
-      form.startActivity(intent);
-      res = new Response(HTTP_OK, MIME_PLAINTEXT, "OK");
-      res.addHeader("Access-Control-Allow-Origin", "*");
-      res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
-      res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
-      res.addHeader("Allow", "POST,OPTIONS,GET,HEAD,PUT");
-      return (res);
+    } else if (uri.equals("/_extensions")) {
+      return processLoadExtensionsRequest(parms);
     }
 
     if (method.equals("PUT")) { // Asset File Upload for newblocks
@@ -344,7 +273,7 @@ public class AppInvHTTPD extends NanoHTTPD {
             parentFileTo.mkdirs();
           }
           if (!fileFrom.renameTo(fileTo)) { // First try rename
-            copyFile(fileFrom, fileTo);
+            error = copyFile(fileFrom, fileTo);
             fileFrom.delete();  // Remove temp file
           }
         } else {
@@ -357,7 +286,7 @@ public class AppInvHTTPD extends NanoHTTPD {
         error = true;
       }
       if (error) {
-        Response res = new Response(HTTP_OK, MIME_PLAINTEXT, "NOTOK");
+        Response res = new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, "NOTOK");
         res.addHeader("Access-Control-Allow-Origin", "*");
         res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
         res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
@@ -373,54 +302,10 @@ public class AppInvHTTPD extends NanoHTTPD {
       }
     }
 
-    Enumeration e = header.propertyNames();
-    while ( e.hasMoreElements())
-      {
-        String value = (String)e.nextElement();
-        Log.d(LOG_TAG,  "  HDR: '" + value + "' = '" +
-                       header.getProperty( value ) + "'" );
-      }
-    e = parms.propertyNames();
-    while ( e.hasMoreElements())
-      {
-        String value = (String)e.nextElement();
-        Log.d(LOG_TAG,  "  PRM: '" + value + "' = '" +
-                       parms.getProperty( value ) + "'" );
-      }
-    e = files.propertyNames();
-    while ( e.hasMoreElements())
-      {
-        String fieldname = (String)e.nextElement();
-        String tempLocation = (String) files.getProperty(fieldname);
-        String filename = (String) parms.getProperty(fieldname);
-        if (filename.startsWith("..") || filename.endsWith("..")
-            || filename.indexOf("../") >= 0) {
-          Log.d(LOG_TAG, " Ignoring invalid filename: " + filename);
-          filename = null;
-        }
-        File fileFrom = new File(tempLocation);
-        if (filename == null) {
-          fileFrom.delete(); // Cleanup our mess (remove temp file).
-        } else {
-          File fileTo = new File(rootDir + "/" + filename);
-          if (!fileFrom.renameTo(fileTo)) { // First try rename, otherwise we have to copy
-            copyFile(fileFrom, fileTo);
-            fileFrom.delete();  // Cleanup temp file
-          }
-        }
-        Log.d(LOG_TAG,  " UPLOADED: '" + filename + "' was at '" + tempLocation + "'");
-        Response res = new Response(HTTP_OK, MIME_PLAINTEXT, "OK");
-        res.addHeader("Access-Control-Allow-Origin", "*");
-        res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
-        res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
-        res.addHeader("Allow", "POST,OPTIONS,GET,HEAD,PUT");
-        return(res);
-      }
-
     return serveFile( uri, header, rootDir, true );
   }
 
-  private void copyFile(File infile, File outfile) {
+  private boolean copyFile(File infile, File outfile) {
     try {
       FileInputStream in = new FileInputStream(infile);
       FileOutputStream out = new FileOutputStream(outfile);
@@ -433,9 +318,80 @@ public class AppInvHTTPD extends NanoHTTPD {
 
       in.close();
       out.close();
+      return false;             // No Error
     } catch (IOException e) {
       e.printStackTrace();
+      return true;              // Oops
     }
+  }
+
+  private Response processLoadExtensionsRequest(Properties parms) {
+    try {
+      JSONArray array = new JSONArray(parms.getProperty("extensions", "[]"));
+      List<String> extensionsToLoad = new ArrayList<String>();
+      for (int i = 0; i < array.length(); i++) {
+        String extensionName = array.optString(i);
+        if (extensionName != null) {
+          extensionsToLoad.add(extensionName);
+        } else {
+          return error("Invalid JSON content at index " + i);
+        }
+      }
+      try {
+        form.loadComponents(extensionsToLoad);
+      } catch (Exception e) {
+        return error(e);
+      }
+      return message("OK");
+    } catch (JSONException e) {
+      return error(e);
+    }
+  }
+
+  /**
+   * Updates the current thread's context class loader to match the main thread's context class
+   * loader. This is used to ensure that all threads see the same classes (the "same" class loaded
+   * by two different class loaders are not identical from the VMs point of view). This ensures
+   * that Scheme code spawned by AppInvHTTPD can find extensions previously loaded by another
+   * thread.
+   */
+  private void adoptMainThreadClassLoader() {
+    ClassLoader mainClassLoader = Looper.getMainLooper().getThread().getContextClassLoader();
+    Thread myThread = Thread.currentThread();
+    if (myThread.getContextClassLoader() != mainClassLoader) {
+      myThread.setContextClassLoader(mainClassLoader);
+    }
+  }
+
+  private Response message(String txt) {
+    return addHeaders(new Response(HTTP_OK, MIME_PLAINTEXT, txt));
+  }
+
+  private Response json(String json) {
+    return addHeaders(new Response(HTTP_OK, MIME_JSON, json));
+  }
+
+  private Response error(String msg) {
+    JSONObject result = new JSONObject();
+    try {
+      result.put("status", "BAD");
+      result.put("message", msg);
+    } catch(JSONException e) {
+      Log.wtf(LOG_TAG, "Unable to write basic JSON content", e);
+    }
+    return addHeaders(new Response(HTTP_OK, MIME_JSON, result.toString()));
+  }
+
+  private Response error(Throwable t) {
+    return error(t.toString());
+  }
+
+  private Response addHeaders(Response res) {
+    res.addHeader("Access-Control-Allow-Origin", "*");
+    res.addHeader("Access-Control-Allow-Headers", "origin, content-type");
+    res.addHeader("Access-Control-Allow-Methods", "POST,OPTIONS,GET,HEAD,PUT");
+    res.addHeader("Allow", "POST,OPTIONS,GET,HEAD,PUT");
+    return res;
   }
 
   /**
@@ -445,10 +401,6 @@ public class AppInvHTTPD extends NanoHTTPD {
   public static void setHmacKey(String inputKey) {
     hmacKey = inputKey.getBytes();
     seq = 1;              // Initialize this now
-  }
-
-  private void doPackageUpdate(final String inurl) {
-    PackageInstaller.doPackageInstall(form, inurl);
   }
 
   public void resetSeq() {

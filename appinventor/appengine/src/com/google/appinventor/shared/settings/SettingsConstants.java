@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2017 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -26,6 +26,9 @@ public class SettingsConstants {
   // disable someone's account. The URL can be user specific in order to deliver
   // a particular message to a particular user.
   public static final String DISABLED_USER_URL = "DisabledUserUrl";
+  public static final String USER_LAST_LOCALE = "LastLocale";
+  public static final String USER_DYSLEXIC_FONT = "DyslexicFont";
+  public static final String USER_AUTOLOAD_PROJECT = "AutoloadLastProject";
 
   public static final String SPLASH_SETTINGS = "SplashSettings";
 
@@ -43,6 +46,7 @@ public class SettingsConstants {
   // Project settings
   public static final String YOUNG_ANDROID_SETTINGS_ICON = "Icon";
   public static final String YOUNG_ANDROID_SETTINGS_SHOW_HIDDEN_COMPONENTS = "ShowHiddenComponents";
+  public static final String YOUNG_ANDROID_SETTINGS_SCREEN_CHECKBOX_STATE_MAP = "ScreenCheckboxStateMap";
   public static final String YOUNG_ANDROID_SETTINGS_PHONE_TABLET = "PhoneTablet";
   public static final String YOUNG_ANDROID_SETTINGS_VERSION_CODE = "VersionCode";
   public static final String YOUNG_ANDROID_SETTINGS_VERSION_NAME = "VersionName";
@@ -51,4 +55,18 @@ public class SettingsConstants {
   public static final String YOUNG_ANDROID_SETTINGS_SIZING = "Sizing";
   public static final String YOUNG_ANDROID_SETTINGS_APP_NAME = "AppName";
   public static final String YOUNG_ANDROID_SETTINGS_SHOW_LISTS_AS_JSON = "ShowListsAsJson";
+  public static final String YOUNG_ANDROID_SETTINGS_TUTORIAL_URL = "TutorialURL";
+  public static final String YOUNG_ANDROID_SETTINGS_BLOCK_SUBSET = "BlocksToolkit";
+  public static final String YOUNG_ANDROID_SETTINGS_ACTIONBAR = "ActionBar";
+  public static final String YOUNG_ANDROID_SETTINGS_PRIMARY_COLOR = "PrimaryColor";
+  public static final String YOUNG_ANDROID_SETTINGS_PRIMARY_COLOR_DARK = "PrimaryColorDark";
+  public static final String YOUNG_ANDROID_SETTINGS_ACCENT_COLOR = "AccentColor";
+  public static final String YOUNG_ANDROID_SETTINGS_THEME = "Theme";
+
+  /**
+   * Settings for the Blocks editor.
+   */
+  public static final String BLOCKS_SETTINGS = "BlocksSettings";
+  public static final String GRID_ENABLED = "Grid";
+  public static final String SNAP_ENABLED = "Snap";
 }

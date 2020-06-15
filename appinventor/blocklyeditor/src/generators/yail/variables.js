@@ -90,7 +90,7 @@ Blockly.Yail['getVariableCommandAndName'] = function(name){
   var pair = Blockly.unprefixName(name);
   var prefix = pair[0];
   var unprefixedName = pair[1];
-  if (prefix === Blockly.globalNamePrefix) {
+  if (prefix === Blockly.Msg.LANG_VARIABLES_GLOBAL_PREFIX || prefix === Blockly.GLOBAL_KEYWORD) {
     name = Blockly.Yail.YAIL_GLOBAL_VAR_TAG + unprefixedName;
     command = Blockly.Yail.YAIL_GET_VARIABLE;
   } else {
@@ -106,7 +106,7 @@ Blockly.Yail['setVariableCommandAndName'] = function(name){
   var pair = Blockly.unprefixName(name);
   var prefix = pair[0];
   var unprefixedName = pair[1];
-  if (prefix === Blockly.globalNamePrefix) {
+  if (prefix === Blockly.Msg.LANG_VARIABLES_GLOBAL_PREFIX || prefix === Blockly.GLOBAL_KEYWORD) {
     name = Blockly.Yail.YAIL_GLOBAL_VAR_TAG + unprefixedName;
     command = Blockly.Yail.YAIL_SET_VARIABLE;
   } else {
@@ -136,14 +136,15 @@ Blockly.Yail['local_variable'] = function(block,isExpression) {
   // [lyn, 01/15/2013] Added to fix bug in local declaration expressions:
   if(isExpression){
     if(!block.getInputTargetBlock("RETURN")){
-      code += Blockly.Yail.YAIL_SPACER +  "0";
+      code += Blockly.Yail.YAIL_SPACER + "0";
     } else {
-      code += Blockly.Yail.YAIL_SPACER +  Blockly.Yail.valueToCode(block, 'RETURN', Blockly.Yail.ORDER_NONE);
+      code += Blockly.Yail.YAIL_SPACER + Blockly.Yail.valueToCode(block, 'RETURN', Blockly.Yail.ORDER_NONE);
     }
   } else {
-    code += Blockly.Yail.YAIL_SPACER +  Blockly.Yail.statementToCode(block, 'STACK', Blockly.Yail.ORDER_NONE);
+    code += Blockly.Yail.YAIL_SPACER +
+      (Blockly.Yail.statementToCode(block, 'STACK', Blockly.Yail.ORDER_NONE) || Blockly.Yail.YAIL_FALSE);
   }
-  code += Blockly.Yail.YAIL_SPACER +  Blockly.Yail.YAIL_CLOSE_COMBINATION;
+  code += Blockly.Yail.YAIL_SPACER + Blockly.Yail.YAIL_CLOSE_COMBINATION;
   if(!isExpression){
     return code;
   } else {

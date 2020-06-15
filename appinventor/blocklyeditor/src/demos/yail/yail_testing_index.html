@@ -9,7 +9,7 @@
 <title> Yail Comparison Test </title>
 
 <script type="text/javascript" src="../../../../lib/closure-library/closure/goog/base.js"></script>
-<script type="text/javascript" src="../../../../build/blocklyeditor/blockly-all.js"></script>
+<script type="text/javascript" src="../../../../build/blocklyeditor/blockly-all.js" charset="utf-8"></script>
 <script type="text/javascript" src="../../../../build/blocklyeditor/component-types.js"></script>
 
 <script type ="text/javascript">
@@ -41,7 +41,7 @@ function start() {
 
   // --- Begin Blockly Initialization
 
-  Blockly.inject(document.body);
+  Blockly.mainWorkspace = Blockly.BlocklyEditor.create(document.body, '', /*readonly*/ false, /*rtl*/ false);
 
   // [lyn, 2015/01/02] Logging interferes with equality tests.
   Blockly.Versioning.setLogging(false);
@@ -50,15 +50,9 @@ function start() {
   // so I've redefined it to avoid errors.
   Blockly.TypeBlock.hide = function () {};
 
-  Blockly.Drawer.createDom();
-  Blockly.Drawer.init();
-
-  Blockly.BlocklyEditor.formName_ = formName;
-
   Blockly.showPrefixToUser = true;
   Blockly.usePrefixInYail = false;
 
-  Blockly.globalNamePrefix = "global"; // For names introduced by global variable declarations
   Blockly.procedureParameterPrefix = "input"; // For names introduced by procedure/function declarations
   Blockly.handlerParameterPrefix = "input"; // For names introduced by event handlers
   Blockly.localNamePrefix = "local"; // For names introduced by local variable declarations
@@ -84,14 +78,16 @@ function start() {
     };
 
   Blockly.prefixGlobalMenuName = function (name) {
-    return Blockly.globalNamePrefix + Blockly.menuSeparator + name;
+    return Blockly.Msg.LANG_VARIABLES_GLOBAL_PREFIX + Blockly.menuSeparator + name;
   };
 
   // Return a list of (1) prefix (if it exists, "" if not) and (2) unprefixed name
   Blockly.unprefixName = function (name) {
-    if (name.indexOf(Blockly.globalNamePrefix + Blockly.menuSeparator) == 0) {
+    if (name.indexOf(Blockly.Msg.LANG_VARIABLES_GLOBAL_PREFIX + Blockly.menuSeparator) == 0) {
       // Globals always have prefix, regardless of flags. Handle these specially
-      return [Blockly.globalNamePrefix, name.substring(Blockly.globalNamePrefix.length + Blockly.menuSeparator.length)];
+      return [Blockly.Msg.LANG_VARIABLES_GLOBAL_PREFIX,
+              name.substring(Blockly.Msg.LANG_VARIABLES_GLOBAL_PREFIX.length +
+                      Blockly.menuSeparator.length)];
     } else if (!Blockly.showPrefixToUser) {
       return ["", name];
     } else {
@@ -179,7 +175,7 @@ function start() {
     document.getElementById('formFile').addEventListener('change', handleLoadForm, false);
     document.getElementById('blocksFile').addEventListener('change', handleLoadBlocks, false);
     initComponentTypes();
-    Blockly.ComponentTypes.populateTypes();
+    Blockly.mainWorkspace.getComponentDatabase().populateTypes(componentTypeJson);
 }
 
 function initComponentTypes() {
@@ -240,7 +236,7 @@ function getFormComponents(formJson) {
 }
 
 function defineComponents(componentJsonObj) {
-    Blockly.Component.add(componentJsonObj.$Name, componentJsonObj.Uuid);
+    Blockly.mainWorkspace.addComponent(componentJsonObj.Uuid, componentJsonObj.$Name, componentJsonObj.$Type);
 //    Blockly.Component.add(JSON.stringify(componentTypes[componentJsonObj.$Type]),
 //            componentJsonObj.$Name, componentJsonObj.Uuid);
     if (componentJsonObj.$Components) {
@@ -264,13 +260,13 @@ function toXml() {
 }
 
 function toAppYail() {
-    var code = Blockly.Yail.getFormYail(formJson, "fakepackagename", false);
+    var code = Blockly.Yail.getFormYail(formJson, "fakepackagename", false, Blockly.mainWorkspace);
     setOutput(code);
     return code;
 }
 
 function toReplYail() {
-    var code = Blockly.Yail.getFormYail(formJson, "fakepackagename", true);
+    var code = Blockly.Yail.getFormYail(formJson, "fakepackagename", true, Blockly.mainWorkspace);
     setOutput(code);
     return code;
 }
@@ -462,6 +458,66 @@ function doTheyMatch(expected, given) {
     }
 
     return false;
+}
+
+/**
+ * Creates a Blockly block of the given type with the given mutation.
+ *
+ * @param {!string} type The type of the block to create, e.g., component_event
+ * @param {?string=} mutation Any mutation information required for the block
+ * @returns {!Blockly.Block} A freshly constructed Blockly block.
+ */
+function blockFromMutation(type, mutation) {
+  mutation = mutation || ''
+  var block_text = "<xml><block type='" + type + "'>" + mutation + "</block></xml>";
+  var block_xml = Blockly.Xml.textToDom(block_text);
+  return Blockly.Xml.domToBlock(block_xml.firstElementChild, Blockly.mainWorkspace);
+}
+
+/**
+ * Gets the rendered name of an event block.
+ *
+ * @param {!Blockly.Block} block An instance of a component_event block
+ * @returns {string} The name shown on the block (after the period)
+ */
+function getEventBlockPresentedName(block) {
+  return block.inputList[0].fieldRow[2].getText().substring(1);  // strip the leading .
+}
+
+/**
+ * Gets the rendered name of a method block.
+ *
+ * @param {!Blockly.Block} block An instance of a component_method block
+ * @returns {string} The name shown on the block (after the period)
+ */
+function getMethodBlockPresentedName(block) {
+  return block.inputList[0].fieldRow[2].getText().substring(1);  // strip the leading .
+}
+
+/**
+ * Gets the rendered name of a property block.
+ *
+ * @param {!Blockly.Block} block An instance of a component_set_get block
+ * @returns {string} The name shown on the block (after the period)
+ */
+function getPropertyBlockPresentedName(block) {
+  if (block.set_or_get === 'get') {
+    return block.inputList[0].fieldRow[3].getText();
+  } else {
+    return block.inputList[0].fieldRow[2].getText();
+  }
+}
+
+/**
+ * Asserts that two values are identical using JavaScript strict comparison.
+ *
+ * @param {*} expected the expected value
+ * @param {*} given the actual value
+ */
+function assertEquals(expected, given) {
+  if (expected !== given) {
+    throw Error('Expected ' + JSON.stringify(expected) + '; Got ' + JSON.stringify(given));
+  }
 }
 
 // Check if a string contains a pattern, ignoring whitespace

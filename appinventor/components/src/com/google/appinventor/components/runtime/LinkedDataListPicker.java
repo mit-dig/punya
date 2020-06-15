@@ -1,5 +1,7 @@
 package com.google.appinventor.components.runtime;
 
+import com.google.appinventor.components.annotations.UsesActivities;
+import com.google.appinventor.components.annotations.androidmanifest.ActivityElement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,6 +40,11 @@ import android.util.Log;
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 @UsesLibraries(libraries = "xercesImpl.jar," + "slf4j-android.jar," + 
     "jena-iri.jar," + "jena-core.jar," + "jena-arq.jar")
+@UsesActivities(activities = {
+    @ActivityElement(name = "com.google.appinventor.components.runtime.SWListActivity",
+        configChanges = "orientation|keyboardHidden",
+        screenOrientation = "behind")
+})
 public class LinkedDataListPicker extends Picker implements ActivityResultListener, Deleteable, LDComponent {
 
   private static final String LOG_TAG = LinkedDataListPicker.class.getSimpleName();

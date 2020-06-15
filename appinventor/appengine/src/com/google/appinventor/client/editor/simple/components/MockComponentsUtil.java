@@ -1,14 +1,11 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2020 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client.editor.simple.components;
 
-// import com.google.gwt.event.dom.client.LoadEvent;
-// import com.google.gwt.event.dom.client.LoadHandler;
-import com.google.gwt.event.shared.GwtEvent.Type;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Timer;
@@ -41,13 +38,29 @@ public final class MockComponentsUtil {
   }
 
   /**
+   * Clears the background color of a widget to its default by CSS rules.
+   *
+   * @param widget  widget to remove the background color for
+   */
+  static void resetWidgetBackgroundColor(Widget widget) {
+    Element el = widget.getElement();
+    if (el != null) {
+      el.getStyle().clearBackgroundColor();
+    }
+  }
+
+  /**
    * Sets the background image for the given widget.
    *
    * @param widget  widget to change background image for
    * @param image  URL
    */
   static void setWidgetBackgroundImage(Widget widget, String image) {
-    DOM.setStyleAttribute(widget.getElement(), "backgroundImage", "url(" + image + ')');
+    if (image.isEmpty()) {
+      DOM.setStyleAttribute(widget.getElement(), "backgroundImage", "none");
+    } else {
+      DOM.setStyleAttribute(widget.getElement(), "backgroundImage", "url(" + image + ')');
+    }
     DOM.setStyleAttribute(widget.getElement(), "backgroundRepeat", "no-repeat");
     DOM.setStyleAttribute(widget.getElement(), "backgroundPosition", "center");
     DOM.setStyleAttribute(widget.getElement(), "backgroundSize", "100% 100%");
@@ -111,6 +124,18 @@ public final class MockComponentsUtil {
       DOM.setStyleAttribute(widget.getElement(), "color", "transparent");
     } else {
       DOM.setStyleAttribute(widget.getElement(), "color", "#" + getHexString(color, 6));
+    }
+  }
+
+  /**
+   * Clears the text color of a widget to its default by CSS rules
+   *
+   * @param widget  widget to remove the text color for
+   */
+  static void resetWidgetTextColor(Widget widget) {
+    Element el = widget.getElement();
+    if (el != null) {
+      el.getStyle().clearColor();
     }
   }
 
@@ -252,16 +277,23 @@ public final class MockComponentsUtil {
    *         0 and height at index 1.
    */
   static String[] clearSizeStyle(Widget w) {
-    Element element = w.getElement();
+    return clearSizeStyle(w.getElement());
+  }
+
+  static String[] clearSizeStyle(Element element) {
     String widthStyle = DOM.getStyleAttribute(element, "width");
     String heightStyle = DOM.getStyleAttribute(element, "height");
+    String lineHeightStyle = DOM.getStyleAttribute(element, "lineHeight");
     if (widthStyle != null) {
       DOM.setStyleAttribute(element, "width", null);
     }
     if (heightStyle != null) {
       DOM.setStyleAttribute(element, "height", null);
     }
-    return new String[] { widthStyle, heightStyle };
+    if (lineHeightStyle != null) {
+      DOM.setStyleAttribute(element, "lineHeight", "initial");
+    }
+    return new String[] { widthStyle, heightStyle, lineHeightStyle };
   }
 
   /*
@@ -272,12 +304,18 @@ public final class MockComponentsUtil {
    *        and height at index 1.
    */
   static void restoreSizeStyle(Widget w, String[] style) {
-    Element element = w.getElement();
+    restoreSizeStyle(w.getElement(), style);
+  }
+
+  static void restoreSizeStyle(Element element, String[] style) {
     if (style[0] != null) {
       DOM.setStyleAttribute(element, "width", style[0]);
     }
     if (style[1] != null) {
       DOM.setStyleAttribute(element, "height", style[1]);
+    }
+    if (style[2] != null) {
+      DOM.setStyleAttribute(element, "lineHeight", style[2]);
     }
   }
 
@@ -321,12 +359,39 @@ public final class MockComponentsUtil {
 
     String[] style = clearSizeStyle(w);
     int width = w.getOffsetWidth() + 4;
-    int height = w.getOffsetHeight();
+    int height = w.getOffsetHeight() + 6;
+    if (height < 26) {          // Do not make the button smaller
+      height = 26;              // then 26, as this mimicks what happens
+    }                           // on the real device
     restoreSizeStyle(w, style);
 
     // Detach the widget from the DOM before returning
     RootPanel.get().remove(w);
 
+    return new int[] { width, height };
+  }
+
+  /**
+   * Returns the preferred size of the specified DOM element in an array of the
+   * form {@code [width, height]}.
+   *
+   * @see #getPreferredSizeOfDetachedWidget(Widget)
+   * @param element the DOM element to compute the size for
+   * @return the natural width and height of the element
+   */
+  public static int[] getPreferredSizeOfElement(Element element) {
+    Element root = RootPanel.get().getElement();
+    root.appendChild(element);
+
+    String[] style = clearSizeStyle(element);
+    int width = element.getOffsetWidth() + 4;
+    int height = element.getOffsetHeight() + 6;
+    if (height < 26) {
+      height = 26;
+    }
+    restoreSizeStyle(element, style);
+
+    root.removeChild(element);
     return new int[] { width, height };
   }
 

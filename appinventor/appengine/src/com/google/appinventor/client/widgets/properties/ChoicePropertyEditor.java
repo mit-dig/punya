@@ -6,9 +6,10 @@
 
 package com.google.appinventor.client.widgets.properties;
 
-import com.google.appinventor.client.widgets.DropDownButton;
+import static com.google.appinventor.client.Ode.MESSAGES;
 import static com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
 
+import com.google.appinventor.client.widgets.DropDownButton;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.Command;
 
@@ -88,7 +89,37 @@ public class ChoicePropertyEditor extends PropertyEditor {
       items.add(new DropDownItem("Choice Property Editor", choice.caption, new Command() {
         @Override
         public void execute() {
-          property.setValue(choice.value);
+          boolean multiple = isMultipleValues();
+          setMultipleValues(false);
+          property.setValue(choice.value, multiple);
+        }
+      }));
+    }
+    dropDownButton = new DropDownButton("Choice Property Editor", choices[0].caption, items, false);
+    dropDownButton.setStylePrimaryName("ode-ChoicePropertyEditor");
+
+    initWidget(dropDownButton);
+  }
+
+  /**
+   * Creates a new instance of the property editor with choice names.
+   * Each choice name is treated as both the captain and the value of a choice.
+   *
+   * @param choiceNames  array of choice names to choose from
+   */
+  public ChoicePropertyEditor(String[] choiceNames) {
+    this.choices = new Choice[choiceNames.length];
+    for (int idx = 0; idx < choiceNames.length; idx += 1)
+      this.choices[idx] = new Choice(choiceNames[idx], choiceNames[idx]);
+
+    List<DropDownItem> items = Lists.newArrayList();
+    for(final Choice choice : choices) {
+      items.add(new DropDownItem("Choice Property Editor", choice.caption, new Command() {
+        @Override
+        public void execute() {
+          boolean multiple = isMultipleValues();
+          setMultipleValues(false);
+          property.setValue(choice.value, multiple);
         }
       }));
     }
@@ -100,6 +131,11 @@ public class ChoicePropertyEditor extends PropertyEditor {
 
   @Override
   protected void updateValue() {
+    if (isMultipleValues()) {
+      dropDownButton.setCaption(MESSAGES.multipleValues());
+      return;
+    }
+
     String propertyValue = property.getValue();
     for (Choice choice : choices) {
       String choiceValue = choice.value;
@@ -108,7 +144,7 @@ public class ChoicePropertyEditor extends PropertyEditor {
       }
     }
   }
-  
+
   /**
    * Enables the dropdown selector for this property
    */

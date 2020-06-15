@@ -1,0 +1,419 @@
+---
+layout: documentation
+title: Linked Data
+---
+
+[&laquo; Back to index](index.html)
+# Linked Data
+
+Table of Contents:
+
+* [LinkedData](#LinkedData)
+* [LinkedDataForm](#LinkedDataForm)
+* [LinkedDataListPicker](#LinkedDataListPicker)
+* [LinkedDataStreamingClient](#LinkedDataStreamingClient)
+
+## LinkedData  {#LinkedData}
+
+Component for LinkedData
+
+
+
+### Properties  {#LinkedData-Properties}
+
+{:.properties}
+
+{:id="LinkedData.EndpointURL" .text} *EndpointURL*
+: Specifies the URL of a SPARQL endpoint.
+ The default value is the DBpedia endpoint.
+
+### Events  {#LinkedData-Events}
+
+{:.events}
+
+{:id="LinkedData.FailedHttsPostingFileToWeb"} FailedHttsPostingFileToWeb(*errorMessage*{:.text})
+: Event for FailedHttsPostingFileToWeb
+
+{:id="LinkedData.FailedToAddDataToWeb"} FailedToAddDataToWeb(*graph*{:.text},*error*{:.text})
+: Event for FailedToAddDataToWeb
+
+{:id="LinkedData.FailedToDeleteDataFromLocal"} FailedToDeleteDataFromLocal()
+: Event for FailedToDeleteDataFromLocal
+
+{:id="LinkedData.FailedToDeleteDataFromWeb"} FailedToDeleteDataFromWeb(*graph*{:.text},*error*{:.text})
+: Event for FailedToDeleteDataFromWeb
+
+{:id="LinkedData.FailedToFeedDataToWeb"} FailedToFeedDataToWeb(*error*{:.text})
+: Event for FailedToFeedDataToWeb
+
+{:id="LinkedData.FailedToWriteDataToWeb"} FailedToWriteDataToWeb(*graph*{:.text},*error*{:.text})
+: This event is raised when the LinkedData component fails to publish a
+ graph to a remote SPARQL endpoint.
+
+{:id="LinkedData.FinishedAddingDataToWeb"} FinishedAddingDataToWeb(*graph*{:.text})
+: Event for FinishedAddingDataToWeb
+
+{:id="LinkedData.FinishedDeletingDataFromLocal"} FinishedDeletingDataFromLocal()
+: Event for FinishedDeletingDataFromLocal
+
+{:id="LinkedData.FinishedDeletingDataFromWeb"} FinishedDeletingDataFromWeb(*graph*{:.text})
+: Event for FinishedDeletingDataFromWeb
+
+{:id="LinkedData.FinishedFeedingDataToWeb"} FinishedFeedingDataToWeb()
+: Event for FinishedFeedingDataToWeb
+
+{:id="LinkedData.FinishedHttsPostingFileToWeb"} FinishedHttsPostingFileToWeb(*message*{:.text})
+: Event for FinishedHttsPostingFileToWeb
+
+{:id="LinkedData.FinishedWritingDataToWeb"} FinishedWritingDataToWeb(*graph*{:.text})
+: This event is raised when a graph is successfully published on a remote
+ endpoint.
+
+{:id="LinkedData.RetrievedRawResults"} RetrievedRawResults(*type*{:.text},*contents*{:.text})
+: This event is raised after a SPARQL engine finishes processing a query
+ and the client has received the results, but before those results have
+ been processed into objects so that they may be used in conjunction with
+ other linked-data-enabled components.
+
+{:id="LinkedData.RetrievedResults"} RetrievedResults(*type*{:.text},*bindings*{:.list})
+: This event is raised after a SPARQL engine finishes processing
+ a query and the client has received the results.
+
+{:id="LinkedData.UnsupportedQueryType"} UnsupportedQueryType()
+: Event raised when a SPARQL query to be executed is not supported
+ by the Linked Data component.
+
+### Methods  {#LinkedData-Methods}
+
+{:.methods}
+
+{:id="LinkedData.AddDataFromComponent" class="method returns boolean"} <i/> AddDataFromComponent(*component*{:.component},*subject*{:.text})
+: Takes a component implementing the LDComponent interface and uses the properties defined
+ there to insert a triple into the model using the given subject.
+
+{:id="LinkedData.AddDataFromLinkedDataForm" class="method returns boolean"} <i/> AddDataFromLinkedDataForm(*form*{:.component})
+: Takes a LinkedDataForm component and converts it and any nested elements into
+ triples within the model encapsulated by this LinkedData component.
+
+{:id="LinkedData.AddDataToWeb" class="method"} <i/> AddDataToWeb(*graph*{:.text},*noResolveUpdate*{:.boolean})
+: Attempts to insert the statements contained within this Linked Data
+ component into the endpoint with an optional graph.
+
+{:id="LinkedData.DeleteDataFromLocal" class="method"} <i/> DeleteDataFromLocal()
+: Deletes all data from the referent model
+
+{:id="LinkedData.DeleteDataFromWeb" class="method"} <i/> DeleteDataFromWeb(*graph*{:.text},*noResolveUpdate*{:.boolean})
+: Attempts to delete the statements contained within this Linked Data
+ component from the endpoint with an optional graph.
+
+{:id="LinkedData.ExecuteSPARQLQuery" class="method"} <i/> ExecuteSPARQLQuery(*query*{:.text})
+: Execute a SPARQL query on the set EndpointURL of this Linked Data component.
+ Currently only supports SELECT queries, and converts all integer types into Long
+ and decimal types into Double.
+
+{:id="LinkedData.FeedDataToWeb" class="method"} <i/> FeedDataToWeb()
+: Attempts to feed the statements contained within this Linked Data
+ component into the endpoint (most likely CSPARQL).
+
+{:id="LinkedData.HttpsPostFileToWeb" class="method"} <i/> HttpsPostFileToWeb(*Url*{:.text},*certificateName*{:.text},*securityToken*{:.text},*filepath*{:.text})
+: Method for HttpsPostFileToWeb
+
+{:id="LinkedData.ReadDataFromLocal" class="method returns boolean"} <i/> ReadDataFromLocal(*path*{:.text})
+: Read contents of the specified path (local or remote) into the referent model.
+ Note the implementation is identical to ReadDataFromWeb
+
+{:id="LinkedData.ReadDataFromWeb" class="method returns boolean"} <i/> ReadDataFromWeb(*path*{:.text})
+: Read contents of the specified path (local or remote) into the referent model.
+ Note the implementation is identical to ReadDataFromLocal
+
+{:id="LinkedData.ResultsToSimpleJSON" class="method returns text"} <i/> ResultsToSimpleJSON(*results*{:.list})
+: Method for ResultsToSimpleJSON
+
+{:id="LinkedData.ToString" class="method returns text"} <i/> ToString()
+: Returns the contents of this LinkedData component as a string. Useful
+ for debugging purposes.
+
+{:id="LinkedData.WriteDataToLocal" class="method returns boolean"} <i/> WriteDataToLocal(*path*{:.text})
+: Saves the model to the given path on the file system.
+
+{:id="LinkedData.WriteDataToWeb" class="method"} <i/> WriteDataToWeb(*graph*{:.text})
+: Write the model represented by the LinkedData component to the
+ RDF graph store represented by EndpointURL using the given graph URI.
+ Any existing triples will get replaced?
+
+## LinkedDataForm  {#LinkedDataForm}
+
+Linked Data Form provides a layout in which contained form elements will be
+ used to generate structured data. This form is used in conjunction with
+ the LinkedData component.
+
+
+
+### Properties  {#LinkedDataForm-Properties}
+
+{:.properties}
+
+{:id="LinkedDataForm.FormID" .text} *FormID*
+: Gets the Base URI of this form.
+
+{:id="LinkedDataForm.GenerateSubjectURI" .text .ro .bo} *GenerateSubjectURI*
+: Returns a URI for the form either by examining its Subject property or
+ generated from its contents.
+
+{:id="LinkedDataForm.Height" .number .bo} *Height*
+: Specifies the `LinkedDataForm`'s vertical height, measured in pixels.
+
+{:id="LinkedDataForm.HeightPercent" .number .wo .bo} *HeightPercent*
+: Specifies the `LinkedDataForm`'s vertical height as a percentage
+ of the [`Screen`'s `Height`](userinterface.html#Screen.Height).
+
+{:id="LinkedDataForm.InverseProperty" .boolean} *InverseProperty*
+: Gets whether or not this form represents an inverse property.
+
+{:id="LinkedDataForm.ObjectType" .text} *ObjectType*
+: Returns the concept URI for this form.
+
+{:id="LinkedDataForm.PropertyURI" .text} *PropertyURI*
+: Gets the Property URI for linking a parent form to this form.
+
+{:id="LinkedDataForm.Subject" .text .bo} *Subject*
+: Gets the Subject URI for this form.
+
+{:id="LinkedDataForm.Visible" .boolean} *Visible*
+: Specifies whether the `LinkedDataForm` should be visible on the screen.  Value is `true`{:.logic.block}
+ if the `LinkedDataForm` is showing and `false`{:.logic.block} if hidden.
+
+{:id="LinkedDataForm.Width" .number .bo} *Width*
+: Specifies the horizontal width of the `LinkedDataForm`, measured in pixels.
+
+{:id="LinkedDataForm.WidthPercent" .number .wo .bo} *WidthPercent*
+: Specifies the horizontal width of the `LinkedDataForm` as a percentage
+ of the [`Screen`'s `Width`](userinterface.html#Screen.Width).
+
+{:id="LinkedDataForm.generateRandomUUID" .text .ro .bo} *generateRandomUUID*
+: Property for generateRandomUUID
+
+### Events  {#LinkedDataForm-Events}
+
+{:.events}
+None
+
+
+### Methods  {#LinkedDataForm-Methods}
+
+{:.methods}
+None
+
+
+## LinkedDataListPicker  {#LinkedDataListPicker}
+
+Provides a list picker backed by the results of a SPARQL query.
+
+
+
+### Properties  {#LinkedDataListPicker-Properties}
+
+{:.properties}
+
+{:id="LinkedDataListPicker.BackgroundColor" .color} *BackgroundColor*
+: Specifies the `LinkedDataListPicker`'s background color as an alpha-red-green-blue
+ integer.  If an [`Image`](#LinkedDataListPicker.Image) has been set, the color
+ change will not be visible until the [`Image`](#LinkedDataListPicker.Image) is removed.
+
+{:id="LinkedDataListPicker.Enabled" .boolean} *Enabled*
+: Specifies whether the `LinkedDataListPicker` should be active and clickable.
+
+{:id="LinkedDataListPicker.EndpointURL" .text} *EndpointURL*
+: Gets the endpoint URL for the list picker.
+
+{:id="LinkedDataListPicker.FontBold" .boolean} *FontBold*
+: Specifies whether the text of the `LinkedDataListPicker` should be bold.
+ Some fonts do not support bold.
+
+{:id="LinkedDataListPicker.FontItalic" .boolean} *FontItalic*
+: Specifies whether the text of the `LinkedDataListPicker` should be italic.
+ Some fonts do not support italic.
+
+{:id="LinkedDataListPicker.FontSize" .number} *FontSize*
+: Specifies the text font size of the `LinkedDataListPicker`, measured in sp(scale-independent pixels).
+
+{:id="LinkedDataListPicker.FontTypeface" .number .do} *FontTypeface*
+: Specifies the text font face of the `LinkedDataListPicker` as default, serif, sans
+ serif, or monospace.
+
+{:id="LinkedDataListPicker.Height" .number .bo} *Height*
+: Specifies the `LinkedDataListPicker`'s vertical height, measured in pixels.
+
+{:id="LinkedDataListPicker.HeightPercent" .number .wo .bo} *HeightPercent*
+: Specifies the `LinkedDataListPicker`'s vertical height as a percentage
+ of the [`Screen`'s `Height`](userinterface.html#Screen.Height).
+
+{:id="LinkedDataListPicker.Image" .text} *Image*
+: Specifies the path of the `LinkedDataListPicker`'s image. If there is both an `Image` and a
+ [`BackgroundColor`](#LinkedDataListPicker.BackgroundColor) specified, only the `Image` will be visible.
+
+{:id="LinkedDataListPicker.ObjectType" .text} *ObjectType*
+: Property for ObjectType
+
+{:id="LinkedDataListPicker.PropertyURI" .text} *PropertyURI*
+: Property for PropertyURI
+
+{:id="LinkedDataListPicker.RelationToObject" .text} *RelationToObject*
+: Property for RelationToObject
+
+{:id="LinkedDataListPicker.SelectionIndex" .number .ro .bo} *SelectionIndex*
+: Returns the index of the user's selection.
+
+{:id="LinkedDataListPicker.SelectionLabel" .text .ro .bo} *SelectionLabel*
+: Returns the label of the user's selection.
+
+{:id="LinkedDataListPicker.SelectionURI" .text .ro .bo} *SelectionURI*
+: Returns the URI of the user's selection.
+
+{:id="LinkedDataListPicker.Shape" .number .do} *Shape*
+: Specifies the shape of the `LinkedDataListPicker`. The valid values for this property are `0` (default),
+ `1` (rounded), `2` (rectangle), and `3` (oval). The `Shape` will not be visible if an
+ [`Image`](#LinkedDataListPicker.Image) is used.
+
+{:id="LinkedDataListPicker.ShowFeedback" .boolean} *ShowFeedback*
+: Specifies if a visual feedback should be shown when a `LinkedDataListPicker` with an assigned
+ [`Image`](#LinkedDataListPicker.Image) is pressed.
+
+{:id="LinkedDataListPicker.SubjectIdentifier" .boolean} *SubjectIdentifier*
+: <p>If the list picker is placed within a Linked Data Form, the Subject Identifier value indicates whether the selected item in the list picker should be used as an input when the Linked Data component generates a new subject identifier for the thing described by the form.</p>
+
+{:id="LinkedDataListPicker.Text" .text} *Text*
+: Specifies the text displayed by the `LinkedDataListPicker`.
+
+{:id="LinkedDataListPicker.TextAlignment" .number .do} *TextAlignment*
+: Specifies the alignment of the `LinkedDataListPicker`'s text. Valid values are:
+ `0` (normal; e.g., left-justified if text is written left to right),
+ `1` (center), or
+ `2` (opposite; e.g., right-justified if text is written left to right).
+
+{:id="LinkedDataListPicker.TextColor" .color} *TextColor*
+: Specifies the text color of the `LinkedDataListPicker` as an alpha-red-green-blue
+ integer.
+
+{:id="LinkedDataListPicker.Visible" .boolean} *Visible*
+: Specifies whether the `LinkedDataListPicker` should be visible on the screen.  Value is `true`{:.logic.block}
+ if the `LinkedDataListPicker` is showing and `false`{:.logic.block} if hidden.
+
+{:id="LinkedDataListPicker.Width" .number .bo} *Width*
+: Specifies the horizontal width of the `LinkedDataListPicker`, measured in pixels.
+
+{:id="LinkedDataListPicker.WidthPercent" .number .wo .bo} *WidthPercent*
+: Specifies the horizontal width of the `LinkedDataListPicker` as a percentage
+ of the [`Screen`'s `Width`](userinterface.html#Screen.Width).
+
+### Events  {#LinkedDataListPicker-Events}
+
+{:.events}
+
+{:id="LinkedDataListPicker.AfterPicking"} AfterPicking()
+: Event to be raised after the `LinkedDataListPicker` activity returns its
+ result and the properties have been filled in.
+
+{:id="LinkedDataListPicker.AfterQuery"} AfterQuery()
+: This event is raised after the query is executed on the remote endpoint.
+
+{:id="LinkedDataListPicker.BeforePicking"} BeforePicking()
+: Event to raise when the `LinkedDataListPicker` is clicked or the picker is shown
+ using the [`Open`](#LinkedDataListPicker.Open) method.  This event occurs before the picker is displayed, and
+ can be used to prepare the picker before it is shown.
+
+{:id="LinkedDataListPicker.BeforeQuery"} BeforeQuery()
+: This event is raised before the query is executed on the remote endpoint.
+
+{:id="LinkedDataListPicker.GotFocus"} GotFocus()
+: Indicates the cursor moved over the `LinkedDataListPicker` so it is now possible
+ to click it.
+
+{:id="LinkedDataListPicker.LostFocus"} LostFocus()
+: Indicates the cursor moved away from the `LinkedDataListPicker` so it is now no
+ longer possible to click it.
+
+{:id="LinkedDataListPicker.TouchDown"} TouchDown()
+: Indicates that the `LinkedDataListPicker` was pressed down.
+
+{:id="LinkedDataListPicker.TouchUp"} TouchUp()
+: Indicates that the `LinkedDataListPicker` has been released.
+
+{:id="LinkedDataListPicker.UnableToRetrieveContent"} UnableToRetrieveContent(*error*{:.text})
+: Raised in the event a query fails.
+
+### Methods  {#LinkedDataListPicker-Methods}
+
+{:.methods}
+
+{:id="LinkedDataListPicker.Open" class="method"} <i/> Open()
+: Opens the `LinkedDataListPicker`, as though the user clicked on it.
+
+## LinkedDataStreamingClient  {#LinkedDataStreamingClient}
+
+Component for LinkedDataStreamingClient
+
+
+
+### Properties  {#LinkedDataStreamingClient-Properties}
+
+{:.properties}
+
+{:id="LinkedDataStreamingClient.RegId" .text .ro .bo} *RegId*
+: Property for RegId
+
+{:id="LinkedDataStreamingClient.ReturnMessage" .text .ro .bo} *ReturnMessage*
+: Property for ReturnMessage
+
+{:id="LinkedDataStreamingClient.SenderID" .text} *SenderID*
+: Property for SenderID
+
+{:id="LinkedDataStreamingClient.ServerURL" .text} *ServerURL*
+: Property for ServerURL
+
+### Events  {#LinkedDataStreamingClient-Events}
+
+{:.events}
+
+{:id="LinkedDataStreamingClient.GotResponseFromServer"} GotResponseFromServer(*url*{:.text},*responseCode*{:.number},*responseType*{:.text},*responseContent*{:.text})
+: Event indicating that a SendMessageToServer call has finished.
+
+{:id="LinkedDataStreamingClient.RegInfoReceived"} RegInfoReceived()
+: Indicates when the server registration has been successful.
+
+{:id="LinkedDataStreamingClient.StreamingInfoReceived"} StreamingInfoReceived()
+: Indicates that the GCM info has been received.
+
+{:id="LinkedDataStreamingClient.SubscriptionResponseReceived"} SubscriptionResponseReceived(*url*{:.text},*responseCode*{:.number},*responseType*{:.text},*responseContent*{:.text})
+: Event for SubscriptionResponseReceived
+
+### Methods  {#LinkedDataStreamingClient-Methods}
+
+{:.methods}
+
+{:id="LinkedDataStreamingClient.CreateNotification" class="method"} <i/> CreateNotification(*title*{:.text},*text*{:.text},*enabledSound*{:.boolean},*enabledVibrate*{:.boolean},*packageName*{:.text},*className*{:.text},*extraKey*{:.text},*extraVal*{:.text})
+: Create a notication with message to wake up another activity when tap on the notification
+
+{:id="LinkedDataStreamingClient.Enabled" class="method"} <i/> Enabled(*enable*{:.boolean})
+: Enable Google Cloud Messaging to receive push notification
+
+{:id="LinkedDataStreamingClient.Register" class="method"} <i/> Register()
+: Authenticate to Google Cloud Messaging
+
+{:id="LinkedDataStreamingClient.SendMessageToServer" class="method"} <i/> SendMessageToServer(*text*{:.text})
+: Performs an HTTP POST request using the GCM Server url property and the specified text.
+
+{:id="LinkedDataStreamingClient.SubscribeToQuery" class="method"} <i/> SubscribeToQuery(*querytext*{:.text},*streamName*{:.text},*window*{:.text},*step*{:.text})
+: Performs an HTTP POST query subscription request using the GCM Server url property and the given query.
+ Query is converted to a CONSTRUCT query because an arbitrary UUID injection is necessary.
+ 
+ select * is currently not supported
+
+{:id="LinkedDataStreamingClient.UnRegister" class="method"} <i/> UnRegister()
+: Remove authentication for this app instance
+
+{:id="LinkedDataStreamingClient.isRegistered" class="method returns boolean"} <i/> isRegistered()
+: Method for isRegistered
+
+{:id="LinkedDataStreamingClient.isServiceReady" class="method returns boolean"} <i/> isServiceReady()
+: Method for isServiceReady

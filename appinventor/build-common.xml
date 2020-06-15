@@ -2,11 +2,18 @@
 
 <!-- ======================================================================
      Copyright 2011 Google Inc.  All Rights Reserved.
+     Copyright 2012-2017 MIT.  All Rights Reserved.
      Author: lizlooney@google.com (Liz Looney)
+     Author: andrew.f.mckinney@gmail.com (Andrew F. McKinney)
+     Author: ewpatton@mit.edu (Evan W. Patton)
+     Author: jis@mit.edu (Jeffrey I. Schiller)
+     Author: ram8647@gmail.com (Ralph Morelli)
+     Author: sharon@google.com (Sharon Perl)
+     Author: trevorbadams@gmail.com (Treavor Adams)
 
      Contains definitions common to multiple App Inventor build.xml files.
      ====================================================================== -->
-<project name="CommonDefinitions">
+<project name="CommonDefinitions" xmlns:if="ant:if" xmlns:unless="ant:unless">
   <!-- Always build with debug set... (jis) -->
   <property name="debug" value="true"/>
   <description>
@@ -132,15 +139,6 @@
   </presetdef>
 
   <!-- =====================================================================
-       Define task ai.javac5 as the compilation task for building the blocks
-       editor and all of its dependencies.
-       ===================================================================== -->
-  <presetdef name="ai.javac5">
-    <ai.javac source="5"
-              target="5"/>
-  </presetdef>
-
-  <!-- =====================================================================
 
        Define task ai.dojunit as the default testing task for AI.  It
        compiles all the specified tests, builds them into a library,
@@ -172,6 +170,10 @@
   <macrodef name="ai.dojunit">
     <attribute name="aij-testingtarget" />
     <attribute name="aij-dir" />
+    <attribute name="aij-prod" default="false" />
+    <!-- The following element is used to workaround a bug in older JDKs that prevents
+         Robolectric's annotations from being read by javac -->
+    <element name="aij-supplemental-includes" optional="true" />
     <sequential>
       <local name="classdir" />
       <property name="classdir" location="${class.dir}/@{aij-testingtarget}" />
@@ -187,6 +189,7 @@
       <ai.javactests destdir="${classdir}" >
         <include name="@{aij-dir}/**/${test_name.class}.java" if="test_name" />
         <include name="@{aij-dir}/**/*.java" unless="test_name" />
+        <aij-supplemental-includes />
         <classpath refid="libsFor@{aij-testingtarget}.path"/>
       </ai.javactests>
 
@@ -194,11 +197,16 @@
            destfile="${local.build.dir}/@{aij-testingtarget}.jar" />
 
       <junit printsummary="yes"
-             fork="yes"
+             fork="true"
+             dir="${basedir}"
+             forkmode="once"
              haltonfailure="no"
              maxmemory="925m"
              showoutput="no">
         <jvmarg value="-XX:MaxPermSize=128m"/>
+        <sysproperty key="gwt.args" value="-prod -gen ${local.build.dir}/gen -war ${local.build.dir}/build/war" if:true="@{aij-prod}"/>
+        <sysproperty key="gwt.args" value="-devMode -logLevel WARN -war ${local.build.dir}/build/war" unless:true="@{aij-prod}"/>
+        <sysproperty key="java.awt.headless" value="true"/>
         <classpath refid="@{aij-testingtarget}.path"/>
         <formatter type="xml"/>
         <!-- If the ant command line sets the test_name property (see above)
@@ -265,16 +273,6 @@
   <!-- targets that build dependencies -->
 
   <!-- ====================================================================
-       blockseditor_BlocksEditor builds:
-       - build/blockseditor/BlocksEditor.jar
-       ==================================================================== -->
-
-  <target name="blockseditor_BlocksEditor">
-    <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/blockseditor"
-         target="BlocksEditor"/>
-  </target>
-
-  <!-- ====================================================================
        blocklyeditor_BlocklyCompile builds:
        - build/blockly-all.js
        ==================================================================== -->
@@ -282,47 +280,6 @@
   <target name="blocklyeditor_BlocklyCompile">
     <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/blocklyeditor"
          target="BlocklyCompile"/>
-  </target>
-
-  <!-- ====================================================================
-       components_ComponentTranslation builds:
-       common/build/src/com/google/appinventor/ComponentsTranslation.java
-       ==================================================================== -->
-
-  <target name="components_ComponentTranslation">
-    <ant inheritAll="false" useNativeBaseDir="true" dir="${appinventor.dir}/components"
-         target="ComponentTranslation"/>
-  </target>
-
-  <!-- ====================================================================
-       buildserver_StarterApp builds:
-       - build/buildserver/AppInventorPhoneApp.apk
-       ==================================================================== -->
-
-  <target name="buildserver_StarterApp">
-    <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/buildserver"
-         target="StarterApp"/>
-  </target>
-
-  <!-- ====================================================================
-       common_CommonTranslations builds:
-       - build/common/CommonTranslations.jar
-       ==================================================================== -->
-
-  <target name="common_CommonTranslations">
-    <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/common"
-         target="CommonTranslations"/>
-  </target>
-
-  <!-- ====================================================================
-       common_BlocksEditorHttpConstants builds:
-       - build/common/BlocksEditorHttpConstants.jar
-       - build/common/BlocksEditorHttpConstants-gwt.jar
-       ==================================================================== -->
-
-  <target name="common_BlocksEditorHttpConstants">
-    <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/common"
-         target="BlocksEditorHttpConstants"/>
   </target>
 
   <!-- ====================================================================
@@ -376,37 +333,6 @@
   <target name="components_CommonConstants">
     <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/components"
          target="CommonConstants"/>
-  </target>
-
-  <!-- ====================================================================
-       components_ComponentList builds:
-       - build/components/simple_components.txt
-       - build/components/simple_components_build_info.json
-       ==================================================================== -->
-
-  <target name="components_ComponentList">
-    <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/components"
-         target="ComponentList"/>
-  </target>
-
-  <!-- ====================================================================
-       components_JsonComponentDescription builds:
-       - build/components/simple_components.json
-       ==================================================================== -->
-
-  <target name="components_JsonComponentDescription">
-    <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/components"
-         target="JsonComponentDescription"/>
-  </target>
-
-  <!-- ====================================================================
-       components_XmlComponentDescription builds:
-       - build/components/ya_lang_def.xml
-       ==================================================================== -->
-
-  <target name="components_XmlComponentDescription">
-    <ant inheritAll="false" useNativeBasedir="true" dir="${appinventor.dir}/components"
-         target="XmlComponentDescription"/>
   </target>
 
 </project>

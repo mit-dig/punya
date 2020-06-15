@@ -1,5 +1,5 @@
 ;;; Copyright 2009-2011 Google, All Rights reserved
-;;; Copyright 2011-2013 MIT, All rights reserved
+;;; Copyright 2011-2018 MIT, All rights reserved
 ;;; Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 
 ;;; These are the functions that define the YAIL (Young Android Intermediate Language) runtime They
@@ -289,21 +289,31 @@
 (define-syntax define-form
   (syntax-rules ()
     ((_ class-name form-name)
-     (define-form-internal class-name form-name 'com.google.appinventor.components.runtime.Form #f))))
+     (define-form-internal class-name form-name 'com.google.appinventor.components.runtime.Form #f #t))
+    ((_ class-name form-name classic-theme)
+     (define-form-internal class-name form-name 'com.google.appinventor.components.runtime.Form #f classic-theme))))
 
 (define-syntax define-repl-form
   (syntax-rules ()
     ((_ class-name form-name)
-     (define-form-internal class-name form-name 'com.google.appinventor.components.runtime.ReplForm #t))))
+     (define-form-internal class-name form-name 'com.google.appinventor.components.runtime.ReplForm #t #f))))
 
 (define-syntax define-form-internal
   (syntax-rules ()
-    ((_ class-name form-name subclass-name isrepl)
+    ((_ class-name form-name subclass-name isrepl classic-theme)
      (begin
        (module-extends subclass-name)
        (module-name class-name)
        (module-static form-name)
        (require <com.google.youngandroid.runtime>)
+
+       (define (get-simple-name object)
+         (*:getSimpleName (*:getClass object)))
+
+       (define (onCreate icicle :: android.os.Bundle) :: void
+         ;(android.util.Log:i "AppInventorCompatActivity" "in YAIL oncreate")
+         (com.google.appinventor.components.runtime.AppInventorCompatActivity:setClassicModeFromYail classic-theme)
+         (invoke-special subclass-name (this) 'onCreate icicle))
 
        (define *debug-form* #f)
 
@@ -396,8 +406,9 @@
 ;;         (com.google.appinventor.components.runtime.ReplApplication:reportError ex)
          (if isrepl
              (when ((this):toastAllowed)
-                   (begin (send-error (ex:getMessage))
-                          ((android.widget.Toast:makeText (this) (ex:getMessage) 5):show)))
+                   (let ((message (if (instance? ex java.lang.Error) (ex:toString) (ex:getMessage))))
+                     (send-error message)
+                     ((android.widget.Toast:makeText (this) message 5):show)))
 
              (com.google.appinventor.components.runtime.util.RuntimeErrorAlert:alert
               (this)
@@ -430,6 +441,27 @@
                                  (begin
                                    (apply handler (gnu.lists.LList:makeList args 0))
                                    #t)
+                                 ;; PermissionException should be caught by a permissions-aware component and
+                                 ;; handled correctly at the point it is caught. However, older extensions
+                                 ;; might not be updated yet for SDK 23's dangerous permissions model, so if
+                                 ;; an exception bubbles all the way up to here we can still catch and report
+                                 ;; it. However, the best context we have for the PermissionDenied event is
+                                 ;; that it occurred in the just-exited event handler code.
+                                 (exception com.google.appinventor.components.runtime.errors.PermissionException
+                                  (begin
+                                    (exception:printStackTrace)
+                                    ;; Test to see if the event we are handling is the
+                                    ;; PermissionDenied of the current form. If so, then we will
+                                    ;; need to avoid re-invoking PermissionDenied.
+                                    (if (and (eq? (this) componentObject)
+                                             (equal? eventName "PermissionNeeded"))
+                                        ;; Error is occurring in the PermissionDenied handler, so we
+                                        ;; use the more general exception handler to prevent going
+                                        ;; into an infinite loop.
+                                        (process-exception exception)
+                                        ((this):PermissionDenied componentObject eventName
+                                                                 (exception:getPermissionNeeded)))
+                                    #f))
                                  (exception java.lang.Throwable
                                   (begin
                                     (android-log-form (exception:getMessage))
@@ -444,6 +476,48 @@
                          (as com.google.appinventor.components.runtime.HandlesEventDispatching (this))
                          registeredComponentName eventName)
                        #f))))
+
+       (define (dispatchGenericEvent componentObject :: com.google.appinventor.components.runtime.Component
+                                     eventName :: java.lang.String
+                                     notAlreadyHandled :: boolean
+                                     args :: java.lang.Object[]) :: void
+         ; My first attempt was to use the gen-generic-event-name
+         ; here, but unfortunately the version of Kawa that we use
+         ; does not correctly import functions from the runtime module
+         ; into the form. The macro expands, but the symbol-append
+         ; function is not found. Below is an "optimization" that
+         ; concatenates the strings first and then calls
+         ; string->symbol, which is effectively the same thing. Most
+         ; of the logic then follows that of dispatchEvent above.
+         (let* ((handler-symbol (string->symbol (string-append "any$" (get-simple-name componentObject) "$" eventName)))
+                (handler (lookup-in-form-environment handler-symbol)))
+           (if handler
+               (try-catch
+                (begin
+                  (apply handler (cons componentObject (cons notAlreadyHandled (gnu.lists.LList:makeList args 0))))
+                  #t)
+                (exception com.google.appinventor.components.runtime.errors.PermissionException
+                 (begin
+                   (exception:printStackTrace)
+                   ;; Test to see if the event we are handling is the
+                   ;; PermissionDenied of the current form. If so, then we will
+                   ;; need to avoid re-invoking PermissionDenied.
+                   (if (and (eq? (this) componentObject)
+                            (equal? eventName "PermissionNeeded"))
+                       ;; Error is occurring in the PermissionDenied handler, so we
+                       ;; use the more general exception handler to prevent going
+                       ;; into an infinite loop.
+                       (process-exception exception)
+                       ((this):PermissionDenied componentObject eventName
+                        (exception:getPermissionNeeded)))
+                   #f))
+                (exception java.lang.Throwable
+                 (begin
+                   (android-log-form (exception:getMessage))
+;;; Comment out the line below to inhibit a stack trace on a RunTimeError
+                   (exception:printStackTrace)
+                   (process-exception exception)
+                   #f))))))
 
        (define (lookup-handler componentName eventName)
          (lookup-in-form-environment
@@ -477,7 +551,7 @@
                      var-val-pairs))
 
          ;; Create each component and set its corresponding field
-         (define (init-components component-descriptors)
+         (define (create-components component-descriptors)
            (for-each (lambda (component-info)
                        (let ((component-name (caddr component-info))
                              (init-thunk (cadddr component-info))
@@ -492,14 +566,10 @@
                            ;; Add the mapping from component name -> component object to the
                            ;; form-environment
                            (add-to-form-environment component-name component-object))))
-                     component-descriptors)
-           ;; Now that all the components are constructed we can call
-           ;; their init-thunk and their Initialize methods.  We need
-           ;; to do this after all the construction steps because the
-           ;; init-thunk (i.e. design-time initializations) and
-           ;; Initialize methods may contain references to other
-           ;; components.
-           ;;
+                     component-descriptors))
+
+         ;; Initialize all of the components
+         (define (init-components component-descriptors)
            ;; First all the init-thunks
            (for-each (lambda (component-info)
                        (let ((component-name (caddr component-info))
@@ -544,20 +614,30 @@
          (register-events events-to-register)
 
          (try-catch
-          (begin
+          (let ((components (reverse components-to-create)))
             ;; We need this binding because the block parser sends this symbol
             ;; to represent an uninitialized value
             ;; We have to explicity write #!null here, rather than
             ;; *the-null-value* because that external defintion hasn't happened yet
             (add-to-global-vars '*the-null-value* (lambda () #!null))
+            ;; The Form has been created (we're in its code), so we should run
+            ;; do-after-form-creation thunks now. This is important because we
+            ;; need the theme set before creating components.
+            (for-each force (reverse form-do-after-creation))
+            (create-components components)
             ;; These next three clauses need to be in this order:
             ;; Properties can't be set until after the global variables are
             ;; assigned.   And some properties can't be set after the components are
             ;; created: For example, the form's layout can't be changed after the
             ;; components have been installed.  (This gives an error.)
             (init-global-variables (reverse global-vars-to-create))
-            (for-each force (reverse form-do-after-creation))
-            (init-components (reverse components-to-create)))
+            ;; Now that all the components are constructed we can call
+            ;; their init-thunk and their Initialize methods.  We need
+            ;; to do this after all the construction steps because the
+            ;; init-thunk (i.e. design-time initializations) and
+            ;; Initialize methods may contain references to other
+            ;; components.
+            (init-components components))
           (exception com.google.appinventor.components.runtime.errors.YailRuntimeError
                      ;;(android-log-form "Caught exception in define-form ")
                      (process-exception exception))))))))
@@ -578,6 +658,14 @@
     (syntax-case stx ()
       ((_ component-name event-name)
        (datum->syntax-object stx #'(symbol-append component-name '$ event-name))))))
+
+;;; (gen-generic-event-name Button Click)
+;;; ==> any$Button$Click
+(define-syntax gen-generic-event-name
+  (lambda (stx)
+    (syntax-case stx ()
+      ((_ component-type event-name)
+       (datum->syntax-object stx #'(symbol-append 'any$ component-type '$ event-name))))))
 
 ;;; define-event-helper looks suspiciously like define, but we need it because
 ;;; if we use define directly in the define-event definition below, the call
@@ -646,6 +734,13 @@
                 'event-name)
                ;; If it's not the REPL the form's $define() method will do the registration
                (add-to-events 'component-name 'event-name)))))))
+
+(define-syntax define-generic-event
+  (lambda (stx)
+    (syntax-case stx ()
+      ((_ component-type event-name args . body)
+       #`(begin
+           (define-event-helper ,(gen-generic-event-name #`component-type #`event-name) args body))))))
 
 ;;;; def
 
@@ -766,26 +861,100 @@
         (*:addParent (KawaEnvironment:getCurrent) *test-environment*)
         (set! *test-global-var-environment* (gnu.mapping.Environment:make 'test-global-var-env)))))
 
-(define-syntax foreach
-  (syntax-rules ()
-    ((_ lambda-arg-name body-form list)
-     (yail-for-each (lambda (lambda-arg-name) body-form) list))))
 
+;; Note: (Jeff Schiller) The macro below is intentionally
+;; unhygienic. We need to make sure that if there is a *yail-break*
+;; form inside bodyform that it does not get shadowed by the macro
+;; (which it would if this was a hygienic macro).
 
-(define-syntax forrange
-  (syntax-rules ()
-    ((_ lambda-arg-name body-form start end step)
-     (yail-for-range (lambda (lambda-arg-name) body-form) start end step))))
+(define-macro (foreach arg-name bodyform list-of-args)
+  `(call-with-current-continuation
+    (lambda (*yail-break*)
+      (let ((proc (lambda (,arg-name) ,bodyform)))
+        (yail-for-each proc ,list-of-args)))))
 
-(define-syntax while
+;; This yail procedure should be called only if "*yail-break*" is used
+;; outside of a foreach, forrange or while macro.  The blocks editor
+;; should give an error if the break block is placed outside of a
+;; loop.  So the only way this yail procedure would be called should
+;; be by running do-it on an isolated break block.  See
+;; blocklyeditor/src/warninghandler.js checkIsNotInLoop
+
+(define (*yail-break* ignore)
+  (signal-runtime-error
+     "Break should be run only from within a loop"
+     "Bad use of Break"))
+
+;; Also unhygienic (see comment above about foreach)
+
+(define-macro (forrange lambda-arg-name body-form start end step)
+  `(call-with-current-continuation
+    (lambda (*yail-break*)
+      (yail-for-range (lambda (,lambda-arg-name) ,body-form) ,start ,end ,step))))
+
+;; Also unhygienic (see comment above about foreach)
+
+;; The structure of this macro is important. If the argument to
+;; call-with-current-continuation is a lambda expression, then Kawa
+;; attempts to optimize it. This optimization fails spectacularly when
+;; the lambda expression is tail-recursive (like ours is). By binding
+;; the lambda expression to a variable and then calling via the
+;; variable, the optimizer is not invoked and the code produced, while
+;; not optmized, is correct.
+
+(define-macro (while condition body . rest)
+  `(let ((cont (lambda (*yail-break*)
+                 (let *yail-loop* ()
+                   (if ,condition
+                       (begin (begin ,body . ,rest)
+                              (*yail-loop*))
+                       #!null)))))
+     (call-with-current-continuation cont)))
+
+;; Below are hygienic versions of the forrange, foreach and while
+;; macros. They are here to be "future aware". A future version of
+;; MIT App Inventor will use these hygienic versions which require
+;; and additional argument, and therefore different YAIL generation
+
+(define-syntax foreach-with-break
   (syntax-rules ()
-    ((_ condition body ...)
-     (let loop ()
-       (if condition
-       (begin
-         body ...
-         (loop))
-       *the-null-value*)))))
+    ((_ escapename arg-name bodyform list-of-args)
+     (call-with-current-continuation
+      (lambda (escapename)
+	(let ((proc (lambda (arg-name) bodyform)))
+	  (yail-for-each proc list-of-args)))))))
+
+  ;; To call this foreach-with-break macro, we must pass a symbol that
+  ;; will be the name of an escape procedure referenced in the body of
+  ;; the proc argument.  For example
+  ;;
+  ;; (foreach-with-break
+  ;;  *yail-break*
+  ;;  x
+  ;;  (if (= x 17)
+  ;;      (begin (display "escape") (*yail-break* #f))
+  ;;      (begin (display x) (display " "))
+  ;;      )
+  ;;  '(100 200 17 300))
+
+(define-syntax forrange-with-break
+  (syntax-rules ()
+    ((_ escapename lambda-arg-name body-form start end step)
+     (call-with-current-continuation
+      (lambda (escapename)
+	(yail-for-range (lambda (lambda-arg-name) body-form) start end step))))))
+
+(define-syntax while-with-break
+  (syntax-rules ()
+    ((_ escapename condition body ...)
+     (call-with-current-continuation
+      (lambda (escapename)
+	(let loop ()
+	  (if condition
+	      (begin
+		body ...
+		(loop))
+	      *the-null-value*)))))))
 
 ;;; RUNTIME library
 
@@ -806,11 +975,15 @@
 (define-alias String <java.lang.String>)
 (define-alias Pattern <java.util.regex.Pattern>)
 (define-alias YailList <com.google.appinventor.components.runtime.util.YailList>)
+(define-alias YailDictionary <com.google.appinventor.components.runtime.util.YailDictionary>)
 (define-alias YailNumberToString <com.google.appinventor.components.runtime.util.YailNumberToString>)
 (define-alias YailRuntimeError <com.google.appinventor.components.runtime.errors.YailRuntimeError>)
+(define-alias PermissionException <com.google.appinventor.components.runtime.errors.PermissionException>)
+(define-alias JavaStringUtils <com.google.appinventor.components.runtime.util.JavaStringUtils>)
 
 (define-alias JavaCollection <java.util.Collection>)
 (define-alias JavaIterator <java.util.Iterator>)
+(define-alias JavaMap <java.util.Map>)
 
 ;;; This is what CodeBlocks sends to Yail to represent the value of an uninitialized variable
 ;;; Perhaps we should arrange things so that codeblocks never sends this.
@@ -875,10 +1048,13 @@
   (let ((coerced-args (coerce-args method-name arglist typelist)))
     (let ((result
            (if (all-coercible? coerced-args)
-               (apply invoke
-                      `(,(lookup-in-current-form-environment component-name)
-                        ,method-name
-                        ,@coerced-args))
+               (try-catch
+                (apply invoke
+                       `(,(lookup-in-current-form-environment component-name)
+                         ,method-name
+                         ,@coerced-args))
+                (exception PermissionException
+                           (*:dispatchPermissionDeniedEvent (SimpleForm:getActiveForm) (lookup-in-current-form-environment component-name) method-name exception)))
                (generate-runtime-type-error method-name arglist))))
       ;; TODO(markf): this should probably be generalized but for now this is OK, I think
       (sanitize-component-data result))))
@@ -990,6 +1166,12 @@
    ;; we need to check for strings first because gnu.lists.FString is a
    ;; subtype of JavaCollection
    ((string? data) data)
+   ;; WARNING: Component writers can construct Yail dictionaries directly, and
+   ;; these pass through sanitization unchallenged.  So any component writer
+   ;; who constructs a Yail dictionary must ensure that list elements are themselves
+   ;; legitimate Yail data types that do not require sanitization.
+   ((yail-dictionary? data) data)
+   ((instance? data JavaMap) (java-map->yail-dictionary data))
    ;; WARNING: Component writers can construct Yail lists directly, and
    ;; these pass through sanitization unchallenged.  So any component writer
    ;; who constructs a Yail list must ensure that list elements are themselves
@@ -1022,6 +1204,26 @@
           (looper (cons (sanitize-component-data (iterator:next))
                         result))))
     (reverse! (looper '()))))
+
+;;; The initial version of this function iterated over entries rather than
+;;; keys, which has getKey and getValue methods. Unfortunately, Kawa tries
+;;; to do the Java Bean thing and look up the fields directly rather than
+;;; calling the methods. This fails because the fields don't have the right
+;;; access modifiers for what Kawa wants to do. Now we use this less
+;;; efficient process by iterating over the keys and looking up the
+;;; corresponding value.
+(define (java-map->yail-dictionary jMap :: JavaMap)
+  (let ((iterator :: JavaIterator ((jMap:keySet):iterator))
+        (dict :: YailDictionary (YailDictionary)))
+    (define (convert)
+      (if (not (iterator:hasNext))
+          dict
+          (let ((key (iterator:next)))
+            (*:put dict
+                   key
+                   (sanitize-component-data (jMap:get key)))
+            (convert))))
+    (convert)))
 
 (define (sanitize-atomic arg)
   (cond
@@ -1077,7 +1279,10 @@
   (let ((coerced-arg (coerce-arg property-value property-type)))
     (android-log (format #f "coerced property value was: ~A " coerced-arg))
     (if (all-coercible? (list coerced-arg))
-        (invoke comp prop-name coerced-arg)
+        (try-catch
+         (invoke comp prop-name coerced-arg)
+         (exception PermissionException
+                    (*:dispatchPermissionDeniedEvent (SimpleForm:getActiveForm) comp prop-name exception)))
         (generate-runtime-type-error prop-name (list property-value)))))
 
 
@@ -1145,6 +1350,9 @@
      ((equal? type 'list) (coerce-to-yail-list arg))
      ((equal? type 'InstantInTime) (coerce-to-instant arg))
      ((equal? type 'component) (coerce-to-component arg))
+     ((equal? type 'pair) (coerce-to-pair arg))
+     ((equal? type 'key) (coerce-to-key arg))
+     ((equal? type 'dictionary) (coerce-to-dictionary arg))
      ((equal? type 'any) arg)
      (else (coerce-to-component-of-type arg type)))))
 
@@ -1159,7 +1367,11 @@
 (define (coerce-to-instant arg)
   (cond
    ((instance? arg java.util.Calendar) arg)
-   (else *non-coercible-value*)))
+   (else
+     (let ((as-millis (coerce-to-number arg)))
+       (if (number? as-millis)
+           (com.google.appinventor.components.runtime.Clock:MakeInstantFromMillis as-millis)
+         *non-coercible-value*)))))
 
 (define (coerce-to-component arg)
   (cond
@@ -1194,6 +1406,12 @@
    ((number? arg) arg)
    ((string? arg)
     (or (padded-string->number arg) *non-coercible-value*))
+   (else *non-coercible-value*)))
+
+(define (coerce-to-key arg)
+  (cond
+   ((number? arg) (coerce-to-number arg))
+   ((string? arg) (coerce-to-string arg))
    (else *non-coercible-value*)))
 
 (define-syntax use-json-format
@@ -1271,22 +1489,58 @@
                 (string-append "[" (join-strings pieces ", ") "]")))
             (else (call-with-output-string (lambda (port) (display arg port))))))))
 
-(define (join-strings strings separator)
-   (cond ((null? strings) "")
-         ((null? (cdr strings)) (car strings))
-         (else ;; have at least two strings
-           (apply string-append
-                  (cons (car strings)
-                        (let recur ((strs (cdr strings)))
-                          (if (null? strs)
-                              '()
-                              (cons separator (cons (car strs) (recur (cdr strs)))))))))))
 
-;;;!!! end of replacement
+;;; join-strings:  Combine all the strings in a list, separated by a specified separator string.
+;;; WARNING: The elements of list-of-strings must be actual strings.   Otherwise, we'll get type
+;;; errors.
 
+;;; We're using Java for joining collections of strings, because doing it
+;;; in Kawa seems to run out of memory (or stack?) on large collections
+;;; a small-memory phones (like the original emulator).
+
+;; Here's the original recursive version that overflows stack
+;; (define (join-strings list-of-strings separator)
+;;    (cond ((null? list-of-strings) "")
+;;          ((null? (cdr list-of-strings)) (car list-of-strings))
+;;          (else ;; have at least two strings
+;;            (apply string-append
+;;                   (cons (car list-of-strings)
+;;                         (let recur ((strs (cdr list-of-strings)))
+;;                           (if (null? strs)
+;;                               '()
+;;                               (cons separator (cons (car strs) (recur (cdr strs)))))))))))
+
+
+;;; Here's a replacement tail-recursive version that runs out of
+;;; memory in the emulator.  Is this due to inadequate tail recursion in Kawa?
+
+;; (define (join-strings list-of-strings separator)
+;;   (join-strings-iter list-of-strings separator))
+
+;; (define (join-strings-iter list-of-strings separator)
+;;   (if (null? list-of-strings)
+;;       ""
+;;       (let ((rstrings (reverse list-of-strings)))
+;;      (let loop ((remaining (cdr rstrings))
+;;                 (joined-so-far (car rstrings)))
+;;        (if (null? remaining)
+;;            joined-so-far
+;;            (loop (cdr remaining)
+;;                  (string-append (car remaining) separator joined-so-far)))))))
+
+;;; Here's the Java version
+
+(define (join-strings list-of-strings separator)
+  ;; NOTE: The elements in list-of-strings should be Kawa strings
+  ;; but they might not be Java strings, since some (all?) Kawa strings
+  ;; are FStrings.  See JavaStringUtils in components/runtime/utils
+  (JavaStringUtils:joinStrings list-of-strings separator))
+
+;;; end of join-strings
 
 ;; Note: This is not general substring replacement. It just replaces one string with another
 ;; using the replacement table
+
 (define (string-replace original replacement-table)
   (cond ((null? replacement-table) original)
         ((string=? original (caar replacement-table)) (cadar replacement-table))
@@ -1296,8 +1550,20 @@
 (define (coerce-to-yail-list arg)
   (cond
    ((yail-list? arg) arg)
+   ((yail-dictionary? arg) (yail-dictionary-dict-to-alist arg))
    (else *non-coercible-value*)))
 
+(define (coerce-to-pair arg)
+  (coerce-to-yail-list arg))
+
+(define (coerce-to-dictionary arg)
+  (cond
+    ((yail-dictionary? arg) arg)
+    ((yail-list? arg) (yail-dictionary-alist-to-dict arg))
+    (else (try-catch
+            (arg:toYailDictionary)
+            (exception java.lang.Exception
+              (*non-coercible-value*))))))
 
 (define (coerce-to-boolean arg)
   (cond
@@ -1576,13 +1842,31 @@
           360))
 
 (define (sin-degrees degrees)
-  (sin (degrees->radians-internal degrees)))
+  (if (= (modulo degrees 90) 0)
+    (if (= (modulo (/ degrees 90) 2) 0)
+      0
+      (if (= (modulo (/ (- degrees 90) 180) 2) 0)
+        1
+        -1))
+    (sin (degrees->radians-internal degrees))))
 
 (define (cos-degrees degrees)
-  (cos (degrees->radians-internal degrees)))
+  (if (= (modulo degrees 90) 0)
+    (if (= (modulo (/ degrees 90) 2) 1)
+      0
+      (if (= (modulo (/ degrees 180) 2) 1)
+        -1
+        1))
+    (cos (degrees->radians-internal degrees))))
 
 (define (tan-degrees degrees)
-  (tan (degrees->radians-internal degrees)))
+  (if (= (modulo degrees 180) 0)
+    0
+    (if (= (modulo (- degrees 45) 90)  0)
+      (if (= (modulo (/ (- degrees 45) 90) 2) 0)
+        1
+        -1)
+      (tan (degrees->radians-internal degrees)))))
 
 ;; Result should be in the range [-90, +90].
 (define (asin-degrees y)
@@ -1605,6 +1889,21 @@
 
 (define (string-to-lower-case s)
   (String:toLowerCase (s:toString)))
+
+(define (unicode-string->list str :: <string>) :: <list>
+  (let loop ((result :: <list> '()) (i :: <int> (string-length str)))
+    (set! i (- i 1))
+    (if (< i 0) result
+        (if (and (>= i 1)
+              (let ((c (string-ref str i))
+                    (c1 (string-ref str (- i 1))))
+                (and (char>=? c #\xD800) (char<=? c #\xDFFF)
+                     (char>=? c1 #\xD800) (char<=? c1 #\xDFFF))))
+            (loop (make <pair> (string-ref str i) (make <pair> (string-ref str (- i 1)) result)) (- i 1))
+          (loop (make <pair> (string-ref str i) result) i)))))
+
+(define (string-reverse s)
+  (list->string (reverse (unicode-string->list s))))
 
 ;;; returns a string that is the number formatted with a
 ;;; specified number of decimal places
@@ -1739,6 +2038,7 @@ Block name               Kawa implementation
 - remove list item        (yail-list-remove-item! yail-list index)
 - length of list          (yail-list-length yail-list)
 - copy list               (yail-list-copy list)
+- reverse list            (yail-list-reverse list)
 - list to csv row         (yail-list-to-csv-row list)
 - list to csv table       (yail-list-to-csv-table list)
 - list from csv row       (yail-list-from-csv-row text)
@@ -1756,6 +2056,7 @@ Block name               Kawa implementation
 - is list?                (yail-list? object)
 - is empty?               (yail-list-empty? yail-list)
 - lookup in pairs         (yail-alist-lookup key yail-list-of-pairs default)
+- join with separator     (yail-list-join-with-separator yail-list separator)
 
 Lists in App Inventor are implemented as "Yail lists".  A Yail list is
 a Java pair whose car is a distinguished token
@@ -1832,6 +2133,13 @@ list, use the make-yail-list constructor with no arguments.
   (cond ((yail-list-empty? yl) (make YailList))
         ((not (pair? yl)) yl)
         (else (YailList:makeList (map yail-list-copy (yail-list-contents yl))))))
+
+;;; does a shallow copy of the yail list yl with its order reversed.
+;;; yl should be a YailList
+(define (yail-list-reverse yl)
+  (if (not (yail-list? yl))
+    (signal-runtime-error "Argument value to \"reverse list\" must be a list" "Expecting list")
+    (insert-yail-list-header (reverse (yail-list-contents yl)))))
 
 ;;; converts a yail list to a CSV-formatted table and returns the text.
 ;;; yl should be a YailList, each element of which is a YailList as well.
@@ -2170,18 +2478,120 @@ list, use the make-yail-list constructor with no arguments.
            (cadr (yail-list-contents (car pairs-to-check))))
           (else (loop (cdr pairs-to-check))))))
 
-
-
 (define (pair-ok? candidate-pair)
   (and (yail-list? candidate-pair)
        (= (length (yail-list-contents candidate-pair)) 2)))
 
-
-
+;;; Joins list elements into a string separated by separator
+;;; Important to convert yail-list to yail-list-contents so that *list*
+;;; is not included as first string.
+(define (yail-list-join-with-separator yail-list separator)
+  (join-strings (yail-list-contents yail-list) separator))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; End of List implementation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#|
+Dictionary implementation.
+
+- make dictionary           (make-yail-dictionary . pairs)
+- make pair                 (make-dictionary-pair key value)
+- set pair                  (yail-dictionary-set-pair yail-dictionary pair)
+- delete pair               (yail-dictionary-delete-pair yail-dictionary key)
+- dictionary lookup         (yail-dictionary-lookup key yail-dictionary default)
+- dict recursive lookup     (yail-dictionary-recursive-lookup keys yail-dictionary default)
+- dict recursive set        (yail-dictionary-recursive-set keys yail-dictionary value)
+- get keys                  (yail-dictionary-get-keys yail-dictionary)
+- get values                (yail-dictionary-get-values yail-dictionary)
+- is key in dict            (yail-dictionary-is-key-in key yail-dictionary)
+- get length of dict        (yail-dictionary-length yail-dictionary)
+- get copy of dict          (yail-dictionary-copy yail-dictionary)
+- combine two dicts         (yail-dictionary-combine-dicts first-dictionary second-dictionary)
+- turn alist to dict        (yail-dictionary-alist-to-dict alist)
+- turn dict to alist        (yail-dictionary-dict-to-alist dict)
+
+- is YailDictionary?        (yail-dictionary? x)
+
+|#
+
+(define (make-yail-dictionary . pairs)
+  (YailDictionary:makeDictionary pairs))
+
+(define (make-dictionary-pair key value)
+  (make-yail-list key value))
+
+(define (yail-dictionary-set-pair key yail-dictionary value)
+  (*:put (as YailDictionary yail-dictionary) key value))
+
+(define (yail-dictionary-delete-pair yail-dictionary key)
+  (*:remove (as YailDictionary yail-dictionary) key))
+
+(define (yail-dictionary-lookup key yail-dictionary default)
+  (let ((result
+    (cond ((instance? yail-dictionary YailList)
+           (yail-alist-lookup key yail-dictionary default))
+          ((instance? yail-dictionary YailDictionary)
+            (*:get (as YailDictionary yail-dictionary) key))
+          (#t default))))
+    (if (eq? result #!null)
+      default
+      result)))
+
+(define (yail-dictionary-recursive-lookup keys yail-dictionary default)
+  (let ((result (*:getObjectAtKeyPath (as YailDictionary yail-dictionary) (yail-list-contents keys))))
+    (if (eq? result #!null)
+      default
+      result)))
+
+(define (yail-dictionary-walk path dict)
+  (YailList:makeList (YailDictionary:walkKeyPath dict (yail-list-contents path))))
+
+(define (yail-dictionary-recursive-set keys yail-dictionary value)
+  (yail-dictionary:setValueForKeyPath (yail-list-contents keys) value))
+
+(define (yail-dictionary-get-keys yail-dictionary)
+  (YailList:makeList (*:keySet (as YailDictionary yail-dictionary))))
+
+(define (yail-dictionary-get-values yail-dictionary)
+  (YailList:makeList (*:values (as YailDictionary yail-dictionary))))
+
+(define (yail-dictionary-is-key-in key yail-dictionary)
+  (*:containsKey (as YailDictionary yail-dictionary) key))
+
+(define (yail-dictionary-length yail-dictionary)
+  (*:size (as YailDictionary yail-dictionary)))
+
+(define (yail-dictionary-alist-to-dict alist)
+  (let loop ((pairs-to-check (yail-list-contents alist)))
+    (cond ((null? pairs-to-check) "The list of pairs has a null pair")
+          ((not (pair-ok? (car pairs-to-check)))
+           (signal-runtime-error
+            (format #f "List of pairs to dict: the list ~A is not a well-formed list of pairs"
+                    (get-display-representation alist))
+            "Invalid list of pairs"))
+          (else (loop (cdr pairs-to-check)))))
+  (YailDictionary:alistToDict alist))
+
+(define (yail-dictionary-dict-to-alist dict)
+  (YailDictionary:dictToAlist dict))
+
+(define (yail-dictionary-copy yail-dictionary)
+  (*:clone (as YailDictionary yail-dictionary)))
+
+(define (yail-dictionary-combine-dicts first-dictionary second-dictionary)
+  (*:putAll (as YailDictionary first-dictionary) second-dictionary))
+
+(define (yail-dictionary? x)
+  (instance? x YailDictionary))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; End of Dictionary implementation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;Text implementation
@@ -2272,6 +2682,19 @@ list, use the make-yail-list constructor with no arguments.
              (b3 (bitwise-and (bitwise-ior (bitwise-arithmetic-shift-left b2 8) b) 255))
              (b4 (bitwise-and (bitwise-xor b3 (char->integer (string-ref lc i))) 255)))
         (set! acc (cons b4 acc))))))
+
+;; NOTE: The keys & values in the YailDictionary should be <String, String>.
+;; However, this might not necessarily be the case, so we pass in an <Object, Object>
+;; map instead to the Java call.
+;; See JavaStringUtils in components/runtime/utils
+(define (string-replace-mappings-dictionary text mappings)
+  (JavaStringUtils:replaceAllMappingsDictionaryOrder text mappings))
+
+(define (string-replace-mappings-longest-string text mappings)
+  (JavaStringUtils:replaceAllMappingsLongestStringOrder text mappings))
+
+(define (string-replace-mappings-earliest-occurrence text mappings)
+  (JavaStringUtils:replaceAllMappingsEarliestOccurrenceOrder text mappings))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; End of Text implementation
@@ -2500,16 +2923,23 @@ list, use the make-yail-list constructor with no arguments.
                  (try-catch
                   (list "OK"
                         (get-display-representation (force promise)))
+                  (exception PermissionException
+                             (exception:printStackTrace)
+                             (list "NOK"
+                                   (string-append "Failed due to missing permission: "
+                                                  (exception:getPermissionNeeded))))
                   (exception YailRuntimeError
                              (android-log (exception:getMessage))
                              (list "NOK"
                                    (exception:getMessage))))
-                 (exception java.lang.Exception
+                 (exception java.lang.Throwable
                             (android-log (exception:getMessage))
                             (exception:printStackTrace)
                             (list
                              "NOK"
-                             (exception:getMessage)))))))))
+                             (if (instance? exception java.lang.Error)
+                                 (exception:toString)
+                                 (exception:getMessage))))))))))
 
 ;; send-to-block is used for all communication back to the blocks editor
 ;; Calls on report are also generated for code from the blocks compiler
@@ -2587,3 +3017,8 @@ list, use the make-yail-list constructor with no arguments.
                  ((equal? (car sl) " ") "<space>")
                  (#t (car sl)))))
         (cons sp (clarify1 (cdr sl))))))
+
+;; Support for WebRTC communication between browser and Companion
+;; as well as learning which assets we need to load
+
+(define-alias AssetFetcher <com.google.appinventor.components.runtime.util.AssetFetcher>)

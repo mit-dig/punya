@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,8 +17,11 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.errors.PermissionException;
+import com.google.appinventor.components.runtime.util.BulkPermissionRequest;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.FileUtil;
+import android.Manifest;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
@@ -28,8 +31,9 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * Multimedia component that records audio using
- * {@link android.media.MediaRecorder}.
+ * ![SoundRecorder icon](images/soundrecorder.png)
+ *
+ * Multimedia component that records audio.
  *
  */
 @DesignerComponent(version = YaVersion.SOUND_RECORDER_COMPONENT_VERSION,
@@ -51,6 +55,8 @@ public final class SoundRecorder extends AndroidNonvisibleComponent
   // note that this is also initialized to "" in the designer
   private String savedRecording = "";
 
+  // Whether or not we have the RECORD_AUDIO permission
+  private boolean havePermission = false;
 
   /**
    * This class encapsulates the required state during recording.
@@ -82,8 +88,9 @@ public final class SoundRecorder extends AndroidNonvisibleComponent
 
     void start() throws IllegalStateException {
       Log.i(TAG, "starting");
+
       try {
-      recorder.start();
+        recorder.start();
       } catch (IllegalStateException e) {
         // This is the error produced when there are two recorders running.
         // There might be other causes, but we don't know them.
@@ -116,13 +123,16 @@ public final class SoundRecorder extends AndroidNonvisibleComponent
 
 
   /**
-   * Returns the path to the saved recording
+   * Specifies the path to the file where the recording should be stored. If this property is the
+   * empty string, then starting a recording will create a file in an appropriate location. If the
+   * property is not the empty string, it should specify a complete path to a file in an existing
+   * directory, including a file name with the extension .3gp.
    *
    * @return  savedRecording path to recording
    */
   @SimpleProperty(
       description = "Specifies the path to the file where the recording should be stored. " +
-          "If this proprety is the empty string, then starting a recording will create a file in " +
+          "If this property is the empty string, then starting a recording will create a file in " +
           "an appropriate location.  If the property is not the empty string, it should specify " +
           "a complete path to a file in an existing directory, including a file name with the " +
           "extension .3gp." ,
@@ -134,6 +144,7 @@ public final class SoundRecorder extends AndroidNonvisibleComponent
   /**
    * Specifies the path to the saved recording displayed by the label.
    *
+   * @suppressdoc
    * @param pathName  path to saved recording
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
@@ -148,6 +159,25 @@ public final class SoundRecorder extends AndroidNonvisibleComponent
    */
   @SimpleFunction
   public void Start() {
+    // Need to check if we have RECORD_AUDIO and WRITE_EXTERNAL permissions
+    if (!havePermission) {
+      final SoundRecorder me = this;
+      form.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          form.askPermission(new BulkPermissionRequest(me, "Start",
+                  Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+            @Override
+            public void onGranted() {
+              me.havePermission = true;
+              me.Start();
+            }
+          });
+        }
+      });
+      return;
+    }
+
     if (controller != null) {
       Log.i(TAG, "Start() called, but already recording to " + controller.file);
       return;
@@ -160,6 +190,9 @@ public final class SoundRecorder extends AndroidNonvisibleComponent
     }
     try {
       controller = new RecordingController(savedRecording);
+    } catch (PermissionException e) {
+      form.dispatchPermissionDeniedEvent(this, "Start", e);
+      return;
     } catch (Throwable t) {
       form.dispatchErrorOccurredEvent(
           this, "Start", ErrorMessages.ERROR_SOUND_RECORDER_CANNOT_CREATE, t.getMessage());

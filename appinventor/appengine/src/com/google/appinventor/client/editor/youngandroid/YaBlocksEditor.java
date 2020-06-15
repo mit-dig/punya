@@ -1,10 +1,11 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright © 2009-2011 Google, All Rights reserved
+// Copyright © 2011-2016 Massachusetts Institute of Technology, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 package com.google.appinventor.client.editor.youngandroid;
 
+import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.boxes.AssetListBox;
@@ -16,13 +17,14 @@ import com.google.appinventor.client.editor.simple.components.FormChangeListener
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockForm;
 import com.google.appinventor.client.editor.simple.palette.DropTargetProvider;
+import com.google.appinventor.client.editor.youngandroid.BlocklyPanel.BlocklyWorkspaceChangeListener;
+import com.google.appinventor.client.editor.youngandroid.events.EventHelper;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.explorer.project.ComponentDatabaseChangeListener;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.widgets.dnd.DropTarget;
-import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
 import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
@@ -30,14 +32,18 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocks
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.xml.client.Document;
+import com.google.gwt.xml.client.Element;
+import com.google.gwt.xml.client.NodeList;
+import com.google.gwt.xml.client.XMLParser;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +54,11 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 /**
  * Editor for Young Android Blocks (.blk) files.
  *
- * TODO(sharon): blocks file loading and saving is not implemented yet!!
- *
  * @author lizlooney@google.com (Liz Looney)
  * @author sharon@google.com (Sharon Perl) added Blockly functionality
  */
 public final class YaBlocksEditor extends FileEditor
-    implements FormChangeListener, BlockDrawerSelectionListener, ComponentDatabaseChangeListener {
+    implements FormChangeListener, BlockDrawerSelectionListener, ComponentDatabaseChangeListener, BlocklyWorkspaceChangeListener {
 
   // A constant to substract from the total height of the Viewer window, set through
   // the computed height of the user's window (Window.getClientHeight())
@@ -104,14 +108,6 @@ public final class YaBlocksEditor extends FileEditor
   // The form editor associated with this blocks editor
   private YaFormEditor myFormEditor;
 
-  // Used to determine if the newly generated yail should be sent to the debugging phone
-  private String lastYail = "";
-
-  //Timer used to poll blocks editor to check if it is initialized
-  private static Timer timer;
-
-  private final List<ComponentDatabaseChangeListener> componentDatabaseChangeListeners = new ArrayList<ComponentDatabaseChangeListener>();
-
   YaBlocksEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
 
@@ -135,7 +131,7 @@ public final class YaBlocksEditor extends FileEditor
      }
     });
     initWidget(blocksArea);
-    addComponentDatabaseChangeListener(blocksArea);
+    blocksArea.populateComponentTypes(COMPONENT_DATABASE.getComponentsJSONString());
 
     // Get references to the source structure explorer
     sourceStructureExplorer = BlockSelectorBox.getBlockSelectorBox().getSourceStructureExplorer();
@@ -178,7 +174,13 @@ public final class YaBlocksEditor extends FileEditor
           return;
         }
         String formJson = myFormEditor.preUpgradeJsonString(); // [lyn, 2014/10/27] added formJson for upgrading
-        blocksArea.loadBlocksContent(formJson, blkFileContent);
+        try {
+          blocksArea.loadBlocksContent(formJson, blkFileContent);
+          blocksArea.addChangeListener(YaBlocksEditor.this);
+        } catch(LoadBlocksException e) {
+          setBlocksDamaged(fullFormName);
+          ErrorReporter.reportError(MESSAGES.blocksNotSaved(fullFormName));
+        }
         loadComplete = true;
         selectedDrawer = null;
         if (afterFileLoaded != null) {
@@ -205,27 +207,8 @@ public final class YaBlocksEditor extends FileEditor
   public void onShow() {
     OdeLog.log("YaBlocksEditor: got onShow() for " + getFileId());
     super.onShow();
-    showWhenInitialized();
-  }
-
-  public void showWhenInitialized() {
-    //check if blocks are initialized
-    if(BlocklyPanel.blocksInited(fullFormName)) {
-      blocksArea.showDifferentForm(fullFormName);
-      loadBlocksEditor();
-      sendComponentData();  // Send Blockly the component information for generating Yail
-      blocksArea.renderBlockly(); //Re-render Blockly due to firefox bug
-    } else {
-      //timer calls this function again if the blocks are not initialized
-      if(timer == null) {
-        timer = new Timer() {
-          public void run() {
-            showWhenInitialized();
-          }
-        };
-      }
-      timer.schedule(200); // Run every 200 milliseconds
-    }
+    loadBlocksEditor();
+    sendComponentData();  // Send Blockly the component information for generating Yail
   }
 
   /*
@@ -255,6 +238,7 @@ public final class YaBlocksEditor extends FileEditor
       Ode.getInstance().getStructureAndAssets().insert(BlockSelectorBox.getBlockSelectorBox(), 0);
       BlockSelectorBox.getBlockSelectorBox().setVisible(true);
       AssetListBox.getAssetListBox().setVisible(true);
+      blocksArea.injectWorkspace();
       hideComponentBlocks();
     } else {
       OdeLog.wlog("Can't get form editor for blocks: " + getFileId());
@@ -287,8 +271,8 @@ public final class YaBlocksEditor extends FileEditor
 
   public static void toggleWarning() {
     BlocklyPanel.switchWarningVisibility();
-    for(Object formName : formToBlocksEditor.keySet().toArray()){
-      BlocklyPanel.toggleWarning((String) formName);
+    for(YaBlocksEditor editor : formToBlocksEditor.values()){
+      editor.blocksArea.toggleWarning();
     }
   }
 
@@ -309,27 +293,31 @@ public final class YaBlocksEditor extends FileEditor
     // Clear and hide the blocks selector tree
     sourceStructureExplorer.clearTree();
     hideComponentBlocks();
+    blocksArea.hideChaff();
   }
 
-  public static void onBlocksAreaChanged(String formName) {
-    YaBlocksEditor editor = formToBlocksEditor.get(formName);
-    if (editor != null) {
-      OdeLog.log("Got blocks area changed for " + formName);
-      Ode.getInstance().getEditorManager().scheduleAutoSave(editor);
-      if (editor instanceof YaBlocksEditor)
-        editor.sendComponentData();
+  @Override
+  public void onWorkspaceChange(BlocklyPanel panel, JavaScriptObject event) {
+    if (!EventHelper.isTransient(event)) {
+      Ode.getInstance().getEditorManager().scheduleAutoSave(this);
+    }
+    if (!EventHelper.isUi(event)) {
+      sendComponentData();
     }
   }
 
   @Override
-  public void getBlocksImage(Callback callback) {
+  public void getBlocksImage(Callback<String, String> callback) {
     blocksArea.getBlocksImage(callback);
   }
 
   public synchronized void sendComponentData() {
+    sendComponentData(false);
+  }
+
+  public synchronized void sendComponentData(boolean force) {
     try {
-      blocksArea.sendComponentData(myFormEditor.encodeFormAsJsonString(true),
-        packageNameFromPath(getFileId()));
+      blocksArea.sendComponentData(myFormEditor.encodeFormAsJsonString(true), packageNameFromPath(getFileId()), force);
     } catch (YailGenerationException e) {
       e.printStackTrace();
     }
@@ -337,7 +325,7 @@ public final class YaBlocksEditor extends FileEditor
 
   private void updateBlocksTree(MockForm form, SourceStructureExplorerItem itemToSelect) {
     TreeItem items[] = new TreeItem[3];
-    items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree();
+    items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree(form);
     items[1] = form.buildComponentsTree();
     items[2] = BlockSelectorBox.getBlockSelectorBox().getGenericComponentsTree(form);
     sourceStructureExplorer.updateTree(items, itemToSelect);
@@ -354,6 +342,56 @@ public final class YaBlocksEditor extends FileEditor
   @Override
   public String getRawFileContent() {
     return blocksArea.getBlocksContent();
+  }
+
+  public Set<String> getBlockTypeSet() {
+    Set<String> blockTypes = new HashSet<String>();
+    String xmlString = blocksArea.getBlocksContent();
+    Document blockDoc = XMLParser.parse(xmlString);
+    NodeList blockElements = blockDoc.getElementsByTagName("block");
+    for (int i = 0; i < blockElements.getLength(); ++i) {
+      Element blockElem = (Element) blockElements.item(i);
+      blockTypes.add(blockElem.getAttribute("type"));
+    }
+    return blockTypes;
+  }
+
+  // This creates a hash of sets. The key is the name of a blocktype. The set is the names of
+  // component blocks (events, methods, and properties) that are used in the current project.
+  // The method takes the a hash of sets as an input so that it may be called multiple times
+  // for separate screens, creating the set of component blocks used through the entire project.
+  // TODO: Examine refactor with XPATH
+  public HashMap<String, Set<String>> getComponentBlockTypeSet(HashMap<String, Set<String>> componentBlocks) {
+    String xmlString = blocksArea.getBlocksContent();
+    Document blockDoc = XMLParser.parse(xmlString);
+    NodeList blockElements = blockDoc.getElementsByTagName("block");
+    for (int i = 0; i < blockElements.getLength(); ++i) {
+      Element blockElem = (Element) blockElements.item(i);
+      String blockType = blockElem.getAttribute("type");
+      if ("component_event".equals(blockType)) {
+        Element mutElem = (Element) blockElem.getElementsByTagName("mutation").item(0);
+        String component_type = mutElem.getAttribute("component_type");
+        String event_name = mutElem.getAttribute("event_name");
+        Set<String> blockTypes = componentBlocks.get(component_type) == null ? new HashSet<String>() : componentBlocks.get(component_type);
+        blockTypes.add(event_name);
+        componentBlocks.put(component_type, blockTypes);
+      } else if ("component_method".equals(blockType)) {
+        Element mutElem = (Element) blockElem.getElementsByTagName("mutation").item(0);
+        String component_type = mutElem.getAttribute("component_type");
+        String method_name = mutElem.getAttribute("method_name");
+        Set<String> blockTypes = componentBlocks.get(component_type) == null ? new HashSet<String>() : componentBlocks.get(component_type);
+        blockTypes.add(method_name);
+        componentBlocks.put(component_type, blockTypes);
+      } else if ("component_set_get".equals(blockType)) {
+        Element mutElem = (Element) blockElem.getElementsByTagName("mutation").item(0);
+        String component_type = mutElem.getAttribute("component_type");
+        String property_name = mutElem.getAttribute("property_name");
+        Set<String> blockTypes = componentBlocks.get(component_type) == null ? new HashSet<String>() : componentBlocks.get(component_type);
+        blockTypes.add(property_name);
+        componentBlocks.put(component_type, blockTypes);
+      }
+    }
+    return componentBlocks;
   }
 
   public FileDescriptorWithContent getYail() throws YailGenerationException {
@@ -398,21 +436,31 @@ public final class YaBlocksEditor extends FileEditor
       return blocksEditor.myFormEditor.getComponentInstanceTypeName(instanceName);
   }
 
+  public static String getComponentInstancePropertyValue(String formName, String instanceName, String propertyName){
+      //use form name to get blocks editor
+      YaBlocksEditor blocksEditor = formToBlocksEditor.get(formName);
+      Map<String, MockComponent> componentMap = blocksEditor.myFormEditor.getComponents();
+      for (String key : componentMap.keySet()) {
+        OdeLog.log(key);
+      }
+      MockComponent mockComponent = componentMap.get(instanceName);
+      return mockComponent.getPropertyValue(propertyName);
+  }
+
   public void addComponent(String typeName, String instanceName, String uuid) {
     if (componentUuids.add(uuid)) {
-      String typeDescription = COMPONENT_DATABASE.getTypeDescription(typeName);
-      blocksArea.addComponent(typeDescription, instanceName, uuid);
+      blocksArea.addComponent(uuid, instanceName, typeName);
     }
   }
 
   public void removeComponent(String typeName, String instanceName, String uuid) {
     if (componentUuids.remove(uuid)) {
-      blocksArea.removeComponent(typeName, instanceName, uuid);
+      blocksArea.removeComponent(uuid);
     }
   }
 
-  public void renameComponent(String typeName, String oldName, String newName, String uuid) {
-    blocksArea.renameComponent(typeName, oldName, newName, uuid);
+  public void renameComponent(String oldName, String newName, String uuid) {
+    blocksArea.renameComponent(uuid, oldName, newName);
   }
 
   public void showComponentBlocks(String instanceName) {
@@ -422,13 +470,13 @@ public final class YaBlocksEditor extends FileEditor
       blocksArea.showComponentBlocks(instanceName);
       selectedDrawer = instanceDrawer;
     } else {
-      blocksArea.hideComponentBlocks();
+      blocksArea.hideDrawer();
       selectedDrawer = null;
     }
   }
 
   public void hideComponentBlocks() {
-    blocksArea.hideComponentBlocks();
+    blocksArea.hideDrawer();
     selectedDrawer = null;
   }
 
@@ -440,7 +488,7 @@ public final class YaBlocksEditor extends FileEditor
       blocksArea.showBuiltinBlocks(drawerName);
       selectedDrawer = builtinDrawer;
     } else {
-      blocksArea.hideBuiltinBlocks();
+      blocksArea.hideDrawer();
       selectedDrawer = null;
     }
   }
@@ -453,13 +501,13 @@ public final class YaBlocksEditor extends FileEditor
       blocksArea.showGenericBlocks(drawerName);
       selectedDrawer = genericDrawer;
     } else {
-      blocksArea.hideGenericBlocks();
+      blocksArea.hideDrawer();
       selectedDrawer = null;
     }
   }
 
   public void hideBuiltinBlocks() {
-    blocksArea.hideBuiltinBlocks();
+    blocksArea.hideDrawer();
   }
 
   public MockForm getForm() {
@@ -529,7 +577,7 @@ public final class YaBlocksEditor extends FileEditor
    */
   @Override
   public void onComponentRenamed(MockComponent component, String oldName) {
-    renameComponent(component.getType(), oldName, component.getName(), component.getUuid());
+    renameComponent(oldName, component.getName(), component.getUuid());
     if (loadComplete) {
       updateSourceStructureExplorer();
       // renaming could potentially confuse an open drawer so close just in case
@@ -541,7 +589,7 @@ public final class YaBlocksEditor extends FileEditor
   private void updateSourceStructureExplorer() {
     MockForm form = getForm();
     if (form != null) {
-      updateBlocksTree(form, form.getSelectedComponent().getSourceStructureExplorerItem());
+      updateBlocksTree(form, form.getLastSelectedComponent().getSourceStructureExplorerItem());
     }
   }
 
@@ -596,6 +644,11 @@ public final class YaBlocksEditor extends FileEditor
     blocksArea.hardReset();
   }
 
+  /*
+   * Perform a hideChaff of Blockly
+   */
+  public void hideChaff () {blocksArea.hideChaff();}
+
   // Static Function. Find the associated editor for formName and
   // set its "damaged" bit. This will cause the editor manager's scheduleAutoSave
   // method to ignore this blocks file and not save it out.
@@ -605,14 +658,6 @@ public final class YaBlocksEditor extends FileEditor
     if (editor != null) {
       editor.setDamaged(true);
     }
-  }
-
-  /*
-   * Switch language to the specified language if applicable
-   */
-  @Override
-  public void switchLanguage(String newLanguage) {
-    blocksArea.switchLanguage(newLanguage);
   }
 
   /*
@@ -632,49 +677,46 @@ public final class YaBlocksEditor extends FileEditor
     return myFormEditor.encodeFormAsJsonString(forYail);
   }
 
-  private void addComponentDatabaseChangeListener(ComponentDatabaseChangeListener cdbChangeListener) {
-    componentDatabaseChangeListeners.add(cdbChangeListener);
-  }
-
-  private void removeComponentDatabaseChangeListener(ComponentDatabaseChangeListener cdbChangeListener) {
-    componentDatabaseChangeListeners.remove(cdbChangeListener);
-  }
-
-  private void clearComponentDatabaseChangeListener() {
-    componentDatabaseChangeListeners.clear();
-  }
-
   @Override
   public void onComponentTypeAdded(List<String> componentTypes) {
-    COMPONENT_DATABASE.removeComponentDatabaseListener(this);
-    for (ComponentDatabaseChangeListener cdbChangeListener : componentDatabaseChangeListeners) {
-      cdbChangeListener.onComponentTypeAdded(componentTypes);
-    }
+    blocksArea.populateComponentTypes(COMPONENT_DATABASE.getComponentsJSONString());
+    blocksArea.verifyAllBlocks();
   }
 
   @Override
   public boolean beforeComponentTypeRemoved(List<String> componentTypes) {
-    boolean result = true;
-    for (ComponentDatabaseChangeListener cdbChangeListener : componentDatabaseChangeListeners) {
-      result = result & cdbChangeListener.beforeComponentTypeRemoved(componentTypes);
-    }
-    return result;
+    return true;
   }
 
   @Override
   public void onComponentTypeRemoved(Map<String, String> componentTypes) {
-    COMPONENT_DATABASE.removeComponentDatabaseListener(this);
-    for (ComponentDatabaseChangeListener cdbChangeListener : componentDatabaseChangeListeners) {
-      cdbChangeListener.onComponentTypeRemoved(componentTypes);
-    }
+    blocksArea.populateComponentTypes(COMPONENT_DATABASE.getComponentsJSONString());
+    blocksArea.verifyAllBlocks();
   }
 
   @Override
   public void onResetDatabase() {
-    COMPONENT_DATABASE.removeComponentDatabaseListener(this);
-    for (ComponentDatabaseChangeListener cdbChangeListener : componentDatabaseChangeListeners) {
-      cdbChangeListener.onResetDatabase();
-    }
+    blocksArea.populateComponentTypes(COMPONENT_DATABASE.getComponentsJSONString());
+    blocksArea.verifyAllBlocks();
   }
+
+  @Override
+  public void makeActiveWorkspace() {
+    blocksArea.makeActive();
+  }
+
+  public static native void resendAssetsAndExtensions()/*-{
+    if (top.ReplState && (top.ReplState.state == Blockly.ReplMgr.rsState.CONNECTED ||
+                          top.ReplState.state == Blockly.ReplMgr.rsState.EXTENSIONS ||
+                          top.ReplState.state == Blockly.ReplMgr.rsState.ASSET)) {
+      Blockly.ReplMgr.resendAssetsAndExtensions();
+    }
+  }-*/;
+
+  public static native void resendExtensionsList()/*-{
+    if (top.ReplState && top.ReplState.state == Blockly.ReplMgr.rsState.CONNECTED) {
+      Blockly.ReplMgr.loadExtensions();
+    }
+  }-*/;
 
 }

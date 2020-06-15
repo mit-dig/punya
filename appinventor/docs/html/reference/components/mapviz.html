@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="/static/css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/css/mit_app_inventor.css">
+    <script type="text/javascript">
+     <!--//--><![CDATA[// ><!--
+
+                                   var gotoappinventor = function() {
+                                       var referrer = document.location.pathname;
+                                       var patt = /.*hour-of-code.*/;
+                                       if (referrer.match(patt)) {
+                                           window.open("http://code.appinventor.mit.edu/", "new");
+                                       } else {
+                                           window.open("http://ai2.appinventor.mit.edu/", "new");
+                                       }
+                                   }
+     //--><!]]>
+    </script>
+    <title>Map & Visualization</title></head>
+<body class="mit_app_inventor"><nav class="navbar navbar-expand-xl navbar-light">
+    <a class="navbar-brand" href="http://appinventor.mit.edu/">
+	<img src="/static/images/logo2.png" alt="Logo">
+    </a>
+    <button type="button" class="btn create-btn" style="margin-right: 20px;" onclick="gotoappinventor();">Create Apps!</button>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
+            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle Navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarContent">
+	<ul class="navbar-nav" style="margin-left: auto;">
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    About
+		</a>
+		<div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/about-us">About App Inventor</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/our-team">Our Team</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/master-trainers">Master Trainers</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/app-month-gallery">App of the Month</a>
+                    <a class="dropdown-item"
+                       href="http://appinventor.mit.edu/ai2/ReleaseNotes">Release Notes</a>
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/about/termsofservice" target="_blank">Terms of Service</a>
+		</div>
+	    </li>
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    Educators
+		</a>
+		<div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/teach" target="_blank">Teach</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/ai2/tutorials">Tutorials</a>
+		</div>
+	    </li>
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu/news" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    News
+		</a>
+		<div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/news">In the news</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/events">Events</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/stories">Stories from the field</a>
+		</div>
+	    </li>
+	    <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu/explore/resources" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    Resources
+		</a>
+		<div class="dropdown-menu">
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/get-started">Get Started</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/library">Documentation</a>
+		    <a class="dropdown-item" href="https://community.appinventor.mit.edu"
+                       target="_blank">Forums</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/ai2/tutorials">Tutorials</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/books">App Inventor Books</a>
+		    <a class="dropdown-item"
+                       href="https://github.com/mit-cml/appinventor-sources"
+                       target="_blank">Open Source Information</a>
+	            <a class="dropdown-item" href="http://appinventor.mit.edu/explore/research">Research</a>
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/hour-of-code">Hour of Code</a>
+                    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/resources">Additional Resources</a>
+		</div>
+	    </li>
+            <li class="nav-item dropdown">
+		<a class="nav-link" href="http://appinventor.mit.edu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    Blogs
+		</a>
+                <div class="dropdown-menu">
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/blog">App Inventor Blog</a>
+	        </div>
+            </li>
+        </ul>
+        <div style="display: inline-flex;margin-left:auto;margin-right:0">
+	    <a href="https://giving.mit.edu/give/to?fundId=3832320" target="_blank">
+                <button type="button" class="btn donate-btn" style="margin-right: 20px;">Donate</button></a>
+            <script>
+             (function() {
+                 var cx = '005719495929270354943:tlvxrelje-e';
+                 var gcse = document.createElement('script');
+                 gcse.type = 'text/javascript';
+                 gcse.async = true;
+                 gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+                            '//www.google.com/cse/cse.js?cx=' + cx;
+                 var s = document.getElementsByTagName('script')[0];
+                 s.parentNode.insertBefore(gcse, s);
+             })();
+            </script>
+            <gcse:searchbox-only></gcse:searchbox-only>
+        </div>
+	<!-- <form class="form-inline" action="/action_page.php">
+	     <div class="form-group has-search">
+	     <span class="fa fa-search form-control-feedback"></span>
+	     <input type="text" class="form-control" placeholder="Search">
+	     </div>
+	     </form> -->
+    </div>
+</nav>
+<div class="default-page">
+            <div class="header">
+	        <h1 class="font-weight-bold text-center offset-xl-2 col-xl-8">Map & Visualization</h1>
+            </div>
+            <div class="container-fluid">
+                <article class="documentation">
+<p><a href="index.html">« Back to index</a></p>
+<h1 id="map--visualization">Map &amp; Visualization</h1>
+
+<p>Table of Contents:</p>
+
+<ul>
+  <li><a href="#GoogleMap">GoogleMap</a></li>
+  <li><a href="#Graph">Graph</a></li>
+</ul>
+
+<h2 id="GoogleMap">GoogleMap</h2>
+
+<p>Component for GoogleMap</p>
+
+<h3 id="GoogleMap-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="GoogleMap.CompassEnabled" class="boolean ro bo"><em>CompassEnabled</em></dt>
+  <dd>Indicates whether the compass widget is currently enabled in the map ui</dd>
+  <dt id="GoogleMap.Height" class="number bo"><em>Height</em></dt>
+  <dd>Property for Height</dd>
+  <dt id="GoogleMap.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
+  <dd>Specifies the <code class="highlighter-rouge">GoogleMap</code>’s vertical height as a percentage
+ of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
+  <dt id="GoogleMap.MapCameraChangedListenerEnabled" class="boolean ro bo"><em>MapCameraChangedListenerEnabled</em></dt>
+  <dd>Indicates if the map camera’s position changed listener is currently enabled</dd>
+  <dt id="GoogleMap.MapClickListenerEnabled" class="boolean ro bo"><em>MapClickListenerEnabled</em></dt>
+  <dd>Indicates if the mapClick listener is currently enabled</dd>
+  <dt id="GoogleMap.MapLongClickListenerEnabled" class="boolean ro bo"><em>MapLongClickListenerEnabled</em></dt>
+  <dd>Indicates if the map’s longClick event listener is currently enabled</dd>
+  <dt id="GoogleMap.MapType" class="text ro bo"><em>MapType</em></dt>
+  <dd>Indicates the current map type</dd>
+  <dt id="GoogleMap.MyLocationEnabled" class="boolean ro bo"><em>MyLocationEnabled</em></dt>
+  <dd>Indicates whether my locaiton UI control is currently enabled for the Google map.</dd>
+  <dt id="GoogleMap.RotateEnabled" class="boolean ro bo"><em>RotateEnabled</em></dt>
+  <dd>Indicates whether the capability to rotate a map on the ui is currently enabled</dd>
+  <dt id="GoogleMap.ScrollEnabled" class="boolean ro bo"><em>ScrollEnabled</em></dt>
+  <dd>Indicates whether the capability to scroll a map on the ui is currently enabled</dd>
+  <dt id="GoogleMap.Visible" class="boolean"><em>Visible</em></dt>
+  <dd>Specifies whether the <code class="highlighter-rouge">GoogleMap</code> should be visible on the screen.  Value is <code class="logic block highlighter-rouge">true</code>
+ if the <code class="highlighter-rouge">GoogleMap</code> is showing and <code class="logic block highlighter-rouge">false</code> if hidden.</dd>
+  <dt id="GoogleMap.Width" class="number bo"><em>Width</em></dt>
+  <dd>Property for Width</dd>
+  <dt id="GoogleMap.WidthPercent" class="number wo bo"><em>WidthPercent</em></dt>
+  <dd>Specifies the horizontal width of the <code class="highlighter-rouge">GoogleMap</code> as a percentage
+ of the <a href="userinterface.html#Screen.Width"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Width</code></a>.</dd>
+  <dt id="GoogleMap.ZoomControlEnabled" class="boolean ro bo"><em>ZoomControlEnabled</em></dt>
+  <dd>Indicates whether the zoom widget on the map ui is currently enabled</dd>
+  <dt id="GoogleMap.ZoomGestureEnabled" class="boolean ro bo"><em>ZoomGestureEnabled</em></dt>
+  <dd>Indicates whether the zoom gesture is currently enabled</dd>
+</dl>
+
+<h3 id="GoogleMap-Events">Events</h3>
+
+<dl class="events">
+  <dt id="GoogleMap.CameraPositionChanged">CameraPositionChanged(<em class="number">lat</em>,<em class="number">lng</em>,<em class="number">bearing</em>,<em class="number">tilt</em>,<em class="number">zoom</em>)</dt>
+  <dd>Called after the camera position has changed, returning all camera position parameters.</dd>
+  <dt id="GoogleMap.FinishedDraggingCircle">FinishedDraggingCircle(<em class="number">id</em>,<em class="number">centerLat</em>,<em class="number">centerLng</em>,<em class="number">radius</em>)</dt>
+  <dd>Event been raised after the action of moving a draggable circle is finished. Possible a user drag the center of the circle or drag the radius marker of the circle</dd>
+  <dt id="GoogleMap.InfoWindowClicked">InfoWindowClicked(<em class="number">markerId</em>)</dt>
+  <dd>When the marker’s infowindow is clicked, returning marker’s id</dd>
+  <dt id="GoogleMap.MapIsReady">MapIsReady()</dt>
+  <dd>Indicates that the map has been rendered and ready for adding markers or changing other settings. Please add or updating markers within this event</dd>
+  <dt id="GoogleMap.OnLocationChanged">OnLocationChanged(<em class="number">lat</em>,<em class="number">lng</em>)</dt>
+  <dd>Triggers this event when user location has changed. Only works when EnableMylocation is set to true</dd>
+  <dt id="GoogleMap.OnMapClick">OnMapClick(<em class="number">lat</em>,<em class="number">lng</em>)</dt>
+  <dd>Called when the user makes a tap gesture on the map</dd>
+  <dt id="GoogleMap.OnMapLongClick">OnMapLongClick(<em class="number">lat</em>,<em class="number">lng</em>)</dt>
+  <dd>Called when the user makes a long-press gesture on the map</dd>
+  <dt id="GoogleMap.OnMarkerClick">OnMarkerClick(<em class="number">markerId</em>,<em class="number">latitude</em>,<em class="number">longitude</em>)</dt>
+  <dd>When a marker is clicked</dd>
+  <dt id="GoogleMap.OnMarkerDrag">OnMarkerDrag(<em class="number">markerId</em>,<em class="number">latitude</em>,<em class="number">longitude</em>)</dt>
+  <dd>When a marker is been dragged</dd>
+  <dt id="GoogleMap.OnMarkerDragEnd">OnMarkerDragEnd(<em class="number">markerId</em>,<em class="number">latitude</em>,<em class="number">longitude</em>)</dt>
+  <dd>When the user drags a marker and finish the action, returning marker’s id and it’s latest position</dd>
+  <dt id="GoogleMap.OnMarkerDragStart">OnMarkerDragStart(<em class="number">markerId</em>,<em class="number">latitude</em>,<em class="number">longitude</em>)</dt>
+  <dd>When a marker starts been dragged</dd>
+</dl>
+
+<h3 id="GoogleMap-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="GoogleMap.AddCircle" class="method returns number"><i></i> AddCircle(<em class="number">lat</em>,<em class="number">lng</em>,<em class="number">radius</em>,<em class="number">alpha</em>,<em class="number">hue</em>,<em class="number">strokeWidth</em>,<em class="number">strokeColor</em>,<em class="boolean">draggable</em>)</dt>
+  <dd>Create a circle overlay on the map UI with specified latitude and longitude for center. “hue” (min 0, max 360) and “alpha” (min 0, max 255) are used to set color and transparency level of the circle, “strokeWidth” and “strokeColor” are for the perimeter of the circle. Returning a unique id of the circle for future reference to events raised by moving this circle. If the circle isset to be draggable, two default markers will appear on the map: one in the center of the circle, another on the perimeter.</dd>
+  <dt id="GoogleMap.AddMarkers" class="method returns list"><i></i> AddMarkers(<em class="list">markers</em>)</dt>
+  <dd>Adding a list of YailLists for markers. The representation of a maker in the inner YailList is composed of: lat(double) [required], long(double) [required], Color, title(String), snippet(String), draggable(boolean). Return a list of unqiue ids for the added  markers. Note that the markers ids are not meant to persist after  the app is closed, but for temporary references to the markers within the program only. Return an empty list if any error happen in the input</dd>
+  <dt id="GoogleMap.AddMarkersFromJson" class="method"><i></i> AddMarkersFromJson(<em class="text">jsonString</em>)</dt>
+  <dd>Adding a list of markers that are represented as JsonArray.  The inner JsonObject represents a markerand is composed of name-value pairs. Name fields for a marker are: “lat” (type double) [required], “lng”(type double) [required], “color”(type int)[in hue value ranging from 0~360], “title”(type String), “snippet”(type String), “draggable”(type boolean)</dd>
+  <dt id="GoogleMap.AddMarkersHue" class="method returns list"><i></i> AddMarkersHue(<em class="list">markers</em>)</dt>
+  <dd>Add a list of YailList to the map</dd>
+  <dt id="GoogleMap.BoundCamera" class="method"><i></i> BoundCamera(<em class="number">neLat</em>,<em class="number">neLng</em>,<em class="number">swLat</em>,<em class="number">swLng</em>)</dt>
+  <dd>Transforms the camera such that the specified latitude/longitude bounds are centered on screen at the greatest possible zoom level. Need to specify both latitudes and longitudes for both northeast location and southwest location of the bounding box</dd>
+  <dt id="GoogleMap.EnableCompass" class="method"><i></i> EnableCompass(<em class="boolean">enable</em>)</dt>
+  <dd>Enables/disables the compass widget on the map’s ui. Call this only after event “MapIsReady” is received</dd>
+  <dt id="GoogleMap.EnableMapCameraPosChangeListener" class="method"><i></i> EnableMapCameraPosChangeListener(<em class="boolean">enabled</em>)</dt>
+  <dd>Enable/Disable map’s camera position changed event</dd>
+  <dt id="GoogleMap.EnableMapClickListener" class="method"><i></i> EnableMapClickListener(<em class="boolean">enabled</em>)</dt>
+  <dd>Enable map click event listener for this component</dd>
+  <dt id="GoogleMap.EnableMapLongClickListener" class="method"><i></i> EnableMapLongClickListener(<em class="boolean">enabled</em>)</dt>
+  <dd>Enable map long click event listener</dd>
+  <dt id="GoogleMap.EnableMyLocation" class="method"><i></i> EnableMyLocation(<em class="boolean">enabled</em>)</dt>
+  <dd>Enable or disable my location widget control for Google Map. One can call GetMyLocation() to obtain the current location after enable this.”</dd>
+  <dt id="GoogleMap.EnableRotate" class="method"><i></i> EnableRotate(<em class="boolean">enable</em>)</dt>
+  <dd>Enables/disables the capability to rotate a map on the ui. Call this only after the event “MapIsReady” is received.</dd>
+  <dt id="GoogleMap.EnableScroll" class="method"><i></i> EnableScroll(<em class="boolean">enable</em>)</dt>
+  <dd>Enables/disables the capability to scroll a map on the ui. Call this only after the event “MapIsReady” is received</dd>
+  <dt id="GoogleMap.EnableZoomControl" class="method"><i></i> EnableZoomControl(<em class="boolean">enable</em>)</dt>
+  <dd>Enables/disables the zoom widget on the map’s ui. Call this only after the event “MapIsReady” is received</dd>
+  <dt id="GoogleMap.EnableZoomGesture" class="method"><i></i> EnableZoomGesture(<em class="boolean">enable</em>)</dt>
+  <dd>Enables/disables zoom gesture on the map ui. Call this only after the event  “MapIsReady” is received.</dd>
+  <dt id="GoogleMap.GetAllCircleIDs" class="method returns list"><i></i> GetAllCircleIDs()</dt>
+  <dd>Get all circles Ids. A short cut to get all the references for the eixisting circles</dd>
+  <dt id="GoogleMap.GetAllMarkerID" class="method returns list"><i></i> GetAllMarkerID()</dt>
+  <dd>Get all the existing markers’s Ids</dd>
+  <dt id="GoogleMap.GetMarkers" class="method returns list"><i></i> GetMarkers()</dt>
+  <dd>Add a list of markers composed of name-value pairs. Name fields for a marker are: “lat” (type double) [required], “lng”(type double) [required], “color”(type int)[in hue value ranging from 0~360], “title”(type String), “snippet”(type String), “draggable”(type boolean)</dd>
+  <dt id="GoogleMap.GetMyLocation" class="method returns list"><i></i> GetMyLocation()</dt>
+  <dd>Get current location using Google Map Service. Return a YailList with first item beingthe latitude, the second item being the longitude, and last time being the accuracy of the reading.</dd>
+  <dt id="GoogleMap.MoveCamera" class="method"><i></i> MoveCamera(<em class="number">lat</em>,<em class="number">lng</em>,<em class="number">zoom</em>)</dt>
+  <dd>Move the map’s camera to the specified position and zoom level</dd>
+  <dt id="GoogleMap.RemoveCircle" class="method returns boolean"><i></i> RemoveCircle(<em class="number">circleId</em>)</dt>
+  <dd>Remove a circle for the map. Returns true if successfully removed, false if the circle does not exist with the specified id</dd>
+  <dt id="GoogleMap.RemoveMarker" class="method"><i></i> RemoveMarker(<em class="number">markerId</em>)</dt>
+  <dd>Remove a marker from the map</dd>
+  <dt id="GoogleMap.SetMapType" class="method"><i></i> SetMapType(<em class="text">layerName</em>)</dt>
+  <dd>Set the layer of Google map. Default layer is “normal”, other choices including “hybrid”,”satellite”, and “terrain”</dd>
+  <dt id="GoogleMap.UpdateCircle" class="method"><i></i> UpdateCircle(<em class="number">circleId</em>,<em class="text">propertyName</em>,<em class="any">value</em>)</dt>
+  <dd>Set the property of an existing circle. Properties include: “alpha”(number, value ranging from 0~255), “color” (nimber, hue value ranging 0~360), “radius”(number in meters)</dd>
+  <dt id="GoogleMap.UpdateMarker" class="method"><i></i> UpdateMarker(<em class="number">markerId</em>,<em class="text">propertyName</em>,<em class="any">value</em>)</dt>
+  <dd>Set the property of a marker, note that the marker has to be added first or else will throw an exception! Properties include: “color”(hue value ranging from 0~360), “title”, “snippet”, “draggable”(give either true or false as the value).</dd>
+  <dt id="GoogleMap.addOverlay" class="method"><i></i> addOverlay()</dt>
+  <dd>Method for addOverlay</dd>
+  <dt id="GoogleMap.addPolygon" class="method"><i></i> addPolygon(<em class="number">latMin</em>,<em class="number">latMax</em>,<em class="number">lonMin</em>,<em class="number">lonMax</em>)</dt>
+  <dd>Method for addPolygon</dd>
+  <dt id="GoogleMap.addTileOverlay" class="method"><i></i> addTileOverlay()</dt>
+  <dd>Method for addTileOverlay</dd>
+  <dt id="GoogleMap.clearAllPolygons" class="method"><i></i> clearAllPolygons()</dt>
+  <dd>Method for clearAllPolygons</dd>
+  <dt id="GoogleMap.drawCentralSquare" class="method"><i></i> drawCentralSquare()</dt>
+  <dd>Method for drawCentralSquare</dd>
+  <dt id="GoogleMap.getBoundingBox" class="method returns text"><i></i> getBoundingBox(<em class="number">latitudeInDegrees</em>,<em class="number">longitudeInDegrees</em>,<em class="number">halfSideInKm</em>)</dt>
+  <dd>Method for getBoundingBox</dd>
+  <dt id="GoogleMap.getMapCenter" class="method returns text"><i></i> getMapCenter()</dt>
+  <dd>Method for getMapCenter</dd>
+  <dt id="GoogleMap.getZoomLevelInfo" class="method returns number"><i></i> getZoomLevelInfo()</dt>
+  <dd>Method for getZoomLevelInfo</dd>
+</dl>
+
+<h2 id="Graph">Graph</h2>
+
+<p>Component for displaying web pages
+ This is a very limited form of browser.  You can view web pages and
+ click on links. It also handles  Javascript. There are lots of things that could be added,
+ but this component is mostly for viewing individual pages.  It’s not intended to take
+ the place of the browser.</p>
+
+<h3 id="Graph-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="Graph.Height" class="number bo"><em>Height</em></dt>
+  <dd>Property for Height</dd>
+  <dt id="Graph.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
+  <dd>Specifies the <code class="highlighter-rouge">Graph</code>’s vertical height as a percentage
+ of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
+  <dt id="Graph.Visible" class="boolean"><em>Visible</em></dt>
+  <dd>Specifies whether the <code class="highlighter-rouge">Graph</code> should be visible on the screen.  Value is <code class="logic block highlighter-rouge">true</code>
+ if the <code class="highlighter-rouge">Graph</code> is showing and <code class="logic block highlighter-rouge">false</code> if hidden.</dd>
+  <dt id="Graph.Width" class="number bo"><em>Width</em></dt>
+  <dd>Property for Width</dd>
+  <dt id="Graph.WidthPercent" class="number wo bo"><em>WidthPercent</em></dt>
+  <dd>Specifies the horizontal width of the <code class="highlighter-rouge">Graph</code> as a percentage
+ of the <a href="userinterface.html#Screen.Width"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Width</code></a>.</dd>
+</dl>
+
+<h3 id="Graph-Events">Events</h3>
+
+<p class="events">None</p>
+
+<h3 id="Graph-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="Graph.CSVstring" class="method"><i></i> CSVstring(<em class="text">csvString</em>,<em class="text">chartType</em>)</dt>
+  <dd>Add CSV graph.</dd>
+  <dt id="Graph.GoogleSpreadsheet" class="method"><i></i> GoogleSpreadsheet(<em class="text">url</em>,<em class="text">query</em>,<em class="text">chartType</em>)</dt>
+  <dd>Add Google Chart based on Google spreadsheet url. If you don’t know what query is, just leave it blank.</dd>
+  <dt id="Graph.SPARQLquery" class="method"><i></i> SPARQLquery(<em class="text">endpoint</em>,<em class="text">query</em>,<em class="text">chartType</em>)</dt>
+  <dd>Add SparQL graph.</dd>
+</dl>
+
+</article>
+<script>
+  // Handle redirection to documentation based on locale query parameter (if specified)
+  (function() {
+      var locale = window.location.search.match('[&?]locale=([a-zA-Z-]*)');
+      if (locale) {
+          if (locale[1].indexOf('en') === 0) {
+              // English needs to stay at the top level to not break existing links
+              var page = window.location.pathname.split('/');
+              if (page.length === 5) {
+                  page.splice(2, 1);
+              } else {
+                  // already on english
+                  return;
+              }
+              window.location.href = page.join('/');
+          } else {
+              var page = window.location.pathname.split('/');
+              if (page.length === 4) {
+                  page.splice(2, 0, locale[1]);
+              } else if (page[2].toLowerCase() != locale[1].toLowerCase()) {
+                  page[2] = locale[1];
+              } else {
+                  return;  // already on the desired language
+              }
+              // Test that the page exists before redirecting.
+              var xhr = new XMLHttpRequest();
+              xhr.open('HEAD', page.join('/'), false);
+              xhr.onreadystatechange = function() {
+                  if (xhr.readyState == 4) {
+                      if ((xhr.status == 200 || xhr.status == 204)) {
+                          window.location.href = page.join('/');
+                      } else if (xhr.status  >= 400) {
+                          page.splice(2, 1);  // go to english version
+                          window.location.href = page.join('/');
+                      }
+                  }
+              };
+              xhr.send();
+          }
+      }
+  })();
+
+  // Handle embedded documentation in help by removing website template
+  if (window.self !== window.top) {
+      setTimeout(function() {
+          var videos = document.querySelectorAll('video');
+          for (var i = 0; i < videos.length; i++) {
+              if (parseInt(videos[i].getAttribute('width')) > 360) {
+                  var aspect = parseInt(videos[i].getAttribute('height')) / parseInt(videos[i].getAttribute('width'));
+                  videos[i].setAttribute('width', '360');
+                  videos[i].setAttribute('height', '' + (360 * aspect));
+              }
+          }
+          var h1 = document.querySelector('h1');
+          var article = document.querySelector('article');
+          article.insertBefore(h1, article.firstElementChild);
+          document.body.innerHTML = article.outerHTML;
+      });
+  }
+</script>
+
+            </div>
+            <div class="footer background-green">
+    <div class="row container">
+	<div class="col-xl-3">
+	    <h3>MIT App Inventor</h3>
+	    <!-- <form class="form-inline" action="/action_page.php">
+		 <div class="form-group has-search">
+		 <span class="fa fa-search form-control-feedback"></span>
+		 <input type="text" class="form-control" placeholder="Search">
+		 </div>
+		 </form> -->
+	</div>
+	<div class="col-xl-6 legal text-center">
+	    <ul>
+		<li>
+		    <a href="http://web.mit.edu" class="btn btn-link" role="button"
+                       target="_blank">© 2012-2020 Massachusetts Institute of Technology</a>
+		</li>
+		<li>
+		    <a href="http://creativecommons.org/licenses/by-sa/3.0/"
+                       target="_blank" class="btn btn-link" role="button">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0</a>
+		</li>
+		<li>
+		    <a href="http://appinventor.mit.edu/about/termsofservice"
+                       target="_blank" class="btn btn-link" role="button">Terms of Service and Privacy Policy</a>
+		</li>
+	    </ul>
+	</div>
+	<div class="col-xl-3 links">
+            <a href="https://community.appinventor.mit.edu" target="_blank">Support / Help</a><br>
+            <a href="mailto:appinventor@mit.edu">Other Inquiries</a>
+	    <div>
+		<span>Twitter:</span>
+		<a href="https://twitter.com/mitappinventor"
+                   target="_blank" class="btn btn-link" role="button">@MITAppInventor</a>
+		<div>
+		    <div>
+			<span>GitHub:</span>
+			<a href="https://github.com/mit-cml" class="btn btn-link" role="button"
+                           target="_blank">mit-cml</a>
+			<div>
+			</div>
+	            </div>
+	        </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="/static/js/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="/static/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script async src="/static/js/widgets.js" charset="utf-8"></script>
+</div>
+    </body>
+</html>

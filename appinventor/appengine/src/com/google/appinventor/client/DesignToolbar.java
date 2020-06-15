@@ -115,6 +115,7 @@ public class DesignToolbar extends Toolbar {
     }
   }
 
+  private static final String WIDGET_NAME_TUTORIAL_TOGGLE = "TutorialToggle";
   private static final String WIDGET_NAME_ADDFORM = "AddForm";
   private static final String WIDGET_NAME_COPYFORM = "CopyForm";
   private static final String WIDGET_NAME_REMOVEFORM = "RemoveForm";
@@ -129,6 +130,7 @@ public class DesignToolbar extends Toolbar {
   private static final String WIDGET_NAME_SWITCH_LANGUAGE_ENGLISH = "English";
   private static final String WIDGET_NAME_SWITCH_LANGUAGE_CHINESE_CN = "Simplified Chinese";
   private static final String WIDGET_NAME_SWITCH_LANGUAGE_SPANISH_ES = "Spanish-Spain";
+  private static final String WIDGET_NAME_SWITCH_LANGUAGE_PORTUGUESE = "Portuguese";
   //private static final String WIDGET_NAME_SWITCH_LANGUAGE_GERMAN = "German";
   //private static final String WIDGET_NAME_SWITCH_LANGUAGE_VIETNAMESE = "Vietnamese";
 
@@ -173,6 +175,10 @@ public class DesignToolbar extends Toolbar {
     // width of palette minus cellspacing/border of buttons
     toolbar.setCellWidth(projectNameLabel, "222px");
 
+    addButton(new ToolbarItem(WIDGET_NAME_TUTORIAL_TOGGLE,
+        MESSAGES.toggleTutorialButton(), new ToogleTutorialAction()));
+    setButtonVisible(WIDGET_NAME_TUTORIAL_TOGGLE, false); // Don't show unless needed
+
     List<DropDownItem> screenItems = Lists.newArrayList();
     addDropDownButton(WIDGET_NAME_SCREENS_DROPDOWN, MESSAGES.screensButton(), screenItems);
 
@@ -197,6 +203,19 @@ public class DesignToolbar extends Toolbar {
     // Gray out the Designer button and enable the blocks button
     toggleEditor(false);
     Ode.getInstance().getTopToolbar().updateFileMenuButtons(0);
+  }
+
+  private class ToogleTutorialAction implements Command {
+    @Override
+    public void execute() {
+      Ode ode = Ode.getInstance();
+      boolean visible = ode.isTutorialVisible();
+      if (visible) {
+        ode.setTutorialVisible(false);
+      } else {
+        ode.setTutorialVisible(true);
+      }
+    }
   }
 
   private class AddFormAction implements Command {
@@ -366,7 +385,7 @@ public class DesignToolbar extends Toolbar {
     }
     // Inform the Blockly Panel which project/screen (aka form) we are working on
     BlocklyPanel.setCurrentForm(projectId + "_" + newScreenName);
-
+    screen.blocksEditor.makeActiveWorkspace();
   }
 
   private class SwitchToBlocksEditorAction implements Command {
@@ -440,6 +459,7 @@ public class DesignToolbar extends Toolbar {
             screen.screenName, new SwitchScreenAction(projectId, screen.screenName)));
       }
       projectNameLabel.setText(projectName);
+      YaBlocksEditor.resendAssetsAndExtensions();  // Send assets for active project
     } else {
       ErrorReporter.reportError("Design toolbar doesn't know about project " + projectName +
           " with id " + projectId);
@@ -545,7 +565,7 @@ public class DesignToolbar extends Toolbar {
     setButtonEnabled(WIDGET_NAME_SWITCH_TO_FORM_EDITOR, blocks);
 
     if (AppInventorFeatures.allowMultiScreenApplications() && !isReadOnly) {
-      if (getCurrentProject() == null || getCurrentProject().currentScreen == "Screen1") {
+      if (getCurrentProject() == null || "Screen1".equals(getCurrentProject().currentScreen)) {
         setButtonEnabled(WIDGET_NAME_REMOVEFORM, false);
       } else {
         setButtonEnabled(WIDGET_NAME_REMOVEFORM, true);
@@ -568,6 +588,14 @@ public class DesignToolbar extends Toolbar {
 
   public View getCurrentView() {
     return currentView;
+  }
+
+  public void setTutorialToggleVisible(boolean value) {
+    if (value) {
+      setButtonVisible(WIDGET_NAME_TUTORIAL_TOGGLE, true);
+    } else {
+      setButtonVisible(WIDGET_NAME_TUTORIAL_TOGGLE, false);
+    }
   }
 
 }

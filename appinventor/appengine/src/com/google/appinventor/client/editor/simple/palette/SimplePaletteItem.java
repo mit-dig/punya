@@ -6,7 +6,7 @@
 
 package com.google.appinventor.client.editor.simple.palette;
 
-import com.google.appinventor.client.TranslationDesignerPallete;
+import com.google.appinventor.client.ComponentsTranslation;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockComponentsUtil;
 import com.google.appinventor.client.widgets.dnd.DragSourcePanel;
@@ -14,6 +14,8 @@ import com.google.appinventor.client.widgets.dnd.DragSourceSupport;
 import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.TouchStartEvent;
+import com.google.gwt.event.dom.client.TouchStartHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -59,7 +61,7 @@ public class SimplePaletteItem extends DragSourcePanel {
     panel.setCellHorizontalAlignment(image, HorizontalPanel.ALIGN_LEFT);
     panel.setCellWidth(image, "30px");
 
-    Label label = new Label(TranslationDesignerPallete.getCorrespondingString(scd.getName()));
+    Label label = new Label(ComponentsTranslation.getComponentName(scd.getName()));
     label.setHorizontalAlignment(Label.ALIGN_LEFT);
     label.addStyleName("ode-SimplePaletteItem-caption");
     panel.add(label);
@@ -67,13 +69,11 @@ public class SimplePaletteItem extends DragSourcePanel {
     HorizontalPanel optPanel = new HorizontalPanel();
 
     ComponentHelpWidget helpImage = new ComponentHelpWidget(scd);
-    helpImage.addStyleName("ode-SimplePalleteItem-button");
     optPanel.add(helpImage);
     optPanel.setCellHorizontalAlignment(helpImage, HorizontalPanel.ALIGN_LEFT);
 
     if (scd.getExternal()) {
       ComponentRemoveWidget deleteImage = new ComponentRemoveWidget(scd);
-      deleteImage.addStyleName("ode-SimplePalleteItem-button");
       optPanel.add(deleteImage);
       optPanel.setCellHorizontalAlignment(deleteImage, HorizontalPanel.ALIGN_RIGHT);
     }
@@ -105,6 +105,12 @@ public class SimplePaletteItem extends DragSourcePanel {
     addMouseDownHandler(new MouseDownHandler() {
       @Override
       public void onMouseDown(MouseDownEvent arg0) {
+        select(getWidget());
+      }
+    });
+    addTouchStartHandler(new TouchStartHandler() {
+      @Override
+      public void onTouchStart(TouchStartEvent event) {
         select(getWidget());
       }
     });

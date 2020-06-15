@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2019 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,6 +25,7 @@ import com.google.appinventor.server.CrashReport;
 import com.google.appinventor.server.FileExporter;
 import com.google.appinventor.server.Server;
 import com.google.appinventor.server.flags.Flag;
+import com.google.appinventor.server.storage.StoredData.Backpack;
 import com.google.appinventor.server.storage.StoredData.CorruptionRecord;
 import com.google.appinventor.server.storage.StoredData.FeedbackData;
 import com.google.appinventor.server.storage.StoredData.FileData;
@@ -79,15 +80,15 @@ import com.google.appengine.tools.cloudstorage.RetryParams;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.channels.Channels;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -193,6 +194,7 @@ public class ObjectifyStorageIo implements  StorageIo {
     ObjectifyService.register(CorruptionRecord.class);
     ObjectifyService.register(PWData.class);
     ObjectifyService.register(SplashData.class);
+    ObjectifyService.register(Backpack.class);
 
     // Learn GCS Bucket from App Configuration or App Engine Default
     String gcsBucket = Flag.createFlag("gcs.bucket", "").get();
@@ -419,16 +421,13 @@ public class ObjectifyStorageIo implements  StorageIo {
       runJobWithRetries(new JobRetryHelper() {
         @Override
         public void run(Objectify datastore) {
+          String cachekey = User.usercachekey + "|" + userId;
+          memcache.delete(cachekey);  // Flush cached copy prior to update
           UserData userData = datastore.find(userKey(userId));
           if (userData != null) {
             userData.name = name;
             datastore.put(userData);
           }
-          // we need to change the memcache version of user
-          User user = new User(userData.id,userData.email,name, userData.link, userData.emailFrequency, userData.tosAccepted,
-              false, userData.type, userData.sessionid);
-          String cachekey = User.usercachekey + "|" + userId;
-          memcache.put(cachekey, user, Expiration.byDeltaSeconds(60)); // Remember for one minute
         }
       }, true);
     } catch (ObjectifyException e) {
@@ -443,16 +442,13 @@ public class ObjectifyStorageIo implements  StorageIo {
       runJobWithRetries(new JobRetryHelper() {
         @Override
         public void run(Objectify datastore) {
+          String cachekey = User.usercachekey + "|" + userId;
+          memcache.delete(cachekey);  // Flush cached copy prior to update
           UserData userData = datastore.find(userKey(userId));
           if (userData != null) {
             userData.link = link;
             datastore.put(userData);
           }
-          // we need to change the memcache version of user
-          User user = new User(userData.id,userData.email,userData.name,link,userData.emailFrequency,userData.tosAccepted,
-              false, userData.type, userData.sessionid);
-          String cachekey = User.usercachekey + "|" + userId;
-          memcache.put(cachekey, user, Expiration.byDeltaSeconds(60)); // Remember for one minute
         }
       }, true);
     } catch (ObjectifyException e) {
@@ -466,16 +462,13 @@ public class ObjectifyStorageIo implements  StorageIo {
       runJobWithRetries(new JobRetryHelper() {
         @Override
         public void run(Objectify datastore) {
+          String cachekey = User.usercachekey + "|" + userId;
+          memcache.delete(cachekey);  // Flush cached copy prior to update
           UserData userData = datastore.find(userKey(userId));
           if (userData != null) {
             userData.emailFrequency = emailFrequency;
             datastore.put(userData);
           }
-          // we need to change the memcache version of user
-          User user = new User(userData.id,userData.email,userData.name,userData.link,emailFrequency,userData.tosAccepted,
-              false, userData.type, userData.sessionid);
-          String cachekey = User.usercachekey + "|" + userId;
-          memcache.put(cachekey, user, Expiration.byDeltaSeconds(60)); // Remember for one minute
         }
       }, true);
     } catch (ObjectifyException e) {
@@ -485,11 +478,12 @@ public class ObjectifyStorageIo implements  StorageIo {
 
   @Override
   public void setUserSessionId(final String userId, final String sessionId) {
-    String cachekey = User.usercachekey + "|" + userId;
     try {
       runJobWithRetries(new JobRetryHelper() {
         @Override
         public void run(Objectify datastore) {
+          String cachekey = User.usercachekey + "|" + userId;
+          memcache.delete(cachekey);  // Flush cached copy prior to update
           UserData userData = datastore.find(userKey(userId));
           if (userData != null) {
             userData.sessionid = sessionId;
@@ -500,16 +494,16 @@ public class ObjectifyStorageIo implements  StorageIo {
     } catch (ObjectifyException e) {
       throw CrashReport.createAndLogError(LOG, null, collectUserErrorInfo(userId), e);
     }
-    memcache.delete(cachekey);  // Flush cached copy because it changed
   }
 
   @Override
   public void setUserPassword(final String userId, final String password) {
-    String cachekey = User.usercachekey + "|" + userId;
     try {
       runJobWithRetries(new JobRetryHelper() {
         @Override
         public void run(Objectify datastore) {
+          String cachekey = User.usercachekey + "|" + userId;
+          memcache.delete(cachekey);  // Flush cached copy prior to update
           UserData userData = datastore.find(userKey(userId));
           if (userData != null) {
             userData.password = password;
@@ -520,7 +514,6 @@ public class ObjectifyStorageIo implements  StorageIo {
     } catch (ObjectifyException e) {
       throw CrashReport.createAndLogError(LOG, null, collectUserErrorInfo(userId), e);
     }
-    memcache.delete(cachekey);  // Flush cached copy because it changed
   }
 
   @Override
@@ -806,7 +799,24 @@ public class ObjectifyStorageIo implements  StorageIo {
       throw CrashReport.createAndLogError(LOG, null,
           collectUserProjectErrorInfo(userId, projectId), e);
     }
+  }
 
+  @Override
+  public void setMoveToTrashFlag(final String userId, final long projectId, final boolean flag) {
+    try {
+      runJobWithRetries(new JobRetryHelper() {
+        @Override
+        public void run(Objectify datastore) {
+          ProjectData projectData = datastore.find(projectKey(projectId));
+          if (projectData != null) {
+            projectData.projectMovedToTrashFlag = flag;
+            datastore.put(projectData);
+          }
+        }
+      }, true);
+    } catch (ObjectifyException e) {
+      throw CrashReport.createAndLogError(LOG, null, collectUserErrorInfo(userId), e);
+    }
   }
 
   @Override
@@ -954,7 +964,7 @@ public class ObjectifyStorageIo implements  StorageIo {
       return new UserProject(projectId, projectData.t.name,
           projectData.t.type, projectData.t.dateCreated,
           projectData.t.dateModified, projectData.t.galleryId,
-          projectData.t.attributionId);
+          projectData.t.attributionId, projectData.t.projectMovedToTrashFlag);
     }
   }
 
@@ -987,7 +997,7 @@ public class ObjectifyStorageIo implements  StorageIo {
         uProjects.add(new UserProject(projectData.id, projectData.name,
             projectData.type, projectData.dateCreated,
             projectData.dateModified, projectData.galleryId,
-            projectData.attributionId));
+            projectData.attributionId, projectData.projectMovedToTrashFlag));
       }
       return uProjects;
     }
@@ -1992,6 +2002,7 @@ public class ObjectifyStorageIo implements  StorageIo {
     final boolean includeScreenShots,
     final boolean forGallery,
     final boolean fatalError) throws IOException {
+    final boolean forBuildserver = includeAndroidKeystore && includeYail;
     validateGCS();
     final Result<Integer> fileCount = new Result<Integer>();
     fileCount.t = 0;
@@ -2003,6 +2014,7 @@ public class ObjectifyStorageIo implements  StorageIo {
     // entity group.
     final List<FileData> fileData = new ArrayList<FileData>();
     final Result<String> projectName = new Result<String>();
+    final Map<String, Integer> screens = new HashMap<String, Integer>();
     projectName.t = null;
     String fileName = null;
 
@@ -2015,36 +2027,50 @@ public class ObjectifyStorageIo implements  StorageIo {
         @Override
         public void run(Objectify datastore) throws IOException {
           Key<ProjectData> projectKey = projectKey(projectId);
-          boolean foundFiles = false;
           for (FileData fd : datastore.query(FileData.class).ancestor(projectKey)) {
+            fileData.add(fd);
+            String fileName = fd.fileName;
+            if (fileName.startsWith("src/") && (fileName.endsWith(".scm") || fileName.endsWith(".bky") || fileName.endsWith(".yail"))) {
+              String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf("."));
+              int count = screens.containsKey(fileNameNoExt) ? screens.get(fileNameNoExt) + 1 : 1;
+              screens.put(fileNameNoExt, count);
+            }
+          }
+          Iterator<FileData> it = fileData.iterator();
+          while (it.hasNext()) {
+            FileData fd = it.next();
             String fileName = fd.fileName;
             if (fileName.startsWith("assets/external_comps") && forGallery) {
               throw new IOException("FATAL Error, external component in gallery app");
             }
-            if (fd.role.equals(FileData.RoleEnum.SOURCE)) {
-              if (fileName.equals(FileExporter.REMIX_INFORMATION_FILE_PATH)) {
-                // Skip legacy remix history files that were previous stored with the project
-                continue;
+            if (!fd.role.equals(FileData.RoleEnum.SOURCE)) {
+              it.remove();
+            } else if (fileName.equals(FileExporter.REMIX_INFORMATION_FILE_PATH) ||
+                      (fileName.startsWith("screenshots") && !includeScreenShots) ||
+                      (fileName.startsWith("src/") && fileName.endsWith(".yail") && !includeYail)) {
+              // Skip legacy remix history files that were previous stored with the project
+              // only include screenshots if asked ...
+              // Don't include YAIL files when exporting projects
+              // includeYail will be set to true when we are exporting the source
+              // to send to the buildserver or when the person exporting
+              // a project is an Admin (for debugging).
+              // Otherwise Yail files are confusing cruft. In the case of
+              // the Firebase Component they may contain secrets which we would
+              // rather not have leak into an export .aia file or into the Gallery
+              it.remove();
+            } else if (forBuildserver && fileName.startsWith("src/") &&
+                (fileName.endsWith(".scm") || fileName.endsWith(".bky") || fileName.endsWith(".yail"))) {
+              String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf("."));
+              if ((Integer)screens.get(fileNameNoExt) < 3) {
+                LOG.log(Level.INFO, "Not adding file to build ", fileName);
+                it.remove();
+                if (fileName.endsWith(".yail")) {
+                  deleteFile(userId, projectId, fileName);
+                }
               }
-              if (fileName.startsWith("screenshots") && !includeScreenShots) {
-                // Only include screenshots if asked...
-                continue;
-              }
-              if (fileName.endsWith(".yail") && !includeYail) {
-                // Don't include YAIL files when exporting projects
-                // includeYail will be set to true when we are exporting the source
-                // to send to the buildserver or when the person exporting
-                // a project is an Admin (for debugging).
-                // Otherwise Yail files are confusing cruft. In the case of
-                // the Firebase Component they may contain secrets which we would
-                // rather not have leak into an export .aia file or into the Gallery
-                continue;
-              }
-              fileData.add(fd);
-              foundFiles = true;
             }
           }
-          if (foundFiles) {
+          if (fileData.size() > 0) {
             ProjectData pd = datastore.find(projectKey);
             projectName.t = pd.name;
             if (includeProjectHistory && !Strings.isNullOrEmpty(pd.history)) {
@@ -2592,6 +2618,10 @@ public class ObjectifyStorageIo implements  StorageIo {
     return new Key<StoredData.PWData>(PWData.class, uid);
   }
 
+  private Key<StoredData.Backpack> backpackdataKey(String backPackId) {
+    return new Key<StoredData.Backpack>(Backpack.class, backPackId);
+  }
+
   // Create a name for a blob from a project id and file name. This is mostly
   // to help with debugging and viewing the blobstore via the admin console.
   // We don't currently use these blob names anywhere else.
@@ -3004,6 +3034,91 @@ public class ObjectifyStorageIo implements  StorageIo {
     }
   }
 
+  /* Store a shared backpack.
+   *
+   * We only store backpacks in the datastore (cached in
+   * memcache by Objectify). So backpacks are limited in
+   * size to what can be stored in a data store entity.
+   */
+
+  @Override
+  public String downloadBackpack(final String backPackId) {
+    final Result<Backpack> result = new Result<Backpack>();
+    try {
+      runJobWithRetries(new JobRetryHelper() {
+          @Override
+          public void run(Objectify datastore) {
+            Backpack backPack = datastore.find(backpackdataKey(backPackId));
+            if (backPack != null) {
+              result.t = backPack;
+            }
+          }
+        }, false);
+    } catch (ObjectifyException e) {
+      CrashReport.createAndLogError(LOG, null, null, e);
+    }
+    if (result.t != null) {
+      return result.t.content;
+    } else {
+      return "[]";              // No shared backpack, return an empty backpack
+    }
+  }
+
+  @Override
+  public void uploadBackpack(String backPackId, String content) {
+    final Backpack backPack = new Backpack();
+    backPack.id = backPackId;
+    backPack.content = content;
+    try {
+      runJobWithRetries(new JobRetryHelper() {
+          @Override
+          public void run(Objectify datastore) {
+            datastore.put(backPack);
+          }
+        }, true);
+    } catch (ObjectifyException e) {
+      throw CrashReport.createAndLogError(LOG, null, null, e);
+    }
+  }
+
+
+  @Override
+  public void storeBuildStatus(String userId, long projectId, int progress) {
+    String prelim = "40bae275-070f-478b-9a5f-d50361809b99";
+    String cacheKey = prelim + userId + projectId;
+    memcache.put(cacheKey, progress);
+  }
+
+  @Override
+  public int getBuildStatus(String userId, long projectId) {
+    String prelim = "40bae275-070f-478b-9a5f-d50361809b99";
+    String cacheKey = prelim + userId + projectId;
+    Integer ival = (Integer) memcache.get(cacheKey);
+    if (ival == null) {         // not in memcache (or memcache service down)
+      return 50;
+    } else {
+      return ival.intValue();
+    }
+  }
+
+  @Override
+  public void assertUserHasProject(final String userId, final long projectId) {
+    try {
+      runJobWithRetries(new JobRetryHelper() {
+        @SuppressWarnings("RedundantThrows")
+        @Override
+        public void run(Objectify datastore) throws ObjectifyException, IOException {
+          Key<UserData> userKey = userKey(userId);
+          Key<UserProjectData> userProjectKey = userProjectKey(userKey, projectId);
+          UserProjectData data = datastore.find(userProjectKey);
+          if (data == null) {  // User doesn't have the corresponding project.
+            throw new SecurityException("Unauthorized access");
+          }
+          // User has data for project, so everything checks out.
+        }
+      }, false);
+    } catch(ObjectifyException e) {
+      throw CrashReport.createAndLogError(LOG, null, null, e);
+    }
+  }
 }
-
-

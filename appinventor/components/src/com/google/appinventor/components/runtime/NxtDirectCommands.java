@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -13,6 +13,7 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
+import com.google.appinventor.components.runtime.util.FileUtil;
 import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 
@@ -20,13 +21,14 @@ import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * ![NXT component icon](images/legoMindstormsNxt.png)
+ *
  * A component that provides a low-level interface to a LEGO MINDSTORMS NXT
  * robot, with functions to send NXT Direct Commands.
  *
@@ -606,7 +608,7 @@ public class NxtDirectCommands extends LegoMindstormsNxtBase {
     try {
       File tempFile = MediaUtil.copyMediaToTempFile(form, source);
       try {
-        InputStream in = new BufferedInputStream(new FileInputStream(tempFile), 1024);
+        InputStream in = new BufferedInputStream(FileUtil.openFile(tempFile), 1024);
         try {
           long fileSize = tempFile.length();
           Integer handle = (destination.endsWith(".rxe") || destination.endsWith(".ric"))

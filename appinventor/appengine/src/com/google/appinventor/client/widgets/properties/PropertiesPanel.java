@@ -107,7 +107,9 @@ public class PropertiesPanel extends Composite implements ComponentDatabaseChang
       }
       parent.add(header);
       PropertyEditor editor = property.getEditor();
-      editor.setStyleName("ode-PropertyEditor");
+      if (!editor.getStyleName().contains("PropertyEditor")) {
+        editor.setStyleName("ode-PropertyEditor");
+      }
       parent.add(editor);
       parent.setWidth("100%");
     }

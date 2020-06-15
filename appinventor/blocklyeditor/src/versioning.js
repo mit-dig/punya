@@ -1,5 +1,5 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2013-2014 MIT, All rights reserved
+// Copyright © 2013-2019 Massachusetts Institute of Technology, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 /**
@@ -8,6 +8,7 @@
  * Methods to handle converting apps from older versions to current
  *
  * @author wolber@usfca.edu (David Wolber)
+ * @author ewpatton@mit.edu (Evan W. Patton)
  *
  * [lyn, 2014/10/31] Completely overhauled blocks upgrading architecture.
  * All the work is done in Blockly.Version.upgrade.
@@ -20,12 +21,12 @@
 
 'use strict';
 
-goog.require('Blockly.Component');
-goog.require('Blockly.ComponentTypes');
+goog.provide('AI.Blockly.Versioning');
+
 goog.require('goog.dom');
 goog.require('goog.dom.xml');
 
-goog.provide('Blockly.Versioning');
+if (Blockly.Versioning === undefined) Blockly.Versioning = {};
 
 Blockly.Versioning.loggingFlag = true;
 
@@ -44,6 +45,8 @@ Blockly.Versioning.log = function log(string) { // Display feedback on upgrade i
  *
  * @param preUpgradeFormJsonString: JSON String from pre-upgrade Form associated with these blocks
  * @param blocksContent: String with XML representation of blocks for a screen
+ * @param {Blockly.WorkspaceSvg=} opt_workspace Optional workspace that will be populated with the
+ * blocks content. If not specified, Blockly.mainWorkspace is used.
  *
  * @author fturbak@wellesley.edu (Lyn Turbak)
  *
@@ -62,9 +65,11 @@ Blockly.Versioning.log = function log(string) { // Display feedback on upgrade i
  * which is defined at the end of this file.
  *
  */
-Blockly.Versioning.upgrade = function (preUpgradeFormJsonString, blocksContent) {
+Blockly.Versioning.upgrade = function (preUpgradeFormJsonString, blocksContent, opt_workspace) {
+  opt_workspace = opt_workspace || Blockly.mainWorkspace;
   var preUpgradeFormJsonObject = JSON.parse(preUpgradeFormJsonString);
   var dom = Blockly.Xml.textToDom(blocksContent); // Initial blocks rep is dom for blocksContent
+  var didUpgrade = false;
 
   /**
    * Upgrade the given componentType. If componentType is "Language", upgrades the blocks language.
@@ -111,8 +116,9 @@ Blockly.Versioning.upgrade = function (preUpgradeFormJsonString, blocksContent) 
         Blockly.Versioning.log("applying upgrader for upgrading component type " + componentType +
             " from version " + (version-1) + " to version " + version);
         // Apply upgrader, possibly mutating rep and changing its dynamic type.
-        rep = Blockly.Versioning.applyUpgrader(versionUpgrader, rep);
+        rep = Blockly.Versioning.applyUpgrader(versionUpgrader, rep, opt_workspace);
       }
+      didUpgrade = true;
     } // otherwise, preUpgradeVersion and systemVersion are equal and no updgrade is necessary
     return rep; // Return final blocks representation, for dynamic typing purposes
   }
@@ -120,8 +126,8 @@ Blockly.Versioning.upgrade = function (preUpgradeFormJsonString, blocksContent) 
   // --------------------------------------------------------------------------------
   // Upgrade language based on language version
 
-  var systemLanguageVersion = window.parent.BlocklyPanel_getBlocksLanguageVersion();
-  var systemYoungAndroidVersion = window.parent.BlocklyPanel_getYaVersion();
+  var systemLanguageVersion = top.BLOCKS_VERSION;
+  var systemYoungAndroidVersion = top.YA_VERSION;
   var versionTags = dom.getElementsByTagName('yacodeblocks');
 
   // if there is no version in the file, then this is an early ai2 project, prior to
@@ -130,12 +136,12 @@ Blockly.Versioning.upgrade = function (preUpgradeFormJsonString, blocksContent) 
 
   var preUpgradeLanguageVersion;
   if (versionTags.length===0) {
-    Blockly.Versioning.v17_blocksOverhaul(dom);
+    Blockly.Versioning.v17_blocksOverhaul(dom, opt_workspace);
     preUpgradeLanguageVersion = 17;  // default for oldest ai2
   }
   else {
     if (systemYoungAndroidVersion == parseInt(versionTags[0].getAttribute('ya-version'), 10)) {
-      Blockly.Versioning.ensureWorkspace(dom);
+      Blockly.Versioning.ensureWorkspace(dom, opt_workspace);
       return;
     }
     preUpgradeLanguageVersion = parseInt(versionTags[0].getAttribute('language-version'), 10);
@@ -148,16 +154,22 @@ Blockly.Versioning.upgrade = function (preUpgradeFormJsonString, blocksContent) 
   // Upgrade components based on pre-upgrade version numbers
   var preUpgradeComponentVersionDict = Blockly.Versioning.makeComponentVersionDict(preUpgradeFormJsonObject);
   for (var componentType in preUpgradeComponentVersionDict) {
+    if (!preUpgradeComponentVersionDict.hasOwnProperty(componentType)) continue;
+
+    // Cannot upgrade extensions as they are not part of the system
+    if (Blockly.Versioning.isExternal(componentType, opt_workspace)) continue;
+
     var preUpgradeVersion = preUpgradeComponentVersionDict[componentType];
-    var systemVersion = Blockly.Versioning.getSystemComponentVersion(componentType);
+    var systemVersion = Blockly.Versioning.getSystemComponentVersion(componentType, opt_workspace);
     blocksRep = upgradeComponentType(componentType, preUpgradeVersion, systemVersion, blocksRep);
   }
 
   // Ensure that final blocks rep is Blockly.mainWorkspace
   Blockly.Versioning.log("Blockly.Versioning.upgrade: Final conversion to Blockly.mainWorkspace");
-  Blockly.Versioning.ensureWorkspace(blocksRep); // No need to use result; does work by side effect on Blockly.mainWorkspace
+  Blockly.Versioning.ensureWorkspace(blocksRep, opt_workspace); // No need to use result; does work by side effect on Blockly.mainWorkspace
 
-}
+  return didUpgrade;
+};
 
 /**
  * [lyn, 2014/11/04]
@@ -182,14 +194,14 @@ Blockly.Versioning.checkUpgrader = function (upgrader) {
     throw "Blockly.Versioning.checkUpgrader: upgrader is not a function, special string, or array of upgraders -- "
         + upgrader;
   }
-}
+};
 
 /**
  * Returns true if blocksRep is a workspace; otherwise returns false
  */
 Blockly.Versioning.isWorkspace = function (blocksRep) {
   return blocksRep instanceof Blockly.Workspace;
-}
+};
 
 /*
 Blockly.Versioning.isWorkspace =
@@ -209,13 +221,14 @@ Blockly.Versioning.isDom = function (blocksRep) {
   try {
     return (blocksRep instanceof Element
             || blocksRep instanceof HTMLElement
-            || blocksRep instanceof HTMLUnknownElement);
+            || blocksRep instanceof HTMLUnknownElement
+            || blocksRep.tagName == 'XML');
   } catch (anyErr) {
     // In phantomJS testing context, HTMLUnknownElement is undefined and causes an error,
     // so handle it this way.
     return false;
   }
-}
+};
 
 /**
  * If blocksRep is a dom, returns it; otherwise converts the workspace to a dom
@@ -225,12 +238,11 @@ Blockly.Versioning.ensureDom = function (blocksRep) {
     return blocksRep; // already a dom
   } else if (Blockly.Versioning.isWorkspace(blocksRep)) {
     Blockly.Versioning.log("Blockly.Versioning.ensureDom: converting Blockly.mainWorkspace to dom");
-    var dom = Blockly.Xml.workspaceToDom(blocksRep);
-    return dom;
+    return Blockly.Xml.workspaceToDom(blocksRep);
   } else {
     throw "Blockly.Versioning.ensureDom: blocksRep is neither dom nor workspace -- " + blocksRep;
   }
-}
+};
 
 Blockly.Versioning.getBlockChildren = function (dom) {
     var result = [];
@@ -239,58 +251,71 @@ Blockly.Versioning.getBlockChildren = function (dom) {
       result.push(gdChild);
     }
     return result;
-}
+};
 
 /**
  * If blocksRep is a workspace, returns it; otherwise converts the workspace to a dom
  */
-Blockly.Versioning.ensureWorkspace = function (blocksRep) {
+Blockly.Versioning.ensureWorkspace = function (blocksRep, opt_workspace) {
   if (Blockly.Versioning.isWorkspace(blocksRep)) {
     return blocksRep; // already a workspace
   } else if (Blockly.Versioning.isDom(blocksRep)) {
+    var workspace = opt_workspace || Blockly.mainWorkspace;
     Blockly.Versioning.log("Blockly.Versioning.ensureWorkspace: converting dom to Blockly.mainWorkspace");
-    Blockly.mainWorkspace.clear(); // Remove any existing blocks before we add new ones.
-    Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, blocksRep);
-    return Blockly.mainWorkspace;
+    workspace.clear(); // Remove any existing blocks before we add new ones.
+    Blockly.Xml.domToWorkspace(blocksRep, workspace);
+    // update top block positions in event of save before rendering.
+    var blocks = workspace.getTopBlocks();
+    for (var i = 0; i < blocks.length; i++) {
+      var block = blocks[i];
+      var xy = block.getRelativeToSurfaceXY();
+      xy.x = block.x;
+      xy.y = block.y;
+    }
+    return workspace;
   } else {
     throw "Blockly.Versioning.ensureWorkspace: blocksRep is neither workspace nor dom -- " + blocksRep;
   }
-}
+};
 
 /**
  * Apply an upgrder to a blocksRepresentation, possibly (1) changing it by side effect and
  * (2) changing its representation (dom or workspace). Returns the final representation.
  * @param upgrader
  * @param blocksRep: an instance of an XML dom tree or a Blockly.Workspace
+ * @param opt_workspace: Optional workspace to be upgraded
  */
-Blockly.Versioning.applyUpgrader = function (upgrader, blocksRep) {
+Blockly.Versioning.applyUpgrader = function (upgrader, blocksRep, opt_workspace) {
+  opt_workspace = opt_workspace || Blockly.mainWorkspace;
+  opt_workspace.getProcedureDatabase().clear();  // clear the proc database in case of multiple upgrades
   Blockly.Versioning.checkUpgrader(upgrader); // ensure it has the correct form.
   // Perform upgrade
   if (upgrader == "ai1CantDoUpgrade") {
     throw "Blockly.Versioning.applyUpgrader: cannot perform an AI Classic upgrade on " + blocksRep;
   } else if (typeof(upgrader) == "function") {
-    return upgrader(blocksRep); // Apply upgrader, possibly mutating rep and changing its dynamic type.
+    return upgrader(blocksRep, opt_workspace); // Apply upgrader, possibly mutating rep and changing its dynamic type.
   } else if (Array.isArray (upgrader)) {
     // Treat array as sequential composition of upgraders
     Blockly.Versioning.log("Blockly.Versioning.applyUpgrader: treating list as sequential composition of upgraders");
-    return (Blockly.Versioning.composeUpgraders(upgrader))(blocksRep);
+    return (Blockly.Versioning.composeUpgraders(upgrader))(blocksRep, opt_workspace);
   } else { // otherwise, versionUpgrader is "noUpgrade", and nothing is done, so acts like identity
     return blocksRep;
   }
-}
+};
 
 /**
  * Return a single upgrader that sequentially composes the upgraders in upgraderList
  * @param upgraderList
  */
-Blockly.Versioning.composeUpgraders = function (upgraderList) {
+Blockly.Versioning.composeUpgraders = function (upgraderList, opt_workspace) {
+  opt_workspace = opt_workspace || Blockly.mainWorkspace;
   return function (blocksRep) {
     for (var i = 0, upgrader; upgrader = upgraderList[i]; i++) {
-      blocksRep = Blockly.Versioning.applyUpgrader(upgrader, blocksRep); // Applying upgrader may convert blocks rep from dom to workspace or vice versa.
+      blocksRep = Blockly.Versioning.applyUpgrader(upgrader, blocksRep, opt_workspace); // Applying upgrader may convert blocks rep from dom to workspace or vice versa.
     }
     return blocksRep; // Return the final blocks rep
   }
-}
+};
 
 /******************************************************************************
  * Key functions for determining whether component upgrades are needed
@@ -381,20 +406,29 @@ Blockly.Versioning.makeComponentVersionDict = function (formJsonObject) {
         processComponents(subComponents);
       }
     }
-   };
+   }
 
    processComponents ([formJsonObject["Properties"]]); // Walk the component tree, updating versionDict along the way.
    return versionDict;
 };
 
-Blockly.Versioning.getSystemComponentVersion = function (componentType) {
-  var versionString = Blockly.ComponentTypes[componentType].componentInfo.version;
+Blockly.Versioning.getSystemComponentVersion = function (componentType, workspace) {
+  var versionString = workspace.getComponentDatabase().getType(componentType).componentInfo.version;
   if (versionString) {
     return parseInt(versionString);
   } else {
     throw "Blockly.Versioning.getSystemComponentVersion: No version for component type " + componentType;
   }
-}
+};
+
+Blockly.Versioning.isExternal = function(componentType, workspace) {
+  var description = workspace.getComponentDatabase().getType(componentType);
+  if (description && description.componentInfo) {
+    return 'true' === description.componentInfo.external;
+  } else {
+    return false;
+  }
+};
 
 /******************************************************************************
  * Details for specific upgrades go below, in reverse chronological order.
@@ -419,7 +453,7 @@ Blockly.Versioning.getSystemComponentVersion = function (componentType) {
  *    functions are used in the upgrade to YAVersion 17.
  ----------------------------------------------------------------------------*/
 
-Blockly.Versioning.v17_blocksOverhaul = function(xmlFromFile) {
+Blockly.Versioning.v17_blocksOverhaul = function(xmlFromFile, workspace) {
   // we loaded in something with no version, we need to translate
   var renameAlert = 0;
   var blocks = xmlFromFile.getElementsByTagName('block');
@@ -462,12 +496,13 @@ Blockly.Versioning.v17_blocksOverhaul = function(xmlFromFile) {
             // legal thing it could be is a (generic) component set/get
             //   but old programs allow instance names same as type names, so
             //   we can get a Accelerometer.Shaking which is really an instance event
-            if ((Blockly.ComponentTypes[splitComponent[0]] != null) &&
+            var componentDb = workspace.getComponentDatabase();
+            if (componentDb.hasType(splitComponent[0]) &&
                 (splitComponent[1] == 'setproperty' || splitComponent[1] == 'getproperty'))
-              Blockly.Versioning.v17_translateComponentSetGetProperty(blockElem);
+              Blockly.Versioning.v17_translateComponentSetGetProperty(blockElem, workspace);
             else {
               var instance = splitComponent[0];
-              var componentType = Blockly.Component.instanceNameToTypeName(instance);
+              var componentType = componentDb.instanceNameToTypeName(instance);
               if (componentType == instance && renameAlert === 0) {
                 alert("Your app was created in an earlier version of App Inventor and may be loaded incorrectly."+
                     " The problem is that it names a component instance"+
@@ -480,16 +515,16 @@ Blockly.Versioning.v17_blocksOverhaul = function(xmlFromFile) {
               //    are answered affirmatively, but this should be checked here as well
               var rightside = splitComponent[1];
               if (rightside == 'setproperty' || rightside == 'getproperty')
-                Blockly.Versioning.v17_translateSetGetProperty(blockElem);
+                Blockly.Versioning.v17_translateSetGetProperty(blockElem, workspace);
               else
               if (rightside == 'component')
-                Blockly.Versioning.v17_translateComponentGet(blockElem);
+                Blockly.Versioning.v17_translateComponentGet(blockElem, workspace);
               else
-              if (Blockly.ComponentTypes[componentType].eventDictionary[rightside] != null)
-                Blockly.Versioning.v17_translateEvent(blockElem);
+              if (componentDb.getEventForType(componentType, rightside))
+                Blockly.Versioning.v17_translateEvent(blockElem, workspace);
               else
-              if (Blockly.ComponentTypes[componentType].methodDictionary[rightside] != null)
-                Blockly.Versioning.v17_translateMethod(blockElem);
+              if (componentDb.getMethodForType(componentType, rightside))
+                Blockly.Versioning.v17_translateMethod(blockElem, workspace);
             }
           }
         }
@@ -503,13 +538,11 @@ Blockly.Versioning.v17_blocksOverhaul = function(xmlFromFile) {
  * v17_translateEvent is called when we know we have an Event element that
  * needs to be translated.
  */
-Blockly.Versioning.v17_translateEvent = function(blockElem) {
+Blockly.Versioning.v17_translateEvent = function(blockElem, workspace) {
   //get the event type and instance name,
   // the type attribute is "component_event"
-  var blockType = blockElem.getAttribute('type');
-  var component_event = blockType;
   // event block types look like: <block type="Button1_Click" x="132" y="72">
-  var splitComponent = component_event.split('_');
+  var splitComponent = blockElem.getAttribute('type').split('_');
   if (splitComponent.length > 2) {
     // This happens when someone puts an _ in a block name!
     splitComponent = [splitComponent.slice(0, -1).join('_'), splitComponent.pop()];
@@ -517,7 +550,7 @@ Blockly.Versioning.v17_translateEvent = function(blockElem) {
   var instance = splitComponent[0];
   var event=splitComponent[1];
   // Paul has a function to convert instance to type
-  var componentType = Blockly.Component.instanceNameToTypeName(instance);
+  var componentType = workspace.getComponentDatabase().instanceNameToTypeName(instance);
   // ok, we have all the info, now we can override the old event attribute with 'event'
   blockElem.setAttribute('type','component_event');
   // <mutation component_type=​"Canvas" instance_name=​"Canvas1" event_name=​"Dragged">​</mutation>
@@ -534,7 +567,7 @@ Blockly.Versioning.v17_translateEvent = function(blockElem) {
  * v17_translateMethod is called when we know we have a component method element that
  * needs to be translated.
  */
-Blockly.Versioning.v17_translateMethod = function(blockElem) {
+Blockly.Versioning.v17_translateMethod = function(blockElem, workspace) {
   // the type attribute is "instance_method"
   var blockType = blockElem.getAttribute('type');
   // method block types look like: <block type="TinyDB_StoreValue" ...>
@@ -546,7 +579,7 @@ Blockly.Versioning.v17_translateMethod = function(blockElem) {
   var instance = splitComponent[0];
   var method = splitComponent[1];
   // Paul has a function to convert instance to type
-  var componentType = Blockly.Component.instanceNameToTypeName(instance);
+  var componentType = workspace.getComponentDatabase().instanceNameToTypeName(instance);
   // ok, we have all the info, now we can override the old event attribute with 'event'
   blockElem.setAttribute('type','component_method');
   // <mutation component_type=​"Canvas" instance_name=​"Canvas1" event_name=​"Dragged">​</mutation>
@@ -591,7 +624,7 @@ Blockly.Versioning.v17_translateAnyMethod = function(blockElem) {
  * v17_translateComponentGet is called when we know we have a component get, e.g.
  * TinyDB_component as the block
  */
-Blockly.Versioning.v17_translateComponentGet = function(blockElem) {
+Blockly.Versioning.v17_translateComponentGet = function(blockElem, workspace) {
   // the type attribute is "instance_method"
   var blockType = blockElem.getAttribute('type');
   // block type looks like: <block type="TinyDB1_component" ..> note an instance
@@ -604,7 +637,7 @@ Blockly.Versioning.v17_translateComponentGet = function(blockElem) {
   var instance = splitComponent[0];
   // if we got here splitComponent[1] must be "component"
   // Paul has a function to convert instance to type
-  var componentType = Blockly.Component.instanceNameToTypeName(instance);
+  var componentType = workspace.getComponentDatabase().instanceNameToTypeName(instance);
   // ok, we have all the info, now we can override the old event attribute with 'event'
   blockElem.setAttribute('type','component_component_block');
   // <mutation component_type=​"Canvas" instance_name=​"Canvas1" event_name=​"Dragged">​</mutation>
@@ -620,7 +653,7 @@ Blockly.Versioning.v17_translateComponentGet = function(blockElem) {
 /**
  * v17_translateSetGetProperty is called when we know we have a get or set on an instance
  */
-Blockly.Versioning.v17_translateSetGetProperty = function(blockElem) {
+Blockly.Versioning.v17_translateSetGetProperty = function(blockElem, workspace) {
   // the type attribute is "instance_setproperty" or "component_getproperty"
   var blockType = blockElem.getAttribute('type');
   // set block look like: <block type="Button1_setproperty" x="132" y="72">
@@ -632,7 +665,7 @@ Blockly.Versioning.v17_translateSetGetProperty = function(blockElem) {
   var instance = splitComponent[0];
   var type=splitComponent[1]; //setproperty or getproperty
   // Paul has a function to convert instance to type
-  var componentType = Blockly.Component.instanceNameToTypeName(instance);
+  var componentType = workspace.getComponentDatabase().instanceNameToTypeName(instance);
   // grab titles to find the particular property. There is a title elem with
   //   a "PROP" attribute right under and within the block element itself
   //   There might be many titles, but we grab the first.
@@ -751,7 +784,7 @@ Blockly.Versioning.changeEventParameterName = function(componentType, eventName,
             }
 
             // Find i18n translation of newParamName
-            var newParamTranslation = window.parent.BlocklyPanel_getLocalizedParameterName(newParamName);
+            var newParamTranslation = mainWorkspace.getComponentDatabase().getInternationalizedParameterName(newParamName);
 
             // Event handler block will have been automatically created with newParamTranslation
             // So need to rename all occurrences of oldParamTranslation within its body
@@ -791,15 +824,16 @@ Blockly.Versioning.renameBlockType = function(oldBlockType, newBlockType) {
     }
     return dom; // Return the modified dom, as required by the upgrading structure.
   }
-}
+};
 
 /**
  * @param componentType: name of component type for method
  * @param methodName: name of method
- * @argumentIndex: index of the default argument block
- * @defaultXMLArgumentBlockText: string with XML for argument block
- * @returns a function that maps a blocksRep (An XML DOM or workspace)
- *   to a modified DOM in which the default argument block has been added to every specified method call.
+ * @param argumentIndex: index of the default argument block
+ * @param defaultXMLArgumentBlockText: string with XML for argument block
+ * @returns {function(Element|Blockly.Workspace)} a function that maps a blocksRep (An XML DOM or
+ *   workspace) to a modified DOM in which the default argument block has been added to every
+ *   specified method call.
  *
  * @author fturbak@wellesley.edu (Lyn Turbak)
  *
@@ -843,15 +877,37 @@ Blockly.Versioning.addDefaultMethodArgument = function(componentType, methodName
     }
     return dom; // Return the modified dom, as required by the upgrading structure.
   }
-}
+};
+
+/**
+ * Rename all event handler blocks for a given component type and event name.
+ * @param componentType: name of component type for event
+ * @param oldEventName: name of event
+ * @param newEventName: new name of event
+ * @returns {function(Element|Blockly.Workspace)} a function that maps a blocksRep (an XML DOM or
+ *   workspace) to a modified DOM in which every specified event block has been renamed.
+ *
+ * @author ewpatton@mit.edu (Evan W. Patton)
+ */
+Blockly.Versioning.changeEventName = function(componentType, oldEventName, newEventName) {
+  return function (blocksRep) {
+    var dom = Blockly.Versioning.ensureDom(blocksRep);
+    var eventHandlerBlocks = Blockly.Versioning.findAllEventHandlers(dom, componentType, oldEventName);
+    for (var b = 0, eventBlock; eventBlock = eventHandlerBlocks[b]; b++) {
+      var mutation = Blockly.Versioning.firstChildWithTagName(eventBlock, 'mutation');
+      mutation.setAttribute('event_name', newEventName);
+    }
+    return dom;
+  };
+};
 
 /**
  * Rename all method call blocks for a given component type and method name.
  * @param componentType: name of component type for method
  * @param oldMethodName: name of method
  * @param newMethodName: new name of method
- * @returns a function that maps a blocksRep (An XML DOM or workspace)
- *   to a modified DOM in which every specified method call has been renamed.
+ * @returns {function(Element|Blockly.Workspace)} a function that maps a blocksRep (An XML DOM or
+ *   workspace) to a modified DOM in which every specified method call has been renamed.
  *
  * @author lizlooney@google.com (Liz Looney)
  */
@@ -866,15 +922,15 @@ Blockly.Versioning.changeMethodName = function(componentType, oldMethodName, new
     }
     return dom; // Return the modified dom, as required by the upgrading structure.
   }
-}
+};
 
 /**
  * Rename all property get/set blocks for a given component type and property name.
  * @param componentType: name of component type for property
  * @param oldPropertyName: name of property
  * @param newPropertyName: new name of property
- * @returns a function that maps a blocksRep (An XML DOM or workspace)
- *   to a modified DOM in which every specified property get/set has been renamed.
+ * @returns {function(Element|Blockly.Workspace)} a function that maps a blocksRep (An XML DOM or
+ *   workspace) to a modified DOM in which every specified property get/set has been renamed.
  *
  * @author lizlooney@google.com (Liz Looney)
  */
@@ -899,13 +955,41 @@ Blockly.Versioning.changePropertyName = function(componentType, oldPropertyName,
     }
     return dom; // Return the modified dom, as required by the upgrading structure.
   }
-}
+};
+
+/**
+ * Returns the list of top-level blocks that are event handlers for the given eventName for
+ * componentType.
+ * @param dom  DOM for XML workspace
+ * @param componentType  name of the component type for event
+ * @param eventName  name of event
+ * @returns {Array.<Element>}  a list of XML elements for the specified event handler blocks.
+ *
+ * @author ewpatton@mit.edu (Evan W. Patton)
+ */
+Blockly.Versioning.findAllEventHandlers = function (dom, componentType, eventName) {
+  var eventBlocks = [];
+  for (var i = 0; i < dom.children.length; i++) {
+    var block = dom.children[i];
+    if (block.tagName === 'block' && block.getAttribute('type') === 'component_event') {
+      var mutation = Blockly.Versioning.firstChildWithTagName(block, 'mutation');
+      if (!mutation) {
+        throw 'Did not find expected mutation child in Blockly.Versioning.findAllEventHandlers ' +
+          'with componentType = ' + componentType + ' and eventName = ' + eventName;
+      } else if ((mutation.getAttribute('component_type') === componentType) &&
+          (mutation.getAttribute('event_name') === eventName)) {
+        eventBlocks.push(block);
+      }
+    }
+  }
+  return eventBlocks;
+};
 
 /**
  * @param dom: DOM for XML workspace
  * @param componentType: name of component type for method
  * @param methodName: name of method
- * @returns a list of HTML elements for the specfied method call blocks.
+ * @returns {Element[]} a list of HTML elements for the specfied method call blocks.
  *
  * @author fturbak@wellesley.edu (Lyn Turbak)
  *
@@ -929,13 +1013,13 @@ Blockly.Versioning.findAllMethodCalls = function (dom, componentType, methodName
     }
   }
   return callBlocks;
-}
+};
 
 /**
  * @param dom: DOM for XML workspace
  * @param componentType: name of component type for property
  * @param propertyName: name of property
- * @returns a list of HTML elements for the specfied property blocks.
+ * @returns {Element[]} a list of HTML elements for the specfied property blocks.
  *
  * @author lizlooney@google.com (Liz Looney)
  *
@@ -959,7 +1043,7 @@ Blockly.Versioning.findAllPropertyBlocks = function (dom, componentType, propert
     }
   }
   return propertyBlocks;
-}
+};
 
 /**
  * @param elem: an HTML element
@@ -979,7 +1063,7 @@ Blockly.Versioning.firstChildWithTagName = function (elem, tag) {
     }
   }
   return null;
-}
+};
 
 /**
  * @param xmlBlockText: string specifying the XML for a single block
@@ -1000,7 +1084,7 @@ Blockly.Versioning.xmlBlockTextToDom = function(xmlBlockText) {
   } else {
     return children[0];
   }
-}
+};
 
 /******************************************************************************
  Define component upgrade maps here.
@@ -1060,7 +1144,10 @@ Blockly.Versioning.AllUpgradeMaps =
     2: "noUpgrade",
 
     // AI2: AccelerometerSensor.Sensitivty property was added.
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // AI2: LegacyMode property was added.
+    4: "noUpgrade"
 
   }, // End Accelerometer upgraders
 
@@ -1122,8 +1209,11 @@ Blockly.Versioning.AllUpgradeMaps =
       for (Element block : getAllMatchingGenusBlocks("Ball-Flung")) {
         markBlockBad(block, String.format(CHANGED_FLUNG_WARNING, "Flung"));
     */
-    5: "ai1CantDoUpgrade" // Just indicates we couldn't do upgrade even if we wanted to
+    5: "ai1CantDoUpgrade", // Just indicates we couldn't do upgrade even if we wanted to
 
+    // The CenterAtOrigin property was added.
+    // The default value of false is correct for upgraded apps.
+    6: "noUpgrade"
   }, // End Ball upgraders
 
   "BarcodeScanner": {
@@ -1157,7 +1247,11 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // The BluetoothClient.Secure property was added.
     // No blocks need to be modified to upgrade to version 5.
-    5: "noUpgrade"
+    5: "noUpgrade",
+
+    // The BluetoothClient.DisconnectOnError property was added.
+    // No blocks need to be modified to upgrade to version 5.
+    6: "noUpgrade"
 
   }, // End BluetoothClient upgraders
 
@@ -1288,7 +1382,19 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // AI2: No blocks need to be modified to upgrade to version 10
     // The default value of TextAlignment was changed from Normal (left) to Center
-    10: "noUpgrade"
+    10: "noUpgrade",
+
+    // DrawShape & DrawArc was added
+    // No blocks need to be modified to upgrade to version 11.
+    11: "noUpgrade",
+
+    // ExtendMovesOutsideCanvas was added
+    // No blocks need to be modified to upgrade to version 12.
+    12: "noUpgrade",
+
+    //  BackgroundImageinBase64 was added
+    // No blocks need to be modified to upgrade to version 13.
+    13: "noUpgrade"
 
   }, // End Canvas upgraders
 
@@ -1320,9 +1426,19 @@ Blockly.Versioning.AllUpgradeMaps =
       ],
 
     // Duration Support was added.
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // MakeDate, MakeTime, MakeInstantFromParts methods added
+    4: "noUpgrade"
 
   }, // End Clock upgraders
+
+  "CloudDB": {
+
+    //This is initial version. Placeholder for future upgrades
+    1: "noUpgrade"
+
+  },
 
   "ContactPicker": {
 
@@ -1378,6 +1494,21 @@ Blockly.Versioning.AllUpgradeMaps =
 
   }, // End EmailPicker upgraders
 
+  "FeatureCollection": {
+
+    // AI2:
+    // - The GeoJSONError event was renamed to LoadError
+    // - The GotGeoJSON event was renamed to GotFeatures
+    // - The ErrorLoadingFeatureCollection event was removed in favor of LoadError
+    // - The LoadedFeatureCollection event was removed in favor of GotFeatures
+    2: [
+      Blockly.Versioning.changeEventName('FeatureCollection', 'GeoJSONError', 'LoadError'),
+      Blockly.Versioning.changeEventName('FeatureCollection', 'GeoGeoJSON', 'GotFeatures'),
+      Blockly.Versioning.changeEventName('FeatureCollection', 'ErrorLoadingFeatureCollection', 'LoadError'),
+      Blockly.Versioning.changeEventName('FeatureCollection', 'LoadedFeatureCollection', 'GotFeatures')
+    ]
+  },
+
   "File": {
 
     // AI2: The AfterFileSaved event was added.
@@ -1407,7 +1538,11 @@ Blockly.Versioning.AllUpgradeMaps =
     // AI2: - InsertRow, GetRows and GetRowsWithConditions was added.
     // - KeyFile, UseServiceAuthentication and ServiceAccountEmail
     //   were added.
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // The LoadingDialogMessage property was added
+    // The ShowLoadingDialog property was added
+    4: "noUpgrade"
 
   }, // End FusiontablesControl upgraders
 
@@ -1453,7 +1588,11 @@ Blockly.Versioning.AllUpgradeMaps =
     2: "noUpgrade",
 
     // Scaling property was added (but not in use yet)
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // Click event was added
+    // The Clickable property was added.
+    4: "noUpgrade"
 
   }, // End Image upgraders
 
@@ -1529,7 +1668,9 @@ Blockly.Versioning.AllUpgradeMaps =
     3: "noUpgrade",
 
     // AI2: Add HTMLFormat property
-    4: "noUpgrade"
+    4: "noUpgrade",
+
+    5: "noUpgrade"
 
   }, // End Label upgraders
 
@@ -1649,8 +1790,40 @@ Blockly.Versioning.AllUpgradeMaps =
 
 
     // AI2: In BLOCKS_LANGUAGE_VERSION 20// Rename 'obsufcated_text' text block to 'obfuscated_text'
-    20: Blockly.Versioning.renameBlockType('obsufcated_text', 'obfuscated_text')
+    20: Blockly.Versioning.renameBlockType('obsufcated_text', 'obfuscated_text'),
 
+    // AI2: Added is a string? block to test whether values are strings.
+    21: "noUpgrade",
+
+    // AI2: Added Break Block
+    22: "noUpgrade",
+
+    // AI2: Added Bitwise Blocks
+    23: "noUpgrade",
+
+    // AI2: In BLOCKS_LANGUAGE_VERSION 24, added List Reverse Block
+    24: "noUpgrade",
+
+    // AI2: In BLOCKS_LANGUAGE_VERSION 25, added Join With Separator Block
+    25: "noUpgrade",
+
+    // AI2: In BLOCKS_LANGUAGE_VERSION 26, Added generic event handlers
+    26: "noUpgrade",
+
+    // AI2: In BLOCKS_LANGUAGE_VERSION 27, Added not-equal to text compare block
+    27: "noUpgrade",
+
+    // AI2: Added dictionaries
+    28: "noUpgrade",
+
+    // AI2: Added "for each in dictionary" block.
+    29: "noUpgrade",
+
+    // AI2: In BLOCKS_LANGUAGE_VERSION 30, The Reverse Text block was added
+    30: "noUpgrade",
+
+    // AI2: Added "replace all mappings" block
+    31: "noUpgrade"
 
   }, // End Language upgraders
 
@@ -1718,6 +1891,70 @@ Blockly.Versioning.AllUpgradeMaps =
 
   }, // End LocationSensor upgraders
 
+  "Map": {
+
+    // AI2:
+    // - The Markers property was renamed to Features
+    // - The LoadGeoJSONFromURL method was renamed to LoadFromURL
+    // - The FeatureFromGeoJSONDescription method was renamed to FeatureFromDescription
+    2: [
+      Blockly.Versioning.changePropertyName('Map', 'Markers', 'Features'),
+      Blockly.Versioning.changeMethodName('Map', 'LoadGeoJSONFromUrl', 'LoadFromURL'),
+      Blockly.Versioning.changeMethodName('Map', 'FeatureFromGeoJSONDescription', 'FeatureFromDescription')
+    ],
+
+    // AI2:
+    // - The GotGeoJSON event was renamed to GotFeatures
+    // - The GeoJSONError event was renamed to LoadError
+    3: [
+      Blockly.Versioning.changeEventName('Map', 'GotGeoJSON', 'GotFeatures'),
+      Blockly.Versioning.changeEventName('Map', 'GeoJSONError', 'LoadError')
+    ],
+
+    // AI2:
+    // - The Rotation property was added to Map
+    4: "noUpgrade",
+
+    // AI2:
+    // - The ScaleUnits and ShowScale properties were added to Map
+    5: "noUpgrade"
+
+  }, // End Map upgraders
+
+  "Circle": {
+    // AI2:
+    // - The FillOpacity and StrokeOpacity properties were added
+    2: "noUpgrade"
+  }, // End Circle upgraders
+
+  "LineString": {
+    // AI2:
+    // - The StrokeOpacity property was added
+    2: "noUpgrade"
+  }, // End LineString upgraders
+
+  "Marker": {
+    // AI2:
+    // - The ShowShadow property was removed
+    2: "noUpgrade",
+
+    // AI2:
+    // - The FillOpacity and StrokeOpacity properties were added
+    3: "noUpgrade"
+  }, // End Marker upgraders
+
+  "Polygon": {
+    // AI2:
+    // - The FillOpacity and StrokeOpacity properties were added
+    2: "noUpgrade"
+  }, // End Polygon upgraders
+
+  "Rectangle": {
+    // AI2:
+    // - The FillOpacity and StrokeOpacity properties were added
+    2: "noUpgrade"
+  }, // End Rectangle upgraders
+
   "NearField": {
 
     //This is initial version. Placeholder for future upgrades
@@ -1754,7 +1991,13 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // Added a ProgressDialog, a dialog that cannot be dismissed by the user.
     // The ShowProgressDialog will show the dialog, and DismissProgressDialog is the only way to dismiss it
-    4: "noUpgrade"
+    4: "noUpgrade",
+
+    // Added TextInputCanceled & ChoosingCanceled event
+    5: "noUpgrade",
+
+    // Added a PasswordDialog for masked text input.
+    6: "noUpgrade"
 
   }, // End Notifier upgraders
 
@@ -1889,7 +2132,10 @@ Blockly.Versioning.AllUpgradeMaps =
     2: "ai1CantDoUpgrade", // Just indicates we couldn't do upgrade even if we wanted to
 
     // RequestFocus was added
-    3: "noUpgrade"
+    3: "noUpgrade",
+
+    // PasswordVisible was added
+    4: "noUpgrade"
 
   }, // End PasswordTextBox upgraders
 
@@ -1900,7 +2146,10 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // AI2: The step sensing algorithm was updated to be more accurate.
     // The GPS related functionality was removed.
-    2: "noUpgrade"
+    2: "noUpgrade",
+
+    // AI2: The Resume and Pause methods were removed.
+    3: "noUpgrade"
 
   }, // End PhoneCall upgraders
 
@@ -1909,7 +2158,9 @@ Blockly.Versioning.AllUpgradeMaps =
     // AI2: - The PhoneCallStarted event was added.
     // - The PhoneCallEnded event was added.
     // - The IncomingCallAnswered event was added.
-    2: "noUpgrade"
+    2: "noUpgrade",
+
+    3: 'noUpgrade'
 
   }, // End PhoneCall upgraders
 
@@ -2065,7 +2316,35 @@ Blockly.Versioning.AllUpgradeMaps =
 
     // For FORM_COMPONENT_VERSION 20:
     // - The Screen1.ShowListsAsJson property was added and no block needs to be changed.
-    20: "noUpgrade"
+    20: "noUpgrade",
+
+    // For FORM_COMPONENT_VERSION 21:
+    // - The AccentColor, PrimaryColor, PrimaryColorDark, and Theme properties were added to Screen, and no block needs to be changed.
+    21: "noUpgrade",
+
+    // For FORM_COMPONENT_VERSION 22:
+    // - The Classic option was added to the Theme property. No blocks need to be changed
+    22: "noUpgrade",
+
+    // For FORM_COMPONENT_VERSION 23:
+    // - The ActionBar designer property was hidden and tied to the Theme property. No blocks need to be changed.
+    23: "noUpgrade",
+
+    // For FORM_COMPONENT_VERSION 24:
+    // - The AskForPermissions method, PermissionDenied event, and PermissionGranted event were added. No blocks need to be changed.
+    24: "noUpgrade",
+
+    // For FORM_COMPONENT_VERSION 25:
+    // - Sizing default value changed from Fixed to Responsive
+    25: "noUpgrade",
+
+    // For FORM_COMPONENT_VERISON 26:
+    // - ShowListsAsJson default value changed from False to True
+    26: "noUpgrade",
+
+    // For FORM_COMPONENT_VERSION 27:
+    // - Platform and PlatformVersion read-only blocks were added
+    27: "noUpgrade"
 
 
   }, // End Screen
@@ -2118,7 +2397,10 @@ Blockly.Versioning.AllUpgradeMaps =
   "SpeechRecognizer": {
 
     //This is initial version. Placeholder for future upgrades
-    1: "noUpgrade"
+    1: "noUpgrade",
+    // The Stop method was added. No blocks need to be changed.
+    // The SpeechRecognizer.UseLegacy property was added.
+    2: "noUpgrade"
 
   }, // End SpeechRecognizer upgraders
 
@@ -2159,6 +2441,7 @@ Blockly.Versioning.AllUpgradeMaps =
     // AI2: Added RequestFocus method
     5: "noUpgrade",
 
+    // AI2: Added ReadOnly property
     6: "noUpgrade"
 
   }, // End TextBox upgraders
@@ -2174,7 +2457,9 @@ Blockly.Versioning.AllUpgradeMaps =
     /* From BlockSaveFile.java:
       handlePropertyTypeChange(componentName, "ReceivingEnabled", "receivingEnabled is now an integer in the range 1-3 instead of a boolean");
     */
-    3: "ai1CantDoUpgrade" // Just indicates we couldn't do upgrade even if we wanted to
+    3: "ai1CantDoUpgrade", // Just indicates we couldn't do upgrade even if we wanted to
+
+    4: 'noUpgrade'
 
   }, // End Texting
 
@@ -2214,7 +2499,10 @@ Blockly.Versioning.AllUpgradeMaps =
   "TinyDB": {
 
     //This is initial version. Placeholder for future upgrades
-    1: "noUpgrade"
+    1: "noUpgrade",
+
+    //Added Property: Namespace
+    2: "noUpgrade"
 
   }, // End TinyDB upgraders
 
@@ -2319,7 +2607,10 @@ Blockly.Versioning.AllUpgradeMaps =
     4: "noUpgrade",
 
     // AI2: The Volume property (setter only) was added to the VideoPlayer.
-    5: "noUpgrade"
+    5: "noUpgrade",
+
+    // AI2: Stop method was added to the VideoPlayer.
+    6: "noUpgrade"
 
   }, // End VideoPlayer upgraders
 
@@ -2360,7 +2651,16 @@ Blockly.Versioning.AllUpgradeMaps =
     3: "ai1CantDoUpgrade", // Just indicates we couldn't do upgrade even if we wanted to
 
     // AI2: Added method XMLTextDecode
-    4: "noUpgrade"
+    4: "noUpgrade",
+
+    // AI2: Added method UriDecode
+    5: "noUpgrade",
+
+    // AI2: Added property Timeout and event TimedOut
+    6: "noUpgrade",
+
+    // AI2: Added methods JsonTextDecodeWithDictionaries and XMLTextDecodeAsDictionary
+    7: "noUpgrade"
 
   }, // End Web upgraders
 
@@ -2381,14 +2681,29 @@ Blockly.Versioning.AllUpgradeMaps =
     5: "noUpgrade",
 
     // AI2: Added ClearCaches method
-    6: "noUpgrade"
+    6: "noUpgrade",
+
+    // AI2: Added WebViewStringChange
+    7: "noUpgrade",
+
+    //AI2: Added PageLoaded
+    8: "noUpgrade",
+
+    // AI2: Added BeforePageLoad event and Stop, Reload, and ClearCookies methods
+    9: "noUpgrade",
+
+    // AI2: Added ErrorOccurred event and RunJavaScript method
+    10: "noUpgrade"
 
   }, // End WebViewer upgraders
 
   "YandexTranslate": {
 
     //This is initial version. Placeholder for future upgrades
-    1: "noUpgrade"
+    1: "noUpgrade",
+
+    // AI2: ApiKey property added
+    2: "noUpgrade"
 
   }, // End YandexTranslate upgraders
 
@@ -2398,4 +2713,4 @@ Blockly.Versioning.AllUpgradeMaps =
     3: "noUpgrade"
   }
 
-}
+};

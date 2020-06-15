@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2017 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -26,34 +26,57 @@ public final class YoungAndroidSettings extends Settings {
     super(SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS);
 
     addProperty(new EditableProperty(this, SettingsConstants.YOUNG_ANDROID_SETTINGS_ICON,
-        "", null, EditableProperty.TYPE_INVISIBLE));
+        "", null, EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_SHOW_HIDDEN_COMPONENTS,
-        "False", null, EditableProperty.TYPE_INVISIBLE));
+        "False", null, EditableProperty.TYPE_INVISIBLE, null, null));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_SCREEN_CHECKBOX_STATE_MAP,
+        "", EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_PHONE_TABLET,
-        "False", null, EditableProperty.TYPE_INVISIBLE));
+        "False", null, EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_CODE, "1", null,
-        EditableProperty.TYPE_INVISIBLE));
+        EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_VERSION_NAME, "1.0", null,
-        EditableProperty.TYPE_INVISIBLE));
+        EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_USES_LOCATION, "false", null,
-        EditableProperty.TYPE_INVISIBLE));
+        EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_MAPS_KEY, "", null,
-        EditableProperty.TYPE_INVISIBLE));
+        EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_APP_NAME, "", null,
-        EditableProperty.TYPE_INVISIBLE));
+        EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_SIZING, "Fixed", null,
-        EditableProperty.TYPE_INVISIBLE));
+        EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this,
         SettingsConstants.YOUNG_ANDROID_SETTINGS_SHOW_LISTS_AS_JSON, "false", null,
+        EditableProperty.TYPE_INVISIBLE, null, null));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_TUTORIAL_URL, "",
         EditableProperty.TYPE_INVISIBLE));
-
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_BLOCK_SUBSET, "",
+        EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_ACTIONBAR, "false",
+        EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_THEME, "AppTheme.Light.DarkActionBar",
+        EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_PRIMARY_COLOR, "&HFFA5CF47",
+        EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_PRIMARY_COLOR_DARK, "&HFF41521C",
+        EditableProperty.TYPE_INVISIBLE));
+    addProperty(new EditableProperty(this,
+        SettingsConstants.YOUNG_ANDROID_SETTINGS_ACCENT_COLOR, "&HFF00728A",
+        EditableProperty.TYPE_INVISIBLE));
   }
 }

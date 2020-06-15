@@ -365,11 +365,11 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   }
 
   @SimpleFunction
-  public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filePath) {
+  public void HttpsPostFileToWeb(final String Url, final String certificateName, final String securityToken, final String filepath) {
     try {
       Runnable call = new Runnable() {
         public void run() {
-        	doInsertData(Url, certificateName, securityToken, filePath);
+        	doInsertData(Url, certificateName, securityToken, filepath);
         }
       };
       AsynchUtil.runAsynchronously(call);

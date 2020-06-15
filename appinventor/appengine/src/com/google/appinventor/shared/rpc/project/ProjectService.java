@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2017 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -15,6 +15,7 @@ import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -77,6 +78,18 @@ public interface ProjectService extends RemoteService {
    * @param projectId  project ID
    */
   void deleteProject(long projectId);
+
+  /**
+   * Moves the project to trash.
+   * @param projectId  project ID
+   */
+  UserProject moveToTrash(long projectId);
+
+  /**
+   * Moves the project to trash.
+   * @param projectId  project ID
+   */
+  UserProject restoreProject(long projectId);
 
   /**
    * On publish this sets the project's gallery id
@@ -280,10 +293,11 @@ public interface ProjectService extends RemoteService {
    * @param projectId  project ID
    * @param nonce used to access the built project -- random string
    * @param target  build target (optional, implementation dependent)
+   * @param secondBuildserver whether to use the second buildserver
    *
    * @return  results of invoking the build command
    */
-  RpcResult build(long projectId, String nonce, String target);
+  RpcResult build(long projectId, String nonce, String target, boolean secondBuildserver);
 
   /**
    * Gets the result of a build command for the project from the back-end.
@@ -324,6 +338,18 @@ public interface ProjectService extends RemoteService {
    * @return modification date for project
    */
   long addLDForm(long projectId, String targetFormFileId, List<String> uriCollection, String conceptURI);
+
+  /**
+   * Imports a media file from a URL and returns the contents.
+   *
+   * @param sessionId  session id
+   * @param projectId  project id
+   * @param url  url of the source file
+   * @param save  if true, the object will be saved in the project assets
+   * @return content at url as an array of bytes
+   */
+  TextFile importMedia(String sessionId, long projectId, String url, boolean save)
+    throws InvalidSessionException, IOException;
 
   /**
    * creates a new project from a gallery app

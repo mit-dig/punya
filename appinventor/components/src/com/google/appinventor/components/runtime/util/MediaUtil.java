@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2016 MIT, All rights reserved
+// Copyright 2011-2018 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,7 +8,9 @@ package com.google.appinventor.components.runtime.util;
 
 import com.google.appinventor.components.runtime.Form;
 import com.google.appinventor.components.runtime.ReplForm;
+import com.google.appinventor.components.runtime.errors.PermissionException;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
@@ -50,7 +52,7 @@ public class MediaUtil {
   private enum MediaSource { ASSET, REPL_ASSET, SDCARD, FILE_URL, URL, CONTENT_URI, CONTACT_URI }
 
   private static final String LOG_TAG = "MediaUtil";
-  private static final String REPL_ASSET_DIR = "/sdcard/AppInventor/assets/";
+  private static String REPL_ASSET_DIR = null;
 
   // tempFileMap maps cached media (assets, etc) to their respective temp files.
   private static final Map<String, File> tempFileMap = new HashMap<String, File>();
@@ -97,6 +99,15 @@ public class MediaUtil {
   }
 
   private static String replAssetPath(String assetName) {
+    // We have to initialize this here. We used to set REPL_ASSET_DIR
+    // in the initializer, but now that we fetch it from the Android
+    // SDK we have to do this here otherwise we get a "Stub!" error
+    // under the unit tests (which do not run on a device or emulator,
+    // so only has access to the android "stub" libraries.)
+    if (REPL_ASSET_DIR == null) { // Fetch it the first time
+      REPL_ASSET_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() +
+        "/AppInventor/assets/";
+    }
     return REPL_ASSET_DIR + assetName;
   }
 
@@ -165,6 +176,17 @@ public class MediaUtil {
     return MediaSource.ASSET;
   }
 
+  public static boolean isExternalFileUrl(String mediaPath) {
+    return mediaPath.startsWith("file:///sdcard/") ||
+        mediaPath.startsWith("file://" + Environment.getExternalStorageDirectory().getAbsolutePath());
+  }
+
+  public static boolean isExternalFile(String mediaPath) {
+    return mediaPath.startsWith("/sdcard/") ||
+        mediaPath.startsWith(Environment.getExternalStorageDirectory().getAbsolutePath()) ||
+        isExternalFileUrl(mediaPath);
+  }
+
   private static ConcurrentHashMap<String, String> pathCache = new ConcurrentHashMap<String, String>(2);
 
   private static String findCaseinsensitivePath(Form form, String mediaPath)
@@ -229,12 +251,17 @@ public class MediaUtil {
         return getAssetsIgnoreCaseInputStream(form,mediaPath);
 
       case REPL_ASSET:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         return new FileInputStream(replAssetPath(mediaPath));
 
       case SDCARD:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         return new FileInputStream(mediaPath);
 
       case FILE_URL:
+        if (isExternalFileUrl(mediaPath)) {
+          form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
       case URL:
         return new URL(mediaPath).openStream();
 
@@ -359,7 +386,11 @@ public class MediaUtil {
     BitmapDrawable result = (BitmapDrawable) syncer.getResult();
     if (result == null) {
       String error = syncer.getError();
-      throw new IOException(error);
+      if (error.startsWith("PERMISSION_DENIED:")) {
+        throw new PermissionException(error.split(":")[1]);
+      } else {
+        throw new IOException(error);
+      }
     } else {
       return result;
     }
@@ -400,10 +431,13 @@ public class MediaUtil {
         try {
           // copy the input stream to an in-memory buffer
           is = openMedia(form, mediaPath, mediaSource);
-          while((read = is.read(buf)) > 0) {
+          while ((read = is.read(buf)) > 0) {
             bos.write(buf, 0, read);
           }
           buf = bos.toByteArray();
+        } catch (PermissionException e) {
+          continuation.onFailure("PERMISSION_DENIED:" + e.getPermissionNeeded());
+          return;
         } catch(IOException e) {
           if (mediaSource == MediaSource.CONTACT_URI) {
             // There's no photo for this contact, return a placeholder image.
@@ -606,12 +640,17 @@ public class MediaUtil {
         return soundPool.load(getAssetsIgnoreCaseAfd(form,mediaPath), 1);
 
       case REPL_ASSET:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         return soundPool.load(replAssetPath(mediaPath), 1);
 
       case SDCARD:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         return soundPool.load(mediaPath, 1);
 
       case FILE_URL:
+        if (isExternalFileUrl(mediaPath)) {
+          form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
         return soundPool.load(fileUrlToFilePath(mediaPath), 1);
 
       case CONTENT_URI:
@@ -654,14 +693,19 @@ public class MediaUtil {
 
 
       case REPL_ASSET:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         mediaPlayer.setDataSource(replAssetPath(mediaPath));
         return;
 
       case SDCARD:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         mediaPlayer.setDataSource(mediaPath);
         return;
 
       case FILE_URL:
+        if (isExternalFileUrl(mediaPath)) {
+          form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
         mediaPlayer.setDataSource(fileUrlToFilePath(mediaPath));
         return;
 
@@ -706,14 +750,19 @@ public class MediaUtil {
         return;
 
       case REPL_ASSET:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         videoView.setVideoPath(replAssetPath(mediaPath));
         return;
 
       case SDCARD:
+        form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         videoView.setVideoPath(mediaPath);
         return;
 
       case FILE_URL:
+        if (isExternalFileUrl(mediaPath)) {
+          form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
         videoView.setVideoPath(fileUrlToFilePath(mediaPath));
         return;
 

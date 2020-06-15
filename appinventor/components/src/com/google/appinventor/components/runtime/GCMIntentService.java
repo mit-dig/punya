@@ -310,10 +310,8 @@ public class GCMIntentService extends GCMBaseIntentService {
         if (enabledVibrate)
             notification.defaults |= Notification.DEFAULT_VIBRATE;
 
-        notification.setLatestEventInfo(mainUIThreadContext,
-                (CharSequence) title, (CharSequence) text, mContentIntent);
         Log.i(TAG, "after updated notification contents");
-        mNM.notify(PROBE_NOTIFICATION_ID, notification);
+        mNM.notify(hashCode(), notification);
         Log.i(TAG, "notified");
     }
 
