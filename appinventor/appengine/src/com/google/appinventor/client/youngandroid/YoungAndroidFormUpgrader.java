@@ -224,6 +224,9 @@ public final class YoungAndroidFormUpgrader {
       } else if (componentType.equals("Ball")) {
         srcCompVersion = upgradeBallProperties(componentProperties, srcCompVersion);
 
+      } else if (componentType.equals("BarcodeScanner")) {
+        srcCompVersion = upgradeBarcodeScannerProperties(componentProperties, srcCompVersion);
+
       } else if (componentType.equals("BluetoothClient")) {
         srcCompVersion = upgradeBluetoothClientProperties(componentProperties, srcCompVersion);
 
@@ -528,6 +531,14 @@ public final class YoungAndroidFormUpgrader {
     if (srcCompVersion < 6) {
       // The OriginAtCenter property was added.
       srcCompVersion = 6;
+    }
+    return srcCompVersion;
+  }
+  private static int upgradeBarcodeScannerProperties(Map<String, JSONValue> componentProperties,
+      int srcCompVersion) {
+    if (srcCompVersion < 2) {
+      // The UseExternalScanner property was added.
+      srcCompVersion = 2;
     }
     return srcCompVersion;
   }

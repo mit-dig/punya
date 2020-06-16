@@ -13,7 +13,7 @@
   </description>
 
   <target name="all"
-          depends="CommonConstants,AndroidRuntime">
+          depends="CommonConstants,AndroidRuntime,Barcode">
   </target>
 
   <target name="tests"

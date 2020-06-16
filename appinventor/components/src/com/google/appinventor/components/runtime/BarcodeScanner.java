@@ -6,6 +6,11 @@
 
 package com.google.appinventor.components.runtime;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Intent;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -13,21 +18,14 @@ import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesActivities;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
-import com.google.appinventor.components.annotations.UsesActivities;
 import com.google.appinventor.components.annotations.androidmanifest.ActivityElement;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
-
-import android.Manifest;
 import com.google.appinventor.components.runtime.util.SdkLevel;
 
 /**
@@ -55,18 +53,20 @@ public class BarcodeScanner extends AndroidNonvisibleComponent
     implements ActivityResultListener, Component {
 
   private static final String SCAN_INTENT = "com.google.zxing.client.android.SCAN";
+  private static final String LOCAL_SCAN = "com.google.zxing.client.android.AppInvCaptureActivity";
   private static final String SCANNER_RESULT_NAME = "SCAN_RESULT";
   private String result = "";
   private boolean useExternalScanner = true;
   private final ComponentContainer container;
   private boolean havePermission = false; // Do we have CAMERA permission?
 
+
   /* Used to identify the call to startActivityForResult. Will be passed back into the
   resultReturned() callback method. */
   private int requestCode;
 
   /**
-   * Creates a Phone Call component.
+   * Creates a Bar Code scanning component.
    *
    * @param container container, component will be placed in
    */
@@ -120,6 +120,7 @@ public class BarcodeScanner extends AndroidNonvisibleComponent
     try {
       container.$context().startActivityForResult(intent, requestCode);
     } catch (ActivityNotFoundException e) {
+      e.printStackTrace();
       container.$form().dispatchErrorOccurredEvent(this, "BarcodeScanner",
         ErrorMessages.ERROR_NO_SCANNER_FOUND, "");
     }

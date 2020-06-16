@@ -378,9 +378,7 @@ $Source $Yail
     (call-component-method 'PhoneStatus1 'startWebRTC (*list-for-runtime* (get-var g$rendezvousServer)  (lexical-value $responseContent)) '(text text)))
 ;;; BarcodeScanner1
 
-(add-component MainPanel com.google.appinventor.components.runtime.BarcodeScanner BarcodeScanner1 
-(set-and-coerce-property! 'BarcodeScanner1 'UseExternalScanner #f 'boolean)
-
+(add-component MainPanel com.google.appinventor.components.runtime.BarcodeScanner BarcodeScanner1 (set-and-coerce-property! 'BarcodeScanner1 'UseExternalScanner #f 'boolean)
 )
 
 (define-event BarcodeScanner1 AfterScan($result)(set-this-form)
