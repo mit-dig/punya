@@ -57,7 +57,7 @@ import android.util.Log;
     "CSPARQL: http://streamreasoning.org/download. " +   
     "<p>You must enter the sender ID and the streaming service URL " +
     " specific to your app. </p> ",
-    category = ComponentCategory.LINKEDDATA,
+    category = ComponentCategory.INTERNAL,
     nonVisible = true, 
     iconName = "images/semanticWeb.png")
 @UsesPermissions(permissionNames = "com.google.android.c2dm.permission.RECEIVE, "
