@@ -11,7 +11,6 @@ Table of Contents:
 * [LinkedData](#LinkedData)
 * [LinkedDataForm](#LinkedDataForm)
 * [LinkedDataListPicker](#LinkedDataListPicker)
-* [LinkedDataStreamingClient](#LinkedDataStreamingClient)
 
 ## LinkedData  {#LinkedData}
 
@@ -348,72 +347,3 @@ Provides a list picker backed by the results of a SPARQL query.
 
 {:id="LinkedDataListPicker.Open" class="method"} <i/> Open()
 : Opens the `LinkedDataListPicker`, as though the user clicked on it.
-
-## LinkedDataStreamingClient  {#LinkedDataStreamingClient}
-
-Component for LinkedDataStreamingClient
-
-
-
-### Properties  {#LinkedDataStreamingClient-Properties}
-
-{:.properties}
-
-{:id="LinkedDataStreamingClient.RegId" .text .ro .bo} *RegId*
-: Property for RegId
-
-{:id="LinkedDataStreamingClient.ReturnMessage" .text .ro .bo} *ReturnMessage*
-: Property for ReturnMessage
-
-{:id="LinkedDataStreamingClient.SenderID" .text} *SenderID*
-: Property for SenderID
-
-{:id="LinkedDataStreamingClient.ServerURL" .text} *ServerURL*
-: Property for ServerURL
-
-### Events  {#LinkedDataStreamingClient-Events}
-
-{:.events}
-
-{:id="LinkedDataStreamingClient.GotResponseFromServer"} GotResponseFromServer(*url*{:.text},*responseCode*{:.number},*responseType*{:.text},*responseContent*{:.text})
-: Event indicating that a SendMessageToServer call has finished.
-
-{:id="LinkedDataStreamingClient.RegInfoReceived"} RegInfoReceived()
-: Indicates when the server registration has been successful.
-
-{:id="LinkedDataStreamingClient.StreamingInfoReceived"} StreamingInfoReceived()
-: Indicates that the GCM info has been received.
-
-{:id="LinkedDataStreamingClient.SubscriptionResponseReceived"} SubscriptionResponseReceived(*url*{:.text},*responseCode*{:.number},*responseType*{:.text},*responseContent*{:.text})
-: Event for SubscriptionResponseReceived
-
-### Methods  {#LinkedDataStreamingClient-Methods}
-
-{:.methods}
-
-{:id="LinkedDataStreamingClient.CreateNotification" class="method"} <i/> CreateNotification(*title*{:.text},*text*{:.text},*enabledSound*{:.boolean},*enabledVibrate*{:.boolean},*packageName*{:.text},*className*{:.text},*extraKey*{:.text},*extraVal*{:.text})
-: Create a notication with message to wake up another activity when tap on the notification
-
-{:id="LinkedDataStreamingClient.Enabled" class="method"} <i/> Enabled(*enable*{:.boolean})
-: Enable Google Cloud Messaging to receive push notification
-
-{:id="LinkedDataStreamingClient.Register" class="method"} <i/> Register()
-: Authenticate to Google Cloud Messaging
-
-{:id="LinkedDataStreamingClient.SendMessageToServer" class="method"} <i/> SendMessageToServer(*text*{:.text})
-: Performs an HTTP POST request using the GCM Server url property and the specified text.
-
-{:id="LinkedDataStreamingClient.SubscribeToQuery" class="method"} <i/> SubscribeToQuery(*querytext*{:.text},*streamName*{:.text},*window*{:.text},*step*{:.text})
-: Performs an HTTP POST query subscription request using the GCM Server url property and the given query.
- Query is converted to a CONSTRUCT query because an arbitrary UUID injection is necessary.
- 
- select * is currently not supported
-
-{:id="LinkedDataStreamingClient.UnRegister" class="method"} <i/> UnRegister()
-: Remove authentication for this app instance
-
-{:id="LinkedDataStreamingClient.isRegistered" class="method returns boolean"} <i/> isRegistered()
-: Method for isRegistered
-
-{:id="LinkedDataStreamingClient.isServiceReady" class="method returns boolean"} <i/> isServiceReady()
-: Method for isServiceReady

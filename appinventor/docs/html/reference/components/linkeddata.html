@@ -134,7 +134,6 @@
   <li><a href="#LinkedData">LinkedData</a></li>
   <li><a href="#LinkedDataForm">LinkedDataForm</a></li>
   <li><a href="#LinkedDataListPicker">LinkedDataListPicker</a></li>
-  <li><a href="#LinkedDataStreamingClient">LinkedDataStreamingClient</a></li>
 </ul>
 
 <h2 id="LinkedData">LinkedData</h2>
@@ -393,63 +392,6 @@
 <dl class="methods">
   <dt id="LinkedDataListPicker.Open" class="method"><i></i> Open()</dt>
   <dd>Opens the <code class="highlighter-rouge">LinkedDataListPicker</code>, as though the user clicked on it.</dd>
-</dl>
-
-<h2 id="LinkedDataStreamingClient">LinkedDataStreamingClient</h2>
-
-<p>Component for LinkedDataStreamingClient</p>
-
-<h3 id="LinkedDataStreamingClient-Properties">Properties</h3>
-
-<dl class="properties">
-  <dt id="LinkedDataStreamingClient.RegId" class="text ro bo"><em>RegId</em></dt>
-  <dd>Property for RegId</dd>
-  <dt id="LinkedDataStreamingClient.ReturnMessage" class="text ro bo"><em>ReturnMessage</em></dt>
-  <dd>Property for ReturnMessage</dd>
-  <dt id="LinkedDataStreamingClient.SenderID" class="text"><em>SenderID</em></dt>
-  <dd>Property for SenderID</dd>
-  <dt id="LinkedDataStreamingClient.ServerURL" class="text"><em>ServerURL</em></dt>
-  <dd>Property for ServerURL</dd>
-</dl>
-
-<h3 id="LinkedDataStreamingClient-Events">Events</h3>
-
-<dl class="events">
-  <dt id="LinkedDataStreamingClient.GotResponseFromServer">GotResponseFromServer(<em class="text">url</em>,<em class="number">responseCode</em>,<em class="text">responseType</em>,<em class="text">responseContent</em>)</dt>
-  <dd>Event indicating that a SendMessageToServer call has finished.</dd>
-  <dt id="LinkedDataStreamingClient.RegInfoReceived">RegInfoReceived()</dt>
-  <dd>Indicates when the server registration has been successful.</dd>
-  <dt id="LinkedDataStreamingClient.StreamingInfoReceived">StreamingInfoReceived()</dt>
-  <dd>Indicates that the GCM info has been received.</dd>
-  <dt id="LinkedDataStreamingClient.SubscriptionResponseReceived">SubscriptionResponseReceived(<em class="text">url</em>,<em class="number">responseCode</em>,<em class="text">responseType</em>,<em class="text">responseContent</em>)</dt>
-  <dd>Event for SubscriptionResponseReceived</dd>
-</dl>
-
-<h3 id="LinkedDataStreamingClient-Methods">Methods</h3>
-
-<dl class="methods">
-  <dt id="LinkedDataStreamingClient.CreateNotification" class="method"><i></i> CreateNotification(<em class="text">title</em>,<em class="text">text</em>,<em class="boolean">enabledSound</em>,<em class="boolean">enabledVibrate</em>,<em class="text">packageName</em>,<em class="text">className</em>,<em class="text">extraKey</em>,<em class="text">extraVal</em>)</dt>
-  <dd>Create a notication with message to wake up another activity when tap on the notification</dd>
-  <dt id="LinkedDataStreamingClient.Enabled" class="method"><i></i> Enabled(<em class="boolean">enable</em>)</dt>
-  <dd>Enable Google Cloud Messaging to receive push notification</dd>
-  <dt id="LinkedDataStreamingClient.Register" class="method"><i></i> Register()</dt>
-  <dd>Authenticate to Google Cloud Messaging</dd>
-  <dt id="LinkedDataStreamingClient.SendMessageToServer" class="method"><i></i> SendMessageToServer(<em class="text">text</em>)</dt>
-  <dd>Performs an HTTP POST request using the GCM Server url property and the specified text.</dd>
-  <dt id="LinkedDataStreamingClient.SubscribeToQuery" class="method"><i></i> SubscribeToQuery(<em class="text">querytext</em>,<em class="text">streamName</em>,<em class="text">window</em>,<em class="text">step</em>)</dt>
-  <dd>Performs an HTTP POST query subscription request using the GCM Server url property and the given query.
- Query is converted to a CONSTRUCT query because an arbitrary UUID injection is necessary.</dd>
-</dl>
-
-<p>select * is currently not supported</p>
-
-<dl>
-  <dt id="LinkedDataStreamingClient.UnRegister" class="method"><i></i> UnRegister()</dt>
-  <dd>Remove authentication for this app instance</dd>
-  <dt id="LinkedDataStreamingClient.isRegistered" class="method returns boolean"><i></i> isRegistered()</dt>
-  <dd>Method for isRegistered</dd>
-  <dt id="LinkedDataStreamingClient.isServiceReady" class="method returns boolean"><i></i> isServiceReady()</dt>
-  <dd>Method for isServiceReady</dd>
 </dl>
 
 </article>
