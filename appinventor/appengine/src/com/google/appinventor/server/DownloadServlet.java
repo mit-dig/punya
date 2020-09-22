@@ -154,7 +154,7 @@ public class DownloadServlet extends OdeServlet {
             StringUtils.normalizeForFilename(projectTitle);
         String zipName_screenTitle = (screenTitle == null) ? null :
             StringUtils.normalizeForFilename(screenTitle);
-        String zipName = zipName_projectTitle + "_" + zipName_screenTitle  + ".aiax";
+        String zipName = zipName_projectTitle + "_" + zipName_screenTitle  + ".ais";
         ProjectSourceZip zipFile = fileExporter.exportProjectSourceScreenZip(userId,
             projectId, zipName);
         downloadableFile = zipFile.getRawFile();

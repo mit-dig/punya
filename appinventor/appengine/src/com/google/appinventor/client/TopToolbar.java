@@ -105,6 +105,7 @@ public class TopToolbar extends Composite {
   private static final String WIDGET_NAME_FEEDBACK = "ReportIssue";
   private static final String WIDGET_NAME_COMPANIONINFO = "CompanionInformation";
   private static final String WIDGET_NAME_COMPANIONUPDATE = "CompanionUpdate";
+  private static final String WIDGET_NAME_IMPORTSCREEN = "ImportScreen";
   private static final String WIDGET_NAME_IMPORTPROJECT = "ImportProject";
   private static final String WIDGET_NAME_IMPORTTEMPLATE = "ImportTemplate";
   private static final String WIDGET_NAME_EXPORTALLPROJECTS = "ExportAllProjects";
@@ -213,30 +214,12 @@ public class TopToolbar extends Composite {
     fileItems.add(new DropDownItem(WIDGET_NAME_MY_PROJECTS, MESSAGES.projectMenuItem(),
         new SwitchToProjectAction()));
     fileItems.add(null);
-    fileItems.add(new DropDownItem(WIDGET_NAME_NEW, MESSAGES.newProjectMenuItem(),
-        new NewAction()));
-    fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTPROJECT, MESSAGES.importScreenMenuItem(),
-        new ImportScreenAction()));
-    fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTPROJECT, MESSAGES.importProjectMenuItem(),
-        new ImportProjectAction()));
-    fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTTEMPLATE, MESSAGES.importTemplateButton(),
-        new ImportTemplateAction()));
-    fileItems.add(new DropDownItem(WIDGET_NAME_DELETE, MESSAGES.deleteProjectButton(),
-        new DeleteAction()));
-    fileItems.add(null);
-    fileItems.add(new DropDownItem(WIDGET_NAME_SAVE, MESSAGES.saveMenuItem(),
-        new SaveAction()));
-    fileItems.add(new DropDownItem(WIDGET_NAME_SAVE_AS, MESSAGES.saveAsMenuItem(),
-        new SaveAsAction()));
-    fileItems.add(new DropDownItem(WIDGET_NAME_CHECKPOINT, MESSAGES.checkpointMenuItem(),
-        new CheckpointAction()));
-    fileItems.add(null);
-    fileItems.add(new DropDownItem(WIDGET_NAME_EXPORTPROJECTSCREEN, MESSAGES.exportScreenMenuItem(),
-        new ExportProjectScreenAction()));
 
     if (!isReadOnly) {
       fileItems.add(new DropDownItem(WIDGET_NAME_NEW, MESSAGES.newProjectMenuItem(),
           new NewAction()));
+      fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTSCREEN, MESSAGES.importScreenMenuItem(),
+          new ImportScreenAction()));
       fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTPROJECT, MESSAGES.importProjectMenuItem(),
           new ImportProjectAction()));
       fileItems.add(new DropDownItem(WIDGET_NAME_IMPORTTEMPLATE, MESSAGES.importTemplateButton(),
@@ -253,6 +236,8 @@ public class TopToolbar extends Composite {
       fileItems.add(null);
     }
 
+    fileItems.add(new DropDownItem(WIDGET_NAME_EXPORTPROJECTSCREEN, MESSAGES.exportScreenMenuItem(),
+        new ExportProjectScreenAction()));
     fileItems.add(new DropDownItem(WIDGET_NAME_EXPORTPROJECT, MESSAGES.exportProjectMenuItem(),
         new ExportProjectAction()));
     fileItems.add(new DropDownItem(WIDGET_NAME_EXPORTALLPROJECTS, MESSAGES.exportAllProjectsMenuItem(),

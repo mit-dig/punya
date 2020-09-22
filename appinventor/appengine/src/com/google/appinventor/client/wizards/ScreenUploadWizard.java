@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class ScreenUploadWizard extends Wizard {
   // Project archive extension
-  private static final String SCREEN_ARCHIVE_EXTENSION = ".aiax";
+  private static final String SCREEN_ARCHIVE_EXTENSION = ".ais";
 
   /**
    * Creates a new project upload wizard.
@@ -39,6 +39,7 @@ public class ScreenUploadWizard extends Wizard {
     // Initialize UI
     final FileUpload upload = new FileUpload();
     upload.setName(ServerLayout.UPLOAD_PROJECT_SCREEN_FORM_ELEMENT);
+    upload.getElement().setAttribute("accept", SCREEN_ARCHIVE_EXTENSION);
     setStylePrimaryName("ode-DialogBox");
     VerticalPanel panel = new VerticalPanel();
     panel.setVerticalAlignment(VerticalPanel.ALIGN_MIDDLE);
