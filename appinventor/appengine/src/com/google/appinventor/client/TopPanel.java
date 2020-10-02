@@ -298,15 +298,9 @@ public class TopPanel extends Composite {
     panel.add(logo);
     panel.setCellWidth(logo, "50px");
     Label title = new Label("Punya Framework");
-    Label version = new Label("Beta");
     title.setStyleName("ode-LogoText");
-    version.setStyleName("ode-LogoVersion");
-    VerticalPanel titleContainer = new VerticalPanel();
-    titleContainer.add(title);
-    titleContainer.add(version);
-    titleContainer.setCellHorizontalAlignment(version, HorizontalPanel.ALIGN_RIGHT);
-    panel.add(titleContainer);
-    panel.setCellWidth(titleContainer, "180px");
+    panel.add(title);
+    panel.setCellWidth(title, "180px");
     panel.setCellHorizontalAlignment(logo, HorizontalPanel.ALIGN_LEFT);
     panel.setCellVerticalAlignment(logo, HorizontalPanel.ALIGN_MIDDLE);
   }
