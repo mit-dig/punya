@@ -55,8 +55,10 @@ public class UploadServlet extends OdeServlet {
   // Since the file path may contain slashes, it must be the last component in the URI.
   private static final int PROJECT_ID_INDEX = 4;
   private static final int PROJECT_NAME_INDEX = 5;
-  private static final int FILE_PATH_INDEX = 6;
-  private static final int SPLIT_LIMIT_FILE = 7;
+  private static final int SPLIT_LIMIT_FILE = 6;
+  private static final int FILE_PATH_INDEX = 5;
+  private static final int SPLIT_LIMIT_SCREEN = 7;
+  private static final int SCREEN_NAME_INDEX = 6;
 
   // Constants used when upload kind is "userfile".
   // Since the file path may contain slashes, it must be the last component in the URI.
@@ -113,10 +115,10 @@ public class UploadServlet extends OdeServlet {
           uploadResponse = e.uploadResponse;
         }
       } else if (uploadKind.equals(ServerLayout.UPLOAD_SCREEN)) {
-        uriComponents = uri.split("/", SPLIT_LIMIT_FILE);
+        uriComponents = uri.split("/", SPLIT_LIMIT_SCREEN);
         long projectId = Long.parseLong(uriComponents[PROJECT_ID_INDEX]);
         String projectName = uriComponents[PROJECT_NAME_INDEX];
-        String fileName = uriComponents[FILE_PATH_INDEX];
+        String fileName = uriComponents[SCREEN_NAME_INDEX];
         InputStream uploadedStream;
         try {
           uploadedStream = getRequestStream(req, ServerLayout.UPLOAD_PROJECT_SCREEN_FORM_ELEMENT);
