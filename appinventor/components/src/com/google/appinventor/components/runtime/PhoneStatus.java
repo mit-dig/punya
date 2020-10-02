@@ -329,7 +329,7 @@ public class PhoneStatus extends AndroidNonvisibleComponent implements Component
   @SimpleFunction(description = "Return the app that installed us")
   public String GetInstaller() {
     if (SdkLevel.getLevel() >= SdkLevel.LEVEL_ECLAIR) {
-      String installer = EclairUtil.getInstallerPackageName("edu.mit.appinventor.aicompanion3", form);
+      String installer = EclairUtil.getInstallerPackageName(YaVersion.ACCEPTABLE_COMPANION_PACKAGE, form);
       if (installer == null) {
         return "sideloaded";
       } else {
