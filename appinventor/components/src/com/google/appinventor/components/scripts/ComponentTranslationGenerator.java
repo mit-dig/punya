@@ -130,7 +130,7 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
       sb.append(Character.toUpperCase(lower.charAt(0)));
       sb.append(lower.substring(1));
     }
-    sb.append("ComponentPallette());\n");
+    sb.append("ComponentCategory());\n");
   }
 
   private void outputPropertyCategory(String category, StringBuilder sb) {
@@ -226,7 +226,6 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
   }
 
   private void outputCategoryAutogen(String category, StringBuilder sb) {
-    if (category.equalsIgnoreCase("linked data")) return;
     String[] parts = category.split(" ");
     sb.append("  @DefaultMessage(\"");
     sb.append(category);
@@ -242,7 +241,7 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
       sb.append(Character.toUpperCase(lower.charAt(0)));
       sb.append(lower.substring(1));
     }
-    sb.append("ComponentPallette();\n\n");
+    sb.append("ComponentCategory();\n\n");
   }
 
   private void outputPropertyCategoryAutogen(String category, StringBuilder sb) {

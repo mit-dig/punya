@@ -82,6 +82,7 @@ import java.util.Map;
       DOC_MAP.put("Connectivity", "connectivity");
       DOC_MAP.put("LEGO\u00AE MINDSTORMS\u00AE", "legomindstorms");
       DOC_MAP.put("Semantic Web", "semanticweb");
+      DOC_MAP.put("Linked Data", "linkeddata");
       DOC_MAP.put("Experimental", "experimental");
       //DOC_MAP.put("Extension", "extension");
     }
