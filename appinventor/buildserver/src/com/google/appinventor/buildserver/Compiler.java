@@ -1653,6 +1653,8 @@ public final class Compiler {
       if (nativeLibsNeeded.size() != 0) { // Need to add native libraries...
         apkBuilder.addNativeLibraries(libsDir);
       }
+      // TODO(ewpatton): Generalize this
+      apkBuilder.addResourcesFromJar(new File(getResource(RUNTIME_FILES_DIR + "jena-reasoner.jar")));
       apkBuilder.sealApk();
       return true;
     } catch (Exception e) {

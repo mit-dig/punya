@@ -11,6 +11,7 @@ Table of Contents:
 * [LinkedData](#LinkedData)
 * [LinkedDataForm](#LinkedDataForm)
 * [LinkedDataListPicker](#LinkedDataListPicker)
+* [Reasoner](#Reasoner)
 
 ## LinkedData  {#LinkedData}
 
@@ -347,3 +348,152 @@ Provides a list picker backed by the results of a SPARQL query.
 
 {:id="LinkedDataListPicker.Open" class="method"} <i/> Open()
 : Opens the `LinkedDataListPicker`, as though the user clicked on it.
+
+## Reasoner  {#Reasoner}
+
+Component for Reasoner
+
+
+
+### Properties  {#Reasoner-Properties}
+
+{:.properties}
+
+{:id="Reasoner.EndpointURL" .text} *EndpointURL*
+: Specifies the URL of a SPARQL endpoint.
+ The default value is the DBpedia endpoint.
+
+{:id="Reasoner.Model" .component} *Model*
+: Property for Model
+
+{:id="Reasoner.RulesEngine" .text} *RulesEngine*
+: Property for RulesEngine
+
+{:id="Reasoner.RulesFile" .text} *RulesFile*
+: Property for RulesFile
+
+### Events  {#Reasoner-Events}
+
+{:.events}
+
+{:id="Reasoner.ErrorOccurred"} ErrorOccurred(*message*{:.text})
+: Event for ErrorOccurred
+
+{:id="Reasoner.FailedHttsPostingFileToWeb"} FailedHttsPostingFileToWeb(*errorMessage*{:.text})
+: Event for FailedHttsPostingFileToWeb
+
+{:id="Reasoner.FailedToAddDataToWeb"} FailedToAddDataToWeb(*graph*{:.text},*error*{:.text})
+: Event for FailedToAddDataToWeb
+
+{:id="Reasoner.FailedToDeleteDataFromLocal"} FailedToDeleteDataFromLocal()
+: Event for FailedToDeleteDataFromLocal
+
+{:id="Reasoner.FailedToDeleteDataFromWeb"} FailedToDeleteDataFromWeb(*graph*{:.text},*error*{:.text})
+: Event for FailedToDeleteDataFromWeb
+
+{:id="Reasoner.FailedToFeedDataToWeb"} FailedToFeedDataToWeb(*error*{:.text})
+: Event for FailedToFeedDataToWeb
+
+{:id="Reasoner.FailedToWriteDataToWeb"} FailedToWriteDataToWeb(*graph*{:.text},*error*{:.text})
+: This event is raised when the LinkedData component fails to publish a
+ graph to a remote SPARQL endpoint.
+
+{:id="Reasoner.FinishedAddingDataToWeb"} FinishedAddingDataToWeb(*graph*{:.text})
+: Event for FinishedAddingDataToWeb
+
+{:id="Reasoner.FinishedDeletingDataFromLocal"} FinishedDeletingDataFromLocal()
+: Event for FinishedDeletingDataFromLocal
+
+{:id="Reasoner.FinishedDeletingDataFromWeb"} FinishedDeletingDataFromWeb(*graph*{:.text})
+: Event for FinishedDeletingDataFromWeb
+
+{:id="Reasoner.FinishedFeedingDataToWeb"} FinishedFeedingDataToWeb()
+: Event for FinishedFeedingDataToWeb
+
+{:id="Reasoner.FinishedHttsPostingFileToWeb"} FinishedHttsPostingFileToWeb(*message*{:.text})
+: Event for FinishedHttsPostingFileToWeb
+
+{:id="Reasoner.FinishedWritingDataToWeb"} FinishedWritingDataToWeb(*graph*{:.text})
+: This event is raised when a graph is successfully published on a remote
+ endpoint.
+
+{:id="Reasoner.ReasoningComplete"} ReasoningComplete()
+: Event for ReasoningComplete
+
+{:id="Reasoner.RetrievedRawResults"} RetrievedRawResults(*type*{:.text},*contents*{:.text})
+: This event is raised after a SPARQL engine finishes processing a query
+ and the client has received the results, but before those results have
+ been processed into objects so that they may be used in conjunction with
+ other linked-data-enabled components.
+
+{:id="Reasoner.RetrievedResults"} RetrievedResults(*type*{:.text},*bindings*{:.list})
+: This event is raised after a SPARQL engine finishes processing
+ a query and the client has received the results.
+
+{:id="Reasoner.UnsupportedQueryType"} UnsupportedQueryType()
+: Event raised when a SPARQL query to be executed is not supported
+ by the Linked Data component.
+
+### Methods  {#Reasoner-Methods}
+
+{:.methods}
+
+{:id="Reasoner.AddDataFromComponent" class="method returns boolean"} <i/> AddDataFromComponent(*component*{:.component},*subject*{:.text})
+: Takes a component implementing the LDComponent interface and uses the properties defined
+ there to insert a triple into the model using the given subject.
+
+{:id="Reasoner.AddDataFromLinkedDataForm" class="method returns boolean"} <i/> AddDataFromLinkedDataForm(*form*{:.component})
+: Takes a LinkedDataForm component and converts it and any nested elements into
+ triples within the model encapsulated by this LinkedData component.
+
+{:id="Reasoner.AddDataToWeb" class="method"} <i/> AddDataToWeb(*graph*{:.text},*noResolveUpdate*{:.boolean})
+: Attempts to insert the statements contained within this Linked Data
+ component into the endpoint with an optional graph.
+
+{:id="Reasoner.DeleteDataFromLocal" class="method"} <i/> DeleteDataFromLocal()
+: Deletes all data from the referent model
+
+{:id="Reasoner.DeleteDataFromWeb" class="method"} <i/> DeleteDataFromWeb(*graph*{:.text},*noResolveUpdate*{:.boolean})
+: Attempts to delete the statements contained within this Linked Data
+ component from the endpoint with an optional graph.
+
+{:id="Reasoner.ExecuteSPARQLQuery" class="method"} <i/> ExecuteSPARQLQuery(*query*{:.text})
+: Execute a SPARQL query on the set EndpointURL of this Linked Data component.
+ Currently only supports SELECT queries, and converts all integer types into Long
+ and decimal types into Double.
+
+{:id="Reasoner.FeedDataToWeb" class="method"} <i/> FeedDataToWeb()
+: Attempts to feed the statements contained within this Linked Data
+ component into the endpoint (most likely CSPARQL).
+
+{:id="Reasoner.GetStatements" class="method returns list"} <i/> GetStatements(*subject*{:.any},*predicate*{:.any},*object*{:.any})
+: Method for GetStatements
+
+{:id="Reasoner.HttpsPostFileToWeb" class="method"} <i/> HttpsPostFileToWeb(*Url*{:.text},*certificateName*{:.text},*securityToken*{:.text},*filepath*{:.text})
+: Method for HttpsPostFileToWeb
+
+{:id="Reasoner.ReadDataFromLocal" class="method returns boolean"} <i/> ReadDataFromLocal(*path*{:.text})
+: Read contents of the specified path (local or remote) into the referent model.
+ Note the implementation is identical to ReadDataFromWeb
+
+{:id="Reasoner.ReadDataFromWeb" class="method returns boolean"} <i/> ReadDataFromWeb(*path*{:.text})
+: Read contents of the specified path (local or remote) into the referent model.
+ Note the implementation is identical to ReadDataFromLocal
+
+{:id="Reasoner.ResultsToSimpleJSON" class="method returns text"} <i/> ResultsToSimpleJSON(*results*{:.list})
+: Method for ResultsToSimpleJSON
+
+{:id="Reasoner.Run" class="method"} <i/> Run()
+: Method for Run
+
+{:id="Reasoner.ToString" class="method returns text"} <i/> ToString()
+: Returns the contents of this LinkedData component as a string. Useful
+ for debugging purposes.
+
+{:id="Reasoner.WriteDataToLocal" class="method returns boolean"} <i/> WriteDataToLocal(*path*{:.text})
+: Saves the model to the given path on the file system.
+
+{:id="Reasoner.WriteDataToWeb" class="method"} <i/> WriteDataToWeb(*graph*{:.text})
+: Write the model represented by the LinkedData component to the
+ RDF graph store represented by EndpointURL using the given graph URI.
+ Any existing triples will get replaced?

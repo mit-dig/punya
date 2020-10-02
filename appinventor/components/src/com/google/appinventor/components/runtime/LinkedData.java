@@ -1,17 +1,6 @@
 package com.google.appinventor.components.runtime;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import android.util.Log;
-
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -25,6 +14,8 @@ import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
+import com.google.appinventor.components.runtime.util.IOUtils;
+import com.google.appinventor.components.runtime.util.MediaUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import com.hp.hpl.jena.query.ResultSet;
@@ -33,6 +24,15 @@ import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @DesignerComponent(version = YaVersion.LINKED_DATA_COMPONENT_VERSION,
     description = "Non-visible component that communicates with a SPARQL-powered triple store",
@@ -43,8 +43,8 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 @UsesLibraries(libraries = "xercesImpl.jar," +
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
-    "jena-arq.jar")
-public class LinkedData extends AndroidNonvisibleComponent implements
+    "jena-arq.jar," + "xml-apis.jar")
+public class LinkedData<T extends Model> extends AndroidNonvisibleComponent implements
 		Component {
 
   /* constants for convenience */
@@ -56,15 +56,15 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   private static final String GEO_NS = "http://www.w3.org/2003/01/geo/wgs84_pos#";
   private static final String SKOS_NS = "http://www.w3.org/2004/02/skos/core#";
 
-  private final Model model;
+  protected T model;
 
   /** endpointURL stores the URI of a SPARQL endpoint **/
   private String endpointURL;
 
-  public LinkedData(ComponentContainer container) {
+  public LinkedData(ComponentContainer<?> container) {
 	  super(container.$form());
 	  endpointURL = "http://dbpedia.org/sparql";
-    model = ModelFactory.createDefaultModel();
+    model = (T) ModelFactory.createDefaultModel();
     model.setNsPrefix("rdf", RDF_NS);
     model.setNsPrefix("rdfs", RDFS_NS);
     model.setNsPrefix("owl", OWL_NS);
@@ -211,6 +211,7 @@ public class LinkedData extends AndroidNonvisibleComponent implements
    */
   @SimpleFunction
   public boolean ReadDataFromLocal(String path) {
+    InputStream input = null;
     try {
       String type = "RDF/XML";
       if(path.endsWith(".n3")) {
@@ -218,10 +219,13 @@ public class LinkedData extends AndroidNonvisibleComponent implements
       } else if(path.endsWith(".ttl")) {
         type = "TURTLE";
       }
-      model.read(path, type);
+      input = MediaUtil.openMedia(form, path);
+      model.read(input, path, type);
     } catch(Exception e) {
       Log.w(LOG_TAG, "Unable to read model.", e);
       return false;
+    } finally {
+      IOUtils.closeQuietly(LOG_TAG, input);
     }
     return true;
   }
@@ -675,5 +679,9 @@ public class LinkedData extends AndroidNonvisibleComponent implements
   @SimpleEvent
   public void FailedHttsPostingFileToWeb(String errorMessage) {
     EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb", errorMessage);
+  }
+
+  protected Model getModel() {
+    return model;
   }
 }

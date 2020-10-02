@@ -168,12 +168,14 @@
     <copy toFile="${public.deps.dir}/jena-core.jar" file="${lib.dir}/jena/jena-core-2.10.0-android.jar" />
     <copy toFile="${public.deps.dir}/jena-arq.jar" file="${lib.dir}/jena/jena-arq-2.10.0-android.jar" />
     <copy toFile="${public.deps.dir}/jena-iri.jar" file="${lib.dir}/jena/jena-iri-0.9.5.jar" />
+    <copy toFile="${public.deps.dir}/jena-reasoner.jar" file="${lib.dir}/jena/jena-reasoner-2.10.0-android.jar" />
     <!--
     <copy toFile="${public.deps.dir}/jena-interfaces.jar" file="${lib.dir}/jena/jena-interfaces-2.10.0.jar" />
     <copy toFile="${public.deps.dir}/httpclient.jar" file="${lib.dir}/jena/httpclient-4.2.3.jar" />
     <copy toFile="${public.deps.dir}/httpcore.jar" file="${lib.dir}/jena/httpcore-4.2.2.jar" />
     -->
-    <copy toFile="${public.deps.dir}/xercesImpl.jar" file="${lib.dir}/jena/xercesLite.jar" />
+    <copy toFile="${public.deps.dir}/xercesImpl.jar" file="${lib.dir}/jena/xercesImpl.jar" />
+    <copy toFile="${public.deps.dir}/xml-apis.jar" file="${lib.dir}/jena/xml-apis.jar" />
     <copy toFile="${public.deps.dir}/slf4j-android.jar" file="${lib.dir}/jena/slf4j-android-1.6.1-RC1.jar" />
     <!-- the below three are replaced with newer version for Google Drive API to work
 	 These three are also specified in FusionTableControl component-->	 

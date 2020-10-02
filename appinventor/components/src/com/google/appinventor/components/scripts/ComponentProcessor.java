@@ -749,7 +749,11 @@ public abstract class ComponentProcessor extends AbstractProcessor {
             elementUtils.getDocComment(element),
             elementUtils.getDocComment(element),
             "Component", false, elementUtils.isDeprecated(element));
-      type = element.asType().toString();
+      String type = element.asType().toString();
+      if (type.contains("<")) {
+        type = type.split("<")[0];
+      }
+      this.type = type;
       displayName = getDisplayNameForComponentType(name);
       permissions = Sets.newHashSet();
       conditionalPermissions = Maps.newTreeMap();
@@ -1075,6 +1079,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
 
     // If we already processed this component, return early.
     String longComponentName = ((TypeElement) element).getQualifiedName().toString();
+    // Remove generic information if present
+    if (longComponentName.contains("<")) {
+      longComponentName = longComponentName.split("<")[0];
+    }
     if (components.containsKey(longComponentName)) {
       return;
     }
@@ -1845,6 +1853,10 @@ public abstract class ComponentProcessor extends AbstractProcessor {
     }
 
     // Check if it's a component.
+    if (type.contains("<")) {
+      // Remove generic information
+      type = type.split("<")[0];
+    }
     if (componentTypes.contains(type)) {
       return "component";
     }

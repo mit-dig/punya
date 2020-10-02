@@ -812,6 +812,9 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/arduino.png")
   ImageResource arduino();
+
+  @Source("com/google/appinventor/images/reasoner.png")
+  ImageResource reasoner();
   
   /**
    * Media icon: image
