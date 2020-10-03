@@ -397,115 +397,44 @@
 
 <h2 id="Reasoner">Reasoner</h2>
 
-<p>Component for Reasoner</p>
+<p>The <code>Reasoner</code> component derives statements from the contents of a
+ <code>LinkedData</code> component.</p>
 
 <h3 id="Reasoner-Properties">Properties</h3>
 
 <dl class="properties">
-  <dt id="Reasoner.EndpointURL" class="text"><em>EndpointURL</em></dt>
-  <dd>Specifies the URL of a SPARQL endpoint.
- The default value is the DBpedia endpoint.</dd>
   <dt id="Reasoner.Model" class="component"><em>Model</em></dt>
-  <dd>Property for Model</dd>
+  <dd>Specifies the base model (A-Box + T-Box) for reasoning.</dd>
   <dt id="Reasoner.RulesEngine" class="text"><em>RulesEngine</em></dt>
-  <dd>Property for RulesEngine</dd>
+  <dd>Specifies the base semantics that should be used for reasoning.</dd>
   <dt id="Reasoner.RulesFile" class="text"><em>RulesFile</em></dt>
-  <dd>Property for RulesFile</dd>
+  <dd>An optional file containing custom rules to be used during reasoning. The rules are applied
+ in addition to any reasoning applied by the choice of <a href="#Reasoner.RulesEngine"><code class="highlighter-rouge">RulesEngine</code></a>.</dd>
 </dl>
 
 <h3 id="Reasoner-Events">Events</h3>
 
 <dl class="events">
   <dt id="Reasoner.ErrorOccurred">ErrorOccurred(<em class="text">message</em>)</dt>
-  <dd>Event for ErrorOccurred</dd>
-  <dt id="Reasoner.FailedHttsPostingFileToWeb">FailedHttsPostingFileToWeb(<em class="text">errorMessage</em>)</dt>
-  <dd>Event for FailedHttsPostingFileToWeb</dd>
-  <dt id="Reasoner.FailedToAddDataToWeb">FailedToAddDataToWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
-  <dd>Event for FailedToAddDataToWeb</dd>
-  <dt id="Reasoner.FailedToDeleteDataFromLocal">FailedToDeleteDataFromLocal()</dt>
-  <dd>Event for FailedToDeleteDataFromLocal</dd>
-  <dt id="Reasoner.FailedToDeleteDataFromWeb">FailedToDeleteDataFromWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
-  <dd>Event for FailedToDeleteDataFromWeb</dd>
-  <dt id="Reasoner.FailedToFeedDataToWeb">FailedToFeedDataToWeb(<em class="text">error</em>)</dt>
-  <dd>Event for FailedToFeedDataToWeb</dd>
-  <dt id="Reasoner.FailedToWriteDataToWeb">FailedToWriteDataToWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
-  <dd>This event is raised when the LinkedData component fails to publish a
- graph to a remote SPARQL endpoint.</dd>
-  <dt id="Reasoner.FinishedAddingDataToWeb">FinishedAddingDataToWeb(<em class="text">graph</em>)</dt>
-  <dd>Event for FinishedAddingDataToWeb</dd>
-  <dt id="Reasoner.FinishedDeletingDataFromLocal">FinishedDeletingDataFromLocal()</dt>
-  <dd>Event for FinishedDeletingDataFromLocal</dd>
-  <dt id="Reasoner.FinishedDeletingDataFromWeb">FinishedDeletingDataFromWeb(<em class="text">graph</em>)</dt>
-  <dd>Event for FinishedDeletingDataFromWeb</dd>
-  <dt id="Reasoner.FinishedFeedingDataToWeb">FinishedFeedingDataToWeb()</dt>
-  <dd>Event for FinishedFeedingDataToWeb</dd>
-  <dt id="Reasoner.FinishedHttsPostingFileToWeb">FinishedHttsPostingFileToWeb(<em class="text">message</em>)</dt>
-  <dd>Event for FinishedHttsPostingFileToWeb</dd>
-  <dt id="Reasoner.FinishedWritingDataToWeb">FinishedWritingDataToWeb(<em class="text">graph</em>)</dt>
-  <dd>This event is raised when a graph is successfully published on a remote
- endpoint.</dd>
+  <dd>Runs when the reasoner encounters an error during reasoning.</dd>
   <dt id="Reasoner.ReasoningComplete">ReasoningComplete()</dt>
-  <dd>Event for ReasoningComplete</dd>
-  <dt id="Reasoner.RetrievedRawResults">RetrievedRawResults(<em class="text">type</em>,<em class="text">contents</em>)</dt>
-  <dd>This event is raised after a SPARQL engine finishes processing a query
- and the client has received the results, but before those results have
- been processed into objects so that they may be used in conjunction with
- other linked-data-enabled components.</dd>
-  <dt id="Reasoner.RetrievedResults">RetrievedResults(<em class="text">type</em>,<em class="list">bindings</em>)</dt>
-  <dd>This event is raised after a SPARQL engine finishes processing
- a query and the client has received the results.</dd>
-  <dt id="Reasoner.UnsupportedQueryType">UnsupportedQueryType()</dt>
-  <dd>Event raised when a SPARQL query to be executed is not supported
- by the Linked Data component.</dd>
+  <dd>Runs when the reasoner has been prepared and any forward-chaining rules have finished.</dd>
 </dl>
 
 <h3 id="Reasoner-Methods">Methods</h3>
 
 <dl class="methods">
-  <dt id="Reasoner.AddDataFromComponent" class="method returns boolean"><i></i> AddDataFromComponent(<em class="component">component</em>,<em class="text">subject</em>)</dt>
-  <dd>Takes a component implementing the LDComponent interface and uses the properties defined
- there to insert a triple into the model using the given subject.</dd>
-  <dt id="Reasoner.AddDataFromLinkedDataForm" class="method returns boolean"><i></i> AddDataFromLinkedDataForm(<em class="component">form</em>)</dt>
-  <dd>Takes a LinkedDataForm component and converts it and any nested elements into
- triples within the model encapsulated by this LinkedData component.</dd>
-  <dt id="Reasoner.AddDataToWeb" class="method"><i></i> AddDataToWeb(<em class="text">graph</em>,<em class="boolean">noResolveUpdate</em>)</dt>
-  <dd>Attempts to insert the statements contained within this Linked Data
- component into the endpoint with an optional graph.</dd>
-  <dt id="Reasoner.DeleteDataFromLocal" class="method"><i></i> DeleteDataFromLocal()</dt>
-  <dd>Deletes all data from the referent model</dd>
-  <dt id="Reasoner.DeleteDataFromWeb" class="method"><i></i> DeleteDataFromWeb(<em class="text">graph</em>,<em class="boolean">noResolveUpdate</em>)</dt>
-  <dd>Attempts to delete the statements contained within this Linked Data
- component from the endpoint with an optional graph.</dd>
-  <dt id="Reasoner.ExecuteSPARQLQuery" class="method"><i></i> ExecuteSPARQLQuery(<em class="text">query</em>)</dt>
-  <dd>Execute a SPARQL query on the set EndpointURL of this Linked Data component.
- Currently only supports SELECT queries, and converts all integer types into Long
- and decimal types into Double.</dd>
-  <dt id="Reasoner.FeedDataToWeb" class="method"><i></i> FeedDataToWeb()</dt>
-  <dd>Attempts to feed the statements contained within this Linked Data
- component into the endpoint (most likely CSPARQL).</dd>
   <dt id="Reasoner.GetStatements" class="method returns list"><i></i> GetStatements(<em class="any">subject</em>,<em class="any">predicate</em>,<em class="any">object</em>)</dt>
-  <dd>Method for GetStatements</dd>
-  <dt id="Reasoner.HttpsPostFileToWeb" class="method"><i></i> HttpsPostFileToWeb(<em class="text">Url</em>,<em class="text">certificateName</em>,<em class="text">securityToken</em>,<em class="text">filepath</em>)</dt>
-  <dd>Method for HttpsPostFileToWeb</dd>
-  <dt id="Reasoner.ReadDataFromLocal" class="method returns boolean"><i></i> ReadDataFromLocal(<em class="text">path</em>)</dt>
-  <dd>Read contents of the specified path (local or remote) into the referent model.
- Note the implementation is identical to ReadDataFromWeb</dd>
-  <dt id="Reasoner.ReadDataFromWeb" class="method returns boolean"><i></i> ReadDataFromWeb(<em class="text">path</em>)</dt>
-  <dd>Read contents of the specified path (local or remote) into the referent model.
- Note the implementation is identical to ReadDataFromLocal</dd>
-  <dt id="Reasoner.ResultsToSimpleJSON" class="method returns text"><i></i> ResultsToSimpleJSON(<em class="list">results</em>)</dt>
-  <dd>Method for ResultsToSimpleJSON</dd>
+  <dd>Get statements as a list of triples from the knowledge base. Each argument can either be false
+ or a string. False is treated as a wildcard. Strings are interpreted as URIs.</dd>
+  <dt id="Reasoner.Query" class="method returns any"><i></i> Query(<em class="text">query</em>)</dt>
+  <dd>Synchronously evaluate a SPARQL query over the knowledge base. The return type depends on the
+ type of query run. For SELECT queries, the return value is a JSON-like dictionary containing
+ results in the SPARQL 1.1 Query Result format.</dd>
   <dt id="Reasoner.Run" class="method"><i></i> Run()</dt>
-  <dd>Method for Run</dd>
-  <dt id="Reasoner.ToString" class="method returns text"><i></i> ToString()</dt>
-  <dd>Returns the contents of this LinkedData component as a string. Useful
- for debugging purposes.</dd>
-  <dt id="Reasoner.WriteDataToLocal" class="method returns boolean"><i></i> WriteDataToLocal(<em class="text">path</em>)</dt>
-  <dd>Saves the model to the given path on the file system.</dd>
-  <dt id="Reasoner.WriteDataToWeb" class="method"><i></i> WriteDataToWeb(<em class="text">graph</em>)</dt>
-  <dd>Write the model represented by the LinkedData component to the
- RDF graph store represented by EndpointURL using the given graph URI.
- Any existing triples will get replaced?</dd>
+  <dd>Runs the reasoner in forward chaining model to derive conclusions. On success, the
+ <a href="#Reasoner.ReasoningComplete"><code class="highlighter-rouge">ReasoningComplete</code></a> event will run. <a href="#Reasoner.ErrorOccurred"><code class="highlighter-rouge">ErrorOccurred</code></a> event will run if reasoning
+ fails.</dd>
 </dl>
 
 </article>

@@ -12,10 +12,18 @@ import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.PunyaVersion;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
+import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.IOUtils;
 import com.google.appinventor.components.runtime.util.MediaUtil;
+import com.google.appinventor.components.runtime.util.YailDictionary;
+import com.google.appinventor.components.runtime.util.YailList;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.InfModel;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory2;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -32,8 +40,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+/**
+ * The <code>Reasoner</code> component derives statements from the contents of a
+ * <code>LinkedData</code> component.
+ *
+ * @author Evan W. Patton (ewpatton@mit.edu)
+ */
 @DesignerComponent(version = PunyaVersion.REASONER_COMPONENT_VERSION,
     nonVisible = true,
     category = ComponentCategory.LINKEDDATA,
@@ -41,15 +57,15 @@ import java.util.List;
 )
 @SimpleObject
 @UsesLibraries({"jena-reasoner.jar"})
-public class Reasoner extends LinkedData<InfModel> {
+public class Reasoner extends LinkedDataBase<InfModel> {
 
   private static final String LOG_TAG = Reasoner.class.getSimpleName();
-  private LinkedData<?> basemodel = null;
+  private LinkedData basemodel = null;
   private String rulesEngine = "";
   private String rulesFile = "";
 
   /**
-   * Creates a new AndroidNonvisibleComponent.
+   * Creates a new Reasoner..
    *
    * @param form the container that this component will be placed in
    */
@@ -59,19 +75,32 @@ public class Reasoner extends LinkedData<InfModel> {
 
   ///region Properties
 
+  @SimpleProperty
+  public LinkedData Model() {
+    return basemodel;
+  }
+
+  /**
+   * Specifies the base model (A-Box + T-Box) for reasoning.
+   */
   @DesignerProperty(
       editorType = PropertyTypeConstants.PROPERTY_TYPE_COMPONENT + ":com.google.appinventor.components.runtime.LinkedData"
   )
   @SimpleProperty(category = PropertyCategory.BEHAVIOR)
-  public void Model(LinkedData<? extends Model> model) {
+  public void Model(LinkedData model) {
     this.basemodel = model;
   }
 
   @SimpleProperty
-  public LinkedData<?> Model() {
-    return basemodel;
+  public String RulesEngine() {
+    return "";
   }
 
+  /**
+   * Specifies the base semantics that should be used for reasoning.
+   *
+   * @param rules the base semantics to use for reasoning
+   */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CHOICES,
       editorArgs = {"None", "RDFS", "OWL Micro", "OWL Mini", "OWL"},
       defaultValue = "None")
@@ -81,24 +110,30 @@ public class Reasoner extends LinkedData<InfModel> {
   }
 
   @SimpleProperty
-  public String RulesEngine() {
-    return "";
+  public String RulesFile() {
+    return rulesFile;
   }
 
+  /**
+   * An optional file containing custom rules to be used during reasoning. The rules are applied
+   * in addition to any reasoning applied by the choice of {@link #RulesEngine}.
+   *
+   * @param rules path to an additional ruleset to include for reasoning
+   */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ASSET)
   @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   public void RulesFile(String rules) {
     this.rulesFile = rules;
   }
 
-  @SimpleProperty
-  public String RulesFile() {
-    return rulesFile;
-  }
-
   ///endregion
   ///region Methods
 
+  /**
+   * Runs the reasoner in forward chaining model to derive conclusions. On success, the
+   * {@link #ReasoningComplete} event will run. {@link #ErrorOccurred} event will run if reasoning
+   * fails.
+   */
   @SimpleFunction
   public void Run() {
     if (this.basemodel == null) {
@@ -150,6 +185,15 @@ public class Reasoner extends LinkedData<InfModel> {
     });
   }
 
+  /**
+   * Get statements as a list of triples from the knowledge base. Each argument can either be false
+   * or a string. False is treated as a wildcard. Strings are interpreted as URIs.
+   *
+   * @param subject the subject to filter by
+   * @param predicate the predicate to filter by
+   * @param object the object to filter by
+   * @return a list of triples matching the (subject, predicate, object) pattern
+   */
   @SimpleFunction
   public List<List<String>> GetStatements(Object subject, Object predicate, Object object) {
     List<List<String>> result = new ArrayList<>();
@@ -184,17 +228,65 @@ public class Reasoner extends LinkedData<InfModel> {
     return result;
   }
 
+  /**
+   * Synchronously evaluate a SPARQL query over the knowledge base. The return type depends on the
+   * type of query run. For SELECT queries, the return value is a JSON-like dictionary containing
+   * results in the SPARQL 1.1 Query Result format.
+   *
+   * @param query a string containing a valid SPARQL query
+   * @return the query results
+   */
+  @SimpleFunction
+  public Object Query(String query) {
+    Query sparql = QueryFactory.create(query);
+    QueryExecution qe = QueryExecutionFactory.create(sparql, model);
+    if (sparql.isSelectType()) {
+      ResultSet rs = qe.execSelect();
+      YailDictionary result = new YailDictionary();
+      YailDictionary head = new YailDictionary();
+      head.put("vars", YailList.makeList(rs.getResultVars()));
+      result.put("head", head);
+      List<YailDictionary> results = new ArrayList<>();
+      while (rs.hasNext()) {
+        YailDictionary yailBinding = new YailDictionary();
+        QuerySolution binding = rs.next();
+        Iterator<String> vars = binding.varNames();
+        while (vars.hasNext()) {
+          String var = vars.next();
+          RDFNode value = binding.get(var);
+          if (value != null) {
+            yailBinding.put(var, value.toString());
+          }
+        }
+        results.add(yailBinding);
+      }
+      result.put("results", YailList.makeList(results));
+      return result;
+    }
+    return Collections.emptyList();
+  }
+
   ///endregion
   ///region Events
 
+  /**
+   * Runs when the reasoner has been prepared and any forward-chaining rules have finished.
+   */
   @SimpleEvent
   public void ReasoningComplete() {
     EventDispatcher.dispatchEvent(this, "ReasoningComplete");
   }
 
+  /**
+   * Runs when the reasoner encounters an error during reasoning.
+   *
+   * @param message the error message
+   */
   @SimpleEvent
   public void ErrorOccurred(String message) {
-    EventDispatcher.dispatchEvent(this, "ErrorOccurred", message);
+    if (!EventDispatcher.dispatchEvent(this, "ErrorOccurred", message)) {
+      form.dispatchErrorOccurredEvent(this, "Run", ErrorMessages.ERROR_REASONER_FAILED, message);
+    }
   }
 
   ///endregion

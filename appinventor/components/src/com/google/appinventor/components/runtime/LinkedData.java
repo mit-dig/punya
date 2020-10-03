@@ -44,7 +44,7 @@ import java.util.Set;
 @UsesLibraries(libraries = "xercesImpl.jar," +
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar," + "xml-apis.jar")
-public class LinkedData<T extends Model> extends AndroidNonvisibleComponent implements
+public class LinkedData extends LinkedDataBase<Model> implements
 		Component {
 
   /* constants for convenience */
@@ -56,15 +56,12 @@ public class LinkedData<T extends Model> extends AndroidNonvisibleComponent impl
   private static final String GEO_NS = "http://www.w3.org/2003/01/geo/wgs84_pos#";
   private static final String SKOS_NS = "http://www.w3.org/2004/02/skos/core#";
 
-  protected T model;
-
   /** endpointURL stores the URI of a SPARQL endpoint **/
   private String endpointURL;
 
   public LinkedData(ComponentContainer<?> container) {
-	  super(container.$form());
+	  super(container, ModelFactory.createDefaultModel());
 	  endpointURL = "http://dbpedia.org/sparql";
-    model = (T) ModelFactory.createDefaultModel();
     model.setNsPrefix("rdf", RDF_NS);
     model.setNsPrefix("rdfs", RDFS_NS);
     model.setNsPrefix("owl", OWL_NS);
@@ -679,9 +676,5 @@ public class LinkedData<T extends Model> extends AndroidNonvisibleComponent impl
   @SimpleEvent
   public void FailedHttsPostingFileToWeb(String errorMessage) {
     EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb", errorMessage);
-  }
-
-  protected Model getModel() {
-    return model;
   }
 }

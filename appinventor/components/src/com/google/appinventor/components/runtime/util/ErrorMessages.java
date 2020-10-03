@@ -329,6 +329,10 @@ public final class ErrorMessages {
   // for Google Cloud Messaging
   public static final int ERROR_GCM_APPSERVER_INVALID = 2019;
   public static final int ERROR_GCM_NO_REGID_FOR_MESSAGE = 2020;
+
+  // for reasoning
+  public static final int ERROR_REASONER_FAILED = 12100;
+  public static final int ERROR_REASONER_NO_MODEL = 12101;
   
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
@@ -793,6 +797,10 @@ public final class ErrorMessages {
         "Unable to request directions. Reason: %s");
     errorMessages.put(ERROR_ROUTING_SERVICE_ERROR, "Routing service failed with status %d %s");
     errorMessages.put(ERROR_NO_ROUTE_FOUND, "No route returned by the routing service.");
+
+    // Reasoning
+    errorMessages.put(ERROR_REASONER_FAILED, "Reasoning failed due to error: %s");
+    errorMessages.put(ERROR_REASONER_NO_MODEL, "No Model specified for reasoning.");
   }
 
   private ErrorMessages() {
