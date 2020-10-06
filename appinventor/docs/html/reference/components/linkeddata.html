@@ -431,6 +431,8 @@
   <dd>Synchronously evaluate a SPARQL query over the knowledge base. The return type depends on the
  type of query run. For SELECT queries, the return value is a JSON-like dictionary containing
  results in the SPARQL 1.1 Query Result format.</dd>
+  <dt id="Reasoner.RulesFromRuleset" class="method"><i></i> RulesFromRuleset(<em class="text">ruleset</em>)</dt>
+  <dd>Populate the rule-based reasoner with the given ruleset of custom rules.</dd>
   <dt id="Reasoner.Run" class="method"><i></i> Run()</dt>
   <dd>Runs the reasoner in forward chaining model to derive conclusions. On success, the
  <a href="#Reasoner.ReasoningComplete"><code class="highlighter-rouge">ReasoningComplete</code></a> event will run. <a href="#Reasoner.ErrorOccurred"><code class="highlighter-rouge">ErrorOccurred</code></a> event will run if reasoning

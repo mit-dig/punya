@@ -63,6 +63,7 @@ public class Reasoner extends LinkedDataBase<InfModel> {
   private LinkedData basemodel = null;
   private String rulesEngine = "";
   private String rulesFile = "";
+  private List<Rule> rules = new ArrayList<>();
 
   /**
    * Creates a new Reasoner..
@@ -166,6 +167,13 @@ public class Reasoner extends LinkedDataBase<InfModel> {
               ((RuleReasoner) reasoner).setRules(loadRules(rulesFile));
             }
           }
+          if (rules.size() > 0) {
+            if (reasoner instanceof FBRuleReasoner) {
+              ((FBRuleReasoner) reasoner).addRules(rules);
+            } else if (reasoner instanceof RuleReasoner) {
+              ((RuleReasoner) reasoner).setRules(rules);
+            }
+          }
           model.prepare();
           form.runOnUiThread(new Runnable() {
             @Override
@@ -226,6 +234,16 @@ public class Reasoner extends LinkedDataBase<InfModel> {
           st.getObject().toString()));
     }
     return result;
+  }
+
+  /**
+   * Populate the rule-based reasoner with the given ruleset of custom rules.
+   *
+   * @param ruleset the ruleset as a string
+   */
+  @SimpleFunction
+  public void RulesFromRuleset(String ruleset) {
+    rules = Rule.parseRules(ruleset);
   }
 
   /**

@@ -83,3 +83,13 @@ Blockly.Yail['logic_compare'] = function() {
       + Blockly.Yail.YAIL_DOUBLE_QUOTE + Blockly.Yail.YAIL_CLOSE_COMBINATION;
   return [ code, Blockly.Yail.ORDER_ATOMIC ];
 };
+
+/// region Semantic Web
+
+Blockly.Yail['logic_ruleset'] = function() {
+  var rules = Blockly.Rules.statementToCode(this, 'RULES');
+  var code = Blockly.Yail.quote_(rules);
+  return [ code, Blockly.Yail.ORDER_ATOMIC ];
+}
+
+/// endregion

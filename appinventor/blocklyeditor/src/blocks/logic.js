@@ -233,3 +233,189 @@ Blockly.Blocks['logic_or'] = {
     return Blockly.Blocks.logic_operation.HELPURLS()[op];
   }
 };
+
+goog.require('Blockly.Rules');
+
+Blockly.Blocks['logic_ruleset'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, Blockly.Blocks.Utilities.YailTypeToBlocklyType('text', Blockly.Blocks.Utilities.OUTPUT));
+    this.appendDummyInput().appendField('ruleset');
+    this.appendStatementInput('RULES')
+      .setCheck(['frule', 'brule']);
+  }
+}
+
+Blockly.Blocks['logic_forward_rule'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'frule');
+    this.setNextStatement(true, ['frule', 'brule']);
+    this.appendDummyInput().appendField('define forward rule')
+//      .appendField(new Blockly.FieldGlobalFlydown('rulename'), 'rulename');
+    this.appendStatementInput('ANTECEDENT')
+      .appendField('body', ['statement']);
+    this.appendDummyInput().appendField('⇒')
+    this.appendStatementInput('CONSEQUENT')
+      .appendField('head', ['statement', 'brule']);
+  }
+};
+
+Blockly.Blocks['logic_backward_rule'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'brule');
+    this.setNextStatement(true, ['frule', 'brule']);
+    this.appendDummyInput()
+      .appendField('define backward rule')
+//      .appendField(new Blockly.FieldGlobalFlydown('rulename'), 'rulename');
+    this.appendStatementInput('CONSEQUENT')
+      .appendField('head')
+      .setCheck('statement');
+    this.appendDummyInput().appendField('⇐');
+    this.appendStatementInput('ANTECEDENT')
+      .appendField('body')
+      .setCheck('statement');
+  }
+};
+
+Blockly.Blocks['logic_triple_pattern'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendValueInput('SUBJECT').appendField('subject')
+      .setCheck(['qname', 'variable']);
+    this.appendValueInput('PREDICATE').appendField('predicate')
+      .setCheck(['qname', 'variable']);
+    this.appendValueInput('OBJECT').appendField('object')
+      .setCheck(['qname', 'variable']);
+    this.setInputsInline(true);
+    var type = this.workspace.newBlock('logic_rdf_type');
+    type.setShadow(true);
+    this.getInput('PREDICATE').connection.connect(type.outputConnection);
+  }
+}
+
+Blockly.Blocks['logic_uri'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['qname']);
+    this.appendDummyInput().appendField('<')
+      .appendField(new Blockly.FieldTextInput(''), 'URI')
+      .appendField('>');
+  }
+}
+
+Blockly.Blocks['logic_qname'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['qname']);
+    this.appendDummyInput().appendField(new Blockly.FieldTextInput(''), 'PREFIX')
+      .appendField(':').appendField(new Blockly.FieldTextInput(''), 'LOCALNAME');
+  }
+}
+
+Blockly.Blocks['logic_binding'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['variable']);
+    this.appendDummyInput().appendField('?')
+      .appendField(new Blockly.FieldTextInput('var'), 'VARNAME');
+  }
+}
+
+Blockly.Blocks['logic_binding_binary_infix'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.appendValueInput('C').appendField('let')
+      .setCheck('variable');
+    this.appendValueInput('A')
+      .appendField(':=')
+      .setCheck(['qname', 'variable']);
+    this.appendValueInput('B')
+      .appendField(new Blockly.FieldDropdown([['+', 'add'], ['-', 'sub'], ['✖️', 'mul'], ['➗', 'div']]), 'OP');
+    this.setInputsInline(true);
+  }
+}
+
+Blockly.Blocks['logic_binding_binary_prefix'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendValueInput('C').appendField('let');
+    this.appendValueInput('A')
+      .appendField(':=')
+      .appendField(new Blockly.FieldDropdown([['min', 'min'], ['max', 'max']]), 'OP');
+    this.appendValueInput('B');
+    this.setInputsInline(true);
+  }
+}
+
+Blockly.Blocks['logic_binding_unary_prefix'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendValueInput('C').appendField('let');
+    this.appendValueInput('A')
+      .appendField(':= 1 + ');
+    this.setInputsInline(true);
+  }
+}
+
+Blockly.Blocks['logic_typecheck'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendValueInput('VALUE')
+      .appendField(new Blockly.FieldDropdown([
+        ['isLiteral', 'isLiteral'], ['isFunctor', 'isFunctor'], ['isBnode', 'isBnode'],
+        ['bound', 'bound']
+      ]), 'OP');
+    this.setInputsInline(true);
+  }
+}
+
+Blockly.Blocks['logic_table'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendValueInput('PROPERTY').appendField('table');
+  }
+}
+
+Blockly.Blocks['logic_table_all'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendDummyInput().appendField('table all');
+  }
+}
+
+Blockly.Blocks['logic_rdf_type'] = {
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['qname']);
+    this.appendDummyInput().appendField('a');
+  }
+}

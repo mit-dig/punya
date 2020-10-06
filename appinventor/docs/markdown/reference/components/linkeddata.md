@@ -393,6 +393,9 @@ The <code>Reasoner</code> component derives statements from the contents of a
  type of query run. For SELECT queries, the return value is a JSON-like dictionary containing
  results in the SPARQL 1.1 Query Result format.
 
+{:id="Reasoner.RulesFromRuleset" class="method"} <i/> RulesFromRuleset(*ruleset*{:.text})
+: Populate the rule-based reasoner with the given ruleset of custom rules.
+
 {:id="Reasoner.Run" class="method"} <i/> Run()
 : Runs the reasoner in forward chaining model to derive conclusions. On success, the
  [`ReasoningComplete`](#Reasoner.ReasoningComplete) event will run. [`ErrorOccurred`](#Reasoner.ErrorOccurred) event will run if reasoning
