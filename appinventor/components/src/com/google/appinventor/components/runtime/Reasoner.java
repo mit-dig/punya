@@ -1,5 +1,6 @@
 package com.google.appinventor.components.runtime;
 
+import android.util.Log;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -33,6 +34,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.reasoner.ReasonerRegistry;
 import com.hp.hpl.jena.reasoner.rulesys.FBRuleReasoner;
+import com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
 import com.hp.hpl.jena.reasoner.rulesys.RuleReasoner;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -157,7 +159,8 @@ public class Reasoner extends LinkedDataBase<InfModel> {
           } else if ("OWL".equals(rulesEngine)) {
             reasoner = ReasonerRegistry.getOWLReasoner();
           } else {
-            reasoner = new FBRuleReasoner(new ArrayList<Rule>());
+            reasoner = new GenericRuleReasoner(new ArrayList<>(rules));
+            ((GenericRuleReasoner) reasoner).setMode(GenericRuleReasoner.HYBRID);
           }
           model = ModelFactory2.createInfModel(reasoner, basemodel.getModel());
           if (rulesFile != null && !rulesFile.equals("")) {
@@ -165,13 +168,6 @@ public class Reasoner extends LinkedDataBase<InfModel> {
               ((FBRuleReasoner) reasoner).addRules(loadRules(rulesFile));
             } else if (reasoner instanceof RuleReasoner) {
               ((RuleReasoner) reasoner).setRules(loadRules(rulesFile));
-            }
-          }
-          if (rules.size() > 0) {
-            if (reasoner instanceof FBRuleReasoner) {
-              ((FBRuleReasoner) reasoner).addRules(rules);
-            } else if (reasoner instanceof RuleReasoner) {
-              ((RuleReasoner) reasoner).setRules(rules);
             }
           }
           model.prepare();
@@ -244,6 +240,11 @@ public class Reasoner extends LinkedDataBase<InfModel> {
   @SimpleFunction
   public void RulesFromRuleset(String ruleset) {
     rules = Rule.parseRules(ruleset);
+    String[] lines = rules.toString().split("\n");
+    System.err.println("Rules:");
+    for (String line : lines) {
+      System.err.println(line);
+    }
   }
 
   /**
