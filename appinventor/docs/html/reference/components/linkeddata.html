@@ -215,6 +215,11 @@
   <dt id="LinkedData.FeedDataToWeb" class="method"><i></i> FeedDataToWeb()</dt>
   <dd>Attempts to feed the statements contained within this Linked Data
  component into the endpoint (most likely CSPARQL).</dd>
+  <dt id="LinkedData.GetLangStatements" class="method returns list"><i></i> GetLangStatements(<em class="any">subject</em>,<em class="any">predicate</em>,<em class="any">object</em>,<em class="any">lang</em>)</dt>
+  <dd>Method for GetLangStatements</dd>
+  <dt id="LinkedData.GetStatements" class="method returns list"><i></i> GetStatements(<em class="any">subject</em>,<em class="any">predicate</em>,<em class="any">object</em>)</dt>
+  <dd>Get statements as a list of triples from the knowledge base. Each argument can either be false
+ or a string. False is treated as a wildcard. Strings are interpreted as URIs.</dd>
   <dt id="LinkedData.HttpsPostFileToWeb" class="method"><i></i> HttpsPostFileToWeb(<em class="text">Url</em>,<em class="text">certificateName</em>,<em class="text">securityToken</em>,<em class="text">filepath</em>)</dt>
   <dd>Method for HttpsPostFileToWeb</dd>
   <dt id="LinkedData.ReadDataFromLocal" class="method returns boolean"><i></i> ReadDataFromLocal(<em class="text">path</em>)</dt>
@@ -424,6 +429,10 @@
 <h3 id="Reasoner-Methods">Methods</h3>
 
 <dl class="methods">
+  <dt id="Reasoner.AddRulesFromRuleset" class="method"><i></i> AddRulesFromRuleset(<em class="text">ruleset</em>)</dt>
+  <dd>Adds additional rules to an existing ruleset.</dd>
+  <dt id="Reasoner.GetLangStatements" class="method returns list"><i></i> GetLangStatements(<em class="any">subject</em>,<em class="any">predicate</em>,<em class="any">object</em>,<em class="any">lang</em>)</dt>
+  <dd>Method for GetLangStatements</dd>
   <dt id="Reasoner.GetStatements" class="method returns list"><i></i> GetStatements(<em class="any">subject</em>,<em class="any">predicate</em>,<em class="any">object</em>)</dt>
   <dd>Get statements as a list of triples from the knowledge base. Each argument can either be false
  or a string. False is treated as a wildcard. Strings are interpreted as URIs.</dd>

@@ -1,6 +1,5 @@
 package com.google.appinventor.components.runtime;
 
-import android.util.Log;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -26,22 +25,16 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.InfModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory2;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.reasoner.BaseInfGraph;
 import com.hp.hpl.jena.reasoner.ReasonerRegistry;
 import com.hp.hpl.jena.reasoner.rulesys.FBRuleReasoner;
 import com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
 import com.hp.hpl.jena.reasoner.rulesys.RuleReasoner;
-import com.hp.hpl.jena.vocabulary.RDF;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -171,6 +164,10 @@ public class Reasoner extends LinkedDataBase<InfModel> {
             }
           }
           model.prepare();
+          if (model.getGraph() instanceof BaseInfGraph) {
+            ((BaseInfGraph) model.getGraph()).validate();
+            // TODO(ewpatton): Report validity to blocks
+          }
           form.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -190,49 +187,6 @@ public class Reasoner extends LinkedDataBase<InfModel> {
   }
 
   /**
-   * Get statements as a list of triples from the knowledge base. Each argument can either be false
-   * or a string. False is treated as a wildcard. Strings are interpreted as URIs.
-   *
-   * @param subject the subject to filter by
-   * @param predicate the predicate to filter by
-   * @param object the object to filter by
-   * @return a list of triples matching the (subject, predicate, object) pattern
-   */
-  @SimpleFunction
-  public List<List<String>> GetStatements(Object subject, Object predicate, Object object) {
-    List<List<String>> result = new ArrayList<>();
-    Resource s = null;
-    Property p = null;
-    RDFNode o = null;
-    if (subject != Boolean.FALSE) {
-      s = ResourceFactory.createResource(subject.toString());
-    }
-    if (predicate != Boolean.FALSE) {
-      if (predicate.toString().equals("a")) {
-        p = RDF.type;
-      } else {
-        p = ResourceFactory.createProperty(predicate.toString());
-      }
-    }
-    if (object != Boolean.FALSE) {
-      String ostr = object.toString();
-      if (ostr.startsWith("http:") || ostr.startsWith("https://") || ostr.startsWith("file://")) {
-        o = ResourceFactory.createResource(ostr);
-      } else {
-        o = ResourceFactory.createPlainLiteral(ostr);
-      }
-    }
-    for (StmtIterator it = model.listStatements(s, p, o); it.hasNext(); ) {
-      Statement st = it.next();
-      result.add(Arrays.asList(
-          st.getSubject().toString(),
-          st.getPredicate().toString(),
-          st.getObject().toString()));
-    }
-    return result;
-  }
-
-  /**
    * Populate the rule-based reasoner with the given ruleset of custom rules.
    *
    * @param ruleset the ruleset as a string
@@ -240,6 +194,22 @@ public class Reasoner extends LinkedDataBase<InfModel> {
   @SimpleFunction
   public void RulesFromRuleset(String ruleset) {
     rules = Rule.parseRules(ruleset);
+    String[] lines = rules.toString().split("\n");
+    System.err.println("Rules:");
+    for (String line : lines) {
+      System.err.println(line);
+    }
+  }
+
+  /**
+   * Adds additional rules to an existing ruleset.
+   *
+   * @param ruleset the ruleset as a string
+   */
+  @SimpleFunction
+  public void AddRulesFromRuleset(String ruleset) {
+    List<Rule> newRules = Rule.parseRules(ruleset);
+    rules.addAll(newRules);
     String[] lines = rules.toString().split("\n");
     System.err.println("Rules:");
     for (String line : lines) {

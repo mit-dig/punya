@@ -115,6 +115,13 @@ Component for LinkedData
 : Attempts to feed the statements contained within this Linked Data
  component into the endpoint (most likely CSPARQL).
 
+{:id="LinkedData.GetLangStatements" class="method returns list"} <i/> GetLangStatements(*subject*{:.any},*predicate*{:.any},*object*{:.any},*lang*{:.any})
+: Method for GetLangStatements
+
+{:id="LinkedData.GetStatements" class="method returns list"} <i/> GetStatements(*subject*{:.any},*predicate*{:.any},*object*{:.any})
+: Get statements as a list of triples from the knowledge base. Each argument can either be false
+ or a string. False is treated as a wildcard. Strings are interpreted as URIs.
+
 {:id="LinkedData.HttpsPostFileToWeb" class="method"} <i/> HttpsPostFileToWeb(*Url*{:.text},*certificateName*{:.text},*securityToken*{:.text},*filepath*{:.text})
 : Method for HttpsPostFileToWeb
 
@@ -383,6 +390,12 @@ The <code>Reasoner</code> component derives statements from the contents of a
 ### Methods  {#Reasoner-Methods}
 
 {:.methods}
+
+{:id="Reasoner.AddRulesFromRuleset" class="method"} <i/> AddRulesFromRuleset(*ruleset*{:.text})
+: Adds additional rules to an existing ruleset.
+
+{:id="Reasoner.GetLangStatements" class="method returns list"} <i/> GetLangStatements(*subject*{:.any},*predicate*{:.any},*object*{:.any},*lang*{:.any})
+: Method for GetLangStatements
 
 {:id="Reasoner.GetStatements" class="method returns list"} <i/> GetStatements(*subject*{:.any},*predicate*{:.any},*object*{:.any})
 : Get statements as a list of triples from the knowledge base. Each argument can either be false
