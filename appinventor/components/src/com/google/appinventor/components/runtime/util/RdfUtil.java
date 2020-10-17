@@ -321,18 +321,22 @@ public final class RdfUtil {
     Property p = model.getProperty( model.expandPrefix( propertyUri ) );
     if ( conceptUri == null || conceptUri.length() == 0 ) {
       // if no concept, try to infer xsd datatype
-      if ( value.getClass() == Boolean.class ) {
-        model.add( s, p, value.toString(), XSDDatatype.XSDboolean );
-      } else if ( value.getClass() == Calendar.class ) {
+      if (value.getClass() == Boolean.class) {
+        model.add(s, p, value.toString(), XSDDatatype.XSDboolean);
+      } else if (value.getClass() == Calendar.class) {
         Date d = ((Calendar) value).getTime();
         SimpleDateFormat formatter = new SimpleDateFormat("Y-m-d");
-        model.add( s, p, formatter.format(d), XSDDatatype.XSDdate );
-      } else if ( value.getClass() == String.class ) {
-        model.add( s, p, (String) value );
+        model.add(s, p, formatter.format(d), XSDDatatype.XSDdate);
+      } else if (value.getClass() == String.class) {
+        model.add(s, p, (String) value);
       } else {
         Log.w(LOG_TAG, "Concept URI not supplied and unable to determine appropriate XSD type from Value.getClass");
         return false;
       }
+    } else if ( conceptUri.startsWith( "xsd:" ) ) {
+      Literal l = model.createTypedLiteral(value.toString(),
+          conceptUri.replace("xsd:", XSD.getURI()));
+      model.add(s, p, l);
     } else if( conceptUri.startsWith( XSD.getURI() ) ) {
       // have a concept and it's in the xsd namespace
       Literal l = model.createTypedLiteral( value.toString(), conceptUri );
