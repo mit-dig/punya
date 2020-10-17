@@ -49,4 +49,25 @@ public class AsynchUtil {
     Thread thread = new Thread(runnable);
     thread.start();
   }
+
+  public static <T> T runAsynchronously(final Callable<T> call) throws InterruptedException {
+    final AtomicReference<T> result = new AtomicReference<>();
+    synchronized (result) {
+      AsynchUtil.runAsynchronously(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            result.set(call.call());
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          synchronized (result) {
+            result.notifyAll();
+          }
+        }
+      });
+      result.wait();
+    }
+    return result.get();
+  }
 }
