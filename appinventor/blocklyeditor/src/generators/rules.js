@@ -164,6 +164,13 @@ Blockly.Rules['logic_binding_unary_prefix'] = function() {
   return 'addOne(' + a + ', ' + c + ')';
 }
 
+Blockly.Rules['logic_equality_check'] = function() {
+  var x = Blockly.Rules.valueToCode(this, 'X', Blockly.Rules.ORDER_NONE);
+  var y = Blockly.Rules.valueToCode(this, 'Y', Blockly.Rules.ORDER_NONE);
+  var op = this.dropdown.getValue();
+  return op + '(' + x + ', ' + y + ')';
+}
+
 /**
  *
  * @returns {string}

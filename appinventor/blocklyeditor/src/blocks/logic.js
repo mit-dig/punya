@@ -377,6 +377,26 @@ Blockly.Blocks['logic_binding_unary_prefix'] = {
   }
 }
 
+Blockly.Blocks['logic_equality_check'] = {
+  category: 'Logic',
+  init: function() {
+    this.dropdown = new Blockly.FieldDropdown([
+      ['=', 'equal'],
+      ['≠', 'notEqual'],
+      ['<', 'lessThan'],
+      ['≤', 'le'],
+      ['>', 'greaterThan'],
+      ['≥', 'ge']
+    ]);
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendValueInput('X');
+    this.appendValueInput('Y').appendField(this.dropdown, 'OP');
+    this.setInputsInline(true);
+  }
+}
+
 Blockly.Blocks['logic_typecheck'] = {
   category: 'Logic',
   init: function() {
