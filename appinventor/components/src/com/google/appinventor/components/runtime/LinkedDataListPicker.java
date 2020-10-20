@@ -1,20 +1,19 @@
 package com.google.appinventor.components.runtime;
 
-import com.google.appinventor.components.annotations.UsesActivities;
-import com.google.appinventor.components.annotations.androidmanifest.ActivityElement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.UsesActivities;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.annotations.UsesPermissions;
+import com.google.appinventor.components.annotations.androidmanifest.ActivityElement;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
@@ -23,10 +22,10 @@ import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil.Solution;
 import com.hp.hpl.jena.query.ResultSet;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.util.Log;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Provides a list picker backed by the results of a SPARQL query.
@@ -109,7 +108,31 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     Log.d(LOG_TAG, "Creating intent");
     Intent intent = new Intent();
     intent.setClassName(container.$context(), SWLIST_ACTIVITY_CLASS);
-    intent.putParcelableArrayListExtra(SWLIST_ACTIVITY_ARG_NAME, (ArrayList<LabeledUri>)items);
+    Bundle bundle = new Bundle();
+    bundle.putBinder("binder", new SWListActivity.DataSource() {
+      @Override
+      void performQuery(String query, Completion completion) {
+        ArrayList<LabeledUri> filteredItems = new ArrayList<>();
+        int i = 0;
+        boolean first = true;
+        while (i < items.size()) {
+          for (; i < items.size(); i++) {
+            if (items.get(i).getLabel().contains(query)) {
+              filteredItems.add(items.get(i));
+            }
+            if (filteredItems.size() % 100 == 0) {
+              break;
+            }
+          }
+          Log.d(LOG_TAG, "Sending batch of " + filteredItems.size() + " uris to activity.");
+          completion.onResultsAvailable(filteredItems, first);
+          first = false;
+          filteredItems.clear();
+        }
+        completion.done();
+      }
+    });
+    intent.putExtra(".source", bundle);
     //intent.putExtra(SWLIST_ACTIVITY_ARG_NAME, items.toArray(new LabeledUri[] {}));
     String openAnim = container.$form().getOpenAnimType();
     intent.putExtra(SWLIST_ACTIVITY_ANIM_TYPE, openAnim);
@@ -203,17 +226,17 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
   private void populateItemsList(final String endpoint, final String conceptUri) {
     Log.d(LOG_TAG, "Populating item list for semantic list picker");
     final String query = "PREFIX dc: <http://purl.org/dc/terms/> " +
-        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
         "PREFIX foaf: <http://xmlns.com/foaf/0.1/> " +
         "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
         "SELECT DISTINCT ?uri (SAMPLE(?lbl) AS ?label) WHERE { " +
         "?uri <" + relationUri + "> <" + conceptUri + "> " +
         "{ ?uri rdfs:label ?lbl }" +
-        //" UNION { ?uri skos:prefLabel ?lbl } " +
-        //"UNION { ?uri foaf:name ?lbl } UNION { ?uri dc:title ?lbl } " +
+        " UNION { ?uri skos:prefLabel ?lbl } " +
+        "UNION { ?uri foaf:name ?lbl } UNION { ?uri dc:title ?lbl } " +
         "FILTER(lang(?lbl) = \"\" || langMatches(lang(?lbl), \"" +
         Locale.getDefault().getLanguage() + "\"))" +
-        "} GROUP BY ?uri ORDER BY ?label LIMIT 100";
+        "} GROUP BY ?uri ORDER BY ?label";
     Log.d(LOG_TAG, "The Query is " + query);
     Collection<Solution> solutions = null;
     try {
@@ -236,6 +259,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
         final String uri = (String)i.getBinding("uri").get(1);
         final String label = (String)i.getBinding("label").get(1);
         items.add(new LabeledUri(label, uri));
+        Log.d(LOG_TAG, label + ": " + uri);
       } catch(final Exception e) {
         Log.w(LOG_TAG, "Unexpected exception processing SPARQL results.", e);
         form.runOnUiThread(new Runnable() {
