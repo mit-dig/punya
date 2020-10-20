@@ -133,7 +133,7 @@ public class LinkedData extends LinkedDataBase<Model> implements
         }
       });
       ((ResultSetRewindable)results).reset();
-      final YailList solutions = RdfUtil.resultSetAsYailList( results );
+      final YailList solutions = RdfUtil.resultSetUsingYailDictionary( results );
       form.runOnUiThread(new Runnable() {
         public void run() {
           RetrievedResults("SELECT", solutions);

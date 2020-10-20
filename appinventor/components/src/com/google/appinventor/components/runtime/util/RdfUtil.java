@@ -1,57 +1,12 @@
 package com.google.appinventor.components.runtime.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import java.security.cert.CertificateException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
-
 import com.google.appinventor.components.runtime.AndroidViewComponent;
 import com.google.appinventor.components.runtime.ComponentContainer;
 import com.google.appinventor.components.runtime.LDComponent;
 import com.google.appinventor.components.runtime.LinkedDataForm;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -70,11 +25,76 @@ import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.XSD;
-
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 
 public final class RdfUtil {
   public static final String LOG_TAG = RdfUtil.class.getSimpleName();
+
+  private static final Set<RDFDatatype> INTEGER_TYPES;
+  private static final Set<RDFDatatype> DOUBLE_TYPES;
+
+  static {
+    INTEGER_TYPES = new HashSet<>();
+    INTEGER_TYPES.add(XSDDatatype.XSDbyte);
+    INTEGER_TYPES.add(XSDDatatype.XSDunsignedByte);
+    INTEGER_TYPES.add(XSDDatatype.XSDshort);
+    INTEGER_TYPES.add(XSDDatatype.XSDunsignedShort);
+    INTEGER_TYPES.add(XSDDatatype.XSDint);
+    INTEGER_TYPES.add(XSDDatatype.XSDinteger);
+    INTEGER_TYPES.add(XSDDatatype.XSDunsignedInt);
+    INTEGER_TYPES.add(XSDDatatype.XSDnonNegativeInteger);
+    INTEGER_TYPES.add(XSDDatatype.XSDnonPositiveInteger);
+    INTEGER_TYPES.add(XSDDatatype.XSDpositiveInteger);
+    INTEGER_TYPES.add(XSDDatatype.XSDnegativeInteger);
+    DOUBLE_TYPES = new HashSet<>();
+    DOUBLE_TYPES.add(XSDDatatype.XSDfloat);
+    DOUBLE_TYPES.add(XSDDatatype.XSDdouble);
+    DOUBLE_TYPES.add(XSDDatatype.XSDdecimal);
+  }
 
   public static final class VariableBinding extends ArrayList<Object> {
     /**
@@ -976,6 +996,57 @@ public final class RdfUtil {
       Log.w(LOG_TAG, "Unable to insert triples due to communication issue.", e);
     }
     return success;
+  }
+
+  public static YailList resultSetUsingYailDictionary(ResultSet results) {
+    List<YailDictionary> bindings = new ArrayList<>();
+    while (results.hasNext()) {
+      QuerySolution s = results.next();
+      Iterator<String> varNames = s.varNames();
+      YailDictionary binding = new YailDictionary();
+      while (varNames.hasNext()) {
+        String var = varNames.next();
+        RDFNode node = s.get(var);
+        if (node.isResource()) {
+          binding.put(var, node.toString());
+        } else if (node.isLiteral()) {
+          Literal l = node.asLiteral();
+          if (l.getDatatype() != null) {
+            RDFDatatype datatype = l.getDatatype();
+            if (XSDDatatype.XSDboolean.equals(datatype)) {
+              binding.put(var, l.getBoolean());
+            } else if (INTEGER_TYPES.contains(l.getDatatype())) {
+              binding.put(var, l.getInt());
+            } else if (DOUBLE_TYPES.contains(l.getDatatype())) {
+              binding.put(var, l.getDouble());
+            } else if (XSDDatatype.XSDdate.equals(datatype)) {
+              String[] parts = l.getString().split("-");
+              Calendar cal = GregorianCalendar.getInstance();
+              cal.set(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+              binding.put(var, node.toString());
+            } else if (XSDDatatype.XSDdateTime.equals(datatype)) {
+              // TODO(ewpatton): Implementation
+              String[] parts = l.getString().split("T");
+              String[] dateParts = parts[0].split("-");
+              String[] timeParts = parts[1].split(":");
+              Calendar cal = GregorianCalendar.getInstance();
+              cal.set(Integer.parseInt(dateParts[0]), Integer.parseInt(dateParts[1]), Integer.parseInt(dateParts[2]),
+                  Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1]), Integer.parseInt(timeParts[2]));
+            } else {
+              binding.put(var, l.getString());
+            }
+          } else {
+            binding.put(var, l.getString());
+          }
+        } else {
+          Log.d(LOG_TAG, "Unexpected type: " + node.getClass());
+          binding.put(var, node.toString());
+        }
+      }
+      bindings.add(binding);
+    }
+    Log.d(LOG_TAG, bindings.toString());
+    return YailList.makeList(bindings);
   }
   
   public static YailList resultSetAsYailList(ResultSet results) {
