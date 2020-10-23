@@ -107,4 +107,37 @@ Blockly.Yail['logic_namespace_decl'] = function() {
   return code;
 }
 
+/**
+ * Converts a URI block into a YAIL string.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.Yail['logic_uri'] = function() {
+  return [Blockly.Yail.quote_(this.getFieldValue('URI')), Blockly.Yail.ORDER_ATOMIC];
+}
+
+/**
+ * Converts a variable binding reference into a YAIL string.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.Yail['logic_binding'] = function() {
+  return [Blockly.Yail.quote_(this.getFieldValue('VARNAME')), Blockly.Yail.ORDER_ATOMIC];
+}
+
+/**
+ * Converts a QName to an expansion based on registered namespaces.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {string}
+ */
+Blockly.Yail['logic_qname'] = function() {
+  var code = '(RdfUtil:expandQName ';
+  code += Blockly.Yail.quote_(this.getFieldValue('PREFIX') + ':' + this.getFieldValue('LOCALNAME'));
+  code += ')';
+  return code;
+}
+
 /// endregion

@@ -1231,4 +1231,8 @@ public final class RdfUtil {
   public static void defineNamespace(String prefix, String uri) {
     PrintUtil.registerPrefix(prefix, uri);
   }
+
+  public static String expandQName(String qname) {
+    return PrintUtil.expandQname(qname);
+  }
 }
