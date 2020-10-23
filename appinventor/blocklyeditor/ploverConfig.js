@@ -170,6 +170,7 @@
     //generator files
     "./src/generators/yail.js",
     './src/generators/rules.js',
+    './src/generators/sparql.js',
     "./src/generators/yail/componentblock.js",
     "./src/generators/yail/lists.js",
     "./src/generators/yail/math.js",

@@ -289,11 +289,11 @@ Blockly.Blocks['logic_triple_pattern'] = {
     this.setPreviousStatement(true, 'statement');
     this.setNextStatement(true, 'statement');
     this.appendValueInput('SUBJECT').appendField('subject')
-      .setCheck(['qname', 'variable']);
+      .setCheck(['qname', 'variable', 'bnode']);
     this.appendValueInput('PREDICATE').appendField('predicate')
-      .setCheck(['qname', 'variable']);
+      .setCheck(['qname', 'variable', 'bnode']);
     this.appendValueInput('OBJECT').appendField('object')
-      .setCheck(['qname', 'variable']);
+      .setCheck(['qname', 'variable', 'bnode', 'Number', 'String', 'Boolean']);
     this.setInputsInline(true);
     var type = this.workspace.newBlock('logic_rdf_type');
     type.setShadow(true);
@@ -319,6 +319,16 @@ Blockly.Blocks['logic_qname'] = {
     this.setOutput(true, ['qname']);
     this.appendDummyInput().appendField(new Blockly.FieldTextInput(''), 'PREFIX')
       .appendField(':').appendField(new Blockly.FieldTextInput(''), 'LOCALNAME');
+  }
+}
+
+Blockly.Blocks['logic_bnode'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(['bnode']);
+    this.appendDummyInput().appendField('Blank Node')
+      .appendField(new Blockly.FieldTextInput(''));
   }
 }
 
@@ -448,5 +458,232 @@ Blockly.Blocks['logic_namespace_decl'] = {
       .appendField(new Blockly.FieldTextInput('prefix'), 'PREFIX')
       .appendField('as')
       .setCheck(['qname']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_select'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['text']);
+    var star = this.workspace.newBlock('logic_sparql_star');
+    star.setShadow(true);
+    this.appendDummyInput().appendField().appendField('SELECT')
+      .appendField(new Blockly.FieldCheckbox('false'), 'DISTINCT')
+      .appendField('DISTINCT');
+    this.appendStatementInput('VARS')
+      .setCheck('varlist');
+    this.appendDummyInput().appendField('WHERE');
+    this.appendStatementInput('WHERE')
+      .setCheck(['statement']);
+    this.appendDummyInput().appendField('MODIFIERS');
+    this.appendStatementInput('MODIFIERS')
+      .setCheck(['modifier']);
+    this.getInput('VARS').connection.connect(star.previousConnection);
+  }
+};
+
+Blockly.Blocks['logic_sparql_star'] = {
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['varlist', 'variable']);
+    this.setNextStatement(true, ['varlist', 'variable']);
+    this.appendDummyInput().appendField('<all variables>');
+  }
+};
+
+Blockly.Blocks['logic_sparql_optional'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['statement']);
+    this.setNextStatement(true, ['statement'])
+    this.appendDummyInput().appendField('OPTIONAL');
+    this.appendStatementInput('CLAUSES')
+      .setCheck(['statement']);
+    this.itemCount_ = 2;
+  }
+}
+
+Blockly.Blocks['logic_sparql_union'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['statement']);
+    this.setNextStatement(true, ['statement']);
+    this.setMutator(new Blockly.Mutator(['logic_graph_item']));
+    this.addInput(0);
+    this.addInput(1);
+    this.itemCount_ = 2;
+  },
+  mutationToDom: Blockly.mutationToDom,
+  domToMutation: Blockly.domToMutation,
+  decompose: function(workspace) {
+    var containerBlock = Blockly.decompose(workspace, 'logic_graph_item', this);
+    containerBlock.setFieldValue('UNION', 'CONTAINER_TEXT');
+    return containerBlock;
+  },
+  compose: Blockly.compose,
+  saveConnections: Blockly.saveConnections,
+  emptyInputName: 'EMPTY',
+  repeatingInputName: 'GRAPH',
+  removeInput: function(name) {
+    if (name.indexOf(this.repeatingInputName) === 0) {
+      var index = parseInt(name.substr(this.repeatingInputName.length));
+      if (index) {
+        Blockly.BlockSvg.prototype.removeInput.call(this, 'UNION' + index);
+      }
+    }
+    Blockly.BlockSvg.prototype.removeInput.call(this, name);
+  },
+  addInput: function(inputNum) {
+    if (inputNum) {
+      this.appendDummyInput('UNION' + inputNum).appendField('UNION');
+    }
+    return this.appendStatementInput(this.repeatingInputName + inputNum).setCheck(['statement']);
+  },
+  addEmptyInput: function() {
+    this.appendDummyInput(this.emptyInputName).appendField('EMPTY UNION');
+  }
+}
+
+Blockly.Blocks['logic_graph_item'] = {
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.appendDummyInput().appendField('subgraph');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.contextMenu = false;
+  }
+}
+
+Blockly.Blocks['logic_sparql_operator'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['statement']);
+    this.setNextStatement(true, ['statement']);
+    this.appendValueInput('OPERAND')
+      .appendField(new Blockly.FieldDropdown([['Filter', 'FILTER']]), 'OPERATOR')
+      .setCheck(null);
+  }
+}
+
+Blockly.Blocks['logic_sparql_offset'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['modifier']);
+    this.setNextStatement(true, ['modifier']);
+    this.appendValueInput('VALUE').appendField('OFFSET')
+      .setCheck(['number']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_limit'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['modifier']);
+    this.setNextStatement(true, ['modifier']);
+    this.appendValueInput('VALUE').appendField('LIMIT')
+      .setCheck(['number']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_groupby'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['modifier']);
+    this.setNextStatement(true, ['modifier']);
+    this.appendValueInput('VALUE').appendField('GROUP BY')
+      .setCheck(['variable']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_orderby'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['modifier']);
+    this.setNextStatement(true, ['modifier']);
+    this.appendValueInput('VALUE').appendField('ORDER BY')
+      .appendField(new Blockly.FieldDropdown([['ASC', 'ASC'], ['DESC', 'DESC']]), 'DIR')
+      .setCheck(['variable']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_uri'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['qname']);
+    this.appendValueInput('URI').appendField('as uri')
+      .setCheck(['text']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_var'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['varlist']);
+    this.setNextStatement(true, ['varlist']);
+    this.appendDummyInput().appendField('?')
+      .appendField(new Blockly.FieldTextInput('var'), 'VARNAME');
+  }
+}
+
+Blockly.Blocks['logic_sparql_graph'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['statement']);
+    this.setNextStatement(true, ['statement']);
+    this.appendValueInput('GRAPH').appendField('GRAPH')
+      .setCheck(['qname', 'variable']);
+    this.appendStatementInput('PATTERN')
+      .setCheck(['statement']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_builtin_unary'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['boolean']);
+    this.appendValueInput('ARG0').appendField(new Blockly.FieldDropdown(
+      [['as string', 'STR'], ['language of', 'LANG'], ['datatype of', 'DATATYPE'],
+      ['is bound?', 'BOUND'], ['is IRI?', 'isIRI'], ['is URI?', 'isURI'], ['is blank node?', 'isBLANK'],
+      ['is literal?', 'isLITERAL']]
+    ), 'OPERATOR');
+  }
+}
+
+Blockly.Blocks['logic_sparql_builtin_binary'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['boolean']);
+    this.appendValueInput('ARG0').appendField(new Blockly.FieldDropdown(
+      [['language matches?', 'LANGMATCHES'], ['same term?', 'sameTerm']]
+    ));
+    this.appendValueInput('ARG1');
+    this.setInputsInline(true);
+  }
+}
+
+Blockly.Blocks['logic_sparql_builtin_regex'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['boolean']);
+    this.appendValueInput('TEXT').appendField('match string').setCheck('String');
+    this.appendValueInput('REGEX').appendField('to regex').setCheck('String');
+    this.appendValueInput('FLAGS').appendField('flags').setCheck('String');
+    var text = this.workspace.newBlock('text');
+    text.setShadow(true);
+    this.getInput('FLAGS').connection.connect(text.outputConnection);
   }
 }

@@ -140,4 +140,16 @@ Blockly.Yail['logic_qname'] = function() {
   return code;
 }
 
+/**
+ * Converts a SPARQL block into a string for YAIL.
+ *
+ * @this Blockly.Block
+ * @returns {[string, number]}
+ */
+Blockly.Yail['logic_sparql_select'] = function() {
+  var query = Blockly.SPARQL.blockToCode(this);
+  var code = Blockly.Yail.quote_(query);
+  return [ code, Blockly.Yail.ORDER_ATOMIC ];
+}
+
 /// endregion
