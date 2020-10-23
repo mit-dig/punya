@@ -408,43 +408,6 @@ public abstract class TextBoxBase extends AndroidViewComponent
     view.invalidate();
   }
 
-  private String conceptUri = "";
-  /**
-   * ConceptURI getter method.
-   *
-   * @return  concept uri
-   */
-  @SimpleProperty(
-      category = PropertyCategory.LINKED_DATA,
-      description = "<p>Object Type changes how the linked data components "
-          + "interpret the value of the text. If left blank, the system will "
-          + "attempt to intelligently identify the type based on features such "
-          + "as whether the text is a sequence of numbers or begins with "
-          + "&quot;http://&quot;. If no type is specified and one cannot be "
-          + "determined, the string will remain untyped.</p>"
-          + "<p>Recommended values include:</p>"
-          + "<ul>"
-          + "<li>xsd:dateTime - for dates and times</li>"
-          + "<li>xsd:decimal - for decimals (e.g. 3.57)</li>"
-          + "<li>xsd:integer - for integers (e.g. 137)</li>"
-          + "<li>xsd:gYear - for years (e.g. 2001)</li>"
-          + "</ul>")
-  public String ObjectType() {
-    return conceptUri;
-  }
-
-  /**
-   * Concept URI property setter method.
-   *
-   * @param concept uri
-   */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
-      defaultValue = "")
-  @SimpleProperty
-  public void ObjectType(String uri) {
-    this.conceptUri = uri;
-  }
-
   /**
    * Returns the textbox contents.
    *
@@ -532,6 +495,8 @@ public abstract class TextBoxBase extends AndroidViewComponent
     }
   }
 
+  // START LinkedData
+
   private String propertyUri;
   /**
    * 
@@ -557,6 +522,43 @@ public abstract class TextBoxBase extends AndroidViewComponent
     return propertyUri;
   }
 
+  private String conceptUri = "";
+  /**
+   * ConceptURI getter method.
+   *
+   * @return  concept uri
+   */
+  @SimpleProperty(
+      category = PropertyCategory.LINKED_DATA,
+      description = "<p>Object Type changes how the linked data components "
+          + "interpret the value of the text. If left blank, the system will "
+          + "attempt to intelligently identify the type based on features such "
+          + "as whether the text is a sequence of numbers or begins with "
+          + "&quot;http://&quot;. If no type is specified and one cannot be "
+          + "determined, the string will remain untyped.</p>"
+          + "<p>Recommended values include:</p>"
+          + "<ul>"
+          + "<li>xsd:dateTime - for dates and times</li>"
+          + "<li>xsd:decimal - for decimals (e.g. 3.57)</li>"
+          + "<li>xsd:integer - for integers (e.g. 137)</li>"
+          + "<li>xsd:gYear - for years (e.g. 2001)</li>"
+          + "</ul>")
+  public String ObjectType() {
+    return conceptUri;
+  }
+
+  /**
+   * Concept URI property setter method.
+   *
+   * @param concept uri
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
+          defaultValue = "")
+  @SimpleProperty
+  public void ObjectType(String uri) {
+    this.conceptUri = uri;
+  }
+
   public Object Value() {
     return Text();
   }
@@ -578,4 +580,5 @@ public abstract class TextBoxBase extends AndroidViewComponent
     return isSubject;
   }
 
+  // END LinkedData
 }

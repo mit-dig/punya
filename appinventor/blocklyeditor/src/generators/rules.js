@@ -54,7 +54,7 @@ Blockly.Rules['math_number'] = function() {
  * @this {Blockly.Block}
  */
 Blockly.Rules['logic_boolean'] = function() {
-  return [this.getFieldValue('logic_boolean').toLowerCase(), Blockly.Rules.ORDER_ATOMIC];
+  return ['"' + this.getFieldValue('BOOL').toLowerCase() + '"' + "^^xsd:boolean", Blockly.Rules.ORDER_ATOMIC];
 }
 
 /**
@@ -202,5 +202,5 @@ Blockly.Rules['logic_table_all'] = function() {
 }
 
 Blockly.Rules['logic_rdf_type'] = function() {
-  return ['a', Blockly.Rules.ORDER_ATOMIC];
+  return ['rdf:type', Blockly.Rules.ORDER_ATOMIC];
 }

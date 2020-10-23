@@ -306,7 +306,7 @@ public final class RdfUtil {
    * @param results
    * @return
    */
-  public static Collection<Solution> resultSetAsCollection(ResultSet results) {
+  public static Collection<Solution>  resultSetAsCollection(ResultSet results) {
     List<Solution> list = new LinkedList<Solution>();
     while(results.hasNext()) {
       list.add(new Solution(results.next()));
@@ -1058,6 +1058,19 @@ public final class RdfUtil {
         solution.add( YailList.makeList( j ) );
       }
       list.add( YailList.makeList( solution ) );
+    }
+    return YailList.makeList( list );
+  }
+
+  public static YailList resultSetAsYailDictionaryList(ResultSet results) {
+    final Collection<Solution> solutions = RdfUtil.resultSetAsCollection( results );
+    final List<YailDictionary> list = new ArrayList<>();
+    for ( Solution i : solutions ) {
+      YailDictionary solution = new YailDictionary();
+      for ( VariableBinding j : i ) {
+        solution.put( j.get(0), j.get(1) );
+      }
+      list.add( solution );
     }
     return YailList.makeList( list );
   }

@@ -70,4 +70,11 @@ public final class CheckBox extends ToggleBase<android.widget.CheckBox> {
     view.invalidate();
   }
 
+  // START LinkedData
+
+  public Object Value() {
+    return Checked();
+  }
+
+  // END LinkedData
 }

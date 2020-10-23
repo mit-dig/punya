@@ -27,7 +27,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
  */
 @SimpleObject
 public abstract class ToggleBase<T extends CompoundButton> extends AndroidViewComponent
-        implements OnCheckedChangeListener, OnFocusChangeListener {
+        implements OnCheckedChangeListener, OnFocusChangeListener, LDComponent {
 
   protected T view;
 
@@ -353,4 +353,44 @@ public abstract class ToggleBase<T extends CompoundButton> extends AndroidViewCo
       LostFocus();
     }
   }
+
+  // START LinkedData
+
+  private String propertyUri;
+
+  /**
+   *
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI,
+      defaultValue = "")
+  @SimpleProperty(category = PropertyCategory.LINKED_DATA,
+      description = "<p>Property URI specifies the relationship between a "
+          + "Linked Data Form containing a TextBox, Password, etc. and the "
+          + "component. Common properties include the name properties in the "
+          + "Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, "
+          + "foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), "
+          + "or descriptions (e.g. rdfs:comment, dc:description).</p>")
+  public void PropertyURI(String uri) {
+    this.propertyUri = uri;
+  }
+
+  /**
+   *
+   */
+  @SimpleProperty
+  public String PropertyURI() {
+    return propertyUri;
+  }
+
+  public String ObjectType() {
+    return "xsd:boolean";
+  }
+
+  public void ObjectType(String uri) {}
+
+  public boolean SubjectIdentifier() {
+    return false;
+  }
+
+  // END LinkedData
 }

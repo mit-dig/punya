@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The <code>Reasoner</code> component derives statements from the contents of a
@@ -199,6 +200,19 @@ public class Reasoner extends LinkedDataBase<InfModel> {
     for (String line : lines) {
       System.err.println(line);
     }
+  }
+
+  /**
+   * Return the loaded rules (if any) as a string.
+   *
+   * @return
+   */
+  @SimpleFunction
+  public String RulesetToString() {
+    StringBuffer ret = new StringBuffer();
+    for (Rule rule : rules)
+      ret.append(rule.toString()).append("\n");
+    return ret.toString().trim();
   }
 
   /**

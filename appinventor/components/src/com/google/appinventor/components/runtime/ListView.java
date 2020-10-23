@@ -26,18 +26,24 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import android.widget.LinearLayout.LayoutParams;
-import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.annotations.DesignerProperty;
-import com.google.appinventor.components.annotations.IsColor;
-import com.google.appinventor.components.annotations.PropertyCategory;
+import com.google.appinventor.components.annotations.DesignerComponent;
+import com.google.appinventor.components.annotations.SimpleProperty;
+import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleEvent;
 import com.google.appinventor.components.annotations.SimpleObject;
-import com.google.appinventor.components.annotations.SimpleProperty;
-import com.google.appinventor.components.common.ComponentCategory;
+import com.google.appinventor.components.annotations.IsColor;
+import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.errors.YailRuntimeError;
 import com.google.appinventor.components.runtime.util.ElementsUtil;
+import com.google.appinventor.components.runtime.util.YailDictionary;
 import com.google.appinventor.components.runtime.util.YailList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is a visible component that allows to place a list of text elements in your {@link Form} to
@@ -62,7 +68,7 @@ import com.google.appinventor.components.runtime.util.YailList;
     iconName = "images/listView.png")
 @SimpleObject
 public final class ListView extends AndroidViewComponent implements AdapterView.OnItemClickListener,
-    AdapterView.OnItemSelectedListener {
+        AdapterView.OnItemSelectedListener {
 
   private static final String LOG_TAG = "ListView";
 
@@ -76,6 +82,7 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
   private ArrayAdapter<Spannable> adapter;
   private ArrayAdapter<Spannable> adapterCopy;
   private YailList items;
+  private YailList bindings;
   private int selectionIndex;
   private String selection;
   private boolean showFilter = false;
@@ -129,22 +136,22 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
     //set up the listener
     txtSearchBox.addTextChangedListener(new TextWatcher() {
 
-        @Override
-        public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-          // When user changed the Text
-          adapter.getFilter().filter(cs);
-        }
+      @Override
+      public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+        // When user changed the Text
+        adapter.getFilter().filter(cs);
+      }
 
-        @Override
-        public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-          // no-op. Required method
-        }
+      @Override
+      public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+        // no-op. Required method
+      }
 
-        @Override
-        public void afterTextChanged(Editable arg0) {
-          // no-op. Required method
-        }
-      });
+      @Override
+      public void afterTextChanged(Editable arg0) {
+        // no-op. Required method
+      }
+    });
 
     if (showFilter) {
       txtSearchBox.setVisibility(View.VISIBLE);
@@ -179,12 +186,12 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
   }
 
   /**
-  * Specifies the `%type%`'s vertical height, measured in pixels.
-  * @param height for height length
-  */
+   * Specifies the `%type%`'s vertical height, measured in pixels.
+   * @param height for height length
+   */
   @Override
   @SimpleProperty(description = "Determines the height of the list on the view.",
-      category =PropertyCategory.APPEARANCE)
+          category =PropertyCategory.APPEARANCE)
   public void Height(int height) {
     if (height == LENGTH_PREFERRED) {
       height = LENGTH_FILL_PARENT;
@@ -193,12 +200,12 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
   }
 
   /**
-  * Specifies the horizontal width of the `%type%`, measured in pixels.
-  * @param width for width length
-  */
+   * Specifies the horizontal width of the `%type%`, measured in pixels.
+   * @param width for width length
+   */
   @Override
   @SimpleProperty(description = "Determines the width of the list on the view.",
-      category = PropertyCategory.APPEARANCE)
+          category = PropertyCategory.APPEARANCE)
   public void Width(int width) {
     if (width == LENGTH_PREFERRED) {
       width = LENGTH_FILL_PARENT;
@@ -213,9 +220,9 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * @param showFilter set the visibility according to this input
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
-      defaultValue = DEFAULT_ENABLED ? "True" : "False")
+          defaultValue = DEFAULT_ENABLED ? "True" : "False")
   @SimpleProperty(description = "Sets visibility of ShowFilterBar. True will show the bar, " +
-      "False will hide it.")
+          "False will hide it.")
   public void ShowFilterBar(boolean showFilter) {
     this.showFilter = showFilter;
     if (showFilter) {
@@ -233,7 +240,7 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * @return true or false (visibility)
    */
   @SimpleProperty(category = PropertyCategory.BEHAVIOR,
-      description = "Returns current state of ShowFilterBar for visibility.")
+          description = "Returns current state of ShowFilterBar for visibility.")
   public boolean ShowFilterBar() {
     return showFilter;
   }
@@ -243,10 +250,35 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * @param itemsList a YailList containing the strings to be added to the ListView
    */
   @SimpleProperty(description="List of text elements to show in the ListView.  This will " +
-                "signal an error if the elements are not text strings.",
-      category = PropertyCategory.BEHAVIOR)
+          "signal an error if the elements are not text strings.",
+          category = PropertyCategory.BEHAVIOR)
   public void Elements(YailList itemsList) {
     items = ElementsUtil.elements(itemsList, "Listview");
+    setAdapterData();
+  }
+
+  /**
+   * Takes a set of query results, and displays values for the given variable name.",
+   * @param bindings
+   * @param showVariable
+   */
+  @SimpleFunction
+  public void LoadFromBindings(YailList bindings, String showVariable) {
+    this.bindings = bindings;
+    List<String> items = new ArrayList<>();
+    String varName = showVariable;
+    for(Object i : bindings.toArray()) {
+      YailDictionary binding = (YailDictionary) i;
+      if (varName == null) {
+        varName = binding.keySet().iterator().next().toString();
+      }
+      if (!binding.containsKey(varName)) {
+        throw new YailRuntimeError("Variable name " + varName + " not found in bindings", "Error");
+      }
+      String item = binding.get(varName).toString();
+      items.add(item);
+    }
+    this.items = YailList.makeList(items);
     setAdapterData();
   }
 
@@ -267,9 +299,9 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_TEXTAREA, defaultValue = "")
   @SimpleProperty(description="The TextView elements specified as a string with the " +
-      "items separated by commas " +
-      "such as: Cheese,Fruit,Bacon,Radish. Each word before the comma will be an element in the " +
-      "list.",  category = PropertyCategory.BEHAVIOR)
+          "items separated by commas " +
+          "such as: Cheese,Fruit,Bacon,Radish. Each word before the comma will be an element in the " +
+          "list.",  category = PropertyCategory.BEHAVIOR)
   public void ElementsFromString(String itemstring) {
     items = ElementsUtil.elementsFromString(itemstring);
     setAdapterData();
@@ -280,7 +312,7 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    */
   public void setAdapterData(){
     adapter = new ArrayAdapter<Spannable>(container.$context(), android.R.layout.simple_list_item_1,
-        itemsToColoredText());
+            itemsToColoredText());
     view.setAdapter(adapter);
 
     adapterCopy = new ArrayAdapter<Spannable>(container.$context(), android.R.layout.simple_list_item_1);
@@ -321,14 +353,28 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * {@link #Selection(String)} will be set to the empty text.
    */
   @SimpleProperty(
-      description = "The index of the currently selected item, starting at " +
-          "1.  If no item is selected, the value will be 0.  If an attempt is " +
-          "made to set this to a number less than 1 or greater than the number " +
-          "of items in the ListView, SelectionIndex will be set to 0, and " +
-          "Selection will be set to the empty text.",
-      category = PropertyCategory.BEHAVIOR)
+          description = "The index of the currently selected item, starting at " +
+                  "1.  If no item is selected, the value will be 0.  If an attempt is " +
+                  "made to set this to a number less than 1 or greater than the number " +
+                  "of items in the ListView, SelectionIndex will be set to 0, and " +
+                  "Selection will be set to the empty text.",
+          category = PropertyCategory.BEHAVIOR)
   public int SelectionIndex() {
     return selectionIndex;
+  }
+
+  @SimpleProperty(description="Returns the binding corresponding to the selection in the ListView.",
+          category = PropertyCategory.BEHAVIOR)
+  public YailDictionary SelectionBinding() {
+    if (bindings == null) {
+      throw new YailRuntimeError("No bindings set for this ListView.", "Error");
+    }
+    if (selectionIndex > 0) {
+      return (YailDictionary) bindings.get(selectionIndex);
+    }
+    else {
+      return null;
+    }
   }
 
   /**
@@ -338,12 +384,12 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * @param index the index to be selected
    */
   @SimpleProperty(description="Specifies the position of the selected item in the ListView. " +
-      "This could be used to retrieve" +
-      "the text at the chosen position. If an attempt is made to set this to a " +
-      "number less than 1 or greater than the number of items in the ListView, SelectionIndex " +
-      "will be set to 0, and Selection will be set to the empty text."
-      ,
-      category = PropertyCategory.BEHAVIOR)
+          "This could be used to retrieve" +
+          "the text at the chosen position. If an attempt is made to set this to a " +
+          "number less than 1 or greater than the number of items in the ListView, SelectionIndex " +
+          "will be set to 0, and Selection will be set to the empty text."
+          ,
+          category = PropertyCategory.BEHAVIOR)
   public void SelectionIndex(int index){
     selectionIndex = ElementsUtil.selectionIndex(index, items);
     // Now, we need to change Selection to correspond to SelectionIndex.
@@ -353,13 +399,13 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
   }
 
   /**
-  * Returns the text in the `ListView` at the position of {@link #SelectionIndex(int)}.
-  */
+   * Returns the text in the `ListView` at the position of {@link #SelectionIndex(int)}.
+   */
   @SimpleProperty(description="Returns the text last selected in the ListView.",
-      category = PropertyCategory
-      .BEHAVIOR)
+          category = PropertyCategory
+                  .BEHAVIOR)
   public String Selection(){
-      return selection;
+    return selection;
   }
 
   /**
@@ -368,7 +414,7 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * @suppressdoc
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
-      defaultValue = "")
+          defaultValue = "")
   @SimpleProperty
   public void Selection(String value) {
     selection = value;
@@ -400,10 +446,10 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
         previousView.requestFocus();
       }
     } else if (lastSelected != null) {
-        // Un-set selected drawable from the last selected item
-        lastSelected.setBackgroundDrawable(UNSELECTED_DRAWABLE);
-        lastSelected = null;
-      }
+      // Un-set selected drawable from the last selected item
+      lastSelected.setBackgroundDrawable(UNSELECTED_DRAWABLE);
+      lastSelected = null;
+    }
   }
 
   /**
@@ -450,7 +496,7 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * The selected element is available in the {@link #Selection(String)} property.
    */
   @SimpleEvent(description = "Simple event to be raised after the an element has been chosen in the" +
-      " list. The selected element is available in the Selection property.")
+          " list. The selected element is available in the Selection property.")
   public void AfterPicking() {
     EventDispatcher.dispatchEvent(this, "AfterPicking");
   }
@@ -461,11 +507,11 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    */
 
   public void setBackgroundColor(int color) {
-      backgroundColor = color;
-      view.setBackgroundColor(backgroundColor);
-      listViewLayout.setBackgroundColor(backgroundColor);
-      // Keeps background color behind list elements correct when scrolling through listView
-      view.setCacheColorHint(backgroundColor);
+    backgroundColor = color;
+    view.setBackgroundColor(backgroundColor);
+    listViewLayout.setBackgroundColor(backgroundColor);
+    // Keeps background color behind list elements correct when scrolling through listView
+    view.setCacheColorHint(backgroundColor);
   }
 
   /**
@@ -477,8 +523,8 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * alpha, red, green, and blue components
    */
   @SimpleProperty(
-      description = "The color of the listview background.",
-      category = PropertyCategory.APPEARANCE)
+          description = "The color of the listview background.",
+          category = PropertyCategory.APPEARANCE)
   @IsColor
   public int BackgroundColor() {
     return backgroundColor;
@@ -496,11 +542,11 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * includes alpha, red, green, and blue components
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
-      defaultValue = Component.DEFAULT_VALUE_COLOR_BLACK)
+          defaultValue = Component.DEFAULT_VALUE_COLOR_BLACK)
   @SimpleProperty
   public void BackgroundColor(int argb) {
-      backgroundColor = argb;
-      setBackgroundColor(backgroundColor);
+    backgroundColor = argb;
+    setBackgroundColor(backgroundColor);
   }
 
   /**
@@ -531,12 +577,12 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * includes alpha, red, green, and blue components
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
-      defaultValue = Component.DEFAULT_VALUE_COLOR_LTGRAY)
+          defaultValue = Component.DEFAULT_VALUE_COLOR_LTGRAY)
   @SimpleProperty
   public void SelectionColor(int argb) {
     selectionColor = argb;
     this.selectionDrawable = new GradientDrawable(
-      GradientDrawable.Orientation.TOP_BOTTOM, new int[]{argb, argb});
+            GradientDrawable.Orientation.TOP_BOTTOM, new int[]{argb, argb});
   }
 
   /**
@@ -548,8 +594,8 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * alpha, red, green, and blue components
    */
   @SimpleProperty(
-      description = "The text color of the listview items.",
-      category = PropertyCategory.APPEARANCE)
+          description = "The text color of the listview items.",
+          category = PropertyCategory.APPEARANCE)
   @IsColor
   public int TextColor() {
     return textColor;
@@ -567,11 +613,11 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * includes alpha, red, green, and blue components
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
-      defaultValue = Component.DEFAULT_VALUE_COLOR_WHITE)
+          defaultValue = Component.DEFAULT_VALUE_COLOR_WHITE)
   @SimpleProperty
   public void TextColor(int argb) {
-      textColor = argb;
-      setAdapterData();
+    textColor = argb;
+    setAdapterData();
   }
 
   /**
@@ -580,8 +626,8 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * @return text size as an float
    */
   @SimpleProperty(
-      description = "The text size of the listview items.",
-      category = PropertyCategory.APPEARANCE)
+          description = "The text size of the listview items.",
+          category = PropertyCategory.APPEARANCE)
   public int TextSize() {
     return textSize;
   }
@@ -592,13 +638,13 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    * @param integer value for font size
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER,
-      defaultValue = DEFAULT_TEXT_SIZE + "")
+          defaultValue = DEFAULT_TEXT_SIZE + "")
   @SimpleProperty
   public void TextSize(int fontSize) {
-      if(fontSize>1000)
-        textSize = 999;
-      else
-        textSize = fontSize;
-      setAdapterData();
+    if(fontSize>1000)
+      textSize = 999;
+    else
+      textSize = fontSize;
+    setAdapterData();
   }
 }
