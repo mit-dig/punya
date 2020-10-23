@@ -1,5 +1,5 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2012 Massachusetts Institute of Technology. All rights reserved.
+// Copyright 2012-2020 Massachusetts Institute of Technology. All rights reserved.
 
 /**
  * @license
@@ -90,6 +90,21 @@ Blockly.Yail['logic_ruleset'] = function() {
   var rules = Blockly.Rules.statementToCode(this, 'RULES');
   var code = Blockly.Yail.quote_(rules);
   return [ code, Blockly.Yail.ORDER_ATOMIC ];
+}
+
+/**
+ * Defines a global namespace for RDF use.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {string}
+ */
+Blockly.Yail['logic_namespace_decl'] = function() {
+  var code = '(RdfUtil:defineNamespace ';
+  code += Blockly.Yail.quote_(this.getFieldValue('PREFIX') || 'ex');
+  code += ' ';
+  code += Blockly.Yail.valueToCode(this, 'URI', Blockly.Yail.ORDER_NONE);
+  code += ')';
+  return code;
 }
 
 /// endregion

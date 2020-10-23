@@ -229,7 +229,8 @@ Blockly.ReplMgr.buildYail = function(workspace, opt_force) {
         if (block.blockType != "event" &&
             block.type != "global_declaration" &&
             block.type != "procedures_defnoreturn" &&
-            block.type != "procedures_defreturn")
+            block.type != "procedures_defreturn" &&
+            block.type != "logic_namespace_decl")
             continue;
         if (block.type == 'component_event') {
             willEmitEvent(block);

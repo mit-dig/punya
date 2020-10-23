@@ -103,6 +103,7 @@
          (SimplePropertyUtil:copyComponentProperties existing-component component-to-add))))))
 
 (define-alias SimpleForm <com.google.appinventor.components.runtime.Form>)
+(define-alias RdfUtil <com.google.appinventor.components.runtime.util.RdfUtil>)
 
 (define (call-Initialize-of-components . component-names)
   ;; Do any inherent/implied initializations

@@ -1,5 +1,7 @@
 // -*- mode: javascript; js-indent-offset: 2; -*-
-// Copyight 2020 Massachusetts Institute of Technology, All rights reserved.
+// Copyright © 2020 Massachusetts Institute of Technology, All rights reserved.
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 'use strict';
 

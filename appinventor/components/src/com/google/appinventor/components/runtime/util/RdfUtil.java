@@ -23,6 +23,7 @@ import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.Prologue;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
+import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.XSD;
 import java.io.BufferedInputStream;
@@ -1226,4 +1227,8 @@ public final class RdfUtil {
 		}
 		return success;
 	}
+
+  public static void defineNamespace(String prefix, String uri) {
+    PrintUtil.registerPrefix(prefix, uri);
+  }
 }

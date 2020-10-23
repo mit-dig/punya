@@ -668,7 +668,8 @@ Blockly.WarningHandler.prototype['checkEmptySockets'] = function(block){
 Blockly.WarningHandler.prototype['checkBlockAtRoot'] = function(block){
   var rootBlock = block.getRootBlock();
   if(block == rootBlock && block.blockType != "event" && block.type !="global_declaration" &&
-     block.type != "procedures_defnoreturn" && block.type != "procedures_defreturn"){
+     block.type != "procedures_defnoreturn" && block.type != "procedures_defreturn" &&
+     block.type != "logic_namespace_decl"){
     if(this.showWarningsToggle) {
       var warningMessage = Blockly.Msg.WRONG_TYPE_BLOCK_WARINGS;
       block.setWarningText(warningMessage);
