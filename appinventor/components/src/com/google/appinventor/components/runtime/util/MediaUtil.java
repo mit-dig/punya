@@ -36,8 +36,10 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -263,6 +265,21 @@ public class MediaUtil {
           form.assertPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
       case URL:
+        if (mediaPath.startsWith("http")) {
+          Log.d(LOG_TAG, "enabling redirects for http url");
+          HttpURLConnection conn = (HttpURLConnection) new URL(mediaPath).openConnection();
+          conn.setInstanceFollowRedirects(true);
+          conn.setDoInput(true);
+          conn.connect();
+          int response = conn.getResponseCode();
+          if (response >= 300 && response <= 399) {
+            String reloc = conn.getHeaderField("Location");
+            Log.d(LOG_TAG, "Redirecting to " + reloc);
+            conn.disconnect();
+            return openMedia(form, reloc, MediaSource.URL);
+          }
+          return conn.getInputStream();
+        }
         return new URL(mediaPath).openStream();
 
       case CONTENT_URI:

@@ -187,19 +187,7 @@ public class LinkedData extends LinkedDataBase<Model> implements
    */
   @SimpleFunction
   public boolean ReadDataFromWeb(String path) {
-    try {
-      String type = "RDF/XML";
-      if(path.endsWith(".n3")) {
-        type = "N3";
-      } else if(path.endsWith(".ttl")) {
-        type = "TURTLE";
-      }
-      model.read(path, type);
-    } catch(Exception e) {
-      Log.w(LOG_TAG, "Unable to read model.", e);
-      return false;
-    }
-    return true;
+    return loadRemoteResource(path);
   }
 
   /**
