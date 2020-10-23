@@ -137,7 +137,7 @@ Blockly.Yail['logic_qname'] = function() {
   var code = '(RdfUtil:expandQName ';
   code += Blockly.Yail.quote_(this.getFieldValue('PREFIX') + ':' + this.getFieldValue('LOCALNAME'));
   code += ')';
-  return code;
+  return [code, Blockly.Yail.ORDER_ATOMIC];
 }
 
 /**
