@@ -1,3 +1,8 @@
+// -*- mode: java; c-basic-offset: 2; -*-
+// Copyright © 2013-2020 Massachusetts Institute of Technology, All rights reserved.
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
+
 package com.google.appinventor.components.runtime;
 
 import android.util.Log;
@@ -78,7 +83,8 @@ public class LinkedData extends LinkedDataBase<Model> implements
 
   /**
    * Returns the URL of the SPARQL endpoint.
-   * @return
+   *
+   * @return the SPARQL endpoint used for reading/writing remote RDF
    */
   @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>Use the Endpoint URL field to specify a Uniform "
@@ -95,7 +101,8 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * Specifies the URL of a SPARQL endpoint.
    * The default value is the DBpedia endpoint.
-   * @param url
+   *
+   * @param url the SPARQL endpoint to use for reading/writing remote RDF
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
       defaultValue = "http://dbpedia.org/sparql")
@@ -108,6 +115,7 @@ public class LinkedData extends LinkedDataBase<Model> implements
    * Execute a SPARQL query on the set EndpointURL of this Linked Data component.
    * Currently only supports SELECT queries, and converts all integer types into Long
    * and decimal types into Double.
+   *
    * @param query Query text to execute
    */
   @SimpleFunction
@@ -161,8 +169,9 @@ public class LinkedData extends LinkedDataBase<Model> implements
    * and the client has received the results, but before those results have
    * been processed into objects so that they may be used in conjunction with
    * other linked-data-enabled components.
-   * @param type
-   * @param contents
+   *
+   * @param type the query type
+   * @param contents the contents of the query results as a string
    */
   @SimpleEvent
   public void RetrievedRawResults(String type, String contents) {
@@ -172,6 +181,7 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * This event is raised after a SPARQL engine finishes processing
    * a query and the client has received the results.
+   *
    * @param type Type of query executed, e.g. SELECT
    * @param bindings A list of bindings satisfying the SPARQL query
    */
@@ -199,9 +209,9 @@ public class LinkedData extends LinkedDataBase<Model> implements
 
   /**
    * Read contents of the specified path (local or remote) into the referent model.
-   * Note the implementation is identical to ReadDataFromLocal
+   *
    * @param path Path to a file containing linked data
-   * @return
+   * @return true if the graph was read successfully, otherwise false
    */
   @SimpleFunction
   public boolean ReadDataFromWeb(String path) {
@@ -210,9 +220,9 @@ public class LinkedData extends LinkedDataBase<Model> implements
 
   /**
    * Read contents of the specified path (local or remote) into the referent model.
-   * Note the implementation is identical to ReadDataFromWeb
+   *
    * @param path Path to a file containing linked data
-   * @return
+   * @return true if the graph was read successfully, otherwise false
    */
   @SimpleFunction
   public boolean ReadDataFromLocal(String path) {
@@ -237,9 +247,9 @@ public class LinkedData extends LinkedDataBase<Model> implements
 
   /**
    * Saves the model to the given path on the file system.
-   * @param model Model reference created using {@link #OpenModel()}
+   *
    * @param path Path to a local file where the model will be written
-   * @return
+   * @return true if the data were written successfully, otherwise false
    */
   @SimpleFunction
   public boolean WriteDataToLocal(String path) {
@@ -264,8 +274,8 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * Takes a component implementing the LDComponent interface and uses the properties defined
    * there to insert a triple into the model using the given subject.
+   *
    * @param component An AndroidViewComponent with a PropertyURI defined
-   * @param model Model reference obtained from {@link #OpenModel()}
    * @param subject URI or CURIE representing the subject the property,value pair will be added to
    * @return true if the component was successfully converted into a triple, otherwise false
    */
@@ -283,8 +293,9 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * Takes a LinkedDataForm component and converts it and any nested elements into
    * triples within the model encapsulated by this LinkedData component.
-   * @param form
-   * @return
+   *
+   * @param form the form to serialize as RDF
+   * @return true if the form converted into an RDF graph successfully, otherwise false
    */
   @SimpleFunction
   public boolean AddDataFromLinkedDataForm(LinkedDataForm form) {
@@ -324,8 +335,8 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * Write the model represented by the LinkedData component to the
    * RDF graph store represented by EndpointURL using the given graph URI.
-   * Any existing triples will get replaced?
-   * @param graph
+   *
+   * @param graph the target graph to receive the contents of the model
    */
   @SimpleFunction
   public void WriteDataToWeb(final String graph) {
@@ -347,8 +358,9 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * This event is raised when the LinkedData component fails to publish a
    * graph to a remote SPARQL endpoint.
-   * @param graph
-   * @param error
+   *
+   * @param graph the target graph that was written
+   * @param error an error message reported by the server
    */
   @SimpleEvent
   public void FailedToWriteDataToWeb(String graph, String error) {
@@ -358,18 +370,18 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * This event is raised when a graph is successfully published on a remote
    * endpoint.
-   * @param graph
+   *
+   * @param graph the target graph that was written
    */
   @SimpleEvent
   public void FinishedWritingDataToWeb(String graph) {
     EventDispatcher.dispatchEvent(this, "FinishedWritingDataToWeb", graph);
   }
 
-  @SuppressWarnings("unchecked")
   private static final Set<Class<?>> WRAPPER_TYPES =
       new HashSet<Class<?>>(Arrays.asList(Boolean.class, Byte.class,
           Short.class, Integer.class, Long.class, Float.class, Double.class));
-  private static final boolean isPrimitiveOrWrapper(Class<?> clazz) {
+  private static boolean isPrimitiveOrWrapper(Class<?> clazz) {
     return clazz.isPrimitive() || WRAPPER_TYPES.contains(clazz);
   }
 
@@ -426,7 +438,7 @@ public class LinkedData extends LinkedDataBase<Model> implements
    * @param graph Empty string for the default graph, otherwise a valid URI
    * @param noResolveUpdate true if the component should attempt to resolve the
    * update URL relative to {@link #EndpointURL()}, false will send the query
-   * directly to {@link #endpointURL()}.
+   * directly to {@link #EndpointURL()}.
    */
   @SimpleFunction
   public void AddDataToWeb(final String graph, boolean noResolveUpdate) {
@@ -498,7 +510,7 @@ public class LinkedData extends LinkedDataBase<Model> implements
    * component into the endpoint (most likely CSPARQL).
    */
   @SimpleFunction
-  public void FeedDataToWeb() throws URISyntaxException {
+  public void FeedDataToWeb() {
     final URI uri = URI.create(EndpointURL());
     Runnable call = new Runnable() {
       public void run() {
@@ -585,7 +597,7 @@ public class LinkedData extends LinkedDataBase<Model> implements
    * @param graph Empty string for the default graph, otherwise a valid URI
    * @param noResolveUpdate true if the component should attempt to resolve the
    * update URL relative to {@link #EndpointURL()}, false will send the query
-   * directly to {@link #endpointURL()}.
+   * directly to {@link #EndpointURL()}.
    */
   @SimpleFunction
   public void DeleteDataFromWeb(final String graph, boolean noResolveUpdate) {
@@ -667,7 +679,8 @@ public class LinkedData extends LinkedDataBase<Model> implements
   /**
    * Returns the contents of this LinkedData component as a string. Useful
    * for debugging purposes.
-   * @return
+   *
+   * @return the contents of the model in Turtle
    */
   @SimpleFunction
   public String ToString() {
@@ -675,12 +688,12 @@ public class LinkedData extends LinkedDataBase<Model> implements
     model.write(out, "TTL");
     return out.toString();
   }
-  
+
   @SimpleEvent
   public void FinishedHttsPostingFileToWeb(String message) {
     EventDispatcher.dispatchEvent(this, "FinishedHttsPostingFileToWeb", message);
   }
-  
+
   @SimpleEvent
   public void FailedHttsPostingFileToWeb(String errorMessage) {
     EventDispatcher.dispatchEvent(this, "FailedHttsPostingDataToWeb", errorMessage);
