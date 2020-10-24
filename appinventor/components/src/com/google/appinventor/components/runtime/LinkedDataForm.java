@@ -1,10 +1,6 @@
 package com.google.appinventor.components.runtime;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-
+import android.util.Log;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -12,17 +8,11 @@ import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
-import com.google.appinventor.components.common.ComponentConstants;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.SemanticWebConstants;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.AlignmentUtil;
 import com.google.appinventor.components.runtime.util.RdfUtil;
-import com.google.appinventor.components.runtime.util.ViewUtil;
-
-import android.app.Activity;
-import android.util.Log;
-import android.view.View;
+import java.util.UUID;
 
 /**
  * Linked Data Form provides a layout in which contained form elements will be
@@ -30,7 +20,6 @@ import android.view.View;
  * the LinkedData component.
  * 
  * @see LinkedData
- * @see LinkedDataStore
  * @author Evan W. Patton <ewpatton@gmail.com>
  *
  */
@@ -41,21 +30,9 @@ import android.view.View;
     "slf4j-android.jar," + "jena-iri.jar," + "jena-core.jar," +
     "jena-arq.jar")
 @SimpleObject
-public class LinkedDataForm extends AndroidViewComponent implements Component,
-    ComponentContainer {
+public class LinkedDataForm extends HVArrangement {
 
   private static final String LOG_TAG = LinkedDataForm.class.getSimpleName();
-  /**
-   * Stores a reference to the parent activity.
-   */
-  private final Activity context;
-
-  /**
-   * Linear layout used for arranging the contents of this form.
-   */
-  private final LinearLayout layout;
-
-  private List<AndroidViewComponent> components;
 
   /**
    * String storing the URI of the concept used to type instances created with this form.
@@ -75,66 +52,23 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Creates a new linked data form in the specified container.
-   * @param container
+   *
+   * @param container the component containing this form
    */
-  public LinkedDataForm(ComponentContainer container) {
-    super(container);
-    context = container.$context();
-    layout = new LinearLayout(context,
-        ComponentConstants.LAYOUT_ORIENTATION_VERTICAL,
-        ComponentConstants.EMPTY_HV_ARRANGEMENT_WIDTH,
-        ComponentConstants.EMPTY_HV_ARRANGEMENT_HEIGHT);
-    AlignmentUtil alignmentSetter = new AlignmentUtil(layout);
-    alignmentSetter.setHorizontalAlignment(ComponentConstants.HORIZONTAL_ALIGNMENT_DEFAULT);
-    alignmentSetter.setVerticalAlignment(ComponentConstants.VERTICAL_ALIGNMENT_DEFAULT);
-    components = new ArrayList<AndroidViewComponent>();
+  public LinkedDataForm(ComponentContainer<AndroidViewComponent> container) {
+    super(container, HVArrangement.LAYOUT_ORIENTATION_VERTICAL, false);
     concept = "";
-    baseUri = "";
+    baseUri = SemanticWebConstants.DEFAULT_BASE_URI;
     property = "";
     Log.d(LOG_TAG, "Created linked data form");
-
-    container.$add(this);
-  }
-
-  @Override
-  public Activity $context() {
-    return context;
-  }
-
-  @Override
-  public Form $form() {
-    return container.$form();
-  }
-
-  @Override
-  public void $add(AndroidViewComponent component) {
-    Log.d(LOG_TAG, "Added component to view layout");
-    layout.add(component);
-    components.add(component);
-  }
-
-  @Override
-  public void setChildWidth(AndroidViewComponent component, int width) {
-    ViewUtil.setChildWidthForVerticalLayout(component.getView(), width);
-  }
-
-  @Override
-  public void setChildHeight(AndroidViewComponent component, int height) {
-    ViewUtil.setChildHeightForVerticalLayout(component.getView(), height);
-  }
-
-  @Override
-  public View getView() {
-    Log.d(LOG_TAG, "Getting layout manager");
-    return layout.getLayoutManager();
   }
 
   /**
    * Sets the concept URI to type objects encoded by this form.
-   * @param uri
+   *
+   * @param uri the concept represented by the form
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
-      defaultValue = "")
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI)
   @SimpleProperty
   public void ObjectType(String uri) {
     concept = uri;
@@ -142,7 +76,8 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Returns the concept URI for this form.
-   * @return
+   *
+   * @return the concept represented by the form
    */
   @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>When the contents of this form are turned into an "
@@ -170,7 +105,8 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Gets the Base URI of this form.
-   * @return
+   *
+   * @return the base URI used for composing subject identifiers
    */
   @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>FormID is an autogenerated identifier for a form. It "
@@ -185,10 +121,10 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Sets the property URI to link a parent form to this form.
-   * @param uri 
+   *
+   * @param uri a property URI
    */
-  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI,
-      defaultValue = "")
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI)
   @SimpleProperty
   public void PropertyURI(String uri) {
     property = uri;
@@ -196,7 +132,8 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Gets the Property URI for linking a parent form to this form.
-   * @return
+   *
+   * @return the form's property relative to its parent
    */
   @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "If the form is placed within another Linked Data Form, "
@@ -217,7 +154,8 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Sets a Subject URI this form describes.
-   * @param uri
+   *
+   * @param uri a subject URI
    */
   @SimpleProperty
   public void Subject(String uri) {
@@ -226,7 +164,8 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Gets the Subject URI for this form.
-   * @return
+   *
+   * @return the subject URI set, if any.
    */
   @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>By default, the use of a form results in a new "
@@ -242,7 +181,9 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Sets if this form's property should be made the subject of a triple and its container the object.
-   * @param inverse
+   *
+   * @param inverse true if the form should be the subject of the statement with its parent, otherwise
+   *                false to make it the object of the statement (the default)
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
       defaultValue = "False")
@@ -253,7 +194,8 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
 
   /**
    * Gets whether or not this form represents an inverse property.
-   * @return
+   *
+   * @return true if the form represents the subject of a triple with its parent, otherwise false
    */
   @SimpleProperty(category = PropertyCategory.LINKED_DATA,
       description = "<p>Inverse Property specifies whether the relationship "
@@ -268,12 +210,6 @@ public class LinkedDataForm extends AndroidViewComponent implements Component,
           + "True.</p>")
   public boolean InverseProperty() {
     return inverse;
-  }
-
-  @Override
-  public Iterator<AndroidViewComponent> iterator() {
-    Log.v(LOG_TAG, "Getting iterator for Linked Data Form. size = "+components.size());
-    return components.iterator();
   }
 
   /**
