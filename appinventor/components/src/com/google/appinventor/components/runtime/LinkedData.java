@@ -72,6 +72,10 @@ public class LinkedData extends LinkedDataBase<Model> implements
     model.setNsPrefix("xsd", XSD.getURI());
   }
 
+  public void Initialize() {
+    model.setNsPrefixes(RdfUtil.PREFIXES);
+  }
+
   /**
    * Returns the URL of the SPARQL endpoint.
    * @return
