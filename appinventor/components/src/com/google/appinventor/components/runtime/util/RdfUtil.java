@@ -75,6 +75,8 @@ import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 public final class RdfUtil {
   public static final String LOG_TAG = RdfUtil.class.getSimpleName();
 
+  public static final Map<String, String> PREFIXES = new HashMap<>();
+
   private static final Set<RDFDatatype> INTEGER_TYPES;
   private static final Set<RDFDatatype> DOUBLE_TYPES;
 
@@ -396,7 +398,7 @@ public final class RdfUtil {
           return false;
         }
         Resource subj = model.getResource(subject);
-        Property pred = model.getProperty(nestedForm.PropertyURI());
+        Property pred = model.getProperty(model.expandPrefix(nestedForm.PropertyURI()));
         Resource obj = model.getResource(nestedSubject);
         model.add(subj, pred, obj);
       } else if(i instanceof ComponentContainer) {
@@ -520,9 +522,9 @@ public final class RdfUtil {
       return fullUri;
     }
     if(subject.toString().equals(form.FormID())) {
-      Log.d(LOG_TAG, "Form did not have URI fields; generating timestamp + uuid URI");
+      Log.d(LOG_TAG, "Form did not have URI fields; generating uuid URI");
       String uuid = UUID.randomUUID().toString();
-      subject.append(System.currentTimeMillis() + "-" + uuid);
+      subject.append(uuid);
     }
     return subject.toString();
   }
@@ -1230,6 +1232,7 @@ public final class RdfUtil {
 
   public static void defineNamespace(String prefix, String uri) {
     PrintUtil.registerPrefix(prefix, uri);
+    PREFIXES.put(prefix, uri);
   }
 
   public static String expandQName(String qname) {

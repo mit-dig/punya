@@ -99,7 +99,7 @@ Blockly.Yail['logic_ruleset'] = function() {
  * @returns {string}
  */
 Blockly.Yail['logic_namespace_decl'] = function() {
-  var code = '(RdfUtil:defineNamespace ';
+  var code = '(define-namespace  ';
   code += Blockly.Yail.quote_(this.getFieldValue('PREFIX') || 'ex');
   code += ' ';
   code += Blockly.Yail.valueToCode(this, 'URI', Blockly.Yail.ORDER_NONE);
@@ -134,7 +134,7 @@ Blockly.Yail['logic_binding'] = function() {
  * @returns {string}
  */
 Blockly.Yail['logic_qname'] = function() {
-  var code = '(RdfUtil:expandQName ';
+  var code = '(expand-qname ';
   code += Blockly.Yail.quote_(this.getFieldValue('PREFIX') + ':' + this.getFieldValue('LOCALNAME'));
   code += ')';
   return [code, Blockly.Yail.ORDER_ATOMIC];

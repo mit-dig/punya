@@ -2771,6 +2771,12 @@ Dictionary implementation.
 ;;;; End of Color implementation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (expand-qname qname)
+  (RdfUtil:expandQName qname))
+
+(define (define-namespace prefix uri)
+  (RdfUtil:defineNamespace prefix uri))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Multiple screens
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
