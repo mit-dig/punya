@@ -46,10 +46,12 @@ public class LinkedDataBase<T extends Model> extends AndroidNonvisibleComponent 
     List<List<String>> result = new ArrayList<>();
     for (StmtIterator it = statementIterator(subject, predicate, object); it.hasNext(); ) {
       Statement st = it.next();
+      String value = st.getObject().isLiteral() ? st.getObject().asLiteral().getString() :
+          st.getObject().asResource().getURI();
       result.add(Arrays.asList(
           st.getSubject().toString(),
           st.getPredicate().toString(),
-          st.getObject().toString()));
+          value));
     }
     return result;
   }
