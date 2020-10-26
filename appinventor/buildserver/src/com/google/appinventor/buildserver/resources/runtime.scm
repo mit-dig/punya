@@ -2598,6 +2598,12 @@ Dictionary implementation.
 ;;;;Text implementation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (sparql-quote str)
+  (if (string? str)
+    (if (string-contains str "\"")
+      (string-append "\"\"\"" str "\"\"\"")
+      (string-append "\"" str "\""))
+    str))
 
 (define (make-disjunct x)
   (cond ((null? (cdr x)) (Pattern:quote (car x)))

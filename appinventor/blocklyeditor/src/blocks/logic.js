@@ -465,7 +465,7 @@ Blockly.Blocks['logic_sparql_select'] = {
   category: 'Logic',
   init: function() {
     this.setColour(Blockly.LOGIC_CATEGORY_HUE);
-    this.setOutput(true, ['text']);
+    this.setOutput(true, ['String']);
     var star = this.workspace.newBlock('logic_sparql_star');
     star.setShadow(true);
     this.appendDummyInput().appendField().appendField('SELECT')
@@ -679,8 +679,8 @@ Blockly.Blocks['logic_sparql_builtin_regex'] = {
   init: function() {
     this.setColour(Blockly.LOGIC_CATEGORY_HUE);
     this.setOutput(true, ['boolean']);
-    this.appendValueInput('TEXT').appendField('match string').setCheck('String');
-    this.appendValueInput('REGEX').appendField('to regex').setCheck('String');
+    this.appendValueInput('TEXT').appendField('match string').setCheck(['String', 'qname', 'variable']);
+    this.appendValueInput('REGEX').appendField('to regex').setCheck(['String', 'qname', 'variable']);
     this.appendValueInput('FLAGS').appendField('flags').setCheck('String');
     var text = this.workspace.newBlock('text');
     text.setShadow(true);

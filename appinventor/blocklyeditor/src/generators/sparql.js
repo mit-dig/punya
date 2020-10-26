@@ -30,6 +30,11 @@ Blockly.SPARQL.scrub_ = function(block, code) {
   return code;
 }
 
+Blockly.SPARQL.blockToCode1 = function(block) {
+  this.yailBlocks = 0;
+  return this.blockToCode(block);
+}
+
 /**
  *
  * @this Blockly.BlockSvg
@@ -112,7 +117,7 @@ Blockly.SPARQL['logic_namespace_decl'] = function() {
   code += this.getFieldValue('PREFIX');
   code += ': ';
   code += Blockly.SPARQL.valueToCode(this, 'URI', Blockly.SPARQL.ORDER_NONE);
-  code += ' .';
+  code += ' ';
   return code;
 }
 
@@ -268,7 +273,7 @@ Blockly.SPARQL['logic_sparql_graph'] = function() {
  * @returns {[string, number]}
  */
 Blockly.SPARQL['logic_sparql_builtin_unary'] = function() {
-  var a0 = Blockly.Rules.valueToCode(this, 'ARG0', Blockly.Rules.ORDER_NONE);
+  var a0 = Blockly.SPARQL.valueToCode(this, 'ARG0', Blockly.SPARQL.ORDER_NONE);
   var op = this.getFieldValue('OPERATOR');
 
   var code = op + "(" + a0 + ")";
@@ -282,8 +287,8 @@ Blockly.SPARQL['logic_sparql_builtin_unary'] = function() {
  * @returns {[string, number]}
  */
 Blockly.SPARQL['logic_sparql_builtin_binary'] = function() {
-  var a0 = Blockly.Rules.valueToCode(this, 'ARG0', Blockly.Rules.ORDER_NONE);
-  var a1 = Blockly.Rules.valueToCode(this, 'ARG1', Blockly.Rules.ORDER_NONE);
+  var a0 = Blockly.SPARQL.valueToCode(this, 'ARG0', Blockly.SPARQL.ORDER_NONE);
+  var a1 = Blockly.SPARQL.valueToCode(this, 'ARG1', Blockly.SPARQL.ORDER_NONE);
   var op = this.getFieldValue('OPERATOR');
 
   var code = op + "(" + a0 + "," + a1 + ")";
@@ -297,7 +302,14 @@ Blockly.SPARQL['logic_sparql_builtin_binary'] = function() {
  * @returns {[string, number]}
  */
 Blockly.SPARQL['logic_sparql_builtin_regex'] = function() {
-  return ['', Blockly.SPARQL.ORDER_FUNCTION_CALL];
+  var code = 'REGEX(';
+  code += Blockly.SPARQL.valueToCode(this, 'TEXT', Blockly.SPARQL.ORDER_FUNCTION_CALL);
+  code += ', ';
+  code += Blockly.SPARQL.valueToCode(this, 'REGEX', Blockly.SPARQL.ORDER_FUNCTION_CALL);
+  code += ', ';
+  code += Blockly.SPARQL.valueToCode(this, 'FLAGS', Blockly.SPARQL.ORDER_FUNCTION_CALL);
+  code += ')';
+  return [code, Blockly.SPARQL.ORDER_FUNCTION_CALL];
 }
 
 /**
@@ -494,4 +506,80 @@ Blockly.SPARQL['logic_negate'] = function() {
   var code = '!';
   var arg = Blockly.SPARQL.valueToCode(this, 'BOOL', Blockly.SPARQL.ORDER_UNARY);
   return [code + arg, Blockly.SPARQL.ORDER_UNARY];
+}
+
+/**
+ * Convert component getters into SPARQL.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.SPARQL['component_set_get'] = function() {
+  Blockly.SPARQL.yailBlocks++;
+  var code = '```yail(sparql-quote ';
+  code += Blockly.Yail.blockToCode(this)[0];
+  code += ')```';
+  return [code, Blockly.SPARQL.ORDER_ATOMIC];
+}
+
+/**
+ * Convert component blocks to their default value.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.SPARQL['component_component_block'] = function() {
+  Blockly.SPARQL.yailBlocks++;
+  var code = '```yail';
+  code += Blockly.Yail.YAIL_GET_PROPERTY;
+  code += Blockly.Yail.YAIL_QUOTE;
+  code += this.getFieldValue('COMPONENT_SELECTOR');
+  code += Blockly.Yail.YAIL_SPACER;
+  code += Blockly.Yail.YAIL_QUOTE;
+  code += 'Value';
+  code += Blockly.Yail.YAIL_CLOSE_COMBINATION;
+  code += '```';
+  return [code, Blockly.SPARQL.ORDER_ATOMIC];
+}
+
+/**
+ * Convert method component calls into SPARQL.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.SPARQL['component_method'] = function() {
+  Blockly.SPARQL.yailBlocks++;
+  var code = '```yail(sparql-quote ';
+  code += Blockly.Yail.blockToCode(this)[0];
+  code += ')```';
+  return [code, Blockly.SPARQL.ORDER_ATOMIC];
+}
+
+/**
+ * Convert procedure call results into SPARQL.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.SPARQL['procedures_callreturn'] = function() {
+  Blockly.SPARQL.yailBlocks++;
+  var code = '```yail';
+  code += Blockly.Yail.blockToCode(this)[0];
+  code += '```';
+  return [code, Blockly.SPARQL.ORDER_ATOMIC];
+}
+
+/**
+ * Convert variable getters into SPARQL.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.SPARQL['lexical_variable_get'] = function() {
+  Blockly.SPARQL.yailBlocks++;
+  var code = '```yail';
+  code += Blockly.Yail.blockToCode(this)[0];
+  code += '```';
+  return [code, Blockly.SPARQL.ORDER_ATOMIC];
 }
