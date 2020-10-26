@@ -176,7 +176,7 @@ public abstract class Sprite extends VisibleComponent
   @DesignerProperty(
       editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
       defaultValue = DEFAULT_ENABLED ? "True" : "False")
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   public void Enabled(boolean enabled) {
     timerInternal.Enabled(enabled);
   }
@@ -203,7 +203,7 @@ public abstract class Sprite extends VisibleComponent
    * @suppressdoc
    * @param userHeading degrees above the positive x-axis
    */
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   @DesignerProperty(
       editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT,
       defaultValue = DEFAULT_HEADING + "")
@@ -242,7 +242,7 @@ public abstract class Sprite extends VisibleComponent
   @DesignerProperty(
       editorType = PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER,
       defaultValue = DEFAULT_INTERVAL + "")
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   public void Interval(int interval) {
     timerInternal.Interval(interval);
   }
@@ -255,7 +255,8 @@ public abstract class Sprite extends VisibleComponent
    * milliseconds
    */
   @SimpleProperty(
-      description = "The number of pixels that the %type% should move every interval, if enabled.")
+      description = "The number of pixels that the %type% should move every interval, if enabled.",
+      category = PropertyCategory.BEHAVIOR)
   @DesignerProperty(
       editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT,
       defaultValue = DEFAULT_SPEED + "")
@@ -297,7 +298,7 @@ public abstract class Sprite extends VisibleComponent
   @DesignerProperty(
       editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
       defaultValue = DEFAULT_VISIBLE ? "True" : "False")
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
   public void Visible(boolean visible) {
     this.visible = visible;
     registerChange();
@@ -358,7 +359,7 @@ public abstract class Sprite extends VisibleComponent
 
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT,
       defaultValue = "0.0")
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
   public void Y(double y) {
     updateY(y);
     registerChange();
@@ -376,7 +377,7 @@ public abstract class Sprite extends VisibleComponent
    *        in front of ones with lower numbers; if values are equal for
    *        sprites, either can go in front of the other
    */
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT,
                     defaultValue = DEFAULT_Z + "")
   public void Z(double layer) {

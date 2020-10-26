@@ -1603,7 +1603,7 @@ public class Form extends AppInventorCompatActivity
 
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
       defaultValue = "False")
-  @SimpleProperty(userVisible = false)
+  @SimpleProperty(userVisible = false, category = PropertyCategory.APPEARANCE)
   public void ActionBar(boolean enabled) {
     if (SdkLevel.getLevel() < SdkLevel.LEVEL_HONEYCOMB) {
       // ActionBar is available on SDK 11 or higher
@@ -1788,7 +1788,7 @@ public class Form extends AppInventorCompatActivity
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_ASSET,
       defaultValue = "")
-  @SimpleProperty(userVisible = false)
+  @SimpleProperty(userVisible = false, category = PropertyCategory.APPLICATION)
   public void Icon(String name) {
     // We don't actually need to do anything.
   }
@@ -1803,7 +1803,8 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "1")
   @SimpleProperty(userVisible = false,
     description = "An integer value which must be incremented each time a new Android "
-    +  "Application Package File (APK) is created for the Google Play Store.")
+    +  "Application Package File (APK) is created for the Google Play Store.",
+    category = PropertyCategory.APPLICATION)
   public void VersionCode(int vCode) {
     // We don't actually need to do anything.
   }
@@ -1818,7 +1819,8 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "1.0")
   @SimpleProperty(userVisible = false,
     description = "A string which can be changed to allow Google Play "
-    + "Store users to distinguish between different versions of the App.")
+    + "Store users to distinguish between different versions of the App.",
+    category = PropertyCategory.APPLICATION)
   public void VersionName(String vName) {
     // We don't actually need to do anything.
   }
@@ -1835,11 +1837,12 @@ public class Form extends AppInventorCompatActivity
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SIZING,
       defaultValue = "Responsive", alwaysSend = true)
   @SimpleProperty(userVisible = false,
-  // This desc won't apprear as a tooltip, since there's no block, but we'll keep it with the source.
-  description = "If set to fixed,  screen layouts will be created for a single fixed-size screen and autoscaled. " +
-      "If set to responsive, screen layouts will use the actual resolution of the device.  " +
-      "See the documentation on responsive design in App Inventor for more information. " +
-      "This property appears on Screen1 only and controls the sizing for all screens in the app.")
+      // This desc won't apprear as a tooltip, since there's no block, but we'll keep it with the source.
+      description = "If set to fixed,  screen layouts will be created for a single fixed-size screen and autoscaled. " +
+          "If set to responsive, screen layouts will use the actual resolution of the device.  " +
+          "See the documentation on responsive design in App Inventor for more information. " +
+          "This property appears on Screen1 only and controls the sizing for all screens in the app.",
+      category = PropertyCategory.APPLICATION)
   public void Sizing(String value) {
     // This is used by the project and build server.
     // We also use it to adjust sizes
@@ -1915,8 +1918,9 @@ public class Form extends AppInventorCompatActivity
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
       defaultValue = "")
   @SimpleProperty(userVisible = false,
-  description = "This is the display name of the installed application in the phone." +
-      "If the AppName is blank, it will be set to the name of the project when the project is built.")
+      description = "This is the display name of the installed application in the phone." +
+          "If the AppName is blank, it will be set to the name of the project when the project is built.",
+      category = PropertyCategory.APPLICATION)
   public void AppName(String aName) {
     // We don't actually need to do anything.
   }
@@ -1989,7 +1993,8 @@ public class Form extends AppInventorCompatActivity
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_THEME,
       defaultValue = ComponentConstants.DEFAULT_THEME)
-  @SimpleProperty(userVisible = false, description = "Sets the theme used by the application.")
+  @SimpleProperty(userVisible = false, description = "Sets the theme used by the application.",
+      category = PropertyCategory.APPLICATION)
   public void Theme(String theme) {
     if (SdkLevel.getLevel() < SdkLevel.LEVEL_HONEYCOMB) {
       backgroundColor = Component.COLOR_WHITE;
@@ -2051,7 +2056,8 @@ public class Form extends AppInventorCompatActivity
     defaultValue = "")
   @SimpleProperty(userVisible = false,
     description = "A URL to use to populate the Tutorial Sidebar while "
-    + "editing a project. Used as a teaching aid.")
+    + "editing a project. Used as a teaching aid.",
+    category = PropertyCategory.APPLICATION)
   public void TutorialURL(String url) {
     // We don't actually do anything This property is stored in the
     // project properties file
@@ -2062,7 +2068,8 @@ public class Form extends AppInventorCompatActivity
   @SimpleProperty(userVisible = false,
     description = "A JSON string representing the subset for the screen. Authors of template apps "
       + "can use this to control what components, designer properties, and blocks are available "
-      + "in the project.")
+      + "in the project.",
+    category = PropertyCategory.APPLICATION)
   public void BlocksToolkit(String json) {
     // We don't actually do anything. This property is stored in the
     // project properties file

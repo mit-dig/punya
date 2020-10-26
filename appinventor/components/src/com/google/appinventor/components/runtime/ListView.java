@@ -578,7 +578,7 @@ public final class ListView extends AndroidViewComponent implements AdapterView.
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
           defaultValue = Component.DEFAULT_VALUE_COLOR_LTGRAY)
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
   public void SelectionColor(int argb) {
     selectionColor = argb;
     this.selectionDrawable = new GradientDrawable(

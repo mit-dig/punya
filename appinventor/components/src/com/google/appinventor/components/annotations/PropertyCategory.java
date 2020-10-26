@@ -16,7 +16,8 @@ public enum PropertyCategory {
   APPEARANCE("Appearance"),
   LINKED_DATA("Linked Data"),
   DEPRECATED("Deprecated"),
-  UNSET("Unspecified");
+  UNSET("Unspecified"),
+  APPLICATION("Application");
 
   private String name;
 

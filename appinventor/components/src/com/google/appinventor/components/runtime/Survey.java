@@ -297,7 +297,8 @@ public class Survey extends AndroidViewComponent{
 	
 	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_SURVEY_STYLE, defaultValue = "1")
 	@SimpleProperty(description = "Set the style of the survey with integer. 1 = textbox, 2 = textarea, " +
-			"3 = multiplechoice, 4 = chooselist, 5 = checkbox, 6 = scale, 7 = yesno")
+			"3 = multiplechoice, 4 = chooselist, 5 = checkbox, 6 = scale, 7 = yesno",
+			category = PropertyCategory.APPEARANCE)
 	public void SetStyle(int style) {
 		Log.i(TAG, "the style is: " + style);
 		switch (style) {	

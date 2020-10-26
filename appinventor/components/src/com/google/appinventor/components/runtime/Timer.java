@@ -401,7 +401,7 @@ public final class Timer extends AndroidNonvisibleComponent implements
 	 * 
 	 * return {@code true} if the device is to be waken up from sleeping
 	 */
-	@SimpleProperty(description = "Wake up the device if asleep")
+	@SimpleProperty(description = "Wake up the device if asleep", category = PropertyCategory.BEHAVIOR)
 	public boolean WakeUp() {
 		return this.wakeup;
 	}
@@ -427,7 +427,7 @@ public final class Timer extends AndroidNonvisibleComponent implements
 	 * 
 	 * return {@code true} if the Alarm is to be set in Repeating mode
 	 */
-	@SimpleProperty(description = "Wake up the device if asleep")
+	@SimpleProperty(description = "Wake up the device if asleep", category = PropertyCategory.BEHAVIOR)
 	public boolean Repeating() {
 		return this.repeating;
 	}

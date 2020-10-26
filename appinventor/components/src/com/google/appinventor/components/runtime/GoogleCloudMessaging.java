@@ -212,7 +212,7 @@ public final class GoogleCloudMessaging extends AndroidNonvisibleComponent
     }
     
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING, defaultValue = "")
-    @SimpleProperty
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
     public void PhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }

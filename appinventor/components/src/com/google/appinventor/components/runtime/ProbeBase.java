@@ -290,7 +290,7 @@ SensorComponent, OnDestroyListener{
    * 
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "60")
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   public void SetScheduleInterval(int newInterval) {
     
     this.interval = newInterval;

@@ -6,6 +6,7 @@
 
 package com.google.appinventor.components.runtime;
 
+import com.google.appinventor.components.annotations.PropertyCategory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -91,7 +92,7 @@ public class TableArrangement extends AndroidViewComponent
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER,
       defaultValue = "2")
-  @SimpleProperty(userVisible = false)
+  @SimpleProperty(userVisible = false, category = PropertyCategory.APPEARANCE)
   public void Columns(int numColumns) {
     viewLayout.setNumColumns(numColumns);
   }
@@ -113,7 +114,7 @@ public class TableArrangement extends AndroidViewComponent
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER,
       defaultValue = "2")
-  @SimpleProperty(userVisible = false)
+  @SimpleProperty(userVisible = false, category = PropertyCategory.APPEARANCE)
   public void Rows(int numRows) {
     viewLayout.setNumRows(numRows);
   }

@@ -550,7 +550,7 @@ public abstract class TextBoxBase extends AndroidViewComponent
   /**
    * Concept URI property setter method.
    *
-   * @param concept uri
+   * @param uri concept uri
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
           defaultValue = "")

@@ -8,6 +8,7 @@ package com.google.appinventor.components.scripts;
 
 import com.google.appinventor.common.utils.StringUtils;
 import com.google.appinventor.components.annotations.DesignerProperty;
+import com.google.appinventor.components.annotations.PropertyCategory;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -140,7 +141,8 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
       // Note: carrying this over from the old Java blocks editor. I'm not sure
       // that we'll actually do anything with invisible properties in the blocks
       // editor. (sharon@google.com)
-      outputBlockProperty(prop.name, prop, alwaysSendProperties.contains(prop.name), defaultValues.get(prop.name), sb);
+      outputBlockProperty(component.name, prop.name, prop, component.designerProperties.get(prop.name),
+          alwaysSendProperties.contains(prop.name), defaultValues.get(prop.name), sb);
       separator = ",\n    ";
     }
     sb.append("],\n  \"events\": [");
@@ -276,7 +278,12 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
    * @param defaultValue The default value of the property (only required if alwaysSend is true).
    * @param sb The StringBuilder to receive the output JSON
    */
-  private void outputBlockProperty(String propertyName, Property prop, boolean alwaysSend, String defaultValue, StringBuilder sb) {
+  private void outputBlockProperty(String componentName, String propertyName, Property prop,
+      DesignerProperty designProp, boolean alwaysSend, String defaultValue, StringBuilder sb) {
+    if (prop.getCategory() == PropertyCategory.UNSET && designProp != null) {
+      messager.printMessage(Diagnostic.Kind.ERROR,
+          "Property " + componentName + "." + propertyName + " has no category.");
+    }
     sb.append("{ \"name\": \"");
     sb.append(propertyName);
     sb.append("\", \"description\": ");

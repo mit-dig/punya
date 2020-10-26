@@ -455,7 +455,7 @@ public class Dropbox extends AndroidNonvisibleComponent
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
       defaultValue = "")
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   public void AppSecret(String appSecret) {
     this.appSecret= appSecret;
   }

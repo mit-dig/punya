@@ -510,7 +510,7 @@ public class Map extends MapFeatureContainerBase implements MapEventListener {
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_MAP_UNIT_SYSTEM,
       defaultValue = "1")
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
   public void ScaleUnits(int units) {
     if (1 <= units && units < MapScaleUnits.values().length) {
       mapController.setScaleUnits(MapScaleUnits.values()[units]);
