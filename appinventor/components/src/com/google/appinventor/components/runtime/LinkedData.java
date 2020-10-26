@@ -141,8 +141,14 @@ public class LinkedData extends LinkedDataBase<Model> implements
           RetrievedResults("SELECT", solutions);
         }
       });
-    } catch ( Exception e ) {
+    } catch (final Exception e ) {
       Log.w(LOG_TAG, e);
+      Log.w(LOG_TAG, queryText);
+      form.runOnUiThread(new Runnable() {
+        public void run() {
+          FailedToExecuteQuery(e.getMessage());
+        }
+      });
     }
   }
 
@@ -177,6 +183,14 @@ public class LinkedData extends LinkedDataBase<Model> implements
   @SimpleEvent
   public void UnsupportedQueryType() {
     EventDispatcher.dispatchEvent(this, "UnsupportedQueryType");
+  }
+
+  /**
+   * Event raised when a SPARQL query raises an exception.
+   */
+  @SimpleEvent
+  public void FailedToExecuteQuery(String error) {
+    EventDispatcher.dispatchEvent(this, "FailedToExecuteQuery", error);
   }
 
   /**

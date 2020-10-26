@@ -668,7 +668,7 @@ Blockly.Blocks['logic_sparql_builtin_binary'] = {
     this.setOutput(true, ['boolean']);
     this.appendValueInput('ARG0').appendField(new Blockly.FieldDropdown(
       [['language matches?', 'LANGMATCHES'], ['same term?', 'sameTerm']]
-    ));
+    ), 'OPERATOR');
     this.appendValueInput('ARG1');
     this.setInputsInline(true);
   }

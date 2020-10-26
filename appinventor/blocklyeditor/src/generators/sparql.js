@@ -87,7 +87,7 @@ Blockly.SPARQL['logic_sparql_select'] = function() {
   if (this.getFieldValue('DISTINCT') === 'true') {
     code += 'DISTINCT ';
   }
-  code += Blockly.SPARQL.statementToCode(this, 'VARS') || '*';
+  code += Blockly.SPARQL.statementToCode(this, 'VARS').replace(/\r?\n/g, " ") || '*';
   code += ' WHERE {\n';
   code += Blockly.SPARQL.statementToCode(this, 'WHERE');
   code += '\n}';
@@ -268,7 +268,12 @@ Blockly.SPARQL['logic_sparql_graph'] = function() {
  * @returns {[string, number]}
  */
 Blockly.SPARQL['logic_sparql_builtin_unary'] = function() {
-  return ['', Blockly.SPARQL.ORDER_FUNCTION_CALL];
+  var a0 = Blockly.Rules.valueToCode(this, 'ARG0', Blockly.Rules.ORDER_NONE);
+  var op = this.getFieldValue('OPERATOR');
+
+  var code = op + "(" + a0 + ")";
+
+  return [code, Blockly.SPARQL.ORDER_FUNCTION_CALL];
 }
 
 /**
@@ -277,7 +282,13 @@ Blockly.SPARQL['logic_sparql_builtin_unary'] = function() {
  * @returns {[string, number]}
  */
 Blockly.SPARQL['logic_sparql_builtin_binary'] = function() {
-  return ['', Blockly.SPARQL.ORDER_FUNCTION_CALL];
+  var a0 = Blockly.Rules.valueToCode(this, 'ARG0', Blockly.Rules.ORDER_NONE);
+  var a1 = Blockly.Rules.valueToCode(this, 'ARG1', Blockly.Rules.ORDER_NONE);
+  var op = this.getFieldValue('OPERATOR');
+
+  var code = op + "(" + a0 + "," + a1 + ")";
+
+  return [code, Blockly.SPARQL.ORDER_FUNCTION_CALL];
 }
 
 /**
