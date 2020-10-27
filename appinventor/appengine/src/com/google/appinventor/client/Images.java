@@ -863,4 +863,10 @@ public interface Images extends Resources {
   */
   @Source("com/google/appinventor/images/YRLogo.png")
   ImageResource YRLogo();
+
+  /**
+   * Designer palette item: LDP-CoAP Client component
+   */
+  @Source("com/google/appinventor/images/ldpcoapclient.png")
+  ImageResource ldpCoapClient();
 }

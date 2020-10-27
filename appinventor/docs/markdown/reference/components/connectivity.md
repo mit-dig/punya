@@ -11,6 +11,7 @@ Table of Contents:
 * [ActivityStarter](#ActivityStarter)
 * [BluetoothClient](#BluetoothClient)
 * [BluetoothServer](#BluetoothServer)
+* [LdpCoapClient](#LdpCoapClient)
 * [Serial](#Serial)
 * [Web](#Web)
 
@@ -391,6 +392,166 @@ Use the `BluetoothServer` component to turn your device into a server that recei
 
 {:id="BluetoothServer.StopAccepting" class="method"} <i/> StopAccepting()
 : Stop accepting an incoming connection.
+
+## LdpCoapClient  {#LdpCoapClient}
+
+![LdpCoapClient](images/ldpCoap.png)
+
+ LdpCoapClient to make ldp coap request
+
+
+
+### Properties  {#LdpCoapClient-Properties}
+
+{:.properties}
+
+{:id="LdpCoapClient.BASE_URI" .text .bo} *BASE_URI*
+: Get BASE URI
+
+### Events  {#LdpCoapClient-Events}
+
+{:.events}
+None
+
+
+### Methods  {#LdpCoapClient-Methods}
+
+{:.methods}
+
+{:id="LdpCoapClient.ApplicationAtomXml" class="method returns number"} <i/> ApplicationAtomXml()
+: application/atom+xml code
+
+{:id="LdpCoapClient.ApplicationBson" class="method returns number"} <i/> ApplicationBson()
+: application/bson code
+
+{:id="LdpCoapClient.ApplicationBzip2" class="method returns number"} <i/> ApplicationBzip2()
+: application/bz2 code
+
+{:id="LdpCoapClient.ApplicationExi" class="method returns number"} <i/> ApplicationExi()
+: application/exi code
+
+{:id="LdpCoapClient.ApplicationFastinfoset" class="method returns number"} <i/> ApplicationFastinfoset()
+: application/fastinfoset code
+
+{:id="LdpCoapClient.ApplicationGzip" class="method returns number"} <i/> ApplicationGzip()
+: application/gzip code
+
+{:id="LdpCoapClient.ApplicationJson" class="method returns number"} <i/> ApplicationJson()
+: application/json code
+
+{:id="LdpCoapClient.ApplicationLdJson" class="method returns number"} <i/> ApplicationLdJson()
+: application/ld+json code
+
+{:id="LdpCoapClient.ApplicationLinkFormat" class="method returns number"} <i/> ApplicationLinkFormat()
+: application/link-format code
+
+{:id="LdpCoapClient.ApplicationMsgpack" class="method returns number"} <i/> ApplicationMsgpack()
+: application/msgpack code
+
+{:id="LdpCoapClient.ApplicationOctetStream" class="method returns number"} <i/> ApplicationOctetStream()
+: application/octet-stream code
+
+{:id="LdpCoapClient.ApplicationRdfPatch" class="method returns number"} <i/> ApplicationRdfPatch()
+: application/rdf-patch code
+
+{:id="LdpCoapClient.ApplicationRdfXml" class="method returns number"} <i/> ApplicationRdfXml()
+: application/rdf+xml code
+
+{:id="LdpCoapClient.ApplicationSoapFastinfoset" class="method returns number"} <i/> ApplicationSoapFastinfoset()
+: application/soap+fastinfoset code
+
+{:id="LdpCoapClient.ApplicationSoapXml" class="method returns number"} <i/> ApplicationSoapXml()
+: application/soap+xml code
+
+{:id="LdpCoapClient.ApplicationUbjson" class="method returns number"} <i/> ApplicationUbjson()
+: application/ubjson code
+
+{:id="LdpCoapClient.ApplicationXml" class="method returns number"} <i/> ApplicationXml()
+: application/xml code
+
+{:id="LdpCoapClient.ApplicationXmppXml" class="method returns number"} <i/> ApplicationXmppXml()
+: application/xmpp+xml code
+
+{:id="LdpCoapClient.ApplicationXobixBinary" class="method returns number"} <i/> ApplicationXobixBinary()
+: application/x-obix-binary code
+
+{:id="LdpCoapClient.Delete" class="method"} <i/> Delete(*resource*{:.text})
+: CoAP Delete resource
+
+{:id="LdpCoapClient.DiscoveryResourcesRdfPatch" class="method"} <i/> DiscoveryResourcesRdfPatch()
+: LDP Resource Discovery in application/rdf-patch
+
+{:id="LdpCoapClient.DiscoveryResourcesTextPlain" class="method"} <i/> DiscoveryResourcesTextPlain()
+: LDP Resource Discovery in text/plain
+
+{:id="LdpCoapClient.DiscoveryResourcesTextTurtle" class="method"} <i/> DiscoveryResourcesTextTurtle()
+: LDP Resource Discovery in text/turtle
+
+{:id="LdpCoapClient.Get" class="method"} <i/> Get(*resource*{:.text},*type*{:.number})
+: LDP-CoAP Get method
+
+{:id="LdpCoapClient.GetETag" class="method returns text"} <i/> GetETag()
+: Get ETag
+
+{:id="LdpCoapClient.Head" class="method"} <i/> Head(*resource*{:.text})
+: HEAD Request
+
+{:id="LdpCoapClient.ImageGif" class="method returns number"} <i/> ImageGif()
+: image/gif code
+
+{:id="LdpCoapClient.ImageJpeg" class="method returns number"} <i/> ImageJpeg()
+: image/jpeg code
+
+{:id="LdpCoapClient.ImagePng" class="method returns number"} <i/> ImagePng()
+: image/png code
+
+{:id="LdpCoapClient.ImageTiff" class="method returns number"} <i/> ImageTiff()
+: image/tiff code
+
+{:id="LdpCoapClient.Options" class="method"} <i/> Options(*resource*{:.text})
+: OPTIONS Request
+
+{:id="LdpCoapClient.Patch" class="method"} <i/> Patch(*resource*{:.text},*type*{:.number},*data*{:.text})
+: PATCH Request
+
+{:id="LdpCoapClient.PatchEtagInput" class="method"} <i/> PatchEtagInput(*resource*{:.text},*type*{:.number},*data*{:.text},*etag*{:.text})
+: PATCH Request
+
+{:id="LdpCoapClient.Post" class="method"} <i/> Post(*resource*{:.text},*type*{:.number},*data*{:.text},*title*{:.text})
+: POST Request
+
+{:id="LdpCoapClient.Put" class="method"} <i/> Put(*resource*{:.text},*type*{:.number},*data*{:.text})
+: PUT Request
+
+{:id="LdpCoapClient.PutEtagInput" class="method"} <i/> PutEtagInput(*resource*{:.text},*type*{:.number},*data*{:.text},*etag*{:.text})
+: PUT Request
+
+{:id="LdpCoapClient.TextCsv" class="method returns number"} <i/> TextCsv()
+: text/csv code
+
+{:id="LdpCoapClient.TextHtml" class="method returns number"} <i/> TextHtml()
+: text/html code
+
+{:id="LdpCoapClient.TextPlain" class="method returns number"} <i/> TextPlain()
+: text/plain code
+
+{:id="LdpCoapClient.TextTurtle" class="method returns number"} <i/> TextTurtle()
+: text/turtle code
+
+{:id="LdpCoapClient.getContentFormat" class="method returns text"} <i/> getContentFormat()
+: Get Content-Format (ct)
+
+{:id="LdpCoapClient.getLocationPath" class="method returns text"} <i/> getLocationPath()
+: Get Location Path
+
+{:id="LdpCoapClient.getRequestStatus" class="method returns text"} <i/> getRequestStatus()
+: get request Status
+
+{:id="LdpCoapClient.getResponseCode" class="method returns text"} <i/> getResponseCode()
+: Get response code
+
+{:id="LdpCoapClient.getResponseText" class="method returns text"} <i/> getResponseText()
+: Get Response Text
 
 ## Serial  {#Serial}
 

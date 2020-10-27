@@ -580,7 +580,9 @@ public class YaVersion {
   // - BLOCKS_LANGUAGE_VERSION was incremented to 31
   // For YOUNG_ANDROID_VERSION 235 (mit-cml/master YaVersion 206):
   // - YANDEX_COMPONENT_VERSION was incremented to 2.
-  public static final int YOUNG_ANDROID_VERSION = 206;
+  // For YOUNG_ANDROID_VERSION 236 (mit-cml/master YaVersion 207)::
+  // - LDPCOAP_CLIENT_COMPONENT_VERSION was initialized to 1
+  public static final int YOUNG_ANDROID_VERSION = 207;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -1033,6 +1035,8 @@ public class YaVersion {
   public static final int LABEL_COMPONENT_VERSION = 5;
 
   public static final int LD_COMPONENT_VERSION = 1;
+
+  public static final int LDPCOAP_CLIENT_COMPONENT_VERSION = 1;
 
   // For LINESTRING_COMPONENT_VERSION 1:
   // - Initial LineString implementation for Maps

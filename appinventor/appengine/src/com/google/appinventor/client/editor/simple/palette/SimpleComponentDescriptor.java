@@ -197,6 +197,7 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/arduino.png", images.arduino());
     bundledImages.put("images/magneticSensor.png", images.magneticSensor());
     bundledImages.put("images/reasoner.png", images.reasoner());
+    bundledImages.put("images/ldpcoapclient.png", images.ldpCoapClient());
 
     imagesInitialized = true;
   }
