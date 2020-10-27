@@ -51,6 +51,7 @@ import com.google.appinventor.client.widgets.properties.EditableProperties;
 import com.google.appinventor.client.widgets.properties.EditableProperty;
 import com.google.appinventor.client.widgets.properties.FloatPropertyEditor;
 import com.google.appinventor.client.widgets.properties.IntegerPropertyEditor;
+import com.google.appinventor.client.widgets.properties.SemanticWebPropertyEditor;
 import com.google.appinventor.client.widgets.properties.SubsetJSONPropertyEditor;
 import com.google.appinventor.client.widgets.properties.LanguageChoicePropertyEditor;
 import com.google.appinventor.client.widgets.properties.NonNegativeFloatPropertyEditor;
@@ -281,6 +282,10 @@ public class PropertiesUtil {
       String type = editorType.substring(PropertyTypeConstants.PROPERTY_TYPE_COMPONENT.length() + 2);
       type = type.substring(type.lastIndexOf('.') + 1);
       return new YoungAndroidComponentSelectorPropertyEditor(editor, Collections.singleton(type));
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI)) {
+      return new SemanticWebPropertyEditor(SemanticWebPropertyEditor.SemanticWebSearchType.CONCEPT_URI);
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_PROPERTY_URI)) {
+      return new SemanticWebPropertyEditor(SemanticWebPropertyEditor.SemanticWebSearchType.PROPERTY_URI);
     } else {
       return new TextPropertyEditor();
     }
