@@ -226,5 +226,9 @@ public final class Switch extends ToggleBase<CompoundButton> {
     return On();
   }
 
+  public void Value(String value) {
+    On(Boolean.parseBoolean(value));
+  }
+
   // END LinkedData
 }

@@ -563,6 +563,10 @@ public abstract class TextBoxBase extends AndroidViewComponent
     return Text();
   }
 
+  public void Value(String value) {
+    Text(value);
+  }
+
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
       defaultValue = "False")
   @SimpleProperty

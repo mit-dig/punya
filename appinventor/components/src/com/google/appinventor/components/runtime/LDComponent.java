@@ -51,6 +51,13 @@ public interface LDComponent {
   public Object Value();
 
   /**
+   * Sets the value of the field when restoring a form from an RDF graph.
+   *
+   * @param value the new value for the component
+   */
+  void Value(String value);
+
+  /**
    * Returns whether or not the value of this field should be used
    * to identify the subject of a Semantic Form.
    * @see LinkedDataForm

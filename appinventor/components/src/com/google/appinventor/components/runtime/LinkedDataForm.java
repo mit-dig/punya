@@ -4,6 +4,7 @@ import android.util.Log;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
+import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
@@ -236,5 +237,17 @@ public class LinkedDataForm extends HVArrangement {
   @SimpleProperty
   public String generateRandomUUID() {
   	return UUID.randomUUID().toString();
+  }
+
+  /**
+   * Populate the content of the form using information about resource identified by uri from the
+   * linked data component.
+   *
+   * @param linkedData the source of the data for the model
+   * @param uri the URI for the instance
+   */
+  @SimpleFunction
+  public void FillFromLinkedData(LinkedDataBase<?> linkedData, String uri) {
+    RdfUtil.detriplifyForm(this, uri, linkedData.getModel());
   }
 }

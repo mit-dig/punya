@@ -76,5 +76,9 @@ public final class CheckBox extends ToggleBase<android.widget.CheckBox> {
     return Checked();
   }
 
+  public void Value(String value) {
+    Checked(Boolean.parseBoolean(value));
+  }
+
   // END LinkedData
 }

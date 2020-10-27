@@ -49,7 +49,7 @@ import java.io.IOException;
  */
 
 @SimpleObject
-public class HVArrangement extends AndroidViewComponent implements Component, ComponentContainer {
+public class HVArrangement extends AndroidViewComponent implements Component, ComponentContainer<AndroidViewComponent> {
   private final Activity context;
 
   // Layout

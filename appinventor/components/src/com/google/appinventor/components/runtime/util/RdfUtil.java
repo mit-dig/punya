@@ -19,6 +19,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.Prologue;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
@@ -535,7 +536,8 @@ public final class RdfUtil {
    * with the UTF-8 charset. The method will return true if the server returns
    * a 2xx response code, otherwise it will return false and log the reason
    * for the failure to logcat.
-   * @see http://www.w3.org/TR/2013/REC-sparql11-http-rdf-update-20130321/#http-put
+   *
+   * @link http://www.w3.org/TR/2013/REC-sparql11-http-rdf-update-20130321/#http-put
    * @param uri An indirect graph URI (with a graph query parameter)
    * @param model A Jena model containing the RDF content to HTTP PUT
    * @return
@@ -1229,6 +1231,31 @@ public final class RdfUtil {
 		}
 		return success;
 	}
+
+  public static void detriplifyForm(LinkedDataForm form, String uri, Model model) {
+    form.Subject(uri);
+    detriplifyContainerOrForm(form, uri, model);
+  }
+
+  private static void detriplifyContainerOrForm(ComponentContainer<AndroidViewComponent> container, String uri, Model model) {
+    Resource subject = model.getResource(uri);
+    for (AndroidViewComponent component : container) {
+      if (component instanceof LinkedDataForm) {
+        String propertyUri = model.expandPrefix(((LDComponent) component).PropertyURI());
+        Property property = model.getProperty(propertyUri);
+        Statement statement = model.getProperty(subject, property);
+        detriplifyForm((LinkedDataForm) component, statement.getObject().asResource().getURI(), model);
+      } else if (component instanceof LDComponent) {
+        String propertyUri = model.expandPrefix(((LDComponent) component).PropertyURI());
+        Property property = model.getProperty(propertyUri);
+        Statement statement = model.getProperty(subject, property);
+        ((LDComponent) component).Value(statement.getObject().asLiteral().getString());
+      } else if (component instanceof ComponentContainer) {
+        //noinspection unchecked
+        detriplifyContainerOrForm((ComponentContainer<AndroidViewComponent>) component, uri, model);
+      }
+    }
+  }
 
   public static void defineNamespace(String prefix, String uri) {
     PrintUtil.registerPrefix(prefix, uri);

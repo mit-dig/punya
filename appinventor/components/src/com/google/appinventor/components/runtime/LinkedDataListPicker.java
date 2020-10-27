@@ -330,6 +330,10 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     return selectionUri;
   }
 
+  public void Value(String value) {
+    selectionUri = value;
+  }
+
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
       defaultValue = "False")
   @SimpleProperty
