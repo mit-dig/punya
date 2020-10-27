@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2019 MIT, All rights reserved
+// Copyright 2011-2020 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -580,9 +580,14 @@ public class YaVersion {
   // - BLOCKS_LANGUAGE_VERSION was incremented to 31
   // For YOUNG_ANDROID_VERSION 235 (mit-cml/master YaVersion 206):
   // - YANDEX_COMPONENT_VERSION was incremented to 2.
-  // For YOUNG_ANDROID_VERSION 236 (mit-cml/master YaVersion 207)::
+  // For YOUNG_ANDROID_VERSION 207:
+  // - BLOCKS_LANGUAGE_VERSION was incremented to 32
+  // For YOUNG_ANDROID_VERSION 208:
+  // - FILE_COMPONENT_VERSION was incremented to 3
+  // - BLOCKS_LANGUAGE_VERSION was incremented to 33
+  // For YOUNG_ANDROID_VERSION 236 (mit-cml/master YaVersion 208):
   // - LDPCOAP_CLIENT_COMPONENT_VERSION was initialized to 1
-  public static final int YOUNG_ANDROID_VERSION = 207;
+  public static final int YOUNG_ANDROID_VERSION = 236;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -662,14 +667,17 @@ public class YaVersion {
   // - The Reverse Text block was added
   // For BLOCKS_LANGUAGE_VERSION 31
   // - The replace-all-mappings block was added.
-
-  public static final int BLOCKS_LANGUAGE_VERSION = 31;
+  // For BLOCKS_LANGUAGE_VERSION 32
+  // - The and/or blocks gained mutators.
+  // For BLOCKS_LANGUAGE_VERSION 33
+  // - Added "contains any" and "contains all" options to the text contains block.
+  public static final int BLOCKS_LANGUAGE_VERSION = 33;
 
   // ................................. Target SDK Version Number ..................................
 
-  public static final int TARGET_SDK_VERSION = 28;
+  public static final int TARGET_SDK_VERSION = 29;
 
-  public static final String TARGET_ANDROID_VERSION = "Android 9.0 Pie";
+  public static final String TARGET_ANDROID_VERSION = "Android 10.0";
 
   // ................................. Component Version Numbers ..................................
 
@@ -890,7 +898,9 @@ public class YaVersion {
 
   // For FILE_COMPONENT_VERSION 2:
   // - The AfterFileSaved event was added.
-  public static final int FILE_COMPONENT_VERSION = 2;
+  // For FILE_COMPONENT_VERSION 3:
+  // - The LegacyMode property was added.
+  public static final int FILE_COMPONENT_VERSION = 3;
 
   // For FORM_COMPONENT_VERSION 2:
   // - The Screen.Scrollable property was added.
@@ -1547,11 +1557,11 @@ public class YaVersion {
 
   public static final String ACCEPTABLE_COMPANION_PACKAGE = "edu.mit.appinventor.punya.aicompanion3";
 
-  public static final String PREFERRED_COMPANION = "2.58punya2";
+  public static final String PREFERRED_COMPANION = "2.60punya1";
   public static final String COMPANION_UPDATE_URL = "";
   public static final String COMPANION_UPDATE_URL1 = "";
   public static final String COMPANION_UPDATE_EMULATOR_URL = "";
-  public static final String [] ACCEPTABLE_COMPANIONS = { "2.58punya2", "2.58punya2u" };
+  public static final String [] ACCEPTABLE_COMPANIONS = { "2.60punya1", "2.60punya1u" };
 
   // Splash Screen Values
   public static final int SPLASH_SURVEY = 1;

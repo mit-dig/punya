@@ -6,13 +6,13 @@
 package com.google.appinventor.components.runtime;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import com.google.android.gms.common.ConnectionResult;
@@ -30,7 +30,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -117,7 +117,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
   // private final AlignmentUtil alignmentSetter;
   private final String MAP_FRAGMENT_TAG;
   private com.google.android.gms.maps.GoogleMap mMap;
-  private SupportMapFragment mMapFragment;
+  private MapFragment mMapFragment;
   private Bundle savedInstanceState;
   private HashMap<Marker, Integer> markers = new HashMap<Marker, Integer>();
 
@@ -193,8 +193,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
     checkGoogleMapInstalled() ;
 
     // TODO: need to add code to check Form (activity) whether savedInstanceState ==null
-    mMapFragment = (SupportMapFragment) form.getSupportFragmentManager()
-        .findFragmentByTag(MAP_FRAGMENT_TAG);
+    mMapFragment = (MapFragment) form.getFragmentManager().findFragmentByTag(MAP_FRAGMENT_TAG);
 
 
     // We only create a fragment if it doesn't already exist.
@@ -203,11 +202,11 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
       Log.i(TAG, "mMapFragment is null.");
       // To programmatically add the map, we first create a SupportMapFragment.
-      mMapFragment = SupportMapFragment.newInstance();
+      mMapFragment = MapFragment.newInstance();
 
       //mMapFragment = new SomeFragment();
-      FragmentTransaction fragmentTransaction =
-          form.getSupportFragmentManager().beginTransaction();
+      android.app.FragmentTransaction fragmentTransaction =
+          form.getFragmentManager().beginTransaction();
       Log.i(TAG, "here before adding fragment");
       // try to use replace to see if we solve the issue
       fragmentTransaction.replace(viewLayout.getId(), mMapFragment, MAP_FRAGMENT_TAG);
@@ -638,7 +637,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
   private void prepareFragmentView() {
 
-    mMapFragment = SupportMapFragment.newInstance();
+    mMapFragment = MapFragment.newInstance();
 
     androidUIHandler.post(new Runnable() {
       public void run() {
@@ -651,7 +650,7 @@ OnMapLongClickListener, OnCameraChangeListener, ConnectionCallbacks, OnConnectio
 
           // Then we add it using a FragmentTransaction.
           // add fragment to the view
-          FragmentTransaction fragmentTransaction = form.getSupportFragmentManager()
+          FragmentTransaction fragmentTransaction = form.getFragmentManager()
               .beginTransaction();
 
           //fragmentTransaction.add(viewLayout.getLayoutManager().getId(),
