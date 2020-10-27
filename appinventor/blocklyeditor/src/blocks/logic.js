@@ -314,10 +314,28 @@ Blockly.Blocks['logic_uri'] = {
 
 Blockly.Blocks['logic_qname'] = {
   category: 'Logic',
+  /**
+   * @this Blockly.BlockSvg
+   */
   init: function() {
+    var workspace = this.workspace;
+    this.dropDown = new Blockly.FieldDropdown(function() {
+      var topBlocks = workspace.getTopBlocks(false);
+      var items = [];
+      for (var i = 0; i < topBlocks.length; i++) {
+        if (topBlocks[i].type === 'logic_namespace_decl') {
+          var prefix = topBlocks[i].getFieldValue('PREFIX');
+          items.push([prefix, prefix]);
+        }
+      }
+      if (items.length === 0) {
+        items.push(['', '']);
+      }
+      return items;
+    });
     this.setColour(Blockly.LOGIC_CATEGORY_HUE);
     this.setOutput(true, ['qname']);
-    this.appendDummyInput().appendField(new Blockly.FieldTextInput(''), 'PREFIX')
+    this.appendDummyInput().appendField(this.dropDown, 'PREFIX')
       .appendField(':').appendField(new Blockly.FieldTextInput(''), 'LOCALNAME');
   }
 }
