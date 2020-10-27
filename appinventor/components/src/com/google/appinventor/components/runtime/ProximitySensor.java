@@ -33,7 +33,10 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A sensor component that can measure the proximity of an object (in cm) relative to the view
@@ -59,7 +62,7 @@ import java.util.List;
 @SimpleObject
 public class ProximitySensor extends AndroidNonvisibleComponent
     implements OnStopListener, OnResumeListener, SensorComponent, OnPauseListener,
-    SensorEventListener, Deleteable {
+        SensorEventListener, Deleteable, RealTimeDataSource<String, Float> {
 
   //default settings for schedule 
   private static final int SCHEDULE_INTERVAL = 300; //read proximity sensor every 300 seconds (5 minutes)
@@ -75,6 +78,9 @@ public class ProximitySensor extends AndroidNonvisibleComponent
 
     // Indicates if the sensor should be running when screen is off (on pause)
     private boolean keepRunningWhenOnPause;
+
+    // Set of observers
+    private Set<ChartDataBase> dataSourceObservers = new HashSet<ChartDataBase>();
 
     /**
      * Creates a new ProximitySensor component.
@@ -236,6 +242,11 @@ public class ProximitySensor extends AndroidNonvisibleComponent
     @SimpleEvent(description = "Triggered when distance (in cm) of the object to the device changes. ")
     public void ProximityChanged(float distance) {
         this.distance = distance;
+
+        // Notify Data Observers of the changed distance (with null key, since
+        // the key does not matter, since only one value is returned)
+        notifyDataObservers("distance", distance);
+
         EventDispatcher.dispatchEvent(this, "ProximityChanged", this.distance);
     }
 
@@ -276,5 +287,39 @@ public class ProximitySensor extends AndroidNonvisibleComponent
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void addDataObserver(ChartDataBase dataComponent) {
+        dataSourceObservers.add(dataComponent);
+    }
+
+    @Override
+    public void removeDataObserver(ChartDataBase dataComponent) {
+        dataSourceObservers.remove(dataComponent);
+    }
+
+    @Override
+    public void notifyDataObservers(String key, Object value) {
+        // Notify each Chart Data observer component of the Data value change
+        for (ChartDataBase dataComponent : dataSourceObservers) {
+            dataComponent.onReceiveValue(this, key, value);
+        }
+    }
+
+    /**
+     * Returns a data value corresponding to the proximity.
+     * distance - distance value
+     *
+     * @param key identifier of the value
+     * @return    Value corresponding to the key, or 0 if key is undefined.
+     */
+    @Override
+    public Float getDataValue(String key) {
+        if (key.equals("distance")) {
+            return distance;
+        } else {
+            return 0f;
+        }
     }
 }
