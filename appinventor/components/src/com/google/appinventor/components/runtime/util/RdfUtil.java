@@ -1244,12 +1244,16 @@ public final class RdfUtil {
         String propertyUri = model.expandPrefix(((LDComponent) component).PropertyURI());
         Property property = model.getProperty(propertyUri);
         Statement statement = model.getProperty(subject, property);
-        detriplifyForm((LinkedDataForm) component, statement.getObject().asResource().getURI(), model);
+        if (statement != null && statement.getObject().isURIResource()) {
+          detriplifyForm((LinkedDataForm) component, statement.getObject().asResource().getURI(), model);
+        }
       } else if (component instanceof LDComponent) {
         String propertyUri = model.expandPrefix(((LDComponent) component).PropertyURI());
         Property property = model.getProperty(propertyUri);
         Statement statement = model.getProperty(subject, property);
-        ((LDComponent) component).Value(statement.getObject().asLiteral().getString());
+        if (statement != null && statement.getObject().isLiteral()) {
+          ((LDComponent) component).Value(statement.getObject().asLiteral().getString());
+        }
       } else if (component instanceof ComponentContainer) {
         //noinspection unchecked
         detriplifyContainerOrForm((ComponentContainer<AndroidViewComponent>) component, uri, model);
