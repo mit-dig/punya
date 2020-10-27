@@ -95,26 +95,42 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
         // AppEngine throws an AccessControlException that is never caught
         // and ultimately will cause this to fail. By using our own connection
         // we bypass this issue.
-        HttpURLConnection conn = (HttpURLConnection)new URL(ontologies[i]).openConnection();
-        conn.addRequestProperty("Accept", "application/rdf+xml,text/turtle,text/n3");
-        conn.setDoInput(true);
-        conn.connect();
-        String contentType = conn.getContentType();
-        if(contentType.equals("application/rdf+xml")) {
-          ontologyModel.read(conn.getInputStream(), ontologies[i]);
-        } else if(contentType.equals("text/turtle")) {
-          ontologyModel.read(conn.getInputStream(), ontologies[i], "TTL");
-        } else if(contentType.equals("text/n3")) {
-          ontologyModel.read(conn.getInputStream(), ontologies[i], "N3");
-        } else if(contentType.equals("text/plain")) {
-          // for non-compliant servers that return turtle as plain text
-          try {
-            ontologyModel.read(conn.getInputStream(), ontologies[i], "TTL");
-          } catch(Exception e) {
-            log.warn("Unexpected content type 'text/plain' returned by server.");
+        URL url = new URL(ontologies[i]);
+        int attempts = 5;
+        while (attempts-- > 0) {
+          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+          conn.setInstanceFollowRedirects(true);
+          conn.addRequestProperty("Accept", "application/rdf+xml,text/turtle,text/n3");
+          conn.setDoInput(true);
+          conn.connect();
+          int response = conn.getResponseCode();
+          log.debug("Status code = " + response);
+          if (response >= 300 && response <= 399) {
+            url = new URL(conn.getHeaderField("Location"));
+            conn.disconnect();
+            continue;
           }
-        } else {
-          log.warn("Unexpected content type '"+contentType+"' returned by server.");
+          String contentType = conn.getContentType();
+          if (contentType.contains(";")) {
+            contentType = contentType.split(";")[0];
+          }
+          if (contentType.equals("application/rdf+xml") || contentType.equals("application/xml")) {
+            ontologyModel.read(conn.getInputStream(), ontologies[i]);
+          } else if (contentType.equals("text/turtle")) {
+            ontologyModel.read(conn.getInputStream(), ontologies[i], "TTL");
+          } else if (contentType.equals("text/n3")) {
+            ontologyModel.read(conn.getInputStream(), ontologies[i], "N3");
+          } else if (contentType.equals("text/plain") || contentType.equals("application/octet-stream")) {
+            // for non-compliant servers that return turtle as plain text
+            try {
+              ontologyModel.read(conn.getInputStream(), ontologies[i], "TTL");
+            } catch (Exception e) {
+              log.warn("Unexpected content type 'text/plain' returned by server.");
+            }
+          } else {
+            log.warn("Unexpected content type '" + contentType + "' returned by server.");
+          }
+          break;
         }
       } catch(Exception e) {
         Logger.getRootLogger().warn("Unable to read ontology "+ontologies[i], e);
