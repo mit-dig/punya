@@ -25,6 +25,8 @@ import android.Manifest;
 import android.os.Environment;
 import android.util.Log;
 
+import com.google.appinventor.components.runtime.util.YailDictionary;
+import com.google.appinventor.components.runtime.util.YailList;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
@@ -59,9 +61,9 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
 
     protected String BASE_URI;
     protected CoapResponse resp = null;
-   
+    protected String containerType = "ldp:BasicContainer";
 
-    public LdpCoapClient(final ComponentContainer container) {
+    public LdpCoapClient(final ComponentContainer<? extends Component> container) {
         super(container.$form());
     }
     
@@ -374,5 +376,28 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
     @SimpleProperty(description = "application/msgpack code")
     public int ApplicationMsgpack() {
         return MediaTypeRegistry.APPLICATION_MSGPACK;
+    }
+
+    @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CONCEPT_URI,
+            defaultValue = "ldp:BasicContainer")
+    @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+    public void ContainerType(String type) {
+        this.containerType = type;
+    }
+
+    @SimpleProperty
+    public String ContainerType() {
+        return containerType;
+    }
+
+    @Deprecated   // remove when ready for production
+    @SimpleFunction
+    public void RegisterSensor(ObservableDataSource<?, ?> sensor, String name, YailDictionary fields) {
+        Post(
+            name,
+            MediaTypeRegistry.TEXT_TURTLE,
+            "...",  // TODO(Floriano): Can you provide the Turtle template here?
+            name + "-" + sensor.getClass().getSimpleName() + "&rt=" + containerType
+        );
     }
 }
