@@ -57,7 +57,6 @@ import java.util.Map;
     SOCIAL("Social"),
     STORAGE("Storage"),
     CONNECTIVITY("Connectivity"),
-    MAPVIZ("Map & Visualization"),
     CLOUDSTORAGE("Cloud Storage"),
     LINKEDDATA("Linked Data"),
     LEGOMINDSTORMS("LEGO\u00AE MINDSTORMS\u00AE"),

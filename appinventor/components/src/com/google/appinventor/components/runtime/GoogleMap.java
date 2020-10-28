@@ -86,7 +86,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @DesignerComponent(version = YaVersion.GOOGLE_MAP_COMPONENT_VERSION,
     description = "Visible component that show information on Google map.",
-    category = ComponentCategory.MAPVIZ,
+    category = ComponentCategory.INTERNAL,
     androidMinSdk = 14)
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.WRITE_EXTERNAL_STORAGE, "

@@ -49,7 +49,7 @@ import android.webkit.WebViewClient;
                   " 1) SparQL Queries to linked data endpoints, 2) Google Spreadsheets," +
                   " and 3) JSON data. This is all done using Javascript visualization libraries" +
                   " on the WebViewer component.",
-    category = ComponentCategory.MAPVIZ,
+    category = ComponentCategory.INTERNAL,
     iconName = "images/graph.png")
 @SimpleObject
 @UsesPermissions(permissionNames = "android.permission.ACCESS_COARSE_LOCATION, "
