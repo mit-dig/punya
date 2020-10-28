@@ -267,111 +267,111 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
         }
         resp = client.putIfMatch(data, type, parseHexBinary(etag));
     }
-    @SimpleFunction(description = "text/plain code")
+    @SimpleProperty(description = "text/plain code")
     public int TextPlain() {
         return MediaTypeRegistry.TEXT_PLAIN;
     }
-    @SimpleFunction(description = "text/csv code")
+    @SimpleProperty(description = "text/csv code")
     public int TextCsv() {
         return MediaTypeRegistry.TEXT_CSV;
     }
-    @SimpleFunction(description = "text/html code")
+    @SimpleProperty(description = "text/html code")
     public int TextHtml() {
         return MediaTypeRegistry.TEXT_HTML;
     }
-    @SimpleFunction(description = "image/gif code")
+    @SimpleProperty(description = "image/gif code")
     public int ImageGif() {
         return MediaTypeRegistry.IMAGE_GIF;
     }
-    @SimpleFunction(description = "image/jpeg code")
+    @SimpleProperty(description = "image/jpeg code")
     public int ImageJpeg() {
         return MediaTypeRegistry.IMAGE_JPEG;
     }
-    @SimpleFunction(description = "image/png code")
+    @SimpleProperty(description = "image/png code")
     public int ImagePng() {
         return MediaTypeRegistry.IMAGE_PNG;
     }
-    @SimpleFunction(description = "image/tiff code")
+    @SimpleProperty(description = "image/tiff code")
     public int ImageTiff() {
         return MediaTypeRegistry.IMAGE_TIFF;
     }
-    @SimpleFunction(description = "application/link-format code")
+    @SimpleProperty(description = "application/link-format code")
     public int ApplicationLinkFormat() {
         return MediaTypeRegistry.APPLICATION_LINK_FORMAT;
     }
-    @SimpleFunction(description = "application/xml code")
+    @SimpleProperty(description = "application/xml code")
     public int ApplicationXml() {
         return MediaTypeRegistry.APPLICATION_XML;
     }
-    @SimpleFunction(description = "application/octet-stream code")
+    @SimpleProperty(description = "application/octet-stream code")
     public int ApplicationOctetStream() {
         return MediaTypeRegistry.APPLICATION_OCTET_STREAM;
     }
-    @SimpleFunction(description = "application/rdf+xml code")
+    @SimpleProperty(description = "application/rdf+xml code")
     public int ApplicationRdfXml() {
         return MediaTypeRegistry.APPLICATION_RDF_XML;
     }
-    @SimpleFunction(description = "application/soap+xml code")
+    @SimpleProperty(description = "application/soap+xml code")
     public int ApplicationSoapXml() {
         return MediaTypeRegistry.APPLICATION_SOAP_XML;
     }
-    @SimpleFunction(description = "application/atom+xml code")
+    @SimpleProperty(description = "application/atom+xml code")
     public int ApplicationAtomXml() {
         return MediaTypeRegistry.APPLICATION_ATOM_XML;
     }
-    @SimpleFunction(description = "application/xmpp+xml code")
+    @SimpleProperty(description = "application/xmpp+xml code")
     public int ApplicationXmppXml() {
         return MediaTypeRegistry.APPLICATION_XMPP_XML;
     }
-    @SimpleFunction(description = "application/exi code")
+    @SimpleProperty(description = "application/exi code")
     public int ApplicationExi() {
         return MediaTypeRegistry.APPLICATION_EXI;
     }
-    @SimpleFunction(description = "application/fastinfoset code")
+    @SimpleProperty(description = "application/fastinfoset code")
     public int ApplicationFastinfoset() {
         return MediaTypeRegistry.APPLICATION_FASTINFOSET;
     }
-    @SimpleFunction(description = "application/soap+fastinfoset code")
+    @SimpleProperty(description = "application/soap+fastinfoset code")
     public int ApplicationSoapFastinfoset() {
         return MediaTypeRegistry.APPLICATION_SOAP_FASTINFOSET;
     }
-    @SimpleFunction(description = "application/json code")
+    @SimpleProperty(description = "application/json code")
     public int ApplicationJson() {
         return MediaTypeRegistry.APPLICATION_JSON;
     }
-    @SimpleFunction(description = "application/x-obix-binary code")
+    @SimpleProperty(description = "application/x-obix-binary code")
     public int ApplicationXobixBinary() {
         return MediaTypeRegistry.APPLICATION_X_OBIX_BINARY;
     }
-    @SimpleFunction(description = "text/turtle code")
+    @SimpleProperty(description = "text/turtle code")
     public int TextTurtle() {
         return MediaTypeRegistry.TEXT_TURTLE;
     }
-    @SimpleFunction(description = "application/ld+json code")
+    @SimpleProperty(description = "application/ld+json code")
     public int ApplicationLdJson() {
         return MediaTypeRegistry.APPLICATION_LD_JSON;
     }
-    @SimpleFunction(description = "application/rdf-patch code")
+    @SimpleProperty(description = "application/rdf-patch code")
     public int ApplicationRdfPatch() {
         return MediaTypeRegistry.APPLICATION_RDF_PATCH;
     }
-    @SimpleFunction(description = "application/gzip code")
+    @SimpleProperty(description = "application/gzip code")
     public int ApplicationGzip() {
         return MediaTypeRegistry.APPLICATION_GZIP;
     }
-    @SimpleFunction(description = "application/bz2 code")
+    @SimpleProperty(description = "application/bz2 code")
     public int ApplicationBzip2() {
         return MediaTypeRegistry.APPLICATION_BZIP2;
     }
-    @SimpleFunction(description = "application/bson code")
+    @SimpleProperty(description = "application/bson code")
     public int ApplicationBson() {
         return MediaTypeRegistry.APPLICATION_BSON;
     }
-    @SimpleFunction(description = "application/ubjson code")
+    @SimpleProperty(description = "application/ubjson code")
     public int ApplicationUbjson() {
         return MediaTypeRegistry.APPLICATION_UBJSON;
     }
-    @SimpleFunction(description = "application/msgpack code")
+    @SimpleProperty(description = "application/msgpack code")
     public int ApplicationMsgpack() {
         return MediaTypeRegistry.APPLICATION_MSGPACK;
     }
