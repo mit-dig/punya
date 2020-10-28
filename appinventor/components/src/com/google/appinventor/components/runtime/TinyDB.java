@@ -27,6 +27,7 @@ import java.util.Map;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Set;
 import org.json.JSONException;
 
 /**
@@ -90,7 +91,8 @@ public class TinyDB extends AndroidNonvisibleComponent implements Component, Del
   private Context context;  // this was a local in constructor and final not private
 
   // Set of observers
-  private HashSet<ChartDataBase> dataSourceObservers = new HashSet<ChartDataBase>();
+  private final Set<DataSink<ObservableDataSource<String, List>>> dataSourceObservers
+      = new HashSet<>();
 
   // SharedPreferences listener used to notify observers
   private final SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -260,12 +262,12 @@ public class TinyDB extends AndroidNonvisibleComponent implements Component, Del
   }
 
   @Override
-  public void addDataObserver(ChartDataBase dataComponent) {
+  public void addDataObserver(DataSink<ObservableDataSource<String, List>> dataComponent) {
     dataSourceObservers.add(dataComponent);
   }
 
   @Override
-  public void removeDataObserver(ChartDataBase dataComponent) {
+  public void removeDataObserver(DataSink<ObservableDataSource<String, List>> dataComponent) {
     dataSourceObservers.remove(dataComponent);
   }
 
@@ -274,7 +276,7 @@ public class TinyDB extends AndroidNonvisibleComponent implements Component, Del
     Log.i("Tag", "Notified: " + dataSourceObservers.size() + " observers.");
 
     // Notify each Chart Data observer component of the Data value change
-    for (ChartDataBase dataComponent : dataSourceObservers) {
+    for (DataSink<ObservableDataSource<String, List>> dataComponent : dataSourceObservers) {
       dataComponent.onDataSourceValueChange(this, key, newValue);
     }
   }

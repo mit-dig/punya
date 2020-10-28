@@ -17,7 +17,7 @@ import com.google.appinventor.components.annotations.SimpleObject;
  * @param <V> value (returned data type)
  */
 @SimpleObject
-public interface DataSource<K, V> {
+public interface DataSource<K, V> extends Component {
   /**
    * Gets the specified data value
    *

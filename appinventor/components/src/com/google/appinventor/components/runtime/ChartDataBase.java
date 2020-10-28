@@ -34,8 +34,7 @@ import java.util.concurrent.Future;
  * base class was created with future extensions (e.g. 3D data) in mind.
  */
 @SimpleObject
-public abstract class ChartDataBase implements Component, DataSourceChangeListener,
-    DataSourceGetValueListener {
+public abstract class ChartDataBase implements Component, DataSink<ObservableDataSource<?, ?>> {
   protected Chart container;
   protected ChartDataModel chartDataModel;
 
@@ -746,7 +745,7 @@ public abstract class ChartDataBase implements Component, DataSourceChangeListen
   @SimpleFunction()
   public void ImportFromCloudDB(final CloudDB cloudDB, final String tag) {
     // Get the Future YailList object from the CloudDB data
-    final Future<List> list = cloudDB.getDataValue(tag);
+    final Future<List<?>> list = cloudDB.getDataValue(tag);
 
     // Import data asynchronously
     threadRunner.execute(new Runnable() {
@@ -910,7 +909,7 @@ public abstract class ChartDataBase implements Component, DataSourceChangeListen
    * @param newValue  the new value of the observed value
    */
   @Override
-  public void onDataSourceValueChange(final DataSource component, final String key, final Object newValue) {
+  public void onDataSourceValueChange(final ObservableDataSource<?, ?> component, final String key, final Object newValue) {
     if (component != dataSource // Calling component is not the attached Data Source. TODO: Un-observe?
         || (!isKeyValid(key))) { // The changed value is not the observed value
       return;
@@ -940,7 +939,7 @@ public abstract class ChartDataBase implements Component, DataSourceChangeListen
   }
 
   @Override
-  public void onReceiveValue(RealTimeDataSource component, final String key, Object value) {
+  public void onReceiveValue(ObservableDataSource<?, ?> component, final String key, Object value) {
     // Calling component is not the actual Data Source
     if (component != dataSource) {
       return;

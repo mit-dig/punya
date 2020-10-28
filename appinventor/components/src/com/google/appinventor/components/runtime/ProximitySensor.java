@@ -80,7 +80,8 @@ public class ProximitySensor extends AndroidNonvisibleComponent
     private boolean keepRunningWhenOnPause;
 
     // Set of observers
-    private Set<ChartDataBase> dataSourceObservers = new HashSet<ChartDataBase>();
+    private final Set<DataSink<ObservableDataSource<String, Float>>> dataSourceObservers
+        = new HashSet<>();
 
     /**
      * Creates a new ProximitySensor component.
@@ -290,19 +291,19 @@ public class ProximitySensor extends AndroidNonvisibleComponent
     }
 
     @Override
-    public void addDataObserver(ChartDataBase dataComponent) {
+    public void addDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
         dataSourceObservers.add(dataComponent);
     }
 
     @Override
-    public void removeDataObserver(ChartDataBase dataComponent) {
+    public void removeDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
         dataSourceObservers.remove(dataComponent);
     }
 
     @Override
     public void notifyDataObservers(String key, Object value) {
         // Notify each Chart Data observer component of the Data value change
-        for (ChartDataBase dataComponent : dataSourceObservers) {
+        for (DataSink<ObservableDataSource<String, Float>> dataComponent : dataSourceObservers) {
             dataComponent.onReceiveValue(this, key, value);
         }
     }

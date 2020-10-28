@@ -8,7 +8,7 @@ package com.google.appinventor.components.runtime;
 /**
  * Interface for receiving real time data from a Data Source.
  */
-public interface DataSourceGetValueListener {
+public interface DataSink<S extends DataSource<?, ?>> {
   /**
    * Event called when a new real time value is sent to the observer.
    *
@@ -16,5 +16,14 @@ public interface DataSourceGetValueListener {
    * @param key  identifier of the value
    * @param value  value received
    */
-  void onReceiveValue(RealTimeDataSource component, String key, Object value);
+  void onReceiveValue(S component, String key, Object value);
+
+  /**
+   * Event called when the value of the observed DataSource component changes.
+   *
+   * @param component component that triggered the event
+   * @param key       key of the value that changed
+   * @param newValue  the new value of the observed value
+   */
+  void onDataSourceValueChange(S component, String key, Object newValue);
 }

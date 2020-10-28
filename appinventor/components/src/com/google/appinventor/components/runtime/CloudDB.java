@@ -111,7 +111,7 @@ import redis.clients.jedis.exceptions.JedisNoScriptException;
   "android.permission.WRITE_EXTERNAL_STORAGE")
 @UsesLibraries(libraries = "jedis.jar")
 public final class CloudDB extends AndroidNonvisibleComponent implements Component,
-  OnClearListener, OnDestroyListener, ObservableDataSource<String, Future<List>> {
+    OnClearListener, OnDestroyListener, ObservableDataSource<String, Future<List<?>>> {
   private static final boolean DEBUG = false;
   private static final String LOG_TAG = "CloudDB";
   private boolean importProject = false;
@@ -254,7 +254,8 @@ public final class CloudDB extends AndroidNonvisibleComponent implements Compone
   private boolean havePermission = false;
 
   // Set of observers
-  private HashSet<ChartDataBase> dataSourceObservers = new HashSet<ChartDataBase>();
+  private final HashSet<DataSink<ObservableDataSource<String, Future<List<?>>>>> dataSourceObservers
+      = new HashSet<>();
 
   private static class storedValue {
     private String tag;
@@ -1440,8 +1441,8 @@ public final class CloudDB extends AndroidNonvisibleComponent implements Compone
    * @return  Future object holding the value as a List object, or empty List if not applicable
    */
   @Override
-  public Future<List> getDataValue(final String key) {
-    return background.submit(new Callable<List>() {
+  public Future<List<?>> getDataValue(final String key) {
+    return background.submit(new Callable<List<?>>() {
       @Override
       public List call() {
         // Get the value identified by the tag (key) or an empty
@@ -1466,19 +1467,19 @@ public final class CloudDB extends AndroidNonvisibleComponent implements Compone
   }
 
   @Override
-  public void addDataObserver(ChartDataBase dataComponent) {
+  public void addDataObserver(DataSink<ObservableDataSource<String, Future<List<?>>>> dataComponent) {
     dataSourceObservers.add(dataComponent);
   }
 
   @Override
-  public void removeDataObserver(ChartDataBase dataComponent) {
+  public void removeDataObserver(DataSink<ObservableDataSource<String, Future<List<?>>>> dataComponent) {
     dataSourceObservers.remove(dataComponent);
   }
 
   @Override
   public void notifyDataObservers(String key, Object newValue) {
     // Notify each Chart Data observer component of the Data value change
-    for (ChartDataBase dataComponent : dataSourceObservers) {
+    for (DataSink<ObservableDataSource<String, Future<List<?>>>> dataComponent : dataSourceObservers) {
       dataComponent.onDataSourceValueChange(this, key, newValue);
     }
   }

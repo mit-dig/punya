@@ -77,6 +77,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -238,7 +239,8 @@ public class Web extends AndroidNonvisibleComponent implements Component, Observ
   private YailList columns = new YailList();
 
   // Set of observers
-  private HashSet<ChartDataBase> dataSourceObservers = new HashSet<ChartDataBase>();
+  private final Set<DataSink<ObservableDataSource<YailList, Future<YailList>>>> dataSourceObservers
+      = new HashSet<>();
 
   /**
    * Creates a new Web component.
@@ -1597,18 +1599,18 @@ public class Web extends AndroidNonvisibleComponent implements Component, Observ
   }
 
   @Override
-  public void addDataObserver(ChartDataBase dataComponent) {
+  public void addDataObserver(DataSink<ObservableDataSource<YailList, Future<YailList>>> dataComponent) {
     dataSourceObservers.add(dataComponent);
   }
 
   @Override
-  public void removeDataObserver(ChartDataBase dataComponent) {
+  public void removeDataObserver(DataSink<ObservableDataSource<YailList, Future<YailList>>> dataComponent) {
     dataSourceObservers.remove(dataComponent);
   }
 
   @Override
   public void notifyDataObservers(YailList key, Object newValue) {
-    for (ChartDataBase dataComponent : dataSourceObservers) {
+    for (DataSink<ObservableDataSource<YailList, Future<YailList>>> dataComponent : dataSourceObservers) {
       // Notify Data Component observer with the new columns value (and null key,
       // since key does not matter in the case of the Web component)
       dataComponent.onDataSourceValueChange(this, null, columns);
