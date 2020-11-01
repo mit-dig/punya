@@ -25,13 +25,13 @@ import android.Manifest;
 import android.os.Environment;
 import android.util.Log;
 
-import com.google.appinventor.components.runtime.util.YailDictionary;
-import com.google.appinventor.components.runtime.util.YailList;
+//import com.google.appinventor.components.runtime.util.YailDictionary;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import com.google.appinventor.components.annotations.UsesLibraries;
 
@@ -67,12 +67,31 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
         super(container.$form());
     }
     
-    public byte[] parseHexBinary(String s) {
-    final int len = s.length();
+
+    protected byte[] computeETag(final String s) {		
+	String h = Integer.toHexString(s.hashCode());
+	if (h.length() < 5) {
+	    try {
+		return String.format("W/\"%s\"", h).getBytes("UTF-8");
+	    } catch (UnsupportedEncodingException e) {
+		return String.format("W/\"%s\"", h).getBytes();
+	    }
+	}
+	try {
+	    return  String.format("W/\"%s\"", h.substring(0, 4)).getBytes("UTF-8");
+	} catch (UnsupportedEncodingException e) {
+	    return String.format("W/\"%s\"", h).getBytes();
+	}
+    }
+
+    /*public byte[] parseHexBinary(String s) {
+    int len = s.length();
 
     // "111" is not a valid hex encoding.
-    if( len%2 != 0 )
-        throw new IllegalArgumentException("hexBinary needs to be even-length: "+s);
+    if( len%2 != 0 ) {
+      s = s + '0';
+      len += 1;
+    }
 
     byte[] out = new byte[len/2];
 
@@ -86,12 +105,13 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
     }
     return out;
     }
+
     private static int hexToBin( char ch ) {
     if( '0'<=ch && ch<='9' )    return ch-'0';
     if( 'A'<=ch && ch<='F' )    return ch-'A'+10;
     if( 'a'<=ch && ch<='f' )    return ch-'a'+10;
-    return -1;
-    }
+    return 0;
+    }*/
 
     @SimpleProperty(description = "Set BASE URI", category = PropertyCategory.BEHAVIOR)
     public void BASE_URI(String URI) {
@@ -137,22 +157,45 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
         resp = client.get(type);
     }
 
-    @SimpleFunction(description = "LDP Resource Discovery in text/turtle")
-    public void DiscoveryResourcesTextTurtle() {
+    @SimpleFunction(description = "Discover resources in text/turtle format")
+    public void DiscoverResourcesTextTurtle() {
         CoapClient client;
         client = new CoapClient(BASE_URI + "/.well-known/core");
         resp = client.get(MediaTypeRegistry.TEXT_TURTLE);
     }
-    @SimpleFunction(description = "LDP Resource Discovery in text/plain")
-    public void DiscoveryResourcesTextPlain() {
+
+    @SimpleFunction(description = "Discover resources in text/plain format")
+    public void DiscoverResourcesTextPlain() {
         CoapClient client;
         client = new CoapClient(BASE_URI + "/.well-known/core");
         resp = client.get(MediaTypeRegistry.TEXT_PLAIN);
     }
-    @SimpleFunction(description = "LDP Resource Discovery in application/rdf-patch")
-    public void DiscoveryResourcesRdfPatch() {
+
+    @SimpleFunction(description = "LDiscover resources in application/rdf-patch format")
+    public void DiscoverResourcesRdfPatch() {
         CoapClient client;
         client = new CoapClient(BASE_URI + "/.well-known/core");
+        resp = client.get(MediaTypeRegistry.APPLICATION_RDF_PATCH);
+    }
+
+    @SimpleFunction(description = "Discover resources of a specific type in text/turtle format")
+    public void DiscoverTypeResourcesTextTurtle(String type) {
+        CoapClient client;
+        client = new CoapClient(BASE_URI + "/.well-known/core?rt=" + type);
+        resp = client.get(MediaTypeRegistry.TEXT_TURTLE);
+    }
+
+    @SimpleFunction(description = "Discover resources of a specific type in text/plain format")
+    public void DiscoverTypeResourcesTextPlain(String type) {
+        CoapClient client;
+        client = new CoapClient(BASE_URI + "/.well-known/core?rt=" + type);
+        resp = client.get(MediaTypeRegistry.TEXT_PLAIN);
+    }
+
+    @SimpleFunction(description = "Discover resources of a specific type in application/rdf-patch format")
+    public void DiscoverTypeResourcesRdfPatch(String type) {
+        CoapClient client;
+        client = new CoapClient(BASE_URI + "/.well-known/core?rt=" + type);
         resp = client.get(MediaTypeRegistry.APPLICATION_RDF_PATCH);
     }
 
@@ -226,21 +269,26 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
         return "";
     }
 
+
     @SimpleFunction(description = "PUT Request")
     public void Put(String resource, int type, String data) {
         CoapClient client;
         client = new CoapClient(BASE_URI + "/" + resource);
-        resp = client.get();
-        if(CoAP.ResponseCode.isSuccess(resp.getCode())) {
-            byte[] etag = parseHexBinary(resp.getOptions().toString().substring(10, 26));
-            resp = client.putIfMatch(data, type, etag);
+        resp = client.get(type);
+        if(resp!=null && CoAP.ResponseCode.isSuccess(resp.getCode())) {
+            byte[] etag = computeETag(resp.getOptions().toString().substring(10, 26));
+            resp = client.putIfMatch(data.getBytes(), type, etag);
+        } else {
+	    resp = client.put(data.getBytes(), type);
         }
     }
+
+
     @SimpleFunction(description = "PUT Request")
     public void PutEtagInput(String resource, int type, String data, String etag) {
         CoapClient client;
         client = new CoapClient(BASE_URI + "/" + resource);
-        resp = client.putIfMatch(data, type, parseHexBinary(etag));
+        resp = client.putIfMatch(data, type, computeETag(etag));
     }
     @SimpleFunction(description = "PATCH Request")
     public void Patch(String resource, int type, String data) {
@@ -254,7 +302,7 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
             client = new CoapClient(BASE_URI + "/" + resource + "?ldp=patch");
         }
         if(CoAP.ResponseCode.isSuccess(resp.getCode())) {
-            byte[] etag = parseHexBinary(resp.getOptions().toString().substring(10, 26));
+            byte[] etag = computeETag(resp.getOptions().toString().substring(10, 26));
             resp = client.putIfMatch(data, type, etag);
         }
     }
@@ -267,7 +315,7 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
         else {
             client = new CoapClient(BASE_URI + "/" + resource + "?ldp=patch");
         }
-        resp = client.putIfMatch(data, type, parseHexBinary(etag));
+        resp = client.putIfMatch(data, type, computeETag(etag));
     }
     @SimpleProperty(description = "text/plain code")
     public int TextPlain() {
@@ -390,14 +438,18 @@ public final class LdpCoapClient extends AndroidNonvisibleComponent
         return containerType;
     }
 
-    @Deprecated   // remove when ready for production
+    /*@Deprecated   // remove when ready for production
     @SimpleFunction
     public void RegisterSensor(ObservableDataSource<?, ?> sensor, String name, YailDictionary fields) {
         Post(
             name,
             MediaTypeRegistry.TEXT_TURTLE,
-            "...",  // TODO(Floriano): Can you provide the Turtle template here?
+            "@prefix ldp: <http://www.w3.org/ns/ldp#> . " + 
+	    "@prefix dc: <http://purl.org/dc/terms/> . " + 
+	    "@prefix m3m: <http://sensormeasurement.appspot.com/m3#> ." + 
+	    "<" + name + "/pedometer> a ldp:Container, ldp:BasicContainer, m3m:Pedometer ;" +
+	    "dc:title \"" + name + " pedometer\" .",
             name + "-" + sensor.getClass().getSimpleName() + "&rt=" + containerType
         );
-    }
+    }*/
 }
