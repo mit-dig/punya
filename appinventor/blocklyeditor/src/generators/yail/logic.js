@@ -133,15 +133,24 @@ Blockly.Yail['logic_binding'] = function() {
 }
 
 /**
- * Converts a QName to an expansion based on registered namespaces.
+ * Converts a QName to an expansion.
  *
  * @this Blockly.BlockSvg
  * @returns {string}
  */
 Blockly.Yail['logic_qname'] = function() {
-  var code = '(expand-qname ';
-  code += Blockly.Yail.quote_(this.getFieldValue('PREFIX') + ':' + this.getFieldValue('LOCALNAME'));
-  code += ')';
+  var code = Blockly.Yail.quote_(this.getFieldValue('NAMESPACE') + this.getFieldValue('LOCALNAME'));
+  return [code, Blockly.Yail.ORDER_ATOMIC];
+}
+
+/**
+ * Converts a QName to an expansion.
+ *
+ * @this Blockly.BlockSvg
+ * @returns {string}
+ */
+Blockly.Yail['logic_qname_select'] = function() {
+  var code = Blockly.Yail.quote_(this.getFieldValue('URI'));
   return [code, Blockly.Yail.ORDER_ATOMIC];
 }
 
@@ -170,6 +179,30 @@ Blockly.Yail['logic_sparql_select'] = function() {
     code = Blockly.Yail.quote_(query);
   }
   return [ code, Blockly.Yail.ORDER_ATOMIC ];
+}
+
+// based on
+// Blockly.Yail['text_join']
+Blockly.Yail['logic_sparql_uri'] = function() {
+  var code = Blockly.Yail.YAIL_CALL_YAIL_PRIMITIVE + "string-append"
+        + Blockly.Yail.YAIL_SPACER + Blockly.Yail.YAIL_OPEN_COMBINATION
+        + Blockly.Yail.YAIL_LIST_CONSTRUCTOR + Blockly.Yail.YAIL_SPACER;
+
+  code += '"<"' + Blockly.Yail.YAIL_SPACER;
+  code += Blockly.Yail.valueToCode(this, 'URI', Blockly.Yail.ORDER_NONE) + Blockly.Yail.YAIL_SPACER;
+  code += '">"';
+
+  code += Blockly.Yail.YAIL_CLOSE_COMBINATION;
+  code += Blockly.Yail.YAIL_SPACER + Blockly.Yail.YAIL_QUOTE
+      + Blockly.Yail.YAIL_OPEN_COMBINATION;
+  for(var i=0;i<3;i++) {
+    code += "text" + Blockly.Yail.YAIL_SPACER;
+  }
+  code += Blockly.Yail.YAIL_CLOSE_COMBINATION + Blockly.Yail.YAIL_SPACER;
+  code += Blockly.Yail.YAIL_DOUBLE_QUOTE + "as uri" +
+    Blockly.Yail.YAIL_DOUBLE_QUOTE + Blockly.Yail.YAIL_CLOSE_COMBINATION;
+
+  return [code, Blockly.Yail.ORDER_ATOMIC];
 }
 
 /// endregion

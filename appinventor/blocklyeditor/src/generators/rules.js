@@ -109,9 +109,19 @@ Blockly.Rules['logic_uri'] = function() {
  * @this {Blockly.Block}
  */
 Blockly.Rules['logic_qname'] = function() {
-  var prefix = this.getFieldValue('PREFIX');
+  var ns = this.getFieldValue('NAMESPACE');
   var local = this.getFieldValue('LOCALNAME');
-  return [prefix + ':' + local, Blockly.Rules.ORDER_ATOMIC];
+  return ['<' + ns + local + '>', Blockly.Rules.ORDER_ATOMIC];
+}
+
+/**
+ *
+ * @returns {Array}
+ * @this {Blockly.Block}
+ */
+Blockly.Rules['logic_qname_select'] = function() {
+  var uri = this.getFieldValue('URI');
+  return ['<' + uri + '>', Blockly.Rules.ORDER_ATOMIC];
 }
 
 /**

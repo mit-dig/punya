@@ -74,7 +74,7 @@ import javax.net.ssl.TrustManagerFactory;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 
 public final class RdfUtil {
-  public static final String LOG_TAG = RdfUtil.class.getSimpleName();
+  public static final String LOG_TAG = "RdfUtil";
 
   public static final Map<String, String> PREFIXES = new HashMap<>();
 
@@ -283,6 +283,7 @@ public final class RdfUtil {
       return null;
     }
     Log.d(LOG_TAG, "Executing SPARQL select query");
+    Log.d(LOG_TAG, query.toString());
     return qe.execSelect();
   }
 

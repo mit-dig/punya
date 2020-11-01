@@ -532,6 +532,26 @@ Blockly.Blocks['logic_uri'] = {
   }
 }
 
+function getDeclaredNamespaces(workspace) {
+    var topBlocks = workspace.getTopBlocks(false);
+    var items = [];
+    for (var i = 0; i < topBlocks.length; i++) {
+        if (topBlocks[i].type === 'logic_namespace_decl') {
+            var block = topBlocks[i];
+            if (block.childBlocks_.length > 0) {
+              var prefix = block.getFieldValue('PREFIX');
+              var uriBlock = block.childBlocks_[0];
+              var uri = uriBlock.getFieldValue('URI');
+              items.push([prefix, uri]);
+            }
+        }
+    }
+    if (items.length === 0) {
+        items.push(['', '']);
+    }
+    return items;
+}
+
 Blockly.Blocks['logic_qname'] = {
   category: 'Logic',
   /**
@@ -539,24 +559,180 @@ Blockly.Blocks['logic_qname'] = {
    */
   init: function() {
     var workspace = this.workspace;
-    this.dropDown = new Blockly.FieldDropdown(function() {
-      var topBlocks = workspace.getTopBlocks(false);
-      var items = [];
-      for (var i = 0; i < topBlocks.length; i++) {
-        if (topBlocks[i].type === 'logic_namespace_decl') {
-          var prefix = topBlocks[i].getFieldValue('PREFIX');
-          items.push([prefix, prefix]);
-        }
-      }
-      if (items.length === 0) {
-        items.push(['', '']);
-      }
-      return items;
+    var dropDown = new Blockly.FieldDropdown(function() {
+        return getDeclaredNamespaces(workspace);
     });
     this.setColour(Blockly.LOGIC_CATEGORY_HUE);
     this.setOutput(true, ['qname']);
-    this.appendDummyInput().appendField(this.dropDown, 'PREFIX')
+    this.appendDummyInput().appendField(dropDown, 'NAMESPACE')
       .appendField(':').appendField(new Blockly.FieldTextInput(''), 'LOCALNAME');
+  }
+}
+
+var NonRepeatingAlert = {
+  last: -1,
+
+  alert: function(msg) {
+    var now = new Date().getTime();
+    if (this.last == -1 || (now - this.last) >= 2500) {
+      this.last = now;
+      alert(msg);
+    }
+  }
+}
+
+var SwTerms = {
+	map: {},
+
+	getTerms: function(uri, onLoadStart, onLoadComplete) {
+		if (this.map[uri]) {
+			onLoadComplete(this.map[uri]);
+			return;
+		} else
+		  onLoadStart();
+
+		var query =
+			"PREFIX owl: <http://www.w3.org/2002/07/owl#> "+
+			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+			"SELECT ?uri WHERE { " +
+			"{ ?uri a owl:Class } UNION " +
+			"{ ?uri a rdfs:Class } UNION " +
+			"{ ?uri a owl:ObjectProperty } UNION " +
+			"{ ?uri a owl:DatatypeProperty } UNION " +
+			"{ ?uri a rdf:Property  } UNION " +
+			"{ ?uri a owl:NamedIndividual }" +
+			"FILTER (STRSTARTS(str(?uri), '" + uri + "')) " +
+			"} ORDER BY ?uri";
+		// console.log(query);
+
+    var endpoint = "http://ppr.cs.dal.ca:3010/terms/query";
+		var url = endpoint + "?query=" + encodeURIComponent(query);
+		console.log("calling: " + url);
+
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+		  if (this.readyState == 4) {
+        if (this.status == 200) {
+          var results = JSON.parse(this.responseText);
+          var terms = SwTerms.collectTerms(uri, results);
+          SwTerms.map[uri] = terms;
+
+          // if retrieval is very quick, just to show there's some loading going on..
+          // ideally onLoadStart() would only be called if retrieval is being slow
+          setTimeout(function() {
+            onLoadComplete(terms);
+          }, 100);
+        } else {
+          NonRepeatingAlert.alert("Cannot reach SPARQL endpoint: " + endpoint + ". " +
+            "Dropdowns for qualified-names will not display properly.");
+          console.log("SwTerms: not-ok xhttp response:", this.status);
+        }
+      }
+		};
+		xhttp.onerror = function () {
+      console.log("SwTerms: error occurred in xhttp");
+    };
+		xhttp.open("GET", url, true);
+		xhttp.send();
+	},
+
+	collectTerms: function(namespace, results) {
+		var bindings = results.results.bindings;
+		if (bindings.length == 0) {
+			console.log("no results found");
+			return [[ '', '' ]];
+		} else
+			console.log(bindings.length + " results found");
+
+		var array = [];
+		for (var i = 0; i < bindings.length; i++) {
+			var binding = bindings[i];
+			var uri = binding.uri.value;
+			var name = uri.substring(namespace.length);
+			if (name)
+				array.push([ name, uri ]);
+		}
+		return array;
+	}
+};
+
+// inspired by
+// https://stackoverflow.com/questions/51667300/how-to-hide-remove-field-in-blockly
+
+Blockly.Blocks['logic_qname_select'] = {
+  category: 'Logic',
+  curNs: "",
+
+  /**
+  * @this Blockly.BlockSvg
+  */
+  init: function() {
+    this.setInputsInline(true);
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setOutput(true, ['qname']);
+
+    var self = this;
+    var dropdown = new Blockly.FieldDropdown(function() {
+      // need to re-load these each time the dropdown is accessed
+      return getDeclaredNamespaces(self.workspace);
+    }, function(newNs) {
+      // each time prefix selection changes
+      self.onNsChange.call(self, newNs, false);
+    });
+
+    this.appendDummyInput()
+      .appendField(dropdown, 'NAMESPACE')
+      .appendField(':');
+
+    this.appendDummyInput('LOCALNAME')
+      .appendField(new Blockly.FieldDropdown([[ '', '' ]]), 'URI');
+  },
+
+  onNsChange: function(newNs, callback) {
+    if (newNs !== '' && newNs !== this.curNs) {
+      this.curNs = newNs;
+      this.updateShape(callback);
+    }
+  },
+
+  updateShape: function(callback) {
+    var block = this;
+    SwTerms.getTerms(this.curNs,
+      function() { block.updateLNField(null); },
+      function(terms) {
+        // console.log(terms);
+        block.updateLNField(terms);
+        if (callback)
+          callback();
+      });
+  },
+
+  updateLNField: function(terms) {
+    if (this.getInput('LOCALNAME')) {
+      this.removeInput('LOCALNAME');
+    }
+    var input = this.appendDummyInput('LOCALNAME');
+    if (terms === null)
+      input.appendField("...", 'URI');
+    else
+      input.appendField(new Blockly.FieldDropdown(terms), 'URI');
+  },
+
+  mutationToDom: function () {
+    var container = document.createElement('mutation');
+    container.setAttribute('cur_ns', this.curNs);
+    container.setAttribute('cur_ln', this.getFieldValue('URI'));
+    return container;
+  },
+
+  domToMutation: function (container) {
+    var curNs = container.getAttribute('cur_ns');
+    var curLn = container.getAttribute('cur_ln');
+    if (curNs != '') {
+      var self = this;
+      this.onNsChange(curNs, function() { self.setFieldValue(curLn, 'URI'); });
+    }
   }
 }
 

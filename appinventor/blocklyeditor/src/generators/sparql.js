@@ -493,8 +493,18 @@ Blockly.SPARQL['logic_uri'] = function() {
  * @returns {[string, number]}
  */
 Blockly.SPARQL['logic_qname'] = function() {
-  return [this.getFieldValue('PREFIX') + ':' + this.getFieldValue('LOCALNAME'),
-    Blockly.SPARQL.ORDER_ATOMIC];
+  return ['<' + this.getFieldValue('NAMESPACE') + this.getFieldValue('LOCALNAME') + '>',
+     Blockly.SPARQL.ORDER_ATOMIC];
+}
+
+/**
+ *
+ * @this Blockly.BlockSvg
+ * @returns {[string, number]}
+ */
+Blockly.SPARQL['logic_qname_select'] = function() {
+  return ['<' + this.getFieldValue('URI') + '>',
+     Blockly.SPARQL.ORDER_ATOMIC];
 }
 
 /**
