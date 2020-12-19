@@ -1223,7 +1223,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
   private String getBuildServerUrlStr(String userName, String userId,
     long projectId, boolean secondBuildserver, String fileName)
       throws UnsupportedEncodingException, EncryptionException {
-    return "http://" + (secondBuildserver ? buildServerHost2.get() : buildServerHost.get()) +
+		  
+    String url = "http://" + (secondBuildserver ? buildServerHost2.get() : buildServerHost.get()) +
       "/buildserver/build-all-from-zip-async"
       + "?uname=" + URLEncoder.encode(userName, "UTF-8")
       + (sendGitVersion.get()
@@ -1236,6 +1237,9 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         + Security.encryptUserAndProjectId(userId, projectId)
         + "/" + fileName,
         "UTF-8");
+		
+	LOG.info("Build server URL: " + url);
+	return url;
   }
 
   private String getCurrentHost() {
@@ -1248,8 +1252,10 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         return appengineHost.get();
       }
     } else {
-      // TODO(user): Figure out how to make this more generic
-      return "localhost:8888";
+      if (StringUtils.isNullOrEmpty(appengineHost.get()))
+	    return "localhost:8888";
+	  else
+	    return appengineHost.get();
     }
   }
 
