@@ -218,9 +218,8 @@ public class AppInventorCompatActivity extends FragmentActivity implements AppCo
   }
 
   public static boolean isEmulator() {
-    return android.os.Build.PRODUCT.contains("google_sdk") ||  // Old emulator build (2.x)
-        android.os.Build.PRODUCT.equals("sdk") ||              // Honeycomb image (for testing)
-        android.os.Build.PRODUCT.contains("sdk_gphone");       // New emulator build (3.x)
+    // HACK: Pretend we're never in an emulator for the time being. Do not merge.
+    return false;
   }
 
   @SuppressWarnings("unused") // Potentially useful for extensions adding custom activities
