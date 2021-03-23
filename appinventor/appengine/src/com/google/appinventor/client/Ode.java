@@ -2458,11 +2458,20 @@ public class Ode implements EntryPoint {
   }
 
   public void setTutorialURL(String newURL) {
-    boolean isUrlAllowed = !newURL.isEmpty()
-          && (newURL.startsWith("http://appinventor.mit.edu/")
-          || newURL.startsWith("https://appinventor.mit.edu/")
-          || newURL.startsWith("http://appinv.us/"));
-    
+    if (newURL.isEmpty()) {
+      designToolbar.setTutorialToggleVisible(false);
+      setTutorialVisible(false);
+      return;
+    }
+
+    boolean isUrlAllowed = false;
+    for (String candidate : config.getTutorialsUrlAllowed()) {
+      if (newURL.startsWith(candidate)) {
+        isUrlAllowed = true;
+        break;
+      }
+    }
+
     if (!isUrlAllowed) {
       designToolbar.setTutorialToggleVisible(false);
       setTutorialVisible(false);
@@ -2473,7 +2482,7 @@ public class Ode implements EntryPoint {
       if (locale != null) {
         newURL += (newURL.contains("?") ? "&" : "?") + "locale=" + locale;
       }
-      String effectiveUrl = (isHttps ? "https://" : "http://") + urlSplits[1]; 
+      String effectiveUrl = (isHttps ? "https://" : "http://") + urlSplits[1];
       tutorialPanel.setUrl(effectiveUrl);
       designToolbar.setTutorialToggleVisible(true);
       setTutorialVisible(true);
