@@ -408,8 +408,92 @@ Use the `BluetoothServer` component to turn your device into a server that recei
 
 {:.properties}
 
+{:id="LdpCoapClient.ApplicationAtomXml" .number .ro .bo} *ApplicationAtomXml*
+: application/atom+xml code
+
+{:id="LdpCoapClient.ApplicationBson" .number .ro .bo} *ApplicationBson*
+: application/bson code
+
+{:id="LdpCoapClient.ApplicationBzip2" .number .ro .bo} *ApplicationBzip2*
+: application/bz2 code
+
+{:id="LdpCoapClient.ApplicationExi" .number .ro .bo} *ApplicationExi*
+: application/exi code
+
+{:id="LdpCoapClient.ApplicationFastinfoset" .number .ro .bo} *ApplicationFastinfoset*
+: application/fastinfoset code
+
+{:id="LdpCoapClient.ApplicationGzip" .number .ro .bo} *ApplicationGzip*
+: application/gzip code
+
+{:id="LdpCoapClient.ApplicationJson" .number .ro .bo} *ApplicationJson*
+: application/json code
+
+{:id="LdpCoapClient.ApplicationLdJson" .number .ro .bo} *ApplicationLdJson*
+: application/ld+json code
+
+{:id="LdpCoapClient.ApplicationLinkFormat" .number .ro .bo} *ApplicationLinkFormat*
+: application/link-format code
+
+{:id="LdpCoapClient.ApplicationMsgpack" .number .ro .bo} *ApplicationMsgpack*
+: application/msgpack code
+
+{:id="LdpCoapClient.ApplicationOctetStream" .number .ro .bo} *ApplicationOctetStream*
+: application/octet-stream code
+
+{:id="LdpCoapClient.ApplicationRdfPatch" .number .ro .bo} *ApplicationRdfPatch*
+: application/rdf-patch code
+
+{:id="LdpCoapClient.ApplicationRdfXml" .number .ro .bo} *ApplicationRdfXml*
+: application/rdf+xml code
+
+{:id="LdpCoapClient.ApplicationSoapFastinfoset" .number .ro .bo} *ApplicationSoapFastinfoset*
+: application/soap+fastinfoset code
+
+{:id="LdpCoapClient.ApplicationSoapXml" .number .ro .bo} *ApplicationSoapXml*
+: application/soap+xml code
+
+{:id="LdpCoapClient.ApplicationUbjson" .number .ro .bo} *ApplicationUbjson*
+: application/ubjson code
+
+{:id="LdpCoapClient.ApplicationXml" .number .ro .bo} *ApplicationXml*
+: application/xml code
+
+{:id="LdpCoapClient.ApplicationXmppXml" .number .ro .bo} *ApplicationXmppXml*
+: application/xmpp+xml code
+
+{:id="LdpCoapClient.ApplicationXobixBinary" .number .ro .bo} *ApplicationXobixBinary*
+: application/x-obix-binary code
+
 {:id="LdpCoapClient.BASE_URI" .text .bo} *BASE_URI*
 : Get BASE URI
+
+{:id="LdpCoapClient.ContainerType" .text} *ContainerType*
+: Property for ContainerType
+
+{:id="LdpCoapClient.ImageGif" .number .ro .bo} *ImageGif*
+: image/gif code
+
+{:id="LdpCoapClient.ImageJpeg" .number .ro .bo} *ImageJpeg*
+: image/jpeg code
+
+{:id="LdpCoapClient.ImagePng" .number .ro .bo} *ImagePng*
+: image/png code
+
+{:id="LdpCoapClient.ImageTiff" .number .ro .bo} *ImageTiff*
+: image/tiff code
+
+{:id="LdpCoapClient.TextCsv" .number .ro .bo} *TextCsv*
+: text/csv code
+
+{:id="LdpCoapClient.TextHtml" .number .ro .bo} *TextHtml*
+: text/html code
+
+{:id="LdpCoapClient.TextPlain" .number .ro .bo} *TextPlain*
+: text/plain code
+
+{:id="LdpCoapClient.TextTurtle" .number .ro .bo} *TextTurtle*
+: text/turtle code
 
 ### Events  {#LdpCoapClient-Events}
 
@@ -421,74 +505,26 @@ None
 
 {:.methods}
 
-{:id="LdpCoapClient.ApplicationAtomXml" class="method returns number"} <i/> ApplicationAtomXml()
-: application/atom+xml code
-
-{:id="LdpCoapClient.ApplicationBson" class="method returns number"} <i/> ApplicationBson()
-: application/bson code
-
-{:id="LdpCoapClient.ApplicationBzip2" class="method returns number"} <i/> ApplicationBzip2()
-: application/bz2 code
-
-{:id="LdpCoapClient.ApplicationExi" class="method returns number"} <i/> ApplicationExi()
-: application/exi code
-
-{:id="LdpCoapClient.ApplicationFastinfoset" class="method returns number"} <i/> ApplicationFastinfoset()
-: application/fastinfoset code
-
-{:id="LdpCoapClient.ApplicationGzip" class="method returns number"} <i/> ApplicationGzip()
-: application/gzip code
-
-{:id="LdpCoapClient.ApplicationJson" class="method returns number"} <i/> ApplicationJson()
-: application/json code
-
-{:id="LdpCoapClient.ApplicationLdJson" class="method returns number"} <i/> ApplicationLdJson()
-: application/ld+json code
-
-{:id="LdpCoapClient.ApplicationLinkFormat" class="method returns number"} <i/> ApplicationLinkFormat()
-: application/link-format code
-
-{:id="LdpCoapClient.ApplicationMsgpack" class="method returns number"} <i/> ApplicationMsgpack()
-: application/msgpack code
-
-{:id="LdpCoapClient.ApplicationOctetStream" class="method returns number"} <i/> ApplicationOctetStream()
-: application/octet-stream code
-
-{:id="LdpCoapClient.ApplicationRdfPatch" class="method returns number"} <i/> ApplicationRdfPatch()
-: application/rdf-patch code
-
-{:id="LdpCoapClient.ApplicationRdfXml" class="method returns number"} <i/> ApplicationRdfXml()
-: application/rdf+xml code
-
-{:id="LdpCoapClient.ApplicationSoapFastinfoset" class="method returns number"} <i/> ApplicationSoapFastinfoset()
-: application/soap+fastinfoset code
-
-{:id="LdpCoapClient.ApplicationSoapXml" class="method returns number"} <i/> ApplicationSoapXml()
-: application/soap+xml code
-
-{:id="LdpCoapClient.ApplicationUbjson" class="method returns number"} <i/> ApplicationUbjson()
-: application/ubjson code
-
-{:id="LdpCoapClient.ApplicationXml" class="method returns number"} <i/> ApplicationXml()
-: application/xml code
-
-{:id="LdpCoapClient.ApplicationXmppXml" class="method returns number"} <i/> ApplicationXmppXml()
-: application/xmpp+xml code
-
-{:id="LdpCoapClient.ApplicationXobixBinary" class="method returns number"} <i/> ApplicationXobixBinary()
-: application/x-obix-binary code
-
 {:id="LdpCoapClient.Delete" class="method"} <i/> Delete(*resource*{:.text})
 : CoAP Delete resource
 
-{:id="LdpCoapClient.DiscoveryResourcesRdfPatch" class="method"} <i/> DiscoveryResourcesRdfPatch()
-: LDP Resource Discovery in application/rdf-patch
+{:id="LdpCoapClient.DiscoverResourcesRdfPatch" class="method"} <i/> DiscoverResourcesRdfPatch()
+: LDiscover resources in application/rdf-patch format
 
-{:id="LdpCoapClient.DiscoveryResourcesTextPlain" class="method"} <i/> DiscoveryResourcesTextPlain()
-: LDP Resource Discovery in text/plain
+{:id="LdpCoapClient.DiscoverResourcesTextPlain" class="method"} <i/> DiscoverResourcesTextPlain()
+: Discover resources in text/plain format
 
-{:id="LdpCoapClient.DiscoveryResourcesTextTurtle" class="method"} <i/> DiscoveryResourcesTextTurtle()
-: LDP Resource Discovery in text/turtle
+{:id="LdpCoapClient.DiscoverResourcesTextTurtle" class="method"} <i/> DiscoverResourcesTextTurtle()
+: Discover resources in text/turtle format
+
+{:id="LdpCoapClient.DiscoverTypeResourcesRdfPatch" class="method"} <i/> DiscoverTypeResourcesRdfPatch(*type*{:.text})
+: Discover resources of a specific type in application/rdf-patch format
+
+{:id="LdpCoapClient.DiscoverTypeResourcesTextPlain" class="method"} <i/> DiscoverTypeResourcesTextPlain(*type*{:.text})
+: Discover resources of a specific type in text/plain format
+
+{:id="LdpCoapClient.DiscoverTypeResourcesTextTurtle" class="method"} <i/> DiscoverTypeResourcesTextTurtle(*type*{:.text})
+: Discover resources of a specific type in text/turtle format
 
 {:id="LdpCoapClient.Get" class="method"} <i/> Get(*resource*{:.text},*type*{:.number})
 : LDP-CoAP Get method
@@ -498,18 +534,6 @@ None
 
 {:id="LdpCoapClient.Head" class="method"} <i/> Head(*resource*{:.text})
 : HEAD Request
-
-{:id="LdpCoapClient.ImageGif" class="method returns number"} <i/> ImageGif()
-: image/gif code
-
-{:id="LdpCoapClient.ImageJpeg" class="method returns number"} <i/> ImageJpeg()
-: image/jpeg code
-
-{:id="LdpCoapClient.ImagePng" class="method returns number"} <i/> ImagePng()
-: image/png code
-
-{:id="LdpCoapClient.ImageTiff" class="method returns number"} <i/> ImageTiff()
-: image/tiff code
 
 {:id="LdpCoapClient.Options" class="method"} <i/> Options(*resource*{:.text})
 : OPTIONS Request
@@ -528,18 +552,6 @@ None
 
 {:id="LdpCoapClient.PutEtagInput" class="method"} <i/> PutEtagInput(*resource*{:.text},*type*{:.number},*data*{:.text},*etag*{:.text})
 : PUT Request
-
-{:id="LdpCoapClient.TextCsv" class="method returns number"} <i/> TextCsv()
-: text/csv code
-
-{:id="LdpCoapClient.TextHtml" class="method returns number"} <i/> TextHtml()
-: text/html code
-
-{:id="LdpCoapClient.TextPlain" class="method returns number"} <i/> TextPlain()
-: text/plain code
-
-{:id="LdpCoapClient.TextTurtle" class="method returns number"} <i/> TextTurtle()
-: text/turtle code
 
 {:id="LdpCoapClient.getContentFormat" class="method returns text"} <i/> getContentFormat()
 : Get Content-Format (ct)

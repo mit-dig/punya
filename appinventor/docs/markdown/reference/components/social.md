@@ -650,7 +650,7 @@ Component for displaying surveys
 : Get the export path for survey results
 
 {:id="Survey.Height" .number .bo} *Height*
-: Property for Height
+: Specifies the `Survey`'s vertical height, measured in pixels.
 
 {:id="Survey.HeightPercent" .number .wo .bo} *HeightPercent*
 : Specifies the `Survey`'s vertical height as a percentage
@@ -670,7 +670,7 @@ Component for displaying surveys
  if the `Survey` is showing and `false`{:.logic.block} if hidden.
 
 {:id="Survey.Width" .number .bo} *Width*
-: Property for Width
+: Specifies the horizontal width of the `Survey`, measured in pixels.
 
 {:id="Survey.WidthPercent" .number .wo .bo} *WidthPercent*
 : Specifies the horizontal width of the `Survey` as a percentage

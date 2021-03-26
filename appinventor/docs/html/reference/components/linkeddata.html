@@ -160,6 +160,8 @@
   <dd>Event for FailedToDeleteDataFromLocal</dd>
   <dt id="LinkedData.FailedToDeleteDataFromWeb">FailedToDeleteDataFromWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
   <dd>Event for FailedToDeleteDataFromWeb</dd>
+  <dt id="LinkedData.FailedToExecuteQuery">FailedToExecuteQuery(<em class="text">error</em>)</dt>
+  <dd>Event raised when a SPARQL query raises an exception.</dd>
   <dt id="LinkedData.FailedToFeedDataToWeb">FailedToFeedDataToWeb(<em class="text">error</em>)</dt>
   <dd>Event for FailedToFeedDataToWeb</dd>
   <dt id="LinkedData.FailedToWriteDataToWeb">FailedToWriteDataToWeb(<em class="text">graph</em>,<em class="text">error</em>)</dt>
@@ -223,11 +225,9 @@
   <dt id="LinkedData.HttpsPostFileToWeb" class="method"><i></i> HttpsPostFileToWeb(<em class="text">Url</em>,<em class="text">certificateName</em>,<em class="text">securityToken</em>,<em class="text">filepath</em>)</dt>
   <dd>Method for HttpsPostFileToWeb</dd>
   <dt id="LinkedData.ReadDataFromLocal" class="method returns boolean"><i></i> ReadDataFromLocal(<em class="text">path</em>)</dt>
-  <dd>Read contents of the specified path (local or remote) into the referent model.
- Note the implementation is identical to ReadDataFromWeb</dd>
+  <dd>Read contents of the specified path (local or remote) into the referent model.</dd>
   <dt id="LinkedData.ReadDataFromWeb" class="method returns boolean"><i></i> ReadDataFromWeb(<em class="text">path</em>)</dt>
-  <dd>Read contents of the specified path (local or remote) into the referent model.
- Note the implementation is identical to ReadDataFromLocal</dd>
+  <dd>Read contents of the specified path (local or remote) into the referent model.</dd>
   <dt id="LinkedData.ResultsToSimpleJSON" class="method returns text"><i></i> ResultsToSimpleJSON(<em class="list">results</em>)</dt>
   <dd>Method for ResultsToSimpleJSON</dd>
   <dt id="LinkedData.ToString" class="method returns text"><i></i> ToString()</dt>
@@ -237,8 +237,7 @@
   <dd>Saves the model to the given path on the file system.</dd>
   <dt id="LinkedData.WriteDataToWeb" class="method"><i></i> WriteDataToWeb(<em class="text">graph</em>)</dt>
   <dd>Write the model represented by the LinkedData component to the
- RDF graph store represented by EndpointURL using the given graph URI.
- Any existing triples will get replaced?</dd>
+ RDF graph store represented by EndpointURL using the given graph URI.</dd>
 </dl>
 
 <h2 id="LinkedDataForm">LinkedDataForm</h2>
@@ -250,6 +249,18 @@
 <h3 id="LinkedDataForm-Properties">Properties</h3>
 
 <dl class="properties">
+  <dt id="LinkedDataForm.AlignHorizontal" class="number"><em>AlignHorizontal</em></dt>
+  <dd>A number that encodes how contents of the <code class="highlighter-rouge">LinkedDataForm</code> are aligned horizontally. The choices
+ are: <code class="highlighter-rouge">1</code> = left aligned, <code class="highlighter-rouge">2</code> = right aligned, <code class="highlighter-rouge">3</code> = horizontally centered. Alignment has no
+ effect if the <code class="highlighter-rouge">LinkedDataForm</code>’s <a href="#LinkedDataForm.Width"><code class="highlighter-rouge">Width</code></a> is <code class="highlighter-rouge">Automatic</code>.</dd>
+  <dt id="LinkedDataForm.AlignVertical" class="number"><em>AlignVertical</em></dt>
+  <dd>A number that encodes how the contents of the <code class="highlighter-rouge">LinkedDataForm</code> are aligned vertically. The choices
+ are: <code class="highlighter-rouge">1</code> = aligned at the top, <code class="highlighter-rouge">2</code> = aligned at the bottom, <code class="highlighter-rouge">3</code> = vertically centered.
+ Alignment has no effect if the <code class="highlighter-rouge">LinkedDataForm</code>’s <a href="#LinkedDataForm.Height"><code class="highlighter-rouge">Height</code></a> is <code class="highlighter-rouge">Automatic</code>.</dd>
+  <dt id="LinkedDataForm.BackgroundColor" class="color"><em>BackgroundColor</em></dt>
+  <dd>Specifies the background color of the LinkedDataForm as an alpha-red-green-blue
+ integer.  If an Image has been set, the color change will not be visible
+ until the Image is removed.</dd>
   <dt id="LinkedDataForm.FormID" class="text"><em>FormID</em></dt>
   <dd>Gets the Base URI of this form.</dd>
   <dt id="LinkedDataForm.GenerateSubjectURI" class="text ro bo"><em>GenerateSubjectURI</em></dt>
@@ -260,6 +271,8 @@
   <dt id="LinkedDataForm.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
   <dd>Specifies the <code class="highlighter-rouge">LinkedDataForm</code>’s vertical height as a percentage
  of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
+  <dt id="LinkedDataForm.Image" class="text"><em>Image</em></dt>
+  <dd>Specifies the path of the background image of the <code class="highlighter-rouge">LinkedDataForm</code>.</dd>
   <dt id="LinkedDataForm.InverseProperty" class="boolean"><em>InverseProperty</em></dt>
   <dd>Gets whether or not this form represents an inverse property.</dd>
   <dt id="LinkedDataForm.ObjectType" class="text"><em>ObjectType</em></dt>
@@ -286,7 +299,11 @@
 
 <h3 id="LinkedDataForm-Methods">Methods</h3>
 
-<p class="methods">None</p>
+<dl class="methods">
+  <dt id="LinkedDataForm.FillFromLinkedData" class="method"><i></i> FillFromLinkedData(<em class="component">linkedData</em>,<em class="text">uri</em>)</dt>
+  <dd>Populate the content of the form using information about resource identified by uri from the
+ linked data component.</dd>
+</dl>
 
 <h2 id="LinkedDataListPicker">LinkedDataListPicker</h2>
 
@@ -323,11 +340,19 @@
   <dd>Specifies the path of the <code class="highlighter-rouge">LinkedDataListPicker</code>’s image. If there is both an <code class="highlighter-rouge">Image</code> and a
  <a href="#LinkedDataListPicker.BackgroundColor"><code class="highlighter-rouge">BackgroundColor</code></a> specified, only the <code class="highlighter-rouge">Image</code> will be visible.</dd>
   <dt id="LinkedDataListPicker.ObjectType" class="text"><em>ObjectType</em></dt>
-  <dd>Property for ObjectType</dd>
+  <dd>
+    <p>Object Type specifies a Uniform Resource Identifier (URI) for a type used to identify objects that should appear in the list picker.</p>
+    <p>For example, <code>http://xmlns.com/foaf/0.1/Person</code> (foaf:Person), is a commonly used class for identifying people. Specifying it here would generate a list of people from the Endpoint URL.</p>
+  </dd>
   <dt id="LinkedDataListPicker.PropertyURI" class="text"><em>PropertyURI</em></dt>
-  <dd>Property for PropertyURI</dd>
+  <dd>
+    <p>If the list picker is placed within a Linked Data Form, the Property URI specifies the relationship between the object being built by the form and the item selected in the list picker.</p>
+    <p>For example, an application for disaster reporting may query a hierarchy of disaster types and present those types using the Linked Data List Picker.</p>
+  </dd>
   <dt id="LinkedDataListPicker.RelationToObject" class="text"><em>RelationToObject</em></dt>
-  <dd>Property for RelationToObject</dd>
+  <dd>
+    <p>RelationToObjectType specifies the relationship between objects presented by the list picker and the Object Type. This field defaults to <code>rdf:type</code>, but other useful values may include <code>skos:narrower</code> or <code>schema:additionalType</code>. The correct property to use will be dependent on the data available in Endpoint URL.</p>
+  </dd>
   <dt id="LinkedDataListPicker.SelectionIndex" class="number ro bo"><em>SelectionIndex</em></dt>
   <dd>Returns the index of the user’s selection.</dd>
   <dt id="LinkedDataListPicker.SelectionLabel" class="text ro bo"><em>SelectionLabel</em></dt>
@@ -442,6 +467,8 @@
  results in the SPARQL 1.1 Query Result format.</dd>
   <dt id="Reasoner.RulesFromRuleset" class="method"><i></i> RulesFromRuleset(<em class="text">ruleset</em>)</dt>
   <dd>Populate the rule-based reasoner with the given ruleset of custom rules.</dd>
+  <dt id="Reasoner.RulesetToString" class="method returns text"><i></i> RulesetToString()</dt>
+  <dd>Return the loaded rules (if any) as a string.</dd>
   <dt id="Reasoner.Run" class="method"><i></i> Run()</dt>
   <dd>Runs the reasoner in forward chaining model to derive conclusions. On success, the
  <a href="#Reasoner.ReasoningComplete"><code class="highlighter-rouge">ReasoningComplete</code></a> event will run. <a href="#Reasoner.ErrorOccurred"><code class="highlighter-rouge">ErrorOccurred</code></a> event will run if reasoning

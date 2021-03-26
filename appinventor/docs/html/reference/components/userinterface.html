@@ -269,6 +269,10 @@
   <dt id="CheckBox.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
   <dd>Specifies the <code class="highlighter-rouge">CheckBox</code>’s vertical height as a percentage
  of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
+  <dt id="CheckBox.PropertyURI" class="text"><em>PropertyURI</em></dt>
+  <dd>
+    <p>Property URI specifies the relationship between a Linked Data Form containing a TextBox, Password, etc. and the component. Common properties include the name properties in the Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), or descriptions (e.g. rdfs:comment, dc:description).</p>
+  </dd>
   <dt id="CheckBox.Text" class="text"><em>Text</em></dt>
   <dd>Specifies the text displayed by the <code class="highlighter-rouge">CheckBox</code>.</dd>
   <dt id="CheckBox.TextColor" class="color"><em>TextColor</em></dt>
@@ -659,6 +663,8 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
  of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
   <dt id="ListView.Selection" class="text"><em>Selection</em></dt>
   <dd>Returns the text in the <code class="highlighter-rouge">ListView</code> at the position of <a href="#ListView.SelectionIndex"><code class="highlighter-rouge">SelectionIndex</code></a>.</dd>
+  <dt id="ListView.SelectionBinding" class="dictionary ro bo"><em>SelectionBinding</em></dt>
+  <dd>Returns the binding corresponding to the selection in the ListView.</dd>
   <dt id="ListView.SelectionColor" class="color"><em>SelectionColor</em></dt>
   <dd>The color of the item when it is selected.</dd>
   <dt id="ListView.SelectionIndex" class="number bo"><em>SelectionIndex</em></dt>
@@ -693,7 +699,10 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
 
 <h3 id="ListView-Methods">Methods</h3>
 
-<p class="methods">None</p>
+<dl class="methods">
+  <dt id="ListView.LoadFromBindings" class="method"><i></i> LoadFromBindings(<em class="list">bindings</em>,<em class="text">showVariable</em>)</dt>
+  <dd>Takes a set of query results, and displays values for the given variable name.”,</dd>
+</dl>
 
 <h2 id="Notifier">Notifier</h2>
 
@@ -1190,6 +1199,10 @@ having dark grey components.</li>
  of the <a href="userinterface.html#Screen.Height"><code class="highlighter-rouge">Screen</code>’s <code class="highlighter-rouge">Height</code></a>.</dd>
   <dt id="Switch.On" class="boolean"><em>On</em></dt>
   <dd>True if the switch is in the On state, false otherwise.</dd>
+  <dt id="Switch.PropertyURI" class="text"><em>PropertyURI</em></dt>
+  <dd>
+    <p>Property URI specifies the relationship between a Linked Data Form containing a TextBox, Password, etc. and the component. Common properties include the name properties in the Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), or descriptions (e.g. rdfs:comment, dc:description).</p>
+  </dd>
   <dt id="Switch.Text" class="text"><em>Text</em></dt>
   <dd>Specifies the text displayed by the <code class="highlighter-rouge">Switch</code>.</dd>
   <dt id="Switch.TextColor" class="color"><em>TextColor</em></dt>

@@ -36,6 +36,7 @@ import javax.tools.FileObject;
  *   "showOnPalette": "true"|"false",
  *   "nonVisible": "true"|"false",
  *   "iconName": "ICON-FILE-NAME",
+ *   "licenseName": "LICENSE-FILE-NAME",
  *   "androidMinSdk": "ANDROID-MIN-SDK",
  *   "conditionals": {
  *     "permissions": {
@@ -110,6 +111,8 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
     sb.append(component.getNonVisible());
     sb.append("\",\n  \"iconName\": \"");
     sb.append(component.getIconName());
+    sb.append("\",\n  \"licenseName\": \"");
+    sb.append(component.getLicenseName());
     sb.append("\",\n  \"androidMinSdk\": ");
     sb.append(component.getAndroidMinSdk());
     outputConditionalAnnotations(component, sb);
@@ -215,8 +218,8 @@ public final class ComponentDescriptorGenerator extends ComponentProcessor {
    */
   private void outputConditionalAnnotations(ComponentInfo component, StringBuilder sb) {
     if (component.conditionalPermissions.size() +
-        component.conditionalBroadcastReceivers.size() + 
-        component.conditionalServices.size() + 
+        component.conditionalBroadcastReceivers.size() +
+        component.conditionalServices.size() +
         component.conditionalContentProviders.size() == 0) {
       return;
     }

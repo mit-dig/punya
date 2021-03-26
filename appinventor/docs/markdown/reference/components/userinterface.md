@@ -182,6 +182,9 @@ None
 : Specifies the `CheckBox`'s vertical height as a percentage
  of the [`Screen`'s `Height`](userinterface.html#Screen.Height).
 
+{:id="CheckBox.PropertyURI" .text} *PropertyURI*
+: <p>Property URI specifies the relationship between a Linked Data Form containing a TextBox, Password, etc. and the component. Common properties include the name properties in the Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), or descriptions (e.g. rdfs:comment, dc:description).</p>
+
 {:id="CheckBox.Text" .text} *Text*
 : Specifies the text displayed by the `CheckBox`.
 
@@ -683,6 +686,9 @@ This is a visible component that allows to place a list of text elements in your
 {:id="ListView.Selection" .text} *Selection*
 : Returns the text in the `ListView` at the position of [`SelectionIndex`](#ListView.SelectionIndex).
 
+{:id="ListView.SelectionBinding" .dictionary .ro .bo} *SelectionBinding*
+: Returns the binding corresponding to the selection in the ListView.
+
 {:id="ListView.SelectionColor" .color} *SelectionColor*
 : The color of the item when it is selected.
 
@@ -724,8 +730,9 @@ This is a visible component that allows to place a list of text elements in your
 ### Methods  {#ListView-Methods}
 
 {:.methods}
-None
 
+{:id="ListView.LoadFromBindings" class="method"} <i/> LoadFromBindings(*bindings*{:.list},*showVariable*{:.text})
+: Takes a set of query results, and displays values for the given variable name.",
 
 ## Notifier  {#Notifier}
 
@@ -1318,6 +1325,9 @@ A `Spinner` component that displays a dialog with a list of elements. These elem
 
 {:id="Switch.On" .boolean} *On*
 : True if the switch is in the On state, false otherwise.
+
+{:id="Switch.PropertyURI" .text} *PropertyURI*
+: <p>Property URI specifies the relationship between a Linked Data Form containing a TextBox, Password, etc. and the component. Common properties include the name properties in the Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), or descriptions (e.g. rdfs:comment, dc:description).</p>
 
 {:id="Switch.Text" .text} *Text*
 : Specifies the text displayed by the `Switch`.

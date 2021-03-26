@@ -134,6 +134,7 @@
   <li><a href="#ActivityStarter">ActivityStarter</a></li>
   <li><a href="#BluetoothClient">BluetoothClient</a></li>
   <li><a href="#BluetoothServer">BluetoothServer</a></li>
+  <li><a href="#LdpCoapClient">LdpCoapClient</a></li>
   <li><a href="#Serial">Serial</a></li>
   <li><a href="#Web">Web</a></li>
 </ul>
@@ -472,6 +473,126 @@ set the following properties:
   <dd>Converts the given text to bytes and writes them to the output stream.</dd>
   <dt id="BluetoothServer.StopAccepting" class="method"><i></i> StopAccepting()</dt>
   <dd>Stop accepting an incoming connection.</dd>
+</dl>
+
+<h2 id="LdpCoapClient">LdpCoapClient</h2>
+
+<p><img src="images/ldpCoap.png" alt="LdpCoapClient" /></p>
+
+<p>LdpCoapClient to make ldp coap request</p>
+
+<h3 id="LdpCoapClient-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="LdpCoapClient.ApplicationAtomXml" class="number ro bo"><em>ApplicationAtomXml</em></dt>
+  <dd>application/atom+xml code</dd>
+  <dt id="LdpCoapClient.ApplicationBson" class="number ro bo"><em>ApplicationBson</em></dt>
+  <dd>application/bson code</dd>
+  <dt id="LdpCoapClient.ApplicationBzip2" class="number ro bo"><em>ApplicationBzip2</em></dt>
+  <dd>application/bz2 code</dd>
+  <dt id="LdpCoapClient.ApplicationExi" class="number ro bo"><em>ApplicationExi</em></dt>
+  <dd>application/exi code</dd>
+  <dt id="LdpCoapClient.ApplicationFastinfoset" class="number ro bo"><em>ApplicationFastinfoset</em></dt>
+  <dd>application/fastinfoset code</dd>
+  <dt id="LdpCoapClient.ApplicationGzip" class="number ro bo"><em>ApplicationGzip</em></dt>
+  <dd>application/gzip code</dd>
+  <dt id="LdpCoapClient.ApplicationJson" class="number ro bo"><em>ApplicationJson</em></dt>
+  <dd>application/json code</dd>
+  <dt id="LdpCoapClient.ApplicationLdJson" class="number ro bo"><em>ApplicationLdJson</em></dt>
+  <dd>application/ld+json code</dd>
+  <dt id="LdpCoapClient.ApplicationLinkFormat" class="number ro bo"><em>ApplicationLinkFormat</em></dt>
+  <dd>application/link-format code</dd>
+  <dt id="LdpCoapClient.ApplicationMsgpack" class="number ro bo"><em>ApplicationMsgpack</em></dt>
+  <dd>application/msgpack code</dd>
+  <dt id="LdpCoapClient.ApplicationOctetStream" class="number ro bo"><em>ApplicationOctetStream</em></dt>
+  <dd>application/octet-stream code</dd>
+  <dt id="LdpCoapClient.ApplicationRdfPatch" class="number ro bo"><em>ApplicationRdfPatch</em></dt>
+  <dd>application/rdf-patch code</dd>
+  <dt id="LdpCoapClient.ApplicationRdfXml" class="number ro bo"><em>ApplicationRdfXml</em></dt>
+  <dd>application/rdf+xml code</dd>
+  <dt id="LdpCoapClient.ApplicationSoapFastinfoset" class="number ro bo"><em>ApplicationSoapFastinfoset</em></dt>
+  <dd>application/soap+fastinfoset code</dd>
+  <dt id="LdpCoapClient.ApplicationSoapXml" class="number ro bo"><em>ApplicationSoapXml</em></dt>
+  <dd>application/soap+xml code</dd>
+  <dt id="LdpCoapClient.ApplicationUbjson" class="number ro bo"><em>ApplicationUbjson</em></dt>
+  <dd>application/ubjson code</dd>
+  <dt id="LdpCoapClient.ApplicationXml" class="number ro bo"><em>ApplicationXml</em></dt>
+  <dd>application/xml code</dd>
+  <dt id="LdpCoapClient.ApplicationXmppXml" class="number ro bo"><em>ApplicationXmppXml</em></dt>
+  <dd>application/xmpp+xml code</dd>
+  <dt id="LdpCoapClient.ApplicationXobixBinary" class="number ro bo"><em>ApplicationXobixBinary</em></dt>
+  <dd>application/x-obix-binary code</dd>
+  <dt id="LdpCoapClient.BASE_URI" class="text bo"><em>BASE_URI</em></dt>
+  <dd>Get BASE URI</dd>
+  <dt id="LdpCoapClient.ContainerType" class="text"><em>ContainerType</em></dt>
+  <dd>Property for ContainerType</dd>
+  <dt id="LdpCoapClient.ImageGif" class="number ro bo"><em>ImageGif</em></dt>
+  <dd>image/gif code</dd>
+  <dt id="LdpCoapClient.ImageJpeg" class="number ro bo"><em>ImageJpeg</em></dt>
+  <dd>image/jpeg code</dd>
+  <dt id="LdpCoapClient.ImagePng" class="number ro bo"><em>ImagePng</em></dt>
+  <dd>image/png code</dd>
+  <dt id="LdpCoapClient.ImageTiff" class="number ro bo"><em>ImageTiff</em></dt>
+  <dd>image/tiff code</dd>
+  <dt id="LdpCoapClient.TextCsv" class="number ro bo"><em>TextCsv</em></dt>
+  <dd>text/csv code</dd>
+  <dt id="LdpCoapClient.TextHtml" class="number ro bo"><em>TextHtml</em></dt>
+  <dd>text/html code</dd>
+  <dt id="LdpCoapClient.TextPlain" class="number ro bo"><em>TextPlain</em></dt>
+  <dd>text/plain code</dd>
+  <dt id="LdpCoapClient.TextTurtle" class="number ro bo"><em>TextTurtle</em></dt>
+  <dd>text/turtle code</dd>
+</dl>
+
+<h3 id="LdpCoapClient-Events">Events</h3>
+
+<p class="events">None</p>
+
+<h3 id="LdpCoapClient-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="LdpCoapClient.Delete" class="method"><i></i> Delete(<em class="text">resource</em>)</dt>
+  <dd>CoAP Delete resource</dd>
+  <dt id="LdpCoapClient.DiscoverResourcesRdfPatch" class="method"><i></i> DiscoverResourcesRdfPatch()</dt>
+  <dd>LDiscover resources in application/rdf-patch format</dd>
+  <dt id="LdpCoapClient.DiscoverResourcesTextPlain" class="method"><i></i> DiscoverResourcesTextPlain()</dt>
+  <dd>Discover resources in text/plain format</dd>
+  <dt id="LdpCoapClient.DiscoverResourcesTextTurtle" class="method"><i></i> DiscoverResourcesTextTurtle()</dt>
+  <dd>Discover resources in text/turtle format</dd>
+  <dt id="LdpCoapClient.DiscoverTypeResourcesRdfPatch" class="method"><i></i> DiscoverTypeResourcesRdfPatch(<em class="text">type</em>)</dt>
+  <dd>Discover resources of a specific type in application/rdf-patch format</dd>
+  <dt id="LdpCoapClient.DiscoverTypeResourcesTextPlain" class="method"><i></i> DiscoverTypeResourcesTextPlain(<em class="text">type</em>)</dt>
+  <dd>Discover resources of a specific type in text/plain format</dd>
+  <dt id="LdpCoapClient.DiscoverTypeResourcesTextTurtle" class="method"><i></i> DiscoverTypeResourcesTextTurtle(<em class="text">type</em>)</dt>
+  <dd>Discover resources of a specific type in text/turtle format</dd>
+  <dt id="LdpCoapClient.Get" class="method"><i></i> Get(<em class="text">resource</em>,<em class="number">type</em>)</dt>
+  <dd>LDP-CoAP Get method</dd>
+  <dt id="LdpCoapClient.GetETag" class="method returns text"><i></i> GetETag()</dt>
+  <dd>Get ETag</dd>
+  <dt id="LdpCoapClient.Head" class="method"><i></i> Head(<em class="text">resource</em>)</dt>
+  <dd>HEAD Request</dd>
+  <dt id="LdpCoapClient.Options" class="method"><i></i> Options(<em class="text">resource</em>)</dt>
+  <dd>OPTIONS Request</dd>
+  <dt id="LdpCoapClient.Patch" class="method"><i></i> Patch(<em class="text">resource</em>,<em class="number">type</em>,<em class="text">data</em>)</dt>
+  <dd>PATCH Request</dd>
+  <dt id="LdpCoapClient.PatchEtagInput" class="method"><i></i> PatchEtagInput(<em class="text">resource</em>,<em class="number">type</em>,<em class="text">data</em>,<em class="text">etag</em>)</dt>
+  <dd>PATCH Request</dd>
+  <dt id="LdpCoapClient.Post" class="method"><i></i> Post(<em class="text">resource</em>,<em class="number">type</em>,<em class="text">data</em>,<em class="text">title</em>)</dt>
+  <dd>POST Request</dd>
+  <dt id="LdpCoapClient.Put" class="method"><i></i> Put(<em class="text">resource</em>,<em class="number">type</em>,<em class="text">data</em>)</dt>
+  <dd>PUT Request</dd>
+  <dt id="LdpCoapClient.PutEtagInput" class="method"><i></i> PutEtagInput(<em class="text">resource</em>,<em class="number">type</em>,<em class="text">data</em>,<em class="text">etag</em>)</dt>
+  <dd>PUT Request</dd>
+  <dt id="LdpCoapClient.getContentFormat" class="method returns text"><i></i> getContentFormat()</dt>
+  <dd>Get Content-Format (ct)</dd>
+  <dt id="LdpCoapClient.getLocationPath" class="method returns text"><i></i> getLocationPath()</dt>
+  <dd>Get Location Path</dd>
+  <dt id="LdpCoapClient.getRequestStatus" class="method returns text"><i></i> getRequestStatus()</dt>
+  <dd>get request Status</dd>
+  <dt id="LdpCoapClient.getResponseCode" class="method returns text"><i></i> getResponseCode()</dt>
+  <dd>Get response code</dd>
+  <dt id="LdpCoapClient.getResponseText" class="method returns text"><i></i> getResponseText()</dt>
+  <dd>Get Response Text</dd>
 </dl>
 
 <h2 id="Serial">Serial</h2>

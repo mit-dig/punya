@@ -838,7 +838,8 @@ Record GPS location periodically
  Setting this value triggers the probe using the new schedule
 
 {:id="LocationProbeSensor.UseCache" .boolean} *UseCache*
-: Property for UseCache
+: Set whether the location info will use the last known location without acquiring new location from 
+ GPS or Network fix
 
 {:id="LocationProbeSensor.UseGPS" .boolean} *UseGPS*
 : Indicate whether the locationProbe uses GPS or not

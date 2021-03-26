@@ -43,6 +43,9 @@ Component for LinkedData
 {:id="LinkedData.FailedToDeleteDataFromWeb"} FailedToDeleteDataFromWeb(*graph*{:.text},*error*{:.text})
 : Event for FailedToDeleteDataFromWeb
 
+{:id="LinkedData.FailedToExecuteQuery"} FailedToExecuteQuery(*error*{:.text})
+: Event raised when a SPARQL query raises an exception.
+
 {:id="LinkedData.FailedToFeedDataToWeb"} FailedToFeedDataToWeb(*error*{:.text})
 : Event for FailedToFeedDataToWeb
 
@@ -127,11 +130,9 @@ Component for LinkedData
 
 {:id="LinkedData.ReadDataFromLocal" class="method returns boolean"} <i/> ReadDataFromLocal(*path*{:.text})
 : Read contents of the specified path (local or remote) into the referent model.
- Note the implementation is identical to ReadDataFromWeb
 
 {:id="LinkedData.ReadDataFromWeb" class="method returns boolean"} <i/> ReadDataFromWeb(*path*{:.text})
 : Read contents of the specified path (local or remote) into the referent model.
- Note the implementation is identical to ReadDataFromLocal
 
 {:id="LinkedData.ResultsToSimpleJSON" class="method returns text"} <i/> ResultsToSimpleJSON(*results*{:.list})
 : Method for ResultsToSimpleJSON
@@ -146,7 +147,6 @@ Component for LinkedData
 {:id="LinkedData.WriteDataToWeb" class="method"} <i/> WriteDataToWeb(*graph*{:.text})
 : Write the model represented by the LinkedData component to the
  RDF graph store represented by EndpointURL using the given graph URI.
- Any existing triples will get replaced?
 
 ## LinkedDataForm  {#LinkedDataForm}
 
@@ -159,6 +159,21 @@ Linked Data Form provides a layout in which contained form elements will be
 ### Properties  {#LinkedDataForm-Properties}
 
 {:.properties}
+
+{:id="LinkedDataForm.AlignHorizontal" .number} *AlignHorizontal*
+: A number that encodes how contents of the `LinkedDataForm` are aligned horizontally. The choices
+ are: `1` = left aligned, `2` = right aligned, `3` = horizontally centered. Alignment has no
+ effect if the `LinkedDataForm`'s [`Width`](#LinkedDataForm.Width) is `Automatic`.
+
+{:id="LinkedDataForm.AlignVertical" .number} *AlignVertical*
+: A number that encodes how the contents of the `LinkedDataForm` are aligned vertically. The choices
+ are: `1` = aligned at the top, `2` = aligned at the bottom, `3` = vertically centered.
+ Alignment has no effect if the `LinkedDataForm`'s [`Height`](#LinkedDataForm.Height) is `Automatic`.
+
+{:id="LinkedDataForm.BackgroundColor" .color} *BackgroundColor*
+: Specifies the background color of the LinkedDataForm as an alpha-red-green-blue
+ integer.  If an Image has been set, the color change will not be visible
+ until the Image is removed.
 
 {:id="LinkedDataForm.FormID" .text} *FormID*
 : Gets the Base URI of this form.
@@ -173,6 +188,9 @@ Linked Data Form provides a layout in which contained form elements will be
 {:id="LinkedDataForm.HeightPercent" .number .wo .bo} *HeightPercent*
 : Specifies the `LinkedDataForm`'s vertical height as a percentage
  of the [`Screen`'s `Height`](userinterface.html#Screen.Height).
+
+{:id="LinkedDataForm.Image" .text} *Image*
+: Specifies the path of the background image of the `LinkedDataForm`.
 
 {:id="LinkedDataForm.InverseProperty" .boolean} *InverseProperty*
 : Gets whether or not this form represents an inverse property.
@@ -209,8 +227,10 @@ None
 ### Methods  {#LinkedDataForm-Methods}
 
 {:.methods}
-None
 
+{:id="LinkedDataForm.FillFromLinkedData" class="method"} <i/> FillFromLinkedData(*linkedData*{:.component},*uri*{:.text})
+: Populate the content of the form using information about resource identified by uri from the
+ linked data component.
 
 ## LinkedDataListPicker  {#LinkedDataListPicker}
 
@@ -260,13 +280,13 @@ Provides a list picker backed by the results of a SPARQL query.
  [`BackgroundColor`](#LinkedDataListPicker.BackgroundColor) specified, only the `Image` will be visible.
 
 {:id="LinkedDataListPicker.ObjectType" .text} *ObjectType*
-: Property for ObjectType
+: <p>Object Type specifies a Uniform Resource Identifier (URI) for a type used to identify objects that should appear in the list picker.</p><p>For example, <code>http://xmlns.com/foaf/0.1/Person</code> (foaf:Person), is a commonly used class for identifying people. Specifying it here would generate a list of people from the Endpoint URL.</p>
 
 {:id="LinkedDataListPicker.PropertyURI" .text} *PropertyURI*
-: Property for PropertyURI
+: <p>If the list picker is placed within a Linked Data Form, the Property URI specifies the relationship between the object being built by the form and the item selected in the list picker.</p><p>For example, an application for disaster reporting may query a hierarchy of disaster types and present those types using the Linked Data List Picker.</p>
 
 {:id="LinkedDataListPicker.RelationToObject" .text} *RelationToObject*
-: Property for RelationToObject
+: <p>RelationToObjectType specifies the relationship between objects presented by the list picker and the Object Type. This field defaults to <code>rdf:type</code>, but other useful values may include <code>skos:narrower</code> or <code>schema:additionalType</code>. The correct property to use will be dependent on the data available in Endpoint URL.</p>
 
 {:id="LinkedDataListPicker.SelectionIndex" .number .ro .bo} *SelectionIndex*
 : Returns the index of the user's selection.
@@ -408,6 +428,9 @@ The <code>Reasoner</code> component derives statements from the contents of a
 
 {:id="Reasoner.RulesFromRuleset" class="method"} <i/> RulesFromRuleset(*ruleset*{:.text})
 : Populate the rule-based reasoner with the given ruleset of custom rules.
+
+{:id="Reasoner.RulesetToString" class="method returns text"} <i/> RulesetToString()
+: Return the loaded rules (if any) as a string.
 
 {:id="Reasoner.Run" class="method"} <i/> Run()
 : Runs the reasoner in forward chaining model to derive conclusions. On success, the
