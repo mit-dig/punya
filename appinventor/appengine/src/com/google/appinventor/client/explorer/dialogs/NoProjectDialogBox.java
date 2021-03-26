@@ -46,7 +46,7 @@ public class NoProjectDialogBox extends DialogBox {
   @UiField
   Button closeDialogBox;
   @UiField
-  Button goToPurr;
+  Button goToApp1;
   @UiField
   Button goToTalk;
   @UiField
@@ -73,10 +73,10 @@ public class NoProjectDialogBox extends DialogBox {
     this.hide();
   }
 
-  @UiHandler("goToPurr")
+  @UiHandler("goToApp1")
   void handleGoToPurr(ClickEvent e) {
     this.hide();
-    new TemplateUploadWizard().createProjectFromExistingZip("HelloPurr", new NewTutorialProject());
+    new TemplateUploadWizard().createProjectFromExistingZip("RdfNotepad", new NewTutorialProject());
   }
 
   @UiHandler("goToTalk")

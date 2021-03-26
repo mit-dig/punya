@@ -919,10 +919,10 @@ public interface Images extends Resources {
   ImageResource navigationComponent();
 
   /**
-  * Wilson Logo 
+  * RdfNotepad Logo
   */
-  @Source("com/google/appinventor/images/wilson.png")
-  ImageResource wilson();
+  @Source("com/google/appinventor/images/rdfnotepad.png")
+  ImageResource rdfNotepad();
 
   /**
   * Talk to Me Logo
