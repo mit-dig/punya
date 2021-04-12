@@ -2468,7 +2468,10 @@ Blockly.Versioning.AllUpgradeMaps =
     5: "noUpgrade",
 
     // AI2: Added ReadOnly property
-    6: "noUpgrade"
+    6: "noUpgrade",
+
+    // PUNYA: Add ObjectType and PropertyURI properties
+    7: "noUpgrade"
 
   }, // End TextBox upgraders
 

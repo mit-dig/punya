@@ -485,7 +485,7 @@ public class ChartData2DTest extends RobolectricTestBase {
         .andReturn(columns);
 
     // Expect Add Data Observer method call
-    web.addDataObserver(data);
+    web.addDataObserver((DataSink) data);
 
     // Register the Mock Data File
     replay(web);
@@ -536,7 +536,7 @@ public class ChartData2DTest extends RobolectricTestBase {
 
 
     // Expect addDataObserver method call
-    tinyDB.addDataObserver(data);
+    tinyDB.addDataObserver((DataSink) data);
 
     replay(tinyDB);
 
@@ -601,7 +601,7 @@ public class ChartData2DTest extends RobolectricTestBase {
         .andReturn(returnValue);
 
     // Expect Add Data Observer method call
-    web.addDataObserver(data);
+    web.addDataObserver((DataSink) data);
 
     EasyMock.expect(web.getColumns(expectedParameters))
         .andReturn(columns);
@@ -642,7 +642,7 @@ public class ChartData2DTest extends RobolectricTestBase {
   @Test
   public void testOnReceiveValue() {
     AccelerometerSensor sensor = EasyMock.createMock(AccelerometerSensor.class);
-    sensor.addDataObserver(data);
+    sensor.addDataObserver((DataSink) data);
     replay(sensor);
 
     String keyValue = "X";
