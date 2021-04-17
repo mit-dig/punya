@@ -13,6 +13,9 @@ import java.util.Properties;
 import org.apache.jena.larq.IndexBuilderString;
 import org.apache.jena.larq.IndexWriterFactory;
 import org.apache.jena.larq.LARQ;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.adapters.JenaReadersWriters;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -111,10 +114,15 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
             continue;
           }
           String contentType = conn.getContentType();
-          if (contentType.contains(";")) {
+          if (contentType != null && contentType.contains(";")) {
             contentType = contentType.split(";")[0];
           }
-          if (contentType.equals("application/rdf+xml") || contentType.equals("application/xml")) {
+          if (contentType == null) {
+            if (ontologies[i].endsWith(".owl")) {
+              ontologies[i] = ontologies[i].replace(".owl", ".ttl");
+            }
+            RDFDataMgr.read(ontologyModel, conn.getInputStream(), ontologies[i], Lang.TURTLE);
+          } else if (contentType.equals("application/rdf+xml") || contentType.equals("application/xml")) {
             ontologyModel.read(conn.getInputStream(), ontologies[i]);
           } else if (contentType.equals("text/turtle")) {
             ontologyModel.read(conn.getInputStream(), ontologies[i], "TTL");
