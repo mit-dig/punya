@@ -175,7 +175,7 @@
   <target name="CheckPlayApp"
           depends="GenPlayAppSrcZip,BuildServer">
     <property name="ext" value="apk"/>
-    <uptodate property="PlayApp.uptodate" targetfile="${public.build.dir}/MIT AI2 Companion.${ext}">
+    <uptodate property="PlayApp.uptodate" targetfile="${public.build.dir}/MIT Punya Companion.${ext}">
       <srcfiles file="${local.build.dir}/aiplayapp.zip"/>
       <srcfiles dir="${run.lib.dir}" includes="*.jar"/>
     </uptodate>
