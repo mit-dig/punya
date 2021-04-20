@@ -1,7 +1,1 @@
-{
-    "name": "LDP-CoAP Tutorial",
-    "subtitle": "A mobile device sensor sharing app",
-    "description": "<p>The goal of this tutorial is to learn how to build your first mobile app exploiting the LDP-CoAP guidelines. For more information see the <a href='https://mit-dig.github.io/punya-tutorials/tutorials/ldp-coap.html' target='_blank'>Punya LDP-CoAP tutorial</a>.",
-    "screenshot": "screenshot.png",
-    "thumbnail": "thumbnail.png"
-}
+{"name": "LDP-CoAP Tutorial","subtitle": "A mobile device sensor sharing app","description": "<p>The goal of this tutorial is to learn how to build your first mobile app exploiting the LDP-CoAP guidelines. For more information see the <a href='https://mit-dig.github.io/punya-tutorials/tutorials/ldp-coap.html' target='_blank'>Punya LDP-CoAP tutorial</a>.","screenshot": "screenshot.png","thumbnail": "thumbnail.png"}

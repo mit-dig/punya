@@ -139,25 +139,21 @@
       <div class="ode-noDialogExampleDiv">
         <div class='ode-noDialogUpperDiv'>
           <h4 class="ode-noDialogExampleTitle">
-            <ui:msg key="translateAppTitle"
-                    description="Title of the Translate App">Translate App</ui:msg>
+            <ui:msg key="ldpCoapAppTitle"
+                    description="Title of the LdpCoap App">LDP-CoAP Tutorial</ui:msg>
           </h4>
           <div class="ode-noDialogExampleImage">
-            <g:Image resource="{res.YRLogo}" altText="YR Media Logo" />
+            <g:Image resource="{res.ldpCoap}" altText="LdpCoap Logo" />
           </div>
           <p class="ode-noDialogExampleAbout">
-            <ui:msg key="translateAppDescription" description="Description of the Translate app">
-              Quickly translate English to Spanish (and other languages too!)
-              You're challenged with creating an app that could act as an aid
-              for immigrant parents who need a little extra help in
-              English-speaking situations. Inspired by YR Media story
-              <a href="https://yr.media/news/what-its-like-to-be-a-translator/" target="_blank"
-                 ui:ph="yrMediaLink">What It's Like to be a Translator</a>.
+            <ui:msg key="ldpCoapDescription" description="Description of the LdpCoap app">
+              Learn how to integrate Internet of Things sensors with Linked Data using the
+              Linked Data Platform Constrained Application Protocol (LDP-CoAP).
             </ui:msg>
           </p>
         </div>
 
-        <g:Button ui:field='goToYR' styleName='{style.ode-tutorialButton}'>
+        <g:Button ui:field='goToApp3' styleName='{style.ode-tutorialButton}'>
           <ui:msg key="startTutorialButton">Go to Tutorial</ui:msg>
         </g:Button>
       </div>

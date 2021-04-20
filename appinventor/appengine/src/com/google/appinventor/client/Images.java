@@ -931,6 +931,12 @@ public interface Images extends Resources {
   ImageResource sleepApnea();
 
   /**
+   * LDP-CoAP logo
+   */
+  @Source("com/google/appinventor/images/ldpCoap.png")
+  ImageResource ldpCoap();
+
+  /**
   * Talk to Me Logo
   */
   @Source("com/google/appinventor/images/talkToMeLogo.png")
