@@ -46,9 +46,9 @@ public class NoProjectDialogBox extends DialogBox {
   @UiField
   Button closeDialogBox;
   @UiField
-  Button goToPurr;
+  Button goToApp1;
   @UiField
-  Button goToTalk;
+  Button goToApp2;
   @UiField
   Button goToYR;
   @UiField
@@ -73,16 +73,16 @@ public class NoProjectDialogBox extends DialogBox {
     this.hide();
   }
 
-  @UiHandler("goToPurr")
+  @UiHandler("goToApp1")
   void handleGoToPurr(ClickEvent e) {
     this.hide();
-    new TemplateUploadWizard().createProjectFromExistingZip("HelloPurr", new NewTutorialProject());
+    new TemplateUploadWizard().createProjectFromExistingZip("RdfNotepad", new NewTutorialProject());
   }
 
-  @UiHandler("goToTalk")
+  @UiHandler("goToApp2")
   void handleGoToTalk(ClickEvent e) {
     this.hide();
-    TemplateUploadWizard.openProjectFromTemplate("http://appinventor.mit.edu/yrtoolkit/yr/aiaFiles/talk_to_me/TalkToMe.asc", new NewTutorialProject());
+    new TemplateUploadWizard().createProjectFromExistingZip("SleepApnea", new NewTutorialProject());
   }
 
   @UiHandler("goToYR")
