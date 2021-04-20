@@ -925,6 +925,12 @@ public interface Images extends Resources {
   ImageResource rdfNotepad();
 
   /**
+   * SleepApnea Logo
+   */
+  @Source("com/google/appinventor/images/rules.png")
+  ImageResource sleepApnea();
+
+  /**
   * Talk to Me Logo
   */
   @Source("com/google/appinventor/images/talkToMeLogo.png")
