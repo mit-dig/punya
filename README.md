@@ -156,19 +156,19 @@ The build server can be run from the terminal by typing:
 
 Note that you will only need to run the build server if you are going to build an app as an apk. You can do all the layout and programming without having the build server running, but you will need it to download the apk.
 
-### Accessing your local server
+## Accessing your local server
 You should now be up and running; you can test this by pointing your browser to:
 
     http://localhost:8888
 
 Before entering or scanning the QR code in the Companion, check the box labeled "Use Legacy Connection".
 
-### Running tests
+## Running tests
 The automated tests depend on [Phantomjs](http://phantomjs.org/). Make sure you install it and add it to your path. After that, you can run all tests by typing the following in a terminal window:
 
     $ ant tests
 
-### Building Release Code
+## Building Release Code
 
 Release builds with optimizations turned on for the web components of the system can be done by passing `-Drelease=true` to `ant`, e.g.:
 
@@ -182,7 +182,7 @@ The release configuration sets the following additional options:
 - App Engine YaClient module is compiled without `<collapse-all-properties/>` to create per-language/browser builds
 - App Engine YaClient module is compiled with optimization tuned to 9 and with 8 threads
 
-### Hot-reloading GWT code with 'Super Dev Mode'
+## Hot-reloading GWT code with 'Super Dev Mode'
 1. Run `ant devmode`
 2. [Run the main server](#running-the-main-server).
 3. Open http://localhost:9876 (*GWT CodeServer*) and drag the two bookmarklets (*Dev Mode On & Off*) to the bookmarks bar.
