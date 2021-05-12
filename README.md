@@ -22,6 +22,38 @@ We use ***very brief and informal*** design documents with descriptions of the p
 
 If you have skipped this step and have gone ahead and made your changes already, feel free to open a pull request, but don't be too surprised if we ask you to go back and document it in a design document. Remember that the main goal of doing this is ***to gather as much feedback, as early as possible***. We will also possibly ask you to put an instance with your changes on [appspot](http://appspot.com), and provide a modified Companion app (if that applies) so that reviewers can play with the changes before looking at the source.
 
+### Forking or cloning
+Consider ***forking*** the project if you want to make changes to the sources. If you simply want to run it locally, you can simply ***clone*** it.
+
+#### Forking
+If you decide to fork, follow the [instructions](https://help.github.com/articles/fork-a-repo) given by github. After that you can clone your own copy of the sources with:
+
+    $ git clone https://github.com/YOUR_USER_NAME/punya.git
+
+Make sure you change *YOUR_USER_NAME* to your user name.
+
+Configuring a remote pointing to this repository is also a good idea if you are forking:
+
+    $ cd punya
+    $ git remote add upstream https://github.com/mit-dig/punya.git
+
+Finally, you will also have to make sure that you are ignoring files that need ignoring:
+
+    $ cp sample-.gitignore .gitignore
+
+### Checkout dependencies
+App Inventor uses Blockly, the web-based visual programming editor from Google, as a core part of its editor. Blockly core is made available to App Inventor as a git submodule. The first time after forking or cloning the repository, you will need to perform the following commands:
+
+    $ git submodule update --init
+
+For developers who will be working on Blockly within the context of App Inventor, the preferred checkout procedure is to perform a `git submodule init`, edit the `.git/config` file to use the read/write SSH URL for [MIT CML's Blockly fork](https://github.com/mit-cml/blockly) instead of the public read-only HTTPS URL assumed by default (to support pushing changes). After changing `.git/config`, a `git submodule update` will pull the repository.
+
+If you need to switch back to a branch that does contains the Blockly and Closure Library sources in the tree, you will need to run the command:
+
+    $ git submodule deinit --all
+
+to clear out the submodules ___before switching branches___. When switching back, you will need to repeat the initialization and update procedure above.
+
 ## Setup instructions (Vagrant)
 
 The easiest way to get a development environment up and running is to use the provided Vagrantfile. Install [Vagrant](https://vagrantup.com) and open a terminal in the root directory of this repository. Run the following commands
@@ -80,38 +112,6 @@ If you are on an RPM-based distribution(Fedora), use:
     $ sudo dnf install glibc.i686 zlib.i686 libstdc++.i686
 
 Note 2: Certain Java 8 features, such as lambda expressions, are not supported on Android, so please don't use them in your changes to the source code.
-
-### Forking or cloning
-Consider ***forking*** the project if you want to make changes to the sources. If you simply want to run it locally, you can simply ***clone*** it.
-
-#### Forking
-If you decide to fork, follow the [instructions](https://help.github.com/articles/fork-a-repo) given by github. After that you can clone your own copy of the sources with:
-
-    $ git clone https://github.com/YOUR_USER_NAME/punya.git
-
-Make sure you change *YOUR_USER_NAME* to your user name.
-
-Configuring a remote pointing to this repository is also a good idea if you are forking:
-
-    $ cd punya
-    $ git remote add upstream https://github.com/mit-dig/punya.git
-
-Finally, you will also have to make sure that you are ignoring files that need ignoring:
-
-    $ cp sample-.gitignore .gitignore
-
-### Checkout dependencies
-App Inventor uses Blockly, the web-based visual programming editor from Google, as a core part of its editor. Blockly core is made available to App Inventor as a git submodule. The first time after forking or cloning the repository, you will need to perform the following commands:
-
-    $ git submodule update --init
-
-For developers who will be working on Blockly within the context of App Inventor, the preferred checkout procedure is to perform a `git submodule init`, edit the `.git/config` file to use the read/write SSH URL for [MIT CML's Blockly fork](https://github.com/mit-cml/blockly) instead of the public read-only HTTPS URL assumed by default (to support pushing changes). After changing `.git/config`, a `git submodule update` will pull the repository.
-
-If you need to switch back to a branch that does contains the Blockly and Closure Library sources in the tree, you will need to run the command:
-
-    $ git submodule deinit --all
-
-to clear out the submodules ___before switching branches___. When switching back, you will need to repeat the initialization and update procedure above.
 
 ### Troubleshooting common installation issues
 Run this command to run a self-diagnosis of your environment. This command tries to figure out common installation issues and offers you a solution to fix them yourself. Make sure this passes all the checks before you proceed further.
