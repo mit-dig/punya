@@ -70,8 +70,8 @@ public class LocationProbeSensor extends ProbeBase{
 	
 	 
 	//default settings for schedule 
-	private final int SCHEDULE_INTERVAL = 1800; //read location information every 10 minutes
-	private final int SCHEDULE_DURATION = 60; //scan for 60 seconds everytime
+	private final int SCHEDULE_INTERVAL = 180; //read location information every 3 minutes
+	private final int SCHEDULE_DURATION = 10; //scan for 10 seconds everytime
 	private final int GOOD_ENOUGHT_ACCURACY = 80;
 	private boolean useGPS = true;
 	private boolean useNetwork = true;
@@ -256,7 +256,7 @@ public class LocationProbeSensor extends ProbeBase{
 	 * GPS or Network fix
 	 * @param newVal
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "Fsocalse")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
 	@SimpleProperty(description = "Set whether the location info will use the last known location without" +
 			" acquring a new location either through GPC or Network fix")
 	public void UseCache(boolean newVal){
@@ -422,21 +422,21 @@ public class LocationProbeSensor extends ProbeBase{
 	 * Returns the default interval between each scan for this probe
 	 */
 	@SimpleProperty(description = "The default interval (in seconds) between each scan for this probe")
-	public float DefaultInterval(){return interval;}
+	public int DefaultInterval(){return interval;}
 
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT)
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "180")
 	@SimpleProperty
-	public void DefaultInterval(float defaultInterval) { this.interval = interval; }
+	public void DefaultInterval(int defaultInterval) { this.interval = interval; }
 
 	
 	/*
 	 * Returns the default duration of each scan for this probe
 	 */
 	@SimpleProperty(description = "The default duration (in seconds) of each scan for this probe")
-	public float DefaultDuration(){ return duration;}
+	public int DefaultDuration(){ return duration;}
 
 	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT)
 	@SimpleProperty
-	public void DefaultDuration(float defaultDuration) { this.duration = duration; }
+	public void DefaultDuration(int defaultDuration) { this.duration = duration; }
 	
 }
