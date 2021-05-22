@@ -422,21 +422,21 @@ public class LocationProbeSensor extends ProbeBase{
 	 * Returns the default interval between each scan for this probe
 	 */
 	@SimpleProperty(description = "The default interval (in seconds) between each scan for this probe")
-	public float DefaultInterval(){
-		
-		return SCHEDULE_INTERVAL;
-	}
+	public float DefaultInterval(){return interval;}
+
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT)
+	@SimpleProperty
+	public void DefaultInterval(float defaultInterval) { this.interval = interval; }
+
 	
 	/*
 	 * Returns the default duration of each scan for this probe
 	 */
 	@SimpleProperty(description = "The default duration (in seconds) of each scan for this probe")
-	public float DefaultDuration(){
-		
-		return SCHEDULE_DURATION;
-	}
-	
+	public float DefaultDuration(){ return duration;}
 
-	
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_FLOAT)
+	@SimpleProperty
+	public void DefaultDuration(float defaultDuration) { this.duration = duration; }
 	
 }
