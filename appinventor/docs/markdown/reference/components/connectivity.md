@@ -11,6 +11,7 @@ Table of Contents:
 * [ActivityStarter](#ActivityStarter)
 * [BluetoothClient](#BluetoothClient)
 * [BluetoothServer](#BluetoothServer)
+* [GooglePlacesService](#GooglePlacesService)
 * [LdpCoapClient](#LdpCoapClient)
 * [Serial](#Serial)
 * [Web](#Web)
@@ -395,6 +396,30 @@ Use the `BluetoothServer` component to turn your device into a server that recei
 
 {:id="BluetoothServer.StopAccepting" class="method"} <i/> StopAccepting()
 : Stop accepting an incoming connection.
+
+## GooglePlacesService  {#GooglePlacesService}
+
+Component for GooglePlacesService
+
+
+
+### Properties  {#GooglePlacesService-Properties}
+
+{:.properties}
+None
+
+
+### Events  {#GooglePlacesService-Events}
+
+{:.events}
+None
+
+
+### Methods  {#GooglePlacesService-Methods}
+
+{:.methods}
+None
+
 
 ## LdpCoapClient  {#LdpCoapClient}
 

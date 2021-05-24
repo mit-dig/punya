@@ -53,7 +53,7 @@ public class GooglePlacesService extends PlacesWebService {
         try {
             PlacesSearchResponse results = PlacesApi.nearbySearchQuery(context, myLocation).radius(nearbyRadius).await();
             for (PlacesSearchResult result : results.results) {
-                
+
             }
         } catch(Exception e) {
             e.printStackTrace();
