@@ -1,25 +1,22 @@
+// -*- mode: java; c-basic-offset: 2; -*-
+// Copyright 2013-2021 MIT, All rights reserved
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
+
 package com.google.appinventor.shared.rpc.semweb;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.List;
 import java.util.Map;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Asynchronous definition of SemWebService
  * 
  * @see SemWebService
- * @author Evan W. Patton <ewpatton@gmail.com>
+ * @author Evan W. Patton (ewpatton@gmail.com)
  *
  */
 public interface SemWebServiceAsync {
-  /**
-   * Asynchronous initialization, see {@link SemWebService#initialize()}.
-   * @deprecated
-   * @param callback
-   */
-  void initialize(AsyncCallback<java.lang.Void> callback);
-
   /**
    * Asynchronous search for classes, see {@link SemWebService#searchClasses(String)}.
    * @param text User input search text.
