@@ -10,9 +10,9 @@ import com.google.appinventor.components.common.PropertyTypeConstants;
  * @author william.van.woensel@gmail.com
  */
 @SimpleObject
-@UsesPermissions(permissionNames = "android.permission.INTERNET," +
-        "android.permission.WRITE_EXTERNAL_STORAGE," +
-        "android.permission.READ_EXTERNAL_STORAGE")
+@UsesPermissions(permissionNames = "android.permission.INTERNET")
+        // "android.permission.WRITE_EXTERNAL_STORAGE," +
+        // "android.permission.READ_EXTERNAL_STORAGE")
 
 public class WebService extends AndroidNonvisibleComponent implements Component {
 
@@ -31,7 +31,7 @@ public class WebService extends AndroidNonvisibleComponent implements Component 
         this.activity = container.$context();
     }
 
-    protected boolean checkRequirements() {
+    protected boolean checkInput() {
         if (apiKeyRequired && apiKey == null) {
             ServiceError("API key required for this service but none given. See ApiKey property.");
             return false;
@@ -44,7 +44,7 @@ public class WebService extends AndroidNonvisibleComponent implements Component 
      *
      * @return the API key
      */
-    @SimpleProperty(description = "The API key for this web service, if any.")
+    @SimpleProperty(description = "The API key for this web service, if any.", category = PropertyCategory.BEHAVIOR)
     public String ApiKey() { return apiKey; }
 
     /**

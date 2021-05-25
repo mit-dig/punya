@@ -43,7 +43,8 @@ public abstract class LocationAwareWebService extends WebService implements Prob
      *
      * @return defaultInterval
      */
-    @SimpleProperty(description = "The default interval (in seconds) between actions, where an action includes a location probe plus service call")
+    @SimpleProperty(description = "The default interval (in seconds) between actions, where an action includes a location probe plus service call",
+            category = PropertyCategory.BEHAVIOR)
     public int DefaultInterval(){return locationProbeSensor.DefaultInterval();}
 
     /**
@@ -60,7 +61,8 @@ public abstract class LocationAwareWebService extends WebService implements Prob
      *
      * @return defaultDuration
      */
-    @SimpleProperty(description = "The default duration (in seconds) of each location probe scan")
+    @SimpleProperty(description = "The default duration (in seconds) of each location probe scan",
+            category = PropertyCategory.BEHAVIOR)
     public int DefaultDuration(){ return locationProbeSensor.DefaultDuration();}
 
     /**
@@ -79,7 +81,8 @@ public abstract class LocationAwareWebService extends WebService implements Prob
      * @return goodEnoughAccuracy
      */
     @SimpleProperty(description = "The good-enough-accuracy of the location data (0-100). " +
-            "If the location accuracy lies below this threshold, then the online service will not be called.")
+            "If the location accuracy lies below this threshold, then the online service will not be called.",
+            category = PropertyCategory.BEHAVIOR)
     public int GoodEnoughAccuracy() {
         return locationProbeSensor.GoodEnoughAccuracy();
     }
@@ -96,7 +99,7 @@ public abstract class LocationAwareWebService extends WebService implements Prob
     /**
      *  Returns whether the location probe will use GPS or not.
      */
-    @SimpleProperty(description = "Whether the location probe will use GPS or not")
+    @SimpleProperty(description = "Whether the location probe will use GPS or not", category = PropertyCategory.BEHAVIOR)
     public boolean UseGPS() {
         return locationProbeSensor.UseGPS();
     }
@@ -111,7 +114,8 @@ public abstract class LocationAwareWebService extends WebService implements Prob
     /**
      *  Returns whether the location probe will use the network or not.
      */
-    @SimpleProperty(description = "whether the location probe will use the network or not")
+    @SimpleProperty(description = "whether the location probe will use the network or not",
+            category = PropertyCategory.BEHAVIOR)
     public boolean UseNetwork() { return locationProbeSensor.UseNetwork(); }
 
     /**
@@ -128,7 +132,8 @@ public abstract class LocationAwareWebService extends WebService implements Prob
      * @return minimumLocationChange
      */
     @SimpleProperty(description = "The minimal difference in location (in meters) compared to the prior location, before the service is called. " +
-            "This avoids calling the online service for location-specific data when the user's location has not really changed much.")
+            "This avoids calling the online service for location-specific data when the user's location has not really changed much.",
+            category = PropertyCategory.BEHAVIOR)
     public int MinimumLocationChange() { return minimumLocationChange; }
 
     /**
@@ -138,79 +143,4 @@ public abstract class LocationAwareWebService extends WebService implements Prob
      */
     @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "0")
     public void MinimumLocationChange(int minimumLocationChange) { this.minimumLocationChange = minimumLocationChange; }
-
-    @Override
-    public void onDataReceived(IJsonObject completeProbeUri, IJsonObject data) {
-        Log.i(TAG, "receive data");
-
-        Location location = new Location(data.get(ProbeKeys.LocationKeys.LATITUDE).getAsDouble(),
-                data.get(ProbeKeys.LocationKeys.LONGITUDE).getAsDouble(),
-                data.get(ProbeKeys.LocationKeys.ACCURACY).getAsFloat(),
-                data.get("mProvider").getAsString(),
-                data.get(ProbeKeys.LocationKeys.TIMESTAMP).getAsLong());
-
-        Log.i(TAG, "location:" + location);
-
-        locationDataReceived(location);
-    }
-
-    @Override
-    public void onDataCompleted(IJsonObject iJsonObject, JsonElement jsonElement) {
-    }
-
-    /**
-     * This method is called when receiving new location data, as per the configuration of the location probe sensor.
-     * A subclass will do something with this location (e.g., call a service for nearby places) and likely raise an event.
-     *
-     * @param locationData
-     */
-    protected abstract void locationDataReceived(Location locationData);
-
-    protected class Location {
-
-        double lat;
-        double lon;
-        float accuracy;
-        String provider;
-        long timestamp;
-
-        public Location(double lat, double lon, float accuracy, String provider, long timestamp) {
-            this.lat = lat;
-            this.lon = lon;
-            this.accuracy = accuracy;
-            this.provider = provider;
-            this.timestamp = timestamp;
-        }
-
-        public double getLat() {
-            return lat;
-        }
-
-        public double getLon() {
-            return lon;
-        }
-
-        public float getAccuracy() {
-            return accuracy;
-        }
-
-        public String getProvider() {
-            return provider;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        @Override
-        public String toString() {
-            return "LocationData{" +
-                    "lat=" + lat +
-                    ", lon=" + lon +
-                    ", accuracy=" + accuracy +
-                    ", provider='" + provider + '\'' +
-                    ", timestamp=" + timestamp +
-                    '}';
-        }
-    }
 }

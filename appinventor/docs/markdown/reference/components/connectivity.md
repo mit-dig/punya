@@ -406,20 +406,66 @@ Component for GooglePlacesService
 ### Properties  {#GooglePlacesService-Properties}
 
 {:.properties}
-None
 
+{:id="GooglePlacesService.ApiKey" .text} *ApiKey*
+: Specifies the API key.
+
+{:id="GooglePlacesService.DefaultDuration" .number} *DefaultDuration*
+: Specifies the default duration (in seconds) of each location probe scan.
+
+{:id="GooglePlacesService.DefaultInterval" .number} *DefaultInterval*
+: Specifies the default interval (in seconds) between actions, where an action includes a location probe plus service call.
+
+{:id="GooglePlacesService.EnabledNearbyPlaces" .boolean .ro .bo} *EnabledNearbyPlaces*
+: Whether the component was run once to get location data and call the web service for nearby places
+
+{:id="GooglePlacesService.EnabledScheduleNearbyPlaces" .boolean .ro .bo} *EnabledScheduleNearbyPlaces*
+: Whether the component is enabled to periodically listen for location data, and call the web service for nearby places
+
+{:id="GooglePlacesService.GoodEnoughAccuracy" .number} *GoodEnoughAccuracy*
+: Sets the good-enough-accuracy of the location data (0-100).
+
+{:id="GooglePlacesService.MinimumLocationChange" .number .ro} *MinimumLocationChange*
+: Returns the minimal difference in location (in meters) compared to the prior location, before the service is called.
+ This avoids calling the online service for location-specific data when the user's location has not really changed much.
+
+{:id="GooglePlacesService.NearbyRadius" .number .ro} *NearbyRadius*
+: Returns the radius around the user’s current location (meters) for which nearby places should be returned.
+
+{:id="GooglePlacesService.PlaceType" .text} *PlaceType*
+: Specifies the type of nearby places that should be returned.
+
+{:id="GooglePlacesService.ScheduleNearbyPlacesInterval" .number} *ScheduleNearbyPlacesInterval*
+: The default interval (in seconds) between actions, where an action includes a location probe plus service call
+
+{:id="GooglePlacesService.UseGPS" .boolean} *UseGPS*
+: Specifies whether the location probe will use GPS or not.
+
+{:id="GooglePlacesService.UseNetwork" .boolean} *UseNetwork*
+: Specifies whether the location probe will use the network or not.
 
 ### Events  {#GooglePlacesService-Events}
 
 {:.events}
-None
 
+{:id="GooglePlacesService.NearbyPlacesReceived"} NearbyPlacesReceived(*nearbyPlaces*{:.list})
+: Event indicating that nearby places have been received
+
+{:id="GooglePlacesService.ServiceDataReceived"} ServiceDataReceived(*data*{:.text})
+: Event indicating that the service call has finished.
+
+{:id="GooglePlacesService.ServiceError"} ServiceError(*error*{:.text})
+: Event indicating an error during the service call.
 
 ### Methods  {#GooglePlacesService-Methods}
 
 {:.methods}
-None
 
+{:id="GooglePlacesService.EnableNearbyPlaces" class="method"} <i/> EnableNearbyPlaces(*enableNearbyPlaces*{:.boolean})
+: Enable the component to run once to get location data, call the web service for nearby places, and raise the corresponding events
+
+{:id="GooglePlacesService.EnableScheduleNearbyPlaces" class="method"} <i/> EnableScheduleNearbyPlaces(*enableScheduleNearbyPlaces*{:.boolean})
+: Enable the component to periodically listen for location data, call the web service for nearby places, and raise the corresponding events
 
 ## LdpCoapClient  {#LdpCoapClient}
 
