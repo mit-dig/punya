@@ -1144,7 +1144,7 @@ Blockly.Blocks['gql_enum'] = {
 Blockly.Blocks['gql_dict'] = goog.object.clone(Blockly.Blocks['dictionaries_create_with']);
 goog.object.extend(Blockly.Blocks['gql_dict'], {
   category: undefined,
-
+  typeblock: undefined,
   addInput: function(inputNum) {
     var input = this.appendValueInput(this.repeatingInputName + inputNum)
       .setCheck(['GraphQLPair']);
@@ -1325,7 +1325,7 @@ goog.object.extend(Blockly.Blocks['gql_pair'], {
 Blockly.Blocks['gql_list'] = goog.object.clone(Blockly.Blocks['lists_create_with']);
 goog.object.extend(Blockly.Blocks['gql_list'], {
   category: undefined,
-
+  typeblock: undefined,
   addInput: function(inputNum) {
     var input = this.appendValueInput(this.repeatingInputName + inputNum);
 
