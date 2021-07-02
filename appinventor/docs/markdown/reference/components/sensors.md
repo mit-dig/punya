@@ -810,10 +810,10 @@ Record GPS location periodically
 
 {:.properties}
 
-{:id="LocationProbeSensor.DefaultDuration" .number .ro .bo} *DefaultDuration*
+{:id="LocationProbeSensor.DefaultDuration" .number} *DefaultDuration*
 : The default duration (in seconds) of each scan for this probe
 
-{:id="LocationProbeSensor.DefaultInterval" .number .ro .bo} *DefaultInterval*
+{:id="LocationProbeSensor.DefaultInterval" .number} *DefaultInterval*
 : The default interval (in seconds) between each scan for this probe
 
 {:id="LocationProbeSensor.EnableSaveToDB" .boolean .wo .bo} *EnableSaveToDB*

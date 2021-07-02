@@ -28,10 +28,6 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys.LocationKeys;
 import edu.mit.media.funf.probe.builtin.SensorProbe;
 import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 
-
-
-
-
 /**
  * Record GPS location periodically
  *
@@ -68,10 +64,10 @@ public class LocationProbeSensor extends ProbeBase{
 	
 	private SimpleLocationProbe probe;
 	
-	 
+
 	//default settings for schedule 
-	private final int SCHEDULE_INTERVAL = 1800; //read location information every 10 minutes
-	private final int SCHEDULE_DURATION = 60; //scan for 60 seconds everytime
+	private final int SCHEDULE_INTERVAL = 180; //read location information every 3 minutes
+	private final int SCHEDULE_DURATION = 10; //scan for 10 seconds everytime
 	private final int GOOD_ENOUGHT_ACCURACY = 80;
 	private boolean useGPS = true;
 	private boolean useNetwork = true;
@@ -82,7 +78,6 @@ public class LocationProbeSensor extends ProbeBase{
 
 	public LocationProbeSensor(ComponentContainer container) {
 		super(container);
-		// TODO Auto-generated constructor stub
 		
 		// Set up listeners
 		form.registerForOnDestroy(this);
@@ -98,7 +93,6 @@ public class LocationProbeSensor extends ProbeBase{
 			interval = SCHEDULE_INTERVAL;
 			duration = SCHEDULE_DURATION;
 			goodEnoughAccurary = GOOD_ENOUGHT_ACCURACY;
- 
 	}
 
 	final Handler myHandler = new Handler() {
@@ -117,14 +111,8 @@ public class LocationProbeSensor extends ProbeBase{
 			Log.i(TAG, " before call LocationInfoReceived();");
 			LocationInfoReceived(timestamp, mLatitude, mLongitude, mAccuracy, mProvider);
 			Log.i(TAG, " after call LocationInfoReceived();");
-
 		}
-
-
 	};
-	
-	
-	
 	
 	/**
 	* Indicates that the Location info has been received.
@@ -144,11 +132,8 @@ public class LocationProbeSensor extends ProbeBase{
                             mAccuracy, mProvider);
 				}
 			});
-
-		}	
-
+		}
 	}
-	
 	
 	/**
 	* Indicates that the updating Location info has completed.
@@ -164,12 +149,8 @@ public class LocationProbeSensor extends ProbeBase{
 							"LocationUpdateComplete");
 				}
 			});
-		}	
-		
-		
+		}
 	}
-	
-	
 	
 	private DataListener listener = new DataListener() {
 		@Override
@@ -193,7 +174,6 @@ public class LocationProbeSensor extends ProbeBase{
 			
 			//save data to DB is enabledSaveToDB is true
 			if(enabledSaveToDB){
-				
 				saveToDB(completeProbeUri, data);
 			}
 
@@ -202,14 +182,12 @@ public class LocationProbeSensor extends ProbeBase{
 			msg.obj = data;
 
 			myHandler.sendMessage(msg);
-
- 
 		}
-
 	};
-	
-	
-	
+
+	public void overrideListener(DataListener listener) {
+		this.listener = listener;
+	}
 
 	/**
 	 * Indicates whether the sensor should "run once" to listen for location information
@@ -234,7 +212,6 @@ public class LocationProbeSensor extends ProbeBase{
 			probe.unregisterListener(listener);
 			Log.i(TAG, "unregister location run-once listener");
 		}
-
 	}
 
 	/*
@@ -256,7 +233,7 @@ public class LocationProbeSensor extends ProbeBase{
 	 * GPS or Network fix
 	 * @param newVal
 	 */
-	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "Fsocalse")
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN, defaultValue = "False")
 	@SimpleProperty(description = "Set whether the location info will use the last known location without" +
 			" acquring a new location either through GPC or Network fix")
 	public void UseCache(boolean newVal){
@@ -279,9 +256,7 @@ public class LocationProbeSensor extends ProbeBase{
 	public void GoodEnoughAccuracy(int newVal) {
 		if(goodEnoughAccurary != newVal){
 			this.goodEnoughAccurary = newVal;
-			 
 		}
-
 	}
 	
 	/**
@@ -300,9 +275,7 @@ public class LocationProbeSensor extends ProbeBase{
 	public void UseGPS(boolean newVal) {
 		if(useGPS != newVal){
 			this.useGPS = newVal;
-			 
 		}
-
 	}
 	
 	
@@ -323,9 +296,7 @@ public class LocationProbeSensor extends ProbeBase{
 	public void UseNetwork(boolean newVal) {
 		if(useNetwork != newVal){
 			this.useNetwork = newVal;
-			 
 		}
-
 	}
 	
 	
@@ -337,12 +308,8 @@ public class LocationProbeSensor extends ProbeBase{
 		return useNetwork;
 	}
 	
-
-	
 	@Override
 	public void registerDataRequest(int interval, int duration) {
-		// TODO Auto-generated method stub
-		
 		Log.i(TAG, "Registering location data requests.");
 		JsonElement dataRequest = null;
 
@@ -355,22 +322,15 @@ public class LocationProbeSensor extends ProbeBase{
 		Log.i(TAG, "Location Data request: " + dataRequest.toString());
 
 		mBoundFunfManager.requestData(listener, dataRequest);
-		
 	}
-	
-	
 	
 	@Override
 	public void unregisterDataRequest() {
-		// TODO Auto-generated method stub
-		
 		Log.i(TAG, "Unregistering location data requests.");
 		//mBoundFunfManager.stopForeground(true);
 		mBoundFunfManager.unrequestAllData2(listener);
 
 		Log.i(TAG, "After Unregistering location data requests.");
-
-		
 	}
 	
 //	  /**
@@ -422,21 +382,21 @@ public class LocationProbeSensor extends ProbeBase{
 	 * Returns the default interval between each scan for this probe
 	 */
 	@SimpleProperty(description = "The default interval (in seconds) between each scan for this probe")
-	public float DefaultInterval(){
-		
-		return SCHEDULE_INTERVAL;
-	}
+	public int DefaultInterval(){return interval;}
+
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "180")
+	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
+	public void DefaultInterval(int interval) { this.interval = interval; }
+
 	
 	/*
 	 * Returns the default duration of each scan for this probe
 	 */
 	@SimpleProperty(description = "The default duration (in seconds) of each scan for this probe")
-	public float DefaultDuration(){
-		
-		return SCHEDULE_DURATION;
-	}
-	
+	public int DefaultDuration(){ return duration;}
 
-	
+	@DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_INTEGER, defaultValue = "10")
+	@SimpleProperty(category = PropertyCategory.BEHAVIOR)
+	public void DefaultDuration(int duration) { this.duration = duration; }
 	
 }
