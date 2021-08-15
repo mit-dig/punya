@@ -125,6 +125,10 @@ import org.json.JSONException;
     showOnPalette = false)
 @SimpleObject
 @UsesPermissions({INTERNET, ACCESS_WIFI_STATE, ACCESS_NETWORK_STATE})
+@UsesLibraries({
+    "xercesImpl.jar", "slf4j-android.jar", "jena-iri.jar", "jena-core.jar", "jena-arq.jar",
+    "xml-apis.jar"
+})
 public class Form extends AppInventorCompatActivity
     implements Component, ComponentContainer, HandlesEventDispatching,
         OnGlobalLayoutListener {

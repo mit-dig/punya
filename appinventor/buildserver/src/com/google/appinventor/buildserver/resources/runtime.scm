@@ -974,6 +974,7 @@
 (define-alias Short <java.lang.Short>)
 (define-alias String <java.lang.String>)
 (define-alias Pattern <java.util.regex.Pattern>)
+(define-alias RdfUtil <com.google.appinventor.components.runtime.util.RdfUtil>)
 (define-alias YailList <com.google.appinventor.components.runtime.util.YailList>)
 (define-alias YailDictionary <com.google.appinventor.components.runtime.util.YailDictionary>)
 (define-alias YailNumberToString <com.google.appinventor.components.runtime.util.YailNumberToString>)
