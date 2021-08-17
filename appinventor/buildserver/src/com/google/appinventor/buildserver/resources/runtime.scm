@@ -1568,7 +1568,7 @@
     (else (try-catch
             (arg:toYailDictionary)
             (exception java.lang.Exception
-              (*non-coercible-value*))))))
+              *non-coercible-value*)))))
 
 (define (coerce-to-boolean arg)
   (cond
