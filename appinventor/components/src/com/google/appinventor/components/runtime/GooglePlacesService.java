@@ -43,7 +43,7 @@ import edu.mit.media.funf.probe.builtin.ProbeKeys;
                 "<p>One can specify the radius (in meters) around the user for which to return places.</p>",
         category = ComponentCategory.CONNECTIVITY, nonVisible = true, iconName = "images/locationProbe.png", showOnPalette = true)
 @SimpleObject
-@UsesLibraries(libraries = "google-maps-services-0.18.1.jar")
+@UsesLibraries(libraries = "google-maps-services-0.18.1.jar,funf.jar")
 public class GooglePlacesService extends PlacesWebService implements Callback<PlacesSearchResponse> {
 
     private GeoApiContext context;
