@@ -108,6 +108,22 @@ Blockly.SPARQL['logic_sparql_star'] = function() {
 }
 
 /**
+ * @this Blockly.BlockSvg
+ * @returns {string}
+ */
+Blockly.SPARQL['logic_sparql_aggregate'] = function() {
+  var op = this.getFieldValue('OP');
+  var distinct = this.getFieldValue('DISTINCT') === 'true';
+  var code = '(' + op;
+  code += distinct ? '(DISTINCT' : '(';
+  code += Blockly.SPARQL.valueToCode(this, 'VALUE',
+    Blockly.SPARQL.ORDER_FUNCTION_CALL);
+  code += ') AS ?';
+  code += this.getFieldValue('NAME');
+  return code + ')';
+}
+
+/**
  *
  * @this Blockly.BlockSvg
  * @returns {string}
@@ -202,8 +218,19 @@ Blockly.SPARQL['logic_sparql_limit'] = function() {
  * @returns {string}
  */
 Blockly.SPARQL['logic_sparql_groupby'] = function() {
-  var code = 'GROUP BY(';
-  code += ')';
+  var code = 'GROUP BY ';
+  code += Blockly.SPARQL.valueToCode(this, 'VALUE', Blockly.SPARQL.ORDER_FUNCTION_CALL);
+  return code;
+}
+
+/**
+ *
+ * @this Blockly.BlockSvg
+ * @returns {string}
+ */
+Blockly.SPARQL['logic_sparql_having'] = function() {
+  var code = 'HAVING ';
+  code += Blockly.SPARQL.valueToCode(this, 'VALUE', Blockly.SPARQL.ORDER_FUNCTION_CALL);
   return code;
 }
 

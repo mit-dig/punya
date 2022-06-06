@@ -43,7 +43,7 @@ Blockly.Blocks.Utilities.InstantInTime = function (myConn, otherConn) {
 // Blockly's convention
 Blockly.Blocks.Utilities.YailTypeToBlocklyTypeMap = {
   'number': {
-    'input': ['Number'],
+    'input': ['Number', 'variable'],
     'output': ['Number', 'String', 'Key']
   },
   'text': {

@@ -907,6 +907,30 @@ Blockly.Blocks['logic_sparql_star'] = {
   }
 };
 
+Blockly.Blocks['logic_sparql_aggregate'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['varlist', 'variable']);
+    this.setNextStatement(true, ['varlist', 'variable']);
+    this.appendValueInput('VALUE')
+      .appendField(new Blockly.FieldDropdown([
+        ['COUNT', 'COUNT'],
+        ['SUM', 'SUM'],
+        ['MIN', 'MIN'],
+        ['MAX', 'MAX'],
+        ['AVG', 'AVG'],
+        ['SAMPLE', 'SAMPLE']
+      ]), 'OP')
+      .appendField('DISTINCT')
+      .appendField(new Blockly.FieldCheckbox('FALSE'));
+    this.appendDummyInput()
+      .appendField('AS ?')
+      .appendField(new Blockly.FieldTextInput(''), 'NAME');
+    this.setInputsInline(true);
+  }
+}
+
 Blockly.Blocks['logic_sparql_optional'] = {
   category: 'Logic',
   init: function() {
@@ -1014,6 +1038,17 @@ Blockly.Blocks['logic_sparql_groupby'] = {
     this.setNextStatement(true, ['modifier']);
     this.appendValueInput('VALUE').appendField('GROUP BY')
       .setCheck(['variable']);
+  }
+}
+
+Blockly.Blocks['logic_sparql_having'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, ['modifier']);
+    this.setNextStatement(true, ['modifier']);
+    this.appendValueInput('VALUE').appendField('HAVING')
+      .setCheck(['Boolean']);
   }
 }
 
