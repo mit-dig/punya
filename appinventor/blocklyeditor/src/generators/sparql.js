@@ -119,7 +119,12 @@ Blockly.SPARQL['logic_sparql_aggregate'] = function() {
   code += Blockly.SPARQL.valueToCode(this, 'VALUE',
     Blockly.SPARQL.ORDER_FUNCTION_CALL);
   code += ') AS ?';
-  code += this.getFieldValue('NAME');
+  var variable = this.getFieldValue('NAME');
+  if (variable.indexOf('?') === 0) {
+    code += variable.substring(1);
+  } else {
+    code += variable;
+  }
   return code + ')';
 }
 

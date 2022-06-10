@@ -910,6 +910,7 @@ Blockly.Blocks['logic_sparql_star'] = {
 Blockly.Blocks['logic_sparql_aggregate'] = {
   category: 'Logic',
   init: function() {
+    var varRegex = new RegExp('^[A-Za-z0-9\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][A-Za-z0-9\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]*$');
     this.setColour(Blockly.LOGIC_CATEGORY_HUE);
     this.setPreviousStatement(true, ['varlist', 'variable']);
     this.setNextStatement(true, ['varlist', 'variable']);
@@ -926,7 +927,12 @@ Blockly.Blocks['logic_sparql_aggregate'] = {
       .appendField(new Blockly.FieldCheckbox('FALSE'));
     this.appendDummyInput()
       .appendField('AS ?')
-      .appendField(new Blockly.FieldTextInput(''), 'NAME');
+      .appendField(new Blockly.FieldTextInput('', function(text) {
+        if (!text || text === '' || varRegex.test(text)) {
+          return text;
+        }
+        return null;
+      }), 'NAME');
     this.setInputsInline(true);
   }
 }
