@@ -11,6 +11,7 @@ import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.PunyaVersion;
+import com.google.appinventor.components.runtime.linkeddata.SumAllLinked;
 import com.google.appinventor.components.runtime.util.AsynchUtil;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 import com.google.appinventor.components.runtime.util.IOUtils;
@@ -28,6 +29,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory2;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.reasoner.BaseInfGraph;
 import com.hp.hpl.jena.reasoner.ReasonerRegistry;
+import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
 import com.hp.hpl.jena.reasoner.rulesys.FBRuleReasoner;
 import com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
@@ -60,6 +62,10 @@ public class Reasoner extends LinkedDataBase<InfModel> {
   private String rulesEngine = "";
   private String rulesFile = "";
   private List<Rule> rules = new ArrayList<>();
+
+  static {
+    BuiltinRegistry.theRegistry.register(new SumAllLinked());
+  }
 
   /**
    * Creates a new Reasoner..

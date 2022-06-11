@@ -802,6 +802,65 @@ Blockly.Blocks['logic_binding_unary_prefix'] = {
   }
 }
 
+Blockly.Blocks['logic_binding_nary_prefix'] = {
+  category: 'Logic',
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.setPreviousStatement(true, 'statement');
+    this.setNextStatement(true, 'statement');
+    this.appendValueInput('VAR')
+      .appendField('let')
+      .setAlign(Blockly.ALIGN_RIGHT)
+      .setCheck('variable');
+    this.appendValueInput('SUBJECT')
+      .appendField('be')
+      .appendField(new Blockly.FieldDropdown([
+        ['sum of all', 'sumAllLinked']
+      ]), 'OP')
+      .appendField('from')
+      .setCheck(['qname', 'variable'])
+      .setAlign(Blockly.ALIGN_RIGHT);
+    this.appendValueInput('PROP0')
+      .appendField('property')
+      .setCheck('qname')
+      .setAlign(Blockly.ALIGN_RIGHT);
+    this.setMutator(new Blockly.Mutator(['logic_property_list_item']));
+    this.itemCount_ = 1;
+    this.emptyInputName = null;
+    this.repeatingInputName = 'PROP';
+  },
+  mutationToDom: Blockly.mutationToDom,
+  domToMutation: Blockly.domToMutation,
+  decompose: function(workspace) {
+    return Blockly.decompose(workspace, 'logic_property_list_item', this);
+  },
+  compose: Blockly.compose,
+  saveConnections: Blockly.saveConnections,
+  addEmptyInput: function() {},
+  addInput: function(inputNum) {
+    var input = this.appendValueInput(this.repeatingInputName + inputNum);
+    input.appendField('property')
+      .setCheck('qname')
+      .setAlign(Blockly.ALIGN_RIGHT)
+    return input;
+  },
+  updateContainerBlock: function(containerBlock) {
+    containerBlock.setFieldValue('properties', 'CONTAINER_TEXT');
+  },
+  typeblock: [{ translatedName: 'sum of all property values' }]
+}
+
+Blockly.Blocks['logic_property_list_item'] = {
+  init: function() {
+    this.setColour(Blockly.LOGIC_CATEGORY_HUE);
+    this.appendDummyInput()
+      .appendField('property');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.contextMenu = false;
+  }
+}
+
 Blockly.Blocks['logic_equality_check'] = {
   category: 'Logic',
   init: function() {

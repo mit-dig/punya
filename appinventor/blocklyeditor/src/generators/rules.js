@@ -176,6 +176,25 @@ Blockly.Rules['logic_binding_unary_prefix'] = function() {
   return 'addOne(' + a + ', ' + c + ')';
 }
 
+/**
+ *
+ * @returns {string}
+ * @this {Blockly.Block}
+ */
+Blockly.Rules['logic_binding_nary_prefix'] = function() {
+  var code = this.getFieldValue('OP');
+  code += '(';
+  code += Blockly.Rules.valueToCode(this, 'SUBJECT', Blockly.Rules.ORDER_NONE);
+  code += ', ';
+  for (var i = 0; i < this.inputList.length - 2; i++) {
+    code += Blockly.Rules.valueToCode(this, 'PROP' + i, Blockly.Rules.ORDER_NONE);
+    code += ', ';
+  }
+  code += Blockly.Rules.valueToCode(this, 'VAR', Blockly.Rules.ORDER_NONE);
+  code += ')';
+  return code;
+}
+
 Blockly.Rules['logic_equality_check'] = function() {
   var x = Blockly.Rules.valueToCode(this, 'X', Blockly.Rules.ORDER_NONE);
   var y = Blockly.Rules.valueToCode(this, 'Y', Blockly.Rules.ORDER_NONE);
