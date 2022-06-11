@@ -1135,7 +1135,7 @@ Blockly.Blocks['logic_sparql_uri'] = {
     this.setColour(Blockly.LOGIC_CATEGORY_HUE);
     this.setOutput(true, ['qname']);
     this.appendValueInput('URI').appendField('as uri')
-      .setCheck(['text']);
+      .setCheck(['String']);
   }
 }
 
