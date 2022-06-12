@@ -45,6 +45,8 @@ public class SumAllLinked extends CollectAll {
         sum += (Double) nr;
       else if (nr instanceof Integer)
         sum += (Integer) nr;
+      else if (nr instanceof Number)
+        sum += ((Number) nr).doubleValue();
       else
         throw new BuiltinException(this, context, "unsupported datatype for sum: " + nr.getClass());
     }
