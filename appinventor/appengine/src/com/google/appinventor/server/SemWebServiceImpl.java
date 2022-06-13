@@ -5,6 +5,7 @@
 
 package com.google.appinventor.server;
 
+import com.google.appinventor.server.flags.Flag;
 import com.google.appinventor.shared.rpc.semweb.SemWebConstants;
 import com.google.appinventor.shared.rpc.semweb.SemWebService;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -50,6 +51,9 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
   private static final Logger LOG = Logger.getLogger(SemWebServiceImpl.class);
 
   private static final String INDEX_TIME = "Lucene initialization completed in %d ms.";
+
+  private static final boolean ENABLED = Flag.createFlag("semweb.enable", "true").get()
+      .equals("true");
 
   /**
    * Stores all ontology information.
@@ -136,7 +140,9 @@ public class SemWebServiceImpl extends OdeRemoteServiceServlet implements
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    new Thread(new OntologyLoader()).start();
+    if (ENABLED) {
+      new Thread(new OntologyLoader()).start();
+    }
   }
 
   /**
