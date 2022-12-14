@@ -198,6 +198,8 @@
     <!-- Used by LDP-CoAP components -->
     <copy toFile="${public.deps.dir}/element-connector-1.0.7.jar" file="${lib.dir}/element-connector/element-connector-1.0.7.jar" />
     <copy toFile="${public.deps.dir}/californium-core-ldp-1.0.0-SNAPSHOT.jar" file="${lib.dir}/californium-core-ldp/californium-core-ldp-1.0.0-SNAPSHOT.jar" />
+    <!-- Used by GooglePlacesService -->
+    <copy toFile="${public.deps.dir}/google-maps-services-0.18.1.jar" file="${lib.dir}/google-maps-services/google-maps-services-0.18.1.jar" />
     <!-- End PUNYA dependencies -->
 
 

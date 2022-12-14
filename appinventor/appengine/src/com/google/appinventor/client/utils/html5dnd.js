@@ -25,7 +25,7 @@ top.HTML5DragDrop_reportError = function(errorCode) {};
 top.HTML5DragDrop_confirmOverwriteKey = function(callback) {};
 top.HTML5DragDrop_confirmOverwriteAsset = function(proejctId, name, callback) {};
 top.HTML5DragDrop_checkProjectNameForCollision = function(name) {};
-top.HTML5DragDrop_shouldShowDropTarget = function(target) {};s
+top.HTML5DragDrop_shouldShowDropTarget = function(target) {};
 
 var dropdiv = document.createElement('div');
 dropdiv.className = 'dropdiv';

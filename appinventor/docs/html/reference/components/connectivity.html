@@ -134,6 +134,7 @@
   <li><a href="#ActivityStarter">ActivityStarter</a></li>
   <li><a href="#BluetoothClient">BluetoothClient</a></li>
   <li><a href="#BluetoothServer">BluetoothServer</a></li>
+  <li><a href="#GooglePlacesService">GooglePlacesService</a></li>
   <li><a href="#LdpCoapClient">LdpCoapClient</a></li>
   <li><a href="#Serial">Serial</a></li>
   <li><a href="#Web">Web</a></li>
@@ -473,6 +474,60 @@ set the following properties:
   <dd>Converts the given text to bytes and writes them to the output stream.</dd>
   <dt id="BluetoothServer.StopAccepting" class="method"><i></i> StopAccepting()</dt>
   <dd>Stop accepting an incoming connection.</dd>
+</dl>
+
+<h2 id="GooglePlacesService">GooglePlacesService</h2>
+
+<p>Component for GooglePlacesService</p>
+
+<h3 id="GooglePlacesService-Properties">Properties</h3>
+
+<dl class="properties">
+  <dt id="GooglePlacesService.ApiKey" class="text"><em>ApiKey</em></dt>
+  <dd>Specifies the API key.</dd>
+  <dt id="GooglePlacesService.DefaultDuration" class="number"><em>DefaultDuration</em></dt>
+  <dd>Specifies the default duration (in seconds) of each location probe scan.</dd>
+  <dt id="GooglePlacesService.DefaultInterval" class="number"><em>DefaultInterval</em></dt>
+  <dd>Specifies the default interval (in seconds) between actions, where an action includes a location probe plus service call.</dd>
+  <dt id="GooglePlacesService.EnabledNearbyPlaces" class="boolean ro bo"><em>EnabledNearbyPlaces</em></dt>
+  <dd>Whether the component was run once to get location data and call the web service for nearby places</dd>
+  <dt id="GooglePlacesService.EnabledScheduleNearbyPlaces" class="boolean ro bo"><em>EnabledScheduleNearbyPlaces</em></dt>
+  <dd>Whether the component is enabled to periodically listen for location data, and call the web service for nearby places</dd>
+  <dt id="GooglePlacesService.GoodEnoughAccuracy" class="number"><em>GoodEnoughAccuracy</em></dt>
+  <dd>Sets the good-enough-accuracy of the location data (0-100).</dd>
+  <dt id="GooglePlacesService.MinimumLocationChange" class="number ro"><em>MinimumLocationChange</em></dt>
+  <dd>Returns the minimal difference in location (in meters) compared to the prior location, before the service is called.
+ This avoids calling the online service for location-specific data when the user’s location has not really changed much.</dd>
+  <dt id="GooglePlacesService.NearbyRadius" class="number ro"><em>NearbyRadius</em></dt>
+  <dd>Returns the radius around the user’s current location (meters) for which nearby places should be returned.</dd>
+  <dt id="GooglePlacesService.PlaceType" class="text"><em>PlaceType</em></dt>
+  <dd>Specifies the type of nearby places that should be returned.</dd>
+  <dt id="GooglePlacesService.ScheduleNearbyPlacesInterval" class="number"><em>ScheduleNearbyPlacesInterval</em></dt>
+  <dd>The default interval (in seconds) between actions, where an action includes a location probe plus service call</dd>
+  <dt id="GooglePlacesService.UseGPS" class="boolean"><em>UseGPS</em></dt>
+  <dd>Specifies whether the location probe will use GPS or not.</dd>
+  <dt id="GooglePlacesService.UseNetwork" class="boolean"><em>UseNetwork</em></dt>
+  <dd>Specifies whether the location probe will use the network or not.</dd>
+</dl>
+
+<h3 id="GooglePlacesService-Events">Events</h3>
+
+<dl class="events">
+  <dt id="GooglePlacesService.NearbyPlacesReceived">NearbyPlacesReceived(<em class="list">nearbyPlaces</em>)</dt>
+  <dd>Event indicating that nearby places have been received</dd>
+  <dt id="GooglePlacesService.ServiceDataReceived">ServiceDataReceived(<em class="text">data</em>)</dt>
+  <dd>Event indicating that the service call has finished.</dd>
+  <dt id="GooglePlacesService.ServiceError">ServiceError(<em class="text">error</em>)</dt>
+  <dd>Event indicating an error during the service call.</dd>
+</dl>
+
+<h3 id="GooglePlacesService-Methods">Methods</h3>
+
+<dl class="methods">
+  <dt id="GooglePlacesService.EnableNearbyPlaces" class="method"><i></i> EnableNearbyPlaces(<em class="boolean">enableNearbyPlaces</em>)</dt>
+  <dd>Enable the component to run once to get location data, call the web service for nearby places, and raise the corresponding events</dd>
+  <dt id="GooglePlacesService.EnableScheduleNearbyPlaces" class="method"><i></i> EnableScheduleNearbyPlaces(<em class="boolean">enableScheduleNearbyPlaces</em>)</dt>
+  <dd>Enable the component to periodically listen for location data, call the web service for nearby places, and raise the corresponding events</dd>
 </dl>
 
 <h2 id="LdpCoapClient">LdpCoapClient</h2>
