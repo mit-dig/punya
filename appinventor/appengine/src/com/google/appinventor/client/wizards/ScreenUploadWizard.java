@@ -58,7 +58,7 @@ public class ScreenUploadWizard extends Wizard {
               substring(Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\')) + 1);
 
           // Make sure the project name is legal and unique.
-          if (!TextValidators.checkNewProjectName(filename)) {
+          if (!TextValidators.checkNewComponentName(filename)) {
             return;
           }
 

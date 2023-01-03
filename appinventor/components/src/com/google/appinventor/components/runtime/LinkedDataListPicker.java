@@ -134,7 +134,7 @@ public class LinkedDataListPicker extends Picker implements ActivityResultListen
     });
     intent.putExtra(".source", bundle);
     //intent.putExtra(SWLIST_ACTIVITY_ARG_NAME, items.toArray(new LabeledUri[] {}));
-    String openAnim = container.$form().getOpenAnimType();
+    String openAnim = container.$form().OpenScreenAnimation();
     intent.putExtra(SWLIST_ACTIVITY_ANIM_TYPE, openAnim);
     return intent;
   }

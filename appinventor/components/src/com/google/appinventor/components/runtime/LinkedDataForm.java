@@ -1,5 +1,7 @@
 package com.google.appinventor.components.runtime;
 
+import static com.google.appinventor.components.common.ComponentConstants.LAYOUT_ORIENTATION_VERTICAL;
+
 import android.util.Log;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
@@ -57,7 +59,7 @@ public class LinkedDataForm extends HVArrangement {
    * @param container the component containing this form
    */
   public LinkedDataForm(ComponentContainer<AndroidViewComponent> container) {
-    super(container, HVArrangement.LAYOUT_ORIENTATION_VERTICAL, false);
+    super(container, LAYOUT_ORIENTATION_VERTICAL, false);
     concept = "";
     baseUri = SemanticWebConstants.DEFAULT_BASE_URI;
     property = "";

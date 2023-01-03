@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2019 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -66,6 +66,10 @@ public final class ErrorMessages {
   public static final int ERROR_NXT_CANNOT_DETECT_COLOR = 417;
   public static final int ERROR_NXT_CANNOT_DETECT_LIGHT = 418;
   public static final int ERROR_NXT_INVALID_GENERATE_COLOR = 419;
+  public static final int ERROR_NXT_INVALID_MOTOR_MODE = 420;
+  public static final int ERROR_NXT_INVALID_REGULATION_MODE = 421;
+  public static final int ERROR_NXT_INVALID_SENSOR_TYPE = 422;
+  public static final int ERROR_NXT_INVALID_SENSOR_MODE = 423;
   // Bluetooth errors
   public static final int ERROR_BLUETOOTH_NOT_AVAILABLE = 501;
   public static final int ERROR_BLUETOOTH_NOT_ENABLED = 502;
@@ -140,6 +144,8 @@ public final class ErrorMessages {
   public static final int ERROR_WEB_XML_TEXT_DECODE_FAILED = 1115;
   public static final int ERROR_WEB_REQUEST_TIMED_OUT = 1117; //Continuing from number after contact picker
   public static final int ERROR_WEB_JSON_TEXT_ENCODE_FAILED = 1118;
+  public static final int ERROR_WEB_UNABLE_TO_MODIFY_RESOURCE = ERROR_WEB_UNABLE_TO_POST_OR_PUT;
+  public static final int ERROR_WEB_UNABLE_TO_MODIFY_RESOURCE_FILE = ERROR_WEB_UNABLE_TO_POST_OR_PUT_FILE;
   // Contact picker (and PhoneNumberPicker) errors
   public static final int ERROR_PHONE_UNSUPPORTED_CONTACT_PICKER = 1107;
   public static final int ERROR_PHONE_UNSUPPORTED_SEARCH_IN_CONTACT_PICKING = 1108;
@@ -213,6 +219,13 @@ public final class ErrorMessages {
   public static final int ERROR_CANNOT_WRITE_TO_FILE = 2104;
   public static final int ERROR_CANNOT_DELETE_ASSET = 2105;
   public static final int ERROR_CANNOT_WRITE_ASSET = 2106;
+  public static final int ERROR_CANNOT_DELETE_FILE = 2107;
+  public static final int ERROR_CANNOT_MAKE_DIRECTORY = 2108;
+  public static final int ERROR_FILE_EXISTS_AT_PATH = 2109;
+  public static final int ERROR_DIRECTORY_DOES_NOT_EXIST = 2110;
+  public static final int ERROR_NOT_A_DIRECTORY = 2111;
+  public static final int ERROR_CANNOT_LIST_DIRECTORY = 2112;
+  public static final int ERROR_CANNOT_REMOVE_DIRECTORY = 2113;
 
   // Yandex.Translate errors
   public static final int ERROR_TRANSLATE_NO_KEY_FOUND = 2201;
@@ -446,6 +459,14 @@ public final class ErrorMessages {
         "Cannot detect light level when the DetectColor property is set to True.");
     errorMessages.put(ERROR_NXT_INVALID_GENERATE_COLOR,
         "The GenerateColor property is limited to None, Red, Green, or Blue.");
+    errorMessages.put(ERROR_NXT_INVALID_MOTOR_MODE,
+        "%d is an invalid NXT motor mode.");
+    errorMessages.put(ERROR_NXT_INVALID_REGULATION_MODE,
+        "%d is an invalid NXT motor regulation mode.");
+    errorMessages.put(ERROR_NXT_INVALID_SENSOR_TYPE,
+        "%d is an invalid NXT sensor type.");
+    errorMessages.put(ERROR_NXT_INVALID_SENSOR_MODE,
+        "%d is an invalid NXT sensor mode.");
     // LegoMindstormsEv3 errors
     errorMessages.put(ERROR_EV3_BLUETOOTH_NOT_SET,
         "The Bluetooth property has not been set.");
@@ -558,9 +579,9 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_WEB_UNSUPPORTED_ENCODING,
         "The encoding %s is not supported.");
     errorMessages.put(ERROR_WEB_UNABLE_TO_POST_OR_PUT,
-        "Unable to post or put the text \"%s\" with the specified URL: %s");
+        "Unable to complete the given request with the text \"%s\" with the specified URL: %s");
     errorMessages.put(ERROR_WEB_UNABLE_TO_POST_OR_PUT_FILE,
-        "Unable to post or put the file \"%s\" with the specified URL %s.");
+        "Unable to complete the given request with the file \"%s\" with the specified URL %s.");
     errorMessages.put(ERROR_WEB_JSON_TEXT_DECODE_FAILED,
         "Unable to decode the JSON text: %s");
     errorMessages.put(ERROR_WEB_HTML_TEXT_DECODE_FAILED,
@@ -692,6 +713,13 @@ public final class ErrorMessages {
     errorMessages.put(ERROR_CANNOT_WRITE_TO_FILE, "Cannot write to file %s");
     errorMessages.put(ERROR_CANNOT_DELETE_ASSET, "Cannot delete asset file at %s");
     errorMessages.put(ERROR_CANNOT_WRITE_ASSET, "Cannot write asset file at %s");
+    errorMessages.put(ERROR_CANNOT_DELETE_FILE, "Cannot delete file at %s");
+    errorMessages.put(ERROR_CANNOT_MAKE_DIRECTORY, "Cannot create directory at %s");
+    errorMessages.put(ERROR_FILE_EXISTS_AT_PATH, "File already exists at %s");
+    errorMessages.put(ERROR_DIRECTORY_DOES_NOT_EXIST, "The directory %s could not be found");
+    errorMessages.put(ERROR_NOT_A_DIRECTORY, "The path at %s is not a directory");
+    errorMessages.put(ERROR_CANNOT_LIST_DIRECTORY, "Cannot list directory at %s");
+    errorMessages.put(ERROR_CANNOT_REMOVE_DIRECTORY, "Cannot remove directory at %s");
     //Yandex.Translate translate Errors
     errorMessages.put(ERROR_TRANSLATE_NO_KEY_FOUND, "Missing API key for the Yandex.Translate " +
         "service.");
@@ -810,9 +838,10 @@ public final class ErrorMessages {
     //ChartData Errors
     errorMessages.put(ERROR_INVALID_CHART_ENTRY_VALUES, "Invalid Chart Entry Value(s): %1$s, %2$s");
     errorMessages.put(ERROR_NULL_CHART_ENTRY_VALUES, "Undefined value was present in Chart Entry");
-    errorMessages.put(ERROR_INSUFFICIENT_CHART_ENTRY_VALUES, "Chart entry did not contain enough values; " +
-        "Expected %1$d, but was %2$d");
-    errorMessages.put(ERROR_INVALID_CHART_DATA_COLOR, "Invalid Chart Data color parameter specified: %1$s");
+    errorMessages.put(ERROR_INSUFFICIENT_CHART_ENTRY_VALUES, "Chart entry did not contain enough "
+        + "values; Expected %1$d, but was %2$d");
+    errorMessages.put(ERROR_INVALID_CHART_DATA_COLOR, "Invalid Chart Data color parameter "
+        + "specified: %1$s");
 
     // Reasoning
     errorMessages.put(ERROR_REASONER_FAILED, "Reasoning failed due to error: %s");

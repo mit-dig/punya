@@ -260,7 +260,12 @@ public class AppInventorCompatActivity extends FragmentActivity implements AppCo
     }
   }
 
-  protected boolean isRepl() {
+  /**
+   * Checks whether the activity is the REPL.
+   *
+   * @return true if the activity is the REPL, otherwise false
+   */
+  public boolean isRepl() {
     return false;
   }
 

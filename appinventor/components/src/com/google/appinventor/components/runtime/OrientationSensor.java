@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -117,8 +117,7 @@ public class OrientationSensor extends AndroidNonvisibleComponent
   private final float[] values = new float[DIMENSIONS];
 
   // Set of observers
-  private final Set<DataSink<ObservableDataSource<String, Float>>> dataSourceObservers
-      = new HashSet<>();
+  private Set<DataSourceChangeListener> dataSourceObservers = new HashSet<>();
 
   /**
    * Creates a new OrientationSensor component.
@@ -466,28 +465,30 @@ public class OrientationSensor extends AndroidNonvisibleComponent
   }
 
   @Override
-  public void addDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
+  public void addDataObserver(DataSourceChangeListener dataComponent) {
     dataSourceObservers.add(dataComponent);
   }
 
   @Override
-  public void removeDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
+  public void removeDataObserver(DataSourceChangeListener dataComponent) {
     dataSourceObservers.remove(dataComponent);
   }
 
   @Override
   public void notifyDataObservers(String key, Object value) {
     // Notify each Chart Data observer component of the Data value change
-    for (DataSink<ObservableDataSource<String, Float>> dataComponent : dataSourceObservers) {
+    for (DataSourceChangeListener dataComponent : dataSourceObservers) {
       dataComponent.onReceiveValue(this, key, value);
     }
   }
 
   /**
-   * Returns a data value corresponding to the provided key:
-   * azimuth - azimuth value
-   * pitch   - pitch value
-   * roll    - roll value
+   * Returns a data value corresponding the given key. Possible keys include:
+   * <ul>
+   * <li>azimuth - azimuth value</li>
+   * <li>pitch   - pitch value</li>
+   * <li>roll    - roll value</li>
+   * </ul>
    *
    * @param key identifier of the value
    * @return    Value corresponding to the key, or 0 if key is undefined.

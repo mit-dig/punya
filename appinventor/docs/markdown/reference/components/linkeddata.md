@@ -167,7 +167,7 @@ Linked Data Form provides a layout in which contained form elements will be
 
 {:id="LinkedDataForm.AlignVertical" .number} *AlignVertical*
 : A number that encodes how the contents of the `LinkedDataForm` are aligned vertically. The choices
- are: `1` = aligned at the top, `2` = aligned at the bottom, `3` = vertically centered.
+ are: `1` = aligned at the top, `2` = vertically centered, `3` = aligned at the bottom.
  Alignment has no effect if the `LinkedDataForm`'s [`Height`](#LinkedDataForm.Height) is `Automatic`.
 
 {:id="LinkedDataForm.BackgroundColor" .color} *BackgroundColor*

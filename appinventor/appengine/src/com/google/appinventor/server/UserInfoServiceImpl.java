@@ -25,6 +25,14 @@ import com.google.appinventor.shared.rpc.user.Config;
 import com.google.appinventor.shared.rpc.user.User;
 import com.google.appinventor.shared.rpc.user.UserInfoService;
 import com.google.appinventor.shared.storage.StorageUtil;
+import com.google.appinventor.server.tokens.Token;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Logger;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -42,6 +50,13 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
   private final transient StorageIo storageIo = StorageIoInstanceHolder.getInstance();
 
   private static final long serialVersionUID = -7316312435338169166L;
+
+  private static final Logger LOG = Logger.getLogger(UserInfoServiceImpl.class.getName());
+
+  @SuppressWarnings("SimpleDateFormat")
+  private static final DateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+
+  private static boolean deleteAccountAllowed = Flag.createFlag("auth.deleteaccountallowed", true).get();
 
   /**
    * Returns System Config, including user information record
@@ -81,9 +96,22 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
     config.setGalleryEnabled(Flag.createFlag("gallery.enabled", false).get());
     config.setGalleryReadOnly(Flag.createFlag("gallery.readonly", false).get());
     config.setGalleryLocation(Flag.createFlag("gallery.location", "").get());
+    config.setDeleteAccountAllowed(deleteAccountAllowed);
 
     if (!Flag.createFlag("build2.server.host", "").get().isEmpty()) {
       config.setSecondBuildserver(true);
+    }
+
+    String expirationDate = Flag.createFlag("service.expires.time", "").get();
+    if (!expirationDate.isEmpty()) {
+      try {
+        Date expires = ISO8601.parse(expirationDate);
+        if (expires.before(new Date())) {
+          config.setServerExpired(true);
+        }
+      } catch (ParseException e) {
+        throw CrashReport.createAndLogError(LOG, null, null, e);
+      }
     }
 
     // Check to see if we need to upgrade this user's project to GCS
@@ -284,6 +312,25 @@ public class UserInfoServiceImpl extends OdeRemoteServiceServlet implements User
   @Override
   public void storeSharedBackpack(String backPackId, String content) {
     storageIo.uploadBackpack(backPackId, content);
+  }
+
+  @Override
+  public String deleteAccount() {
+    if (!deleteAccountAllowed) {
+      return ("");
+    }
+    if (storageIo.deleteAccount(userInfoProvider.getUserId())) {
+      String delAccountUrl = Flag.createFlag("deleteaccount.url", "NONE").get();
+      if (delAccountUrl.equals("NONE")) {
+        return (delAccountUrl);
+      } else {
+        String token = Token.makeAccountDeletionToken(userInfoProvider.getUserId(),
+          userInfoProvider.getUserEmail());
+        return (delAccountUrl + "/?token=" + token);
+      }
+    } else {
+      return ("");
+    }
   }
 
 }

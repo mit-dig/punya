@@ -1,5 +1,5 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2019-2020 MIT, All rights reserved
+// Copyright 2019-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,31 +8,42 @@ package com.google.appinventor.components.runtime;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.drawable.ColorDrawable;
+
 import android.view.View;
+
 import android.widget.RelativeLayout;
-import com.google.appinventor.components.common.ComponentConstants;
-import org.easymock.EasyMock;
-import org.junit.Before;
-import org.junit.Test;
+
+import com.google.appinventor.components.common.ChartType;
 
 import java.util.ArrayList;
 
+import org.easymock.EasyMock;
+
+import org.junit.Before;
+import org.junit.Test;
+
 /**
  * Abstract test class for the Chart class.
- * <p>
- * Contains test cases for functionality independent of the Chart type.
+ *
+ * <p>Contains test cases for functionality independent of the Chart type.</p>
  */
-public abstract class AbstractChartTest<V extends ChartView,
-    C extends com.github.mikephil.charting.charts.Chart> extends RobolectricTestBase {
+public abstract class AbstractChartTest<
+    C extends com.github.mikephil.charting.charts.Chart<?>,
+    V extends ChartView<?, ?, ?, C, V>>
+    extends RobolectricTestBase {
   protected V chartView;
   protected C chart;
   protected Chart chartComponent;
 
+  /**
+   * Configures a new Chart component for testing.
+   */
   @Before
   public void setUp() {
     super.setUp();
@@ -50,7 +61,7 @@ public abstract class AbstractChartTest<V extends ChartView,
   public void testChartConstructorDefaultProperties() {
     Chart defaultChart = new Chart(getForm());
 
-    assertEquals(ComponentConstants.CHART_TYPE_LINE, defaultChart.Type());
+    assertEquals(ChartType.Line, defaultChart.Type());
     assertEquals(Component.COLOR_DEFAULT, defaultChart.BackgroundColor());
     assertEquals("", defaultChart.Description());
     assertTrue(defaultChart.getView().isEnabled());
@@ -106,7 +117,7 @@ public abstract class AbstractChartTest<V extends ChartView,
     // Chart itself in the Chart componentt Relative Layout view,
     // separate handling has to be done here for the Pie Chart.
     // TODO: Refactor this to be in separate corresponding classes.
-    if (getType() == ComponentConstants.CHART_TYPE_PIE) {
+    if (getType() == ChartType.Pie) {
       // The Root Chart view is the child of the RelativeLayout which is
       // a child of the Chart component's RelativeLayout.
       assertEquals(chart, ((RelativeLayout) child).getChildAt(0));
@@ -115,7 +126,7 @@ public abstract class AbstractChartTest<V extends ChartView,
     }
 
     // Change the Type of the Chart
-    chartComponent.Type(0);
+    chartComponent.Type(ChartType.Line);
 
     // Assert that the getChartView method no longer returns
     // the removed chartView
@@ -138,7 +149,7 @@ public abstract class AbstractChartTest<V extends ChartView,
 
     chartComponent.Description(description);
     chartComponent.BackgroundColor(argb);
-    chartComponent.Type(0);
+    chartComponent.Type(ChartType.Line);
 
     assertEquals(description, chart.getDescription().getText());
     assertEquals(argb, ((ColorDrawable) chart.getBackground()).getColor());
@@ -150,7 +161,7 @@ public abstract class AbstractChartTest<V extends ChartView,
    */
   @Test
   public void testChangeTypeReinitializeChartDataComponents() {
-    ArrayList<ChartDataBase> dataComponents = new ArrayList<ChartDataBase>();
+    ArrayList<ChartDataBase> dataComponents = new ArrayList<>();
 
     for (int i = 0; i < 3; ++i) {
       // Create a mock Data component, and expect an initChartData
@@ -165,7 +176,7 @@ public abstract class AbstractChartTest<V extends ChartView,
       dataComponents.add(dataComponent);
     }
 
-    chartComponent.Type(0);
+    chartComponent.Type(ChartType.Line);
 
     // Verify initChartData() method calls for all the
     // attached Data components.
@@ -254,9 +265,9 @@ public abstract class AbstractChartTest<V extends ChartView,
   }
 
   /**
-   * Returns the type of the Chart (integer representation)
+   * Returns the type of the Chart (integer representation).
    *
    * @return Chart Type (integer)
    */
-  public abstract int getType();
+  public abstract ChartType getType();
 }

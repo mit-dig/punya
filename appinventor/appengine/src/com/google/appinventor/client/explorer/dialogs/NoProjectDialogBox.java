@@ -76,19 +76,19 @@ public class NoProjectDialogBox extends DialogBox {
   @UiHandler("goToApp1")
   void handleGoToPurr(ClickEvent e) {
     this.hide();
-    new TemplateUploadWizard().createProjectFromExistingZip("RdfNotepad", new NewTutorialProject());
+    new TemplateUploadWizard().createProjectFromExistingZip("RdfNotepad", new NewTutorialProject(), "RdfNotepad");
   }
 
   @UiHandler("goToApp2")
   void handleGoToTalk(ClickEvent e) {
     this.hide();
-    new TemplateUploadWizard().createProjectFromExistingZip("SleepApnea", new NewTutorialProject());
+    new TemplateUploadWizard().createProjectFromExistingZip("SleepApnea", new NewTutorialProject(), "SleepApnea");
   }
 
   @UiHandler("goToApp3")
   void handleGoToYR(ClickEvent e) {
     this.hide();
-    new TemplateUploadWizard().createProjectFromExistingZip("LdpCoapTutorial", new NewTutorialProject());
+    new TemplateUploadWizard().createProjectFromExistingZip("LdpCoapTutorial", new NewTutorialProject(), "LdpCoapTutorial");
   }
 
   @UiHandler("noDialogNewProject")

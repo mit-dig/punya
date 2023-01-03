@@ -1,16 +1,20 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2017 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client.editor.simple.components.utils;
 
 import com.google.appinventor.client.ComponentsTranslation;
-import com.google.appinventor.client.editor.simple.components.MockForm;
+
 import com.google.appinventor.client.editor.simple.components.MockComponent;
+import com.google.appinventor.client.editor.simple.components.MockForm;
+
 import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
+
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
+
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidAccelerometerSensitivityChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidAlignmentChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidAssetSelectorPropertyEditor;
@@ -18,10 +22,12 @@ import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroid
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidButtonShapeChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidChartLineTypeChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidChartPointShapeChoicePropertyEditor;
+import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidChartTypeChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidColorChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidComponentSelectorPropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidDataColumnSelectorProperty;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidDefaultURLPropertyEditor;
+import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidFileScopePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidFloatRangePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidFontTypefaceChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidGeoJSONPropertyEditor;
@@ -34,9 +40,12 @@ import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroid
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidLegoEv3UltrasonicSensorModeChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidLegoNxtSensorPortChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidLengthPropertyEditor;
+import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidListViewAddDataPropertyEditor;
+import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidListViewLayoutChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidMapScaleUnitsPropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidMapTypePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidNavigationMethodChoicePropertyEditor;
+import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidRecyclerViewOrientationPropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidScreenAnimationChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidScreenOrientationChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidSensorDistIntervalChoicePropertyEditor;
@@ -46,26 +55,29 @@ import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroid
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidThemeChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidToastLengthChoicePropertyEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidVerticalAlignmentChoicePropertyEditor;
-import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidChartTypeChoicePropertyEditor;
+
 import com.google.appinventor.client.properties.BadPropertyEditorException;
 import com.google.appinventor.client.properties.Property;
+
 import com.google.appinventor.client.widgets.properties.ChoicePropertyEditor;
 import com.google.appinventor.client.widgets.properties.CountryChoicePropertyEditor;
 import com.google.appinventor.client.widgets.properties.EditableProperties;
 import com.google.appinventor.client.widgets.properties.EditableProperty;
 import com.google.appinventor.client.widgets.properties.FloatPropertyEditor;
 import com.google.appinventor.client.widgets.properties.IntegerPropertyEditor;
-import com.google.appinventor.client.widgets.properties.SemanticWebPropertyEditor;
-import com.google.appinventor.client.widgets.properties.SubsetJSONPropertyEditor;
 import com.google.appinventor.client.widgets.properties.LanguageChoicePropertyEditor;
 import com.google.appinventor.client.widgets.properties.NonNegativeFloatPropertyEditor;
 import com.google.appinventor.client.widgets.properties.NonNegativeIntegerPropertyEditor;
 import com.google.appinventor.client.widgets.properties.PropertyEditor;
 import com.google.appinventor.client.widgets.properties.ScalingChoicePropertyEditor;
+import com.google.appinventor.client.widgets.properties.SemanticWebPropertyEditor;
 import com.google.appinventor.client.widgets.properties.StringPropertyEditor;
+import com.google.appinventor.client.widgets.properties.SubsetJSONPropertyEditor;
 import com.google.appinventor.client.widgets.properties.TextAreaPropertyEditor;
 import com.google.appinventor.client.widgets.properties.TextPropertyEditor;
+
 import com.google.appinventor.components.common.PropertyTypeConstants;
+
 import com.google.appinventor.shared.simple.ComponentDatabaseInterface;
 
 import java.util.Collections;
@@ -88,18 +100,19 @@ import java.util.List;
 public class PropertiesUtil {
   // Construct a HashSet of acceptable Chart Data Source components
   private static final HashSet<String> CHART_DATA_SOURCES = new HashSet<String>() {{
-    add("DataFile");
-    add("TinyDB");
-    add("CloudDB");
-    add("AccelerometerSensor");
-    add("BluetoothClient");
-    add("Web");
-    add("GyroscopeSensor");
-    add("OrientationSensor");
-    add("ProximitySensor");
-    add("Pedometer");
-    add("LocationSensor");
-  }};
+      add("DataFile");
+      add("TinyDB");
+      add("CloudDB");
+      add("AccelerometerSensor");
+      add("BluetoothClient");
+      add("Web");
+      add("GyroscopeSensor");
+      add("OrientationSensor");
+      add("ProximitySensor");
+      add("Pedometer");
+      add("LocationSensor");
+      add("Spreadsheet");
+    }};
 
 
   /**
@@ -109,16 +122,16 @@ public class PropertiesUtil {
   }
 
   /**
-   * Populate properties of a MockComponent, given a list of property definitons
+   * Populate properties of a MockComponent, given a list of property definitions
    * @param mockComponent
-   * @param propertyDefintions
+   * @param propertyDefinitions
    */
-  public static void populateProperties(MockComponent mockComponent, List<ComponentDatabaseInterface.PropertyDefinition> propertyDefintions,
+  public static void populateProperties(MockComponent mockComponent, List<ComponentDatabaseInterface.PropertyDefinition> propertyDefinitions,
                                         YaFormEditor editor) {
 
     String componentType = mockComponent.getType();
     // Configure properties
-    for (ComponentDatabaseInterface.PropertyDefinition property : propertyDefintions) {
+    for (ComponentDatabaseInterface.PropertyDefinition property : propertyDefinitions) {
       mockComponent.addProperty(property.getName(), property.getDefaultValue(),
           ComponentsTranslation.getPropertyName(property.getCaption()),
           ComponentsTranslation.getPropertyName(property.getCategory()),
@@ -132,7 +145,7 @@ public class PropertiesUtil {
   }
 
   // Use individual methods for each property since we can't write the generic
-  // getExstingPropertyEditor due to type safety issues - see below.
+  // getExistingPropertyEditor due to type safety issues - see below.
 
   /**
    * Retrieves the property editor for Horizontal Alignment.
@@ -219,6 +232,8 @@ public class PropertiesUtil {
       return new YoungAndroidColorChoicePropertyEditor(defaultValue);
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_COMPONENT)) {
       return new YoungAndroidComponentSelectorPropertyEditor(editor);
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_FILESCOPE)) {
+      return new YoungAndroidFileScopePropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_FLOAT)) {
       return new FloatPropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_GEOGRAPHIC_POINT)) {
@@ -298,6 +313,10 @@ public class PropertiesUtil {
       return new ScalingChoicePropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_FIREBASE_URL)) {
       return new YoungAndroidDefaultURLPropertyEditor("DEFAULT");
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_LISTVIEW_ADD_DATA)) {
+      return new YoungAndroidListViewAddDataPropertyEditor(editor);
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_LISTVIEW_LAYOUT)) {
+      return new YoungAndroidListViewLayoutChoicePropertyEditor();
     } else if (editorType.startsWith(PropertyTypeConstants.PROPERTY_TYPE_COMPONENT + ":")) {
       String type = editorType.substring(PropertyTypeConstants.PROPERTY_TYPE_COMPONENT.length() + 2);
       type = type.substring(type.lastIndexOf('.') + 1);
@@ -318,6 +337,8 @@ public class PropertiesUtil {
       return new YoungAndroidChartPointShapeChoicePropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_CHART_LINE_TYPE)) {
       return new YoungAndroidChartLineTypeChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_RECYCLERVIEW_ORIENTATION)) {
+      return new YoungAndroidRecyclerViewOrientationPropertyEditor(); 
     } else {
       return new TextPropertyEditor();
     }
