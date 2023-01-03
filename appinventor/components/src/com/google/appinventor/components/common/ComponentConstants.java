@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2018 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -23,8 +23,9 @@ public class ComponentConstants {
   /**
    * Layout constants.
    */
-  public static final int LAYOUT_ORIENTATION_HORIZONTAL = 0;
-  public static final int LAYOUT_ORIENTATION_VERTICAL = 1;
+  public static final int LAYOUT_ORIENTATION_HORIZONTAL = 1;
+  public static final int LAYOUT_ORIENTATION_VERTICAL = 0;
+  public static final int LAYOUT_ORIENTATION_GRID = 2;
 
   public static final int DEFAULT_ROW_COLUMN = -1;
 
@@ -116,26 +117,18 @@ public class ComponentConstants {
   public static final int RECTANGLE_PREFERRED_WIDTH = 50;
   public static final int RECTANGLE_PREFERRED_HEIGHT = 30;
 
-  /**
+  /*
+   * Constants for type of ListViewLayout
+   */
+  public static final int LISTVIEW_LAYOUT_SINGLE_TEXT = 0;
+  public static final int LISTVIEW_LAYOUT_TWO_TEXT = 1;
+  public static final int LISTVIEW_LAYOUT_TWO_TEXT_LINEAR = 2;
+  public static final int LISTVIEW_LAYOUT_IMAGE_SINGLE_TEXT = 3;
+  public static final int LISTVIEW_LAYOUT_IMAGE_TWO_TEXT = 4;
+
+  /*
    * Chart Components
    */
   public static final int CHART_PREFERRED_WIDTH = 176;
   public static final int CHART_PREFERRED_HEIGHT = 144;
-
-  public static final int CHART_TYPE_LINE = 0;
-  public static final int CHART_TYPE_SCATTER = 1;
-  public static final int CHART_TYPE_AREA = 2;
-  public static final int CHART_TYPE_BAR = 3;
-  public static final int CHART_TYPE_PIE = 4;
-  public static final int CHART_TYPES = 5; // Number of Chart Types
-
-  public static final int CHART_POINT_STYLE_CIRCLE = 0;
-  public static final int CHART_POINT_STYLE_SQUARE = 1;
-  public static final int CHART_POINT_STYLE_TRIANGLE = 2;
-  public static final int CHART_POINT_STYLE_CROSS = 3;
-  public static final int CHART_POINT_STYLE_X = 4;
-
-  public static final int CHART_LINE_TYPE_LINEAR = 0;
-  public static final int CHART_LINE_TYPE_CURVED = 1;
-  public static final int CHART_LINE_TYPE_STEPPED = 2;
 }

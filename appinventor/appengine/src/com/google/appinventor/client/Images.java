@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2017 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -375,6 +375,13 @@ public interface Images extends Resources {
   ImageResource listview();
 
   /**
+ * Designer palette item: ListView component
+ */
+
+ @Source("com/google/appinventor/images/recyclerView.png")
+ ImageResource recyclerview();
+
+  /**
    * Designer palette item: PhoneCall component
    */
   @Source("com/google/appinventor/images/phoneCall.png")
@@ -403,6 +410,12 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/gameClient.png")
   ImageResource gameclient();
+
+  /**
+   * Designer pallete item: Spreadsheet component
+   */
+  @Source("com/google/appinventor/images/spreadsheet.png")
+  ImageResource spreadsheet();
 
   /**
    * Designer palette item: Sprite
@@ -812,6 +825,12 @@ public interface Images extends Resources {
     */
   @Source("com/google/appinventor/images/spinner.png")
   ImageResource spinner();
+
+  /**
+   * Designer palette item: Translator Component
+   */
+  @Source("com/google/appinventor/images/translator.png")
+  ImageResource translator();
 
   /**
     * Designer palette item: YandexTranslate

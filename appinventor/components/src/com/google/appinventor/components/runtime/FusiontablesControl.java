@@ -5,10 +5,13 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 package com.google.appinventor.components.runtime;
 
+import com.google.api.client.extensions.android2.AndroidHttp;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.services.fusiontables.Fusiontables;
+import com.google.api.services.fusiontables.Fusiontables.Query.Sql;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -56,6 +59,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Appinventor fusiontables control.
@@ -132,10 +136,13 @@ import java.util.ArrayList;
     "android.permission.READ_EXTERNAL_STORAGE")
 @UsesLibraries(libraries =
     "fusiontables.jar," +
-    "google-api-client-beta.jar," +
-    "google-http-client-beta.jar," +
-    "google-oauth-client-beta.jar," +
-    "guava-14.0.1.jar," +
+    "google-api-client.jar," +
+    "google-api-client-android2-beta.jar," +
+    "google-http-client.jar," +
+    "google-http-client-android2-beta.jar," +
+    "google-http-client-android3-beta.jar," +
+    "google-oauth-client.jar," +
+    "guava.jar," +
     "gson.jar")
 
 public class FusiontablesControl extends AndroidNonvisibleComponent implements Component {
@@ -562,8 +569,6 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
    * @return the HttpResponse if the request succeeded, or null
    */
   public com.google.api.client.http.HttpResponse sendQuery(String query, String authToken) {
-    errorMessage = standardErrorMessage; // In case we get an error without a message
-    Log.i(LOG_TAG, "executing " + query);
     return null;
   }
 
@@ -848,7 +853,8 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
       queryResultStr = "";
       errorMessage = standardErrorMessage;
 
-      final JsonFactory JSON_FACTORY = new GsonFactory();
+      final HttpTransport TRANSPORT = AndroidHttp.newCompatibleTransport();
+      final JsonFactory JSON_FACTORY = null;
 
       Log.i(STAG, "keyPath " + keyPath);
 
@@ -860,18 +866,27 @@ public class FusiontablesControl extends AndroidNonvisibleComponent implements C
           cachedServiceCredentials = MediaUtil.copyMediaToTempFile(container.$form(), keyPath);
         }
         GoogleCredential credential = new  GoogleCredential.Builder()
+            .setTransport(TRANSPORT)
             .setJsonFactory(JSON_FACTORY)
             .setServiceAccountId(serviceAccountEmail)
-            .setServiceAccountScopes(scope)
+            .setServiceAccountScopes(Collections.singleton(scope))
             .setServiceAccountPrivateKeyFromP12File(cachedServiceCredentials)
             .build();
 
+        com.google.api.client.http.HttpResponse response = null;
+
         // Process the response
-        // the response will be null if sql.executeUnparsed threw an error.  In that
-        // case, the catch took care of signaling a form error to the user, and make
-        // the FusionTablesControl.query method return a standard error message.
-        queryResultStr = errorMessage;
-        Log.i(STAG, "Error with null response:  " + errorMessage);
+        if (response != null) {
+          // in the non-error case, get the response as a string to so we can return it
+          queryResultStr = httpResponseToString(response);
+          Log.i(STAG, "Query = " + query + "\nResultStr = " + queryResultStr);
+        } else {
+          // the response will be null if sql.executeUnparsed threw an error.  In that
+          // case, the catch took care of signaling a form error to the user, and make
+          // the FusionTablesControl.query method return a standard error message.
+          queryResultStr = errorMessage;
+          Log.i(STAG, "Error with null response:  " + errorMessage);
+        }
 
         Log.i(STAG, "executed sql query");
 

@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2018 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,6 +17,7 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.util.BulkPermissionRequest;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
 
 import android.content.Context;
@@ -27,6 +28,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -83,8 +88,7 @@ public class LocationSensor extends AndroidNonvisibleComponent
     RealTimeDataSource<String, Float> {
 
   // Set of observers
-  private final Set<DataSink<ObservableDataSource<String, Float>>> dataSourceObservers
-      = new HashSet<>();
+  private Set<DataSourceChangeListener> dataSourceObservers = new HashSet<>();
 
   public interface LocationSensorListener extends LocationListener {
     void onTimeIntervalChanged(int time);
@@ -686,24 +690,18 @@ public class LocationSensor extends AndroidNonvisibleComponent
       androidUIHandler.post(new Runnable() {
           @Override
           public void run() {
-            me.form.askPermission(Manifest.permission.ACCESS_FINE_LOCATION,
-              new PermissionResultHandler() {
+            me.form.askPermission(new BulkPermissionRequest(me, "RefreshProvider", Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION) {
                 @Override
-                public void HandlePermissionResponse(String permission, boolean granted) {
-                  if (granted) {
-                    me.havePermission = true;
-                    me.RefreshProvider(caller);
-                    Log.d(LOG_TAG, "Permission Granted");
-                  } else {
-                    me.havePermission = false;
-                    me.enabled = false;
-                    me.form.dispatchPermissionDeniedEvent(me, caller, Manifest.permission.ACCESS_FINE_LOCATION);
-                  }
+                public void onGranted() {
+                  me.havePermission = true;
+                  me.RefreshProvider(caller);
+                  Log.d(LOG_TAG, "Permission Granted");
                 }
               });
           }
         });
     }
+
     if (providerLocked && !empty(providerName)) {
       listening = startProvider(providerName);
       return;
@@ -797,29 +795,31 @@ public class LocationSensor extends AndroidNonvisibleComponent
   }
 
   @Override
-  public void addDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
+  public void addDataObserver(DataSourceChangeListener dataComponent) {
     dataSourceObservers.add(dataComponent);
   }
 
   @Override
-  public void removeDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
+  public void removeDataObserver(DataSourceChangeListener dataComponent) {
     dataSourceObservers.remove(dataComponent);
   }
 
   @Override
   public void notifyDataObservers(String key, Object value) {
     // Notify each Chart Data observer component of the Data value change
-    for (DataSink<ObservableDataSource<String, Float>> dataComponent : dataSourceObservers) {
+    for (DataSourceChangeListener dataComponent : dataSourceObservers) {
       dataComponent.onReceiveValue(this, key, value);
     }
   }
 
   /**
-   * Returns a data value corresponding to the provided key:
-   * latitude  - latitude value
-   * longitude - longitude value
-   * altitude  - altitude value
-   * speed     - speed value
+   * Returns a data value for a given key. Possible keys include:
+   * <ul>
+   *   <li>latitude  - latitude value</li>
+   *   <li>longitude - longitude value</li>
+   *   <li>altitude  - altitude value</li>
+   *   <li>speed     - speed value</li>
+   * </ul>
    *
    * @param key identifier of the value
    * @return    Value corresponding to the key, or 0 if key is undefined.

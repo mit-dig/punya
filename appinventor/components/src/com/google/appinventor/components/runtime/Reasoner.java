@@ -298,7 +298,7 @@ public class Reasoner extends LinkedDataBase<InfModel> {
     InputStream in = null;
     try {
       in = MediaUtil.openMedia(form, filename);
-      return Rule.parseRules(IOUtils.readStream(in));
+      return Rule.parseRules(IOUtils.readStreamAsString(in));
     } finally {
       IOUtils.closeQuietly(LOG_TAG, in);
     }

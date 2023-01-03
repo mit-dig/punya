@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -54,8 +54,7 @@ public class GyroscopeSensor extends AndroidNonvisibleComponent
   private boolean listening;
 
   // Set of observers
-  private final Set<DataSink<ObservableDataSource<String, Float>>> dataSourceObservers
-      = new HashSet<>();
+  private Set<DataSourceChangeListener> dataSourceObservers = new HashSet<>();
 
   /**
    * Creates a new GyroscopeSensor component.
@@ -252,28 +251,30 @@ public class GyroscopeSensor extends AndroidNonvisibleComponent
   }
 
   @Override
-  public void addDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
+  public void addDataObserver(DataSourceChangeListener dataComponent) {
     dataSourceObservers.add(dataComponent);
   }
 
   @Override
-  public void removeDataObserver(DataSink<ObservableDataSource<String, Float>> dataComponent) {
+  public void removeDataObserver(DataSourceChangeListener dataComponent) {
     dataSourceObservers.remove(dataComponent);
   }
 
   @Override
   public void notifyDataObservers(String key, Object value) {
     // Notify each Chart Data observer component of the Data value change
-    for (DataSink<ObservableDataSource<String, Float>> dataComponent : dataSourceObservers) {
+    for (DataSourceChangeListener dataComponent : dataSourceObservers) {
       dataComponent.onReceiveValue(this, key, value);
     }
   }
 
   /**
-   * Returns a data value corresponding to the provided key:
-   * X - x direction angular velocity
-   * Y - y direction angular velocity
-   * Z - z direction angular velocity
+   * Returns a data value. Possible keys include:
+   * <ul>
+   *   <li>X - x direction angular velocity</li>
+   *   <li>Y - y direction angular velocity</li>
+   *   <li>Z - z direction angular velocity</li>
+   * </ul>
    *
    * @param key identifier of the value
    * @return    Value corresponding to the key, or 0 if key is undefined.

@@ -356,6 +356,7 @@ public final class MockForm extends MockContainer {
   private static final String PROPERTY_NAME_PRIMARY_COLOR_DARK = "PrimaryColorDark";
   private static final String PROPERTY_NAME_ACCENT_COLOR = "AccentColor";
   private static final String PROPERTY_NAME_THEME = "Theme";
+  private static final String PROPERTY_NAME_DEFAULTFILESCOPE = "DefaultFileScope";
 
   // Form UI components
   AbsolutePanel formWidget;
@@ -759,7 +760,8 @@ public final class MockForm extends MockContainer {
       case PROPERTY_NAME_PRIMARY_COLOR:
       case PROPERTY_NAME_PRIMARY_COLOR_DARK:
       case PROPERTY_NAME_ACCENT_COLOR:
-      case PROPERTY_NAME_THEME: {
+      case PROPERTY_NAME_THEME:
+      case PROPERTY_NAME_DEFAULTFILESCOPE: {
         return editor.isScreen1();
       }
 
@@ -1042,6 +1044,14 @@ public final class MockForm extends MockContainer {
       titleBar.changeBookmarkIcon(blackIcons);
     }
 
+  }
+
+  private void setDefaultFileScope(String defaultFileScope) {
+    if (editor.isScreen1()) {
+      editor.getProjectEditor().changeProjectSettingsProperty(
+          SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS,
+          SettingsConstants.YOUNG_ANDROID_SETTINGS_DEFAULTFILESCOPE, defaultFileScope);
+    }
   }
 
   /**
@@ -1386,6 +1396,8 @@ public final class MockForm extends MockContainer {
         getProperties().getExistingProperty(PROPERTY_NAME_ACTIONBAR).setValue("True");
       }
       setTheme(newValue);
+    } else if (propertyName.equals(PROPERTY_NAME_DEFAULTFILESCOPE)) {
+      setDefaultFileScope(newValue);
     } else if (propertyName.equals(PROPERTY_NAME_PRIMARY_COLOR)) {
       setPrimaryColor(newValue);
       if (idxPhonePreviewStyle == 2) {

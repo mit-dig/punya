@@ -1,5 +1,5 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2019-2020 MIT, All rights reserved
+// Copyright 2019-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,9 +8,10 @@ package com.google.appinventor.client.editor.simple.components;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidDataColumnSelectorProperty;
 import com.google.appinventor.client.widgets.properties.EditableProperty;
+import com.google.appinventor.components.common.LineType;
+import com.google.appinventor.components.common.PointStyle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -20,8 +21,8 @@ import java.util.Set;
  * Base class for MockChartData components, providing base functionality
  * for property setters, adding the component to a Mock Chart
  * as a child, and showing/hiding properties.
- * <p>
- * The component acts as an invisible visible component, and was not chosen
+ *
+ * <p>The component acts as an invisible visible component, and was not chosen
  * to be a NonVisibleComponent so that it would appear in the Chart hierarchy
  * instead of the non-visible component bar.
  */
@@ -35,6 +36,9 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
   private static final String PROPERTY_CHART_SOURCE_VALUE = "DataSourceKey";
   private static final String PROPERTY_DATA_FILE_X_COLUMN = "DataFileXColumn";
   private static final String PROPERTY_DATA_FILE_Y_COLUMN = "DataFileYColumn";
+  private static final String PROPERTY_SPREADSHEET_HEADERS = "SpreadsheetUseHeaders";
+  private static final String PROPERTY_SPREADSHEET_X_COLUMN = "SpreadsheetXColumn";
+  private static final String PROPERTY_SPREADSHEET_Y_COLUMN = "SpreadsheetYColumn";
   private static final String PROPERTY_WEB_X_COLUMN = "WebXColumn";
   private static final String PROPERTY_WEB_Y_COLUMN = "WebYColumn";
 
@@ -52,15 +56,18 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
 
   static {
     Set<String> propertyNames = new HashSet<String>() {{
-      add(PROPERTY_NAME_HEIGHT);
-      add(PROPERTY_NAME_WIDTH);
-      add(PROPERTY_DATA_FILE_X_COLUMN);
-      add(PROPERTY_DATA_FILE_Y_COLUMN);
-      add(PROPERTY_CHART_SOURCE_VALUE);
-      add(PROPERTY_WEB_X_COLUMN);
-      add(PROPERTY_WEB_Y_COLUMN);
-      add(PROPERTY_POINT_SHAPE);
-    }};
+        add(PROPERTY_NAME_HEIGHT);
+        add(PROPERTY_NAME_WIDTH);
+        add(PROPERTY_DATA_FILE_X_COLUMN);
+        add(PROPERTY_DATA_FILE_Y_COLUMN);
+        add(PROPERTY_CHART_SOURCE_VALUE);
+        add(PROPERTY_SPREADSHEET_HEADERS);
+        add(PROPERTY_SPREADSHEET_X_COLUMN);
+        add(PROPERTY_SPREADSHEET_Y_COLUMN);
+        add(PROPERTY_WEB_X_COLUMN);
+        add(PROPERTY_WEB_Y_COLUMN);
+        add(PROPERTY_POINT_SHAPE);
+      }};
 
     // Set Hidden Properties map to an immutable set so that
     // the contents could not be modified.
@@ -68,10 +75,10 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
   }
 
   // Represents the Chart data icon
-  private Image iconWidget;
+  private final Image iconWidget;
 
   protected MockChart chart;
-  protected MockChartDataModel chartDataModel;
+  protected MockChartDataModel<?, ?> chartDataModel;
   protected MockComponent dataSource;
 
   // Stores the DataFileColumn properties (in order) to import from
@@ -97,7 +104,7 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
   }
 
   /**
-   * Adds the Mock Chart Data component to the specified Mock Chart component
+   * Adds the Mock Chart Data component to the specified Mock Chart component.
    *
    * @param chart Chart Mock component to add the data to
    */
@@ -212,13 +219,13 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
    * @param newValue New value of the Point Shape (String)
    */
   private void setPointShapeProperty(String newValue) {
-    int pointShape = Integer.parseInt(newValue);
+    PointStyle pointShape = PointStyle.fromUnderlyingValue(Integer.parseInt(newValue));
 
     // Only change the point shape of the Model if it is of
     // type ScatterChartDataModel (since only that model supports
     // the changing of the Point Shape)
     if (chartDataModel instanceof MockPointChartDataModel) {
-      ((MockPointChartDataModel) chartDataModel).changePointShape(pointShape);
+      ((MockPointChartDataModel<?>) chartDataModel).changePointShape(pointShape);
     }
   }
 
@@ -231,13 +238,13 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
    * @param newValue New value of the Line Type (String)
    */
   private void setLineTypeProperty(String newValue) {
-    int lineType = Integer.parseInt(newValue);
+    LineType lineType = LineType.fromUnderlyingValue(Integer.parseInt(newValue));
 
     // Only change the line type of the Model if it is of
     // type lineChartBaseDataModel (since only that model
     // supports the changing of the Line Type)
     if (chartDataModel instanceof MockLineChartBaseDataModel) {
-      ((MockLineChartBaseDataModel) chartDataModel).setLineType(lineType);
+      ((MockLineChartBaseDataModel<?>) chartDataModel).setLineType(lineType);
     }
   }
 
@@ -285,12 +292,18 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
     showProperty(PROPERTY_WEB_X_COLUMN, showWebColumns);
     showProperty(PROPERTY_WEB_Y_COLUMN, showWebColumns);
 
+    boolean showSheetsColumns = (dataSource != null && dataSource.getType().equals("Spreadsheet"));
+    showProperty(PROPERTY_SPREADSHEET_HEADERS, showSheetsColumns);
+    showProperty(PROPERTY_SPREADSHEET_X_COLUMN, showSheetsColumns);
+    showProperty(PROPERTY_SPREADSHEET_Y_COLUMN, showSheetsColumns);
+
     // Handle DataFile-related property responses
     handleDataFilePropertySetting();
 
-    // Show Data Source Value only if the Data Source is non-null and not of type MockDataFile or Web
-    boolean showDataSourceValue = (dataSource != null &&
-        !(dataSource instanceof MockDataFile || showWebColumns));
+    // Show Data Source Value only if the Data Source is non-null
+    // and not of type MockDataFile or Web
+    boolean showDataSourceValue = (dataSource != null
+        && !(dataSource instanceof MockDataFile || showWebColumns));
 
     showProperty(PROPERTY_CHART_SOURCE_VALUE, showDataSourceValue);
   }
@@ -298,8 +311,8 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
   /**
    * Change the visibility of styling related properties which
    * only apply to limited Data Models, rather than all of them.
-   * <p>
-   * This method should be invoked upon changing the type of the
+   *
+   * <p>This method should be invoked upon changing the type of the
    * Data Model.
    */
   private void changeStylingPropertiesVisibility() {
@@ -327,8 +340,8 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
   /**
    * Handles properties with regards to a DataFile source upon
    * changing the Data Source of the Data component.
-   * <p>
-   * The method shows/hides the DataFile X and Y Column properties
+   *
+   * <p>The method shows/hides the DataFile X and Y Column properties
    * depending on the attached Source (if it's a DataFile, then
    * the properties will be shown, and hidden otherwise)
    * If the properties are shown, the Column selectors
@@ -344,11 +357,11 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
     showProperty(PROPERTY_DATA_FILE_Y_COLUMN, showDataFileColumns);
 
     // Get the Column property selectors
-    YoungAndroidDataColumnSelectorProperty xEditor =
+    YoungAndroidDataColumnSelectorProperty xeditor =
         (YoungAndroidDataColumnSelectorProperty)
             properties.getProperty(PROPERTY_DATA_FILE_X_COLUMN).getEditor();
 
-    YoungAndroidDataColumnSelectorProperty yEditor =
+    YoungAndroidDataColumnSelectorProperty yeditor =
         (YoungAndroidDataColumnSelectorProperty)
             properties.getProperty(PROPERTY_DATA_FILE_Y_COLUMN).getEditor();
 
@@ -360,13 +373,13 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
       onColumnsChange((MockDataFile) dataSource);
 
       // Update the Source of the column selectors
-      xEditor.changeSource((MockDataFile) dataSource);
-      yEditor.changeSource((MockDataFile) dataSource);
+      xeditor.changeSource((MockDataFile) dataSource);
+      yeditor.changeSource((MockDataFile) dataSource);
     } else {
       // Remove data sources from the property editors (since Data Source
       // is not a DataFile)
-      xEditor.changeSource(null);
-      yEditor.changeSource(null);
+      xeditor.changeSource(null);
+      yeditor.changeSource(null);
     }
   }
 
@@ -413,8 +426,8 @@ public abstract class MockChartData extends MockVisibleComponent implements Data
 
   /**
    * Sets the properties for the Chart Data component.
-   * <p>
-   * The need for this method is the fact that the component's
+   *
+   * <p>The need for this method is the fact that the component's
    * properties can only be set after the Data component has been added to
    * the Chart.
    */

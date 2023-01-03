@@ -23,6 +23,9 @@ import com.google.appinventor.components.runtime.util.ViewUtil;
 import android.app.Activity;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Use a table arrangement component to display a group of components in a tabular fashion.
  *
@@ -59,6 +62,8 @@ public class TableArrangement extends AndroidViewComponent
   // Layout
   private final TableLayout viewLayout;
   private final List<AndroidViewComponent> components;
+
+  private List<Component> allChildren = new ArrayList<>();
 
   /**
    * Creates a new TableArrangement component.
@@ -135,6 +140,12 @@ public class TableArrangement extends AndroidViewComponent
   public void $add(AndroidViewComponent component) {
     viewLayout.add(component);
     components.add(component);
+    allChildren.add(component);
+  }
+
+  @Override
+  public List<? extends Component> getChildren(){
+    return allChildren;
   }
 
   @Override

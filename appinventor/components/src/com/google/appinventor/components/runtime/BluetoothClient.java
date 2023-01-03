@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2012 MIT, All rights reserved
+// Copyright 2011-2022 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -48,16 +48,19 @@ import java.util.concurrent.TimeUnit;
 @SimpleObject
 @UsesPermissions(permissionNames =
                  "android.permission.BLUETOOTH, " +
-                 "android.permission.BLUETOOTH_ADMIN")
-public final class BluetoothClient extends BluetoothConnectionBase implements RealTimeDataSource<String, String> {
+                 "android.permission.BLUETOOTH_ADMIN," +
+                 "android.permission.BLUETOOTH_SCAN," +
+                 "android.permission.BLUETOOTH_CONNECT"
+  )
+public final class BluetoothClient extends BluetoothConnectionBase
+    implements RealTimeDataSource<String, String> {
   private static final String SPP_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
   private final List<Component> attachedComponents = new ArrayList<Component>();
   private Set<Integer> acceptableDeviceClasses;
 
   // Set of observers
-  private final Set<DataSink<ObservableDataSource<String, String>>> dataSourceObservers
-      = new HashSet<>();
+  private HashSet<DataSourceChangeListener> dataSourceObservers = new HashSet<>();
 
   // Executor Service to poll data continuously from the Input Stream
   // which holds data sent by Bluetooth connections. Used for sending
@@ -208,10 +211,13 @@ public final class BluetoothClient extends BluetoothConnectionBase implements Re
     return addressesAndNames;
   }
 
-  @SimpleProperty(description = "Changes the polling rate in milliseconds when the Bluetooth Client is used " +
-      "as a Data Source in a Chart Data component. The minimum value is 1, and values of less than 1 will be " +
-      "automatically resolved to the value 1.",
-      category = PropertyCategory.BEHAVIOR)
+  /**
+   * The polling rate in milliseconds when the Bluetooth Client is used as a Data Source in a
+   * Chart Data component. The minimum value is 1.
+   *
+   * @param rate the rate in milliseconds
+   */
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
   @DesignerProperty(defaultValue = "10")
   public void PollingRate(int rate) {
     // Resolve polling rate values that are too small to the smallest possible value.
@@ -224,10 +230,10 @@ public final class BluetoothClient extends BluetoothConnectionBase implements Re
 
   /**
    * Returns the configured polling rate value of the Bluetooth Client.
+   *
    * @return  polling rate value
    */
-  @SimpleProperty(description = "The polling rate in milliseconds when the Bluetooth Client is used " +
-      "as a Data Source in a Chart Data component.")
+  @SimpleProperty
   public int PollingRate() {
     return this.pollingRate;
   }
@@ -368,18 +374,6 @@ public final class BluetoothClient extends BluetoothConnectionBase implements Re
         BluetoothReflection.getBluetoothDeviceName(bluetoothDevice) + ".");
   }
 
-  @Override
-  public synchronized void addDataObserver(DataSink<ObservableDataSource<String, String>> dataComponent) {
-    // Data Polling Service has not been initialized yet; Initialize it
-    // (since Data Component is added)
-    if (dataPollService == null) {
-      startBluetoothDataPolling();
-    }
-
-    // Add the Data Component as an observer
-    dataSourceObservers.add(dataComponent);
-  }
-
   /**
    * Starts the scheduled Data Polling Service that
    * continuously reads data and notifies all the
@@ -410,7 +404,19 @@ public final class BluetoothClient extends BluetoothConnectionBase implements Re
   }
 
   @Override
-  public synchronized void removeDataObserver(DataSink<ObservableDataSource<String, String>> dataComponent) {
+  public synchronized void addDataObserver(DataSourceChangeListener dataComponent) {
+    // Data Polling Service has not been initialized yet; Initialize it
+    // (since Data Component is added)
+    if (dataPollService == null) {
+      startBluetoothDataPolling();
+    }
+
+    // Add the Data Component as an observer
+    dataSourceObservers.add(dataComponent);
+  }
+
+  @Override
+  public synchronized void removeDataObserver(DataSourceChangeListener dataComponent) {
     dataSourceObservers.remove(dataComponent);
 
     // No more Data Source observers exist;
@@ -426,7 +432,7 @@ public final class BluetoothClient extends BluetoothConnectionBase implements Re
 
   @Override
   public void notifyDataObservers(String key, Object newValue) {
-    for (DataSink<ObservableDataSource<String, String>> observer : dataSourceObservers) {
+    for (DataSourceChangeListener observer : dataSourceObservers) {
       observer.onReceiveValue(this, key, newValue);
     }
   }

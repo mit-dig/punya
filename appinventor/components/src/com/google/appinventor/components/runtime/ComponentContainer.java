@@ -8,12 +8,14 @@ package com.google.appinventor.components.runtime;
 
 import android.app.Activity;
 
+import java.util.List;
+
 /**
  * Components that can contain other components need to implement this
  * interface.
  *
  */
-public interface ComponentContainer<T> extends Iterable<T> {
+public interface ComponentContainer<T extends Component> extends Component, Iterable<T> {
   /**
    * Returns the activity context (which can be retrieved from the root
    * container - aka the form).
@@ -43,6 +45,8 @@ public interface ComponentContainer<T> extends Iterable<T> {
   void setChildWidth(AndroidViewComponent component, int width);
 
   void setChildHeight(AndroidViewComponent component, int height);
+
+  List<T> getChildren();
 
   int Width();
 

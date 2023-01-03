@@ -91,4 +91,10 @@ public interface UserInfoService extends RemoteService {
 
   public void storeSharedBackpack(String backPackId, String content);
 
+  /**
+   * Delete a users account
+   */
+
+  public String deleteAccount();
+
 }

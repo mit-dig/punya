@@ -80,10 +80,10 @@ import edu.mit.media.funf.storage.UploadService;
     "android.permission.READ_LOGS, " + 
     "android.permission.ACCESS_NETWORK_STATE")
 @UsesLibraries(libraries =
-   "google-http-client-beta.jar," +
-   "google-oauth-client-beta.jar," +
+   "google-http-client.jar," +
+   "google-oauth-client.jar," +
    "google-api-services-drive-v2.jar," +
-   "google-api-client-beta.jar," +
+   "google-api-client.jar," +
    "google-api-client-android-beta-14.jar," +
    "google-http-client-android-beta-14.jar," +
    "google-http-client-gson-beta-14.jar, " +

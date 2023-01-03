@@ -95,6 +95,7 @@
     "./src/warningHandler.js",
     "./src/field_procedure.js",
     "./src/field_textblockinput.js",
+    "./src/field_invalid_dropdown.js",
     "./src/warningIndicator.js",
     "./src/exportBlocksImage.js",
     "./src/flydown.js",
@@ -110,6 +111,7 @@
     "./src/rendered_connection.js",
     "./src/input.js",
     "./src/field_event_flydown.js",
+    "./src/utils_xml.js",
 
     // Dialog Utiltiy
     "./src/util.js",
@@ -131,6 +133,7 @@
     './src/blocks/components.js',
     './src/blocks/dictionaries.js',
     './src/blocks/gql.js',
+    './src/blocks/helpers.js',
 
     //generator files
     "./src/generators/yail.js",
@@ -147,6 +150,7 @@
     "./src/generators/yail/procedures.js",
     "./src/generators/yail/dictionaries.js",
     "./src/generators/yail/gql.js",
+    './src/generators/yail/helpers.js',
 
     // Repl
     "./src/replmgr.js",
