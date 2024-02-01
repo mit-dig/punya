@@ -40,7 +40,7 @@
 		<div class="dropdown-menu">
 		    <a class="dropdown-item" href="http://appinventor.mit.edu/about-us">About App Inventor</a>
 		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/our-team">Our Team</a>
-		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/master-trainers">Master Trainers</a>
+		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/expert-trainers">Expert Trainers</a>
 		    <a class="dropdown-item" href="http://appinventor.mit.edu/explore/app-month-gallery">App of the Month</a>
                     <a class="dropdown-item"
                        href="http://appinventor.mit.edu/ai2/ReleaseNotes">Release Notes</a>
@@ -173,9 +173,10 @@
  Some fonts do not support italic.</dd>
   <dt id="Button.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">Button</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="Button.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="Button.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the text font face of the <code class="highlighter-rouge">Button</code> as default, serif, sans
- serif, or monospace.</dd>
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project’s media.</dd>
   <dt id="Button.Height" class="number bo"><em>Height</em></dt>
   <dd>Specifies the <code class="highlighter-rouge">Button</code>’s vertical height, measured in pixels.</dd>
   <dt id="Button.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
@@ -261,7 +262,7 @@
  Some fonts do not support italic.</dd>
   <dt id="CheckBox.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">CheckBox</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="CheckBox.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="CheckBox.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the text font face of the <code class="highlighter-rouge">CheckBox</code> as default, serif, sans
  serif, or monospace.</dd>
   <dt id="CheckBox.Height" class="number bo"><em>Height</em></dt>
@@ -329,9 +330,10 @@
  Some fonts do not support italic.</dd>
   <dt id="DatePicker.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">DatePicker</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="DatePicker.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="DatePicker.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the text font face of the <code class="highlighter-rouge">DatePicker</code> as default, serif, sans
- serif, or monospace.</dd>
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project’s media.</dd>
   <dt id="DatePicker.Height" class="number bo"><em>Height</em></dt>
   <dd>Specifies the <code class="highlighter-rouge">DatePicker</code>’s vertical height, measured in pixels.</dd>
   <dt id="DatePicker.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
@@ -480,7 +482,7 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
  Some fonts do not support italic.</dd>
   <dt id="Label.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the label’s text’s font size, measured in sp(scale-independent pixels).</dd>
-  <dt id="Label.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="Label.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the label’s text’s font face as default, serif, sans
  serif, or monospace.</dd>
   <dt id="Label.HTMLContent" class="text ro bo"><em>HTMLContent</em></dt>
@@ -559,9 +561,10 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
  Some fonts do not support italic.</dd>
   <dt id="ListPicker.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">ListPicker</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="ListPicker.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="ListPicker.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the text font face of the <code class="highlighter-rouge">ListPicker</code> as default, serif, sans
- serif, or monospace.</dd>
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project’s media.</dd>
   <dt id="ListPicker.Height" class="number bo"><em>Height</em></dt>
   <dd>Specifies the <code class="highlighter-rouge">ListPicker</code>’s vertical height, measured in pixels.</dd>
   <dt id="ListPicker.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
@@ -664,10 +667,10 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
  such as: Cheese,Fruit,Bacon,Radish.</dd>
   <dt id="ListView.FontSizeDetail" class="number"><em>FontSizeDetail</em></dt>
   <dd>Specifies the <code class="highlighter-rouge">ListView</code> item’s text font size</dd>
-  <dt id="ListView.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="ListView.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the label’s text’s font face as default, serif, sans
  serif, or monospace.</dd>
-  <dt id="ListView.FontTypefaceDetail" class="number do"><em>FontTypefaceDetail</em></dt>
+  <dt id="ListView.FontTypefaceDetail" class="text do"><em>FontTypefaceDetail</em></dt>
   <dd>Specifies the label’s text’s font face as default, serif, sans
  serif, or monospace.</dd>
   <dt id="ListView.Height" class="number bo"><em>Height</em></dt>
@@ -746,6 +749,8 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
   <dd>Takes a set of query results, and displays values for the given variable name.”,</dd>
   <dt id="ListView.Refresh" class="method"><i></i> Refresh()</dt>
   <dd>Reload the ListView to reflect any changes in the data.</dd>
+  <dt id="ListView.RemoveItemAtIndex" class="method"><i></i> RemoveItemAtIndex(<em class="number">index</em>)</dt>
+  <dd>Removes Item from list at a given index</dd>
 </dl>
 
 <h2 id="Notifier">Notifier</h2>
@@ -857,7 +862,7 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
  Some fonts do not support italic.</dd>
   <dt id="PasswordTextBox.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">PasswordTextBox</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="PasswordTextBox.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="PasswordTextBox.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>The text font face of the <code class="highlighter-rouge">PasswordTextBox</code>. Valid values are <code class="highlighter-rouge">0</code> (default), <code class="highlighter-rouge">1</code> (serif), <code class="highlighter-rouge">2</code> (sans
  serif), or <code class="highlighter-rouge">3</code> (monospace).</dd>
   <dt id="PasswordTextBox.Height" class="number bo"><em>Height</em></dt>
@@ -963,7 +968,8 @@ Valid values for the month field are 1-12 and 1-31 for the day field.</dd>
   <dd>Sets the animation type for the transition of this form closing and returning
  to a form behind it in the activity stack.</dd>
   <dt id="Screen.DefaultFileScope" class="com google appinventor components common FileScopeEnum wo do"><em>DefaultFileScope</em></dt>
-  <dd>Specifies the default scope used when components access files. Note that the <a href="#File"><code class="highlighter-rouge">File</code></a>
+  <dd>Specifies the default scope used when components access files. Note that the
+ <a href="/reference/components/storage.html#File" target="_blank">File</a>
  component has its own property for controlling file scopes.</dd>
   <dt id="Screen.Height" class="number ro bo"><em>Height</em></dt>
   <dd>Returns the Screen height in pixels (y-size).</dd>
@@ -1243,7 +1249,7 @@ having dark grey components.</li>
  Some fonts do not support italic.</dd>
   <dt id="Switch.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">Switch</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="Switch.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="Switch.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the text font face of the <code class="highlighter-rouge">Switch</code> as default, serif, sans
  serif, or monospace.</dd>
   <dt id="Switch.Height" class="number bo"><em>Height</em></dt>
@@ -1337,7 +1343,7 @@ having dark grey components.</li>
  Some fonts do not support italic.</dd>
   <dt id="TextBox.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">TextBox</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="TextBox.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="TextBox.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>The text font face of the <code class="highlighter-rouge">TextBox</code>. Valid values are <code class="highlighter-rouge">0</code> (default), <code class="highlighter-rouge">1</code> (serif), <code class="highlighter-rouge">2</code> (sans
  serif), or <code class="highlighter-rouge">3</code> (monospace).</dd>
   <dt id="TextBox.Height" class="number bo"><em>Height</em></dt>
@@ -1364,7 +1370,7 @@ having dark grey components.</li>
     <p>Property URI specifies the relationship between a Linked Data Form containing a TextBox, Password, etc. and the component. Common properties include the name properties in the Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), or descriptions (e.g. rdfs:comment, dc:description).</p>
   </dd>
   <dt id="TextBox.ReadOnly" class="boolean"><em>ReadOnly</em></dt>
-  <dd>Whether the TextBox is read-only. By default, this is <code class="logic block highlighter-rouge">true</code>.</dd>
+  <dd>Whether the TextBox is read-only. By default, this is <code class="logic block highlighter-rouge">false</code>.</dd>
   <dt id="TextBox.SubjectIdentifier" class="boolean"><em>SubjectIdentifier</em></dt>
   <dd>
     <p>If the text box is contained in a Linked Data Form and Subject Identifier is checked, then the value of the text box will be used to construct a new Uniform Resource Identifier (URI) when the form is submitted.</p>
@@ -1434,9 +1440,10 @@ having dark grey components.</li>
  Some fonts do not support italic.</dd>
   <dt id="TimePicker.FontSize" class="number"><em>FontSize</em></dt>
   <dd>Specifies the text font size of the <code class="highlighter-rouge">TimePicker</code>, measured in sp(scale-independent pixels).</dd>
-  <dt id="TimePicker.FontTypeface" class="number do"><em>FontTypeface</em></dt>
+  <dt id="TimePicker.FontTypeface" class="text do"><em>FontTypeface</em></dt>
   <dd>Specifies the text font face of the <code class="highlighter-rouge">TimePicker</code> as default, serif, sans
- serif, or monospace.</dd>
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project’s media.</dd>
   <dt id="TimePicker.Height" class="number bo"><em>Height</em></dt>
   <dd>Specifies the <code class="highlighter-rouge">TimePicker</code>’s vertical height, measured in pixels.</dd>
   <dt id="TimePicker.HeightPercent" class="number wo bo"><em>HeightPercent</em></dt>
@@ -1783,7 +1790,7 @@ Eclair, this function is a no-op on older phones.</p>
 	    <ul>
 		<li>
 		    <a href="http://web.mit.edu" class="btn btn-link" role="button"
-                       target="_blank">© 2012-2020 Massachusetts Institute of Technology</a>
+                       target="_blank">© 2012-2024 Massachusetts Institute of Technology</a>
 		</li>
 		<li>
 		    <a href="http://creativecommons.org/licenses/by-sa/3.0/"
@@ -1802,15 +1809,16 @@ Eclair, this function is a no-op on older phones.</p>
 		<span>Twitter:</span>
 		<a href="https://twitter.com/mitappinventor"
                    target="_blank" class="btn btn-link" role="button">@MITAppInventor</a>
-		<div>
-		    <div>
-			<span>GitHub:</span>
-			<a href="https://github.com/mit-cml" class="btn btn-link" role="button"
-                           target="_blank">mit-cml</a>
-			<div>
-			</div>
-	            </div>
-	        </div>
+	    </div>
+	    <div>
+	      <span>GitHub:</span>
+	      <a href="https://github.com/mit-cml" class="btn btn-link" role="button"
+                 target="_blank">mit-cml</a>
+	    </div>
+            <div>
+              <span>Accessibility:</span>
+              <a href="https://accessibility.mit.edu" role="button"
+                 targe="_blank">accessibility.mit.edu</a>
             </div>
         </div>
     </div>

@@ -374,10 +374,9 @@ public final class Translator extends AndroidNonvisibleComponent {
 
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_STRING,
       defaultValue = "")
-  @SimpleProperty(description = "The API Key to use. MIT App Inventor will automatically fill this " +
-    "value in. You should not need to change it.",
-      userVisible = true,
-      category = PropertyCategory.BEHAVIOR)
+  @SimpleProperty(description = "The API Key to use. MIT App Inventor will automatically fill this "
+      + "value in. You should not need to change it.",
+      userVisible = true, category = PropertyCategory.ADVANCED)
   public void ApiKey(String apiKey) {
     this.apiKey = apiKey;
   }

@@ -12,14 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
+import com.google.appinventor.client.editor.youngandroid.DesignToolbar;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.widgets.LabeledTextBox;
-import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
+import com.google.appinventor.client.widgets.DropDownItem;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;

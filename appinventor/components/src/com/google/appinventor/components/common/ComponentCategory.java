@@ -53,6 +53,7 @@ public enum ComponentCategory {
   ANIMATION("Drawing and Animation"),
   MAPS("Maps"),
   CHARTS("Charts"),
+  DATASCIENCE("Data Science"),
   SENSORS("Sensors"),
   SOCIAL("Social"),
   STORAGE("Storage"),
@@ -62,6 +63,7 @@ public enum ComponentCategory {
   LEGOMINDSTORMS("LEGO® MINDSTORMS®"),
   EXPERIMENTAL("Experimental"),
   EXTENSION("Extension"),
+  FUTURE("Future"),
   INTERNAL("For internal use only"),
   // UNINITIALIZED is used as a default value so Swing libraries can still compile
   UNINITIALIZED("Uninitialized");
@@ -77,6 +79,7 @@ public enum ComponentCategory {
     DOC_MAP.put("Drawing and Animation", "animation");
     DOC_MAP.put("Maps", "maps");
     DOC_MAP.put("Charts", "charts");
+    DOC_MAP.put("Data Science", "datascience");
     DOC_MAP.put("Sensors", "sensors");
     DOC_MAP.put("Social", "social");
     DOC_MAP.put("Storage", "storage");
@@ -85,7 +88,8 @@ public enum ComponentCategory {
     DOC_MAP.put("Semantic Web", "semanticweb");
     DOC_MAP.put("Linked Data", "linkeddata");
     DOC_MAP.put("Experimental", "experimental");
-    //DOC_MAP.put("Extension", "extension");
+    DOC_MAP.put("Extension", "extension");
+    DOC_MAP.put("Future", "future");
   }
 
   private final String name;

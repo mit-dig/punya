@@ -134,8 +134,8 @@ public class PropertiesUtil {
     for (ComponentDatabaseInterface.PropertyDefinition property : propertyDefinitions) {
       mockComponent.addProperty(property.getName(), property.getDefaultValue(),
           ComponentsTranslation.getPropertyName(property.getCaption()),
-          ComponentsTranslation.getPropertyName(property.getCategory()),
-          ComponentsTranslation.getPropertyName(property.getDescription()),
+          ComponentsTranslation.getCategoryName(property.getCategory()),
+          ComponentsTranslation.getPropertyDescription(property.getName()),
           property.getEditorType(), property.getEditorArgs(),
           PropertiesUtil.createPropertyEditor(property.getEditorType(), property.getDefaultValue(), editor, property.getEditorArgs()));
       /*OdeLog.log("Property Caption: " + property.getCaption() + ", "
@@ -296,7 +296,7 @@ public class PropertiesUtil {
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TOAST_LENGTH)) {
       return new YoungAndroidToastLengthChoicePropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TYPEFACE)) {
-      return new YoungAndroidFontTypefaceChoicePropertyEditor();
+      return new YoungAndroidFontTypefaceChoicePropertyEditor(editor);
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_VISIBILITY)) {
       return new YoungAndroidBooleanPropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TEXT_RECEIVING)) {

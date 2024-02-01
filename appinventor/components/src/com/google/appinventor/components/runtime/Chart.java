@@ -9,10 +9,15 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBubbleDataSet;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
 import com.google.appinventor.components.annotations.SimpleEvent;
+import com.google.appinventor.components.annotations.SimpleFunction;
 import com.google.appinventor.components.annotations.SimpleObject;
 import com.google.appinventor.components.annotations.SimpleProperty;
 import com.google.appinventor.components.annotations.UsesLibraries;
@@ -64,6 +69,8 @@ public class Chart extends AndroidViewComponent
   private int pieRadius;
   private boolean legendEnabled;
   private boolean gridEnabled;
+  private boolean zeroX;
+  private boolean zeroY;
   private YailList labels;
 
   // Synced tick value across all Data Series (used for real-time entries)
@@ -99,6 +106,8 @@ public class Chart extends AndroidViewComponent
     LegendEnabled(true);
     GridEnabled(true);
     Labels(new YailList());
+    XFromZero(false);
+    YFromZero(false);
 
     // Register onInitialize event of the Chart
     $form().registerForOnInitialize(this);
@@ -305,7 +314,8 @@ public class Chart extends AndroidViewComponent
       defaultValue = "100")
   @SimpleProperty(description = "Sets the Pie Radius of a Pie Chart from 0% to 100%, where the "
       + "percentage indicates the percentage of the hole fill. 100% means that a full Pie Chart "
-      + "is drawn, while values closer to 0% correspond to hollow Pie Charts.", userVisible = false,
+      + "is drawn, while values closer to 0% correspond to hollow Pie Charts.",
+      userVisible = false,
       category = PropertyCategory.APPEARANCE)
   public void PieRadius(int percent) {
     this.pieRadius = percent;
@@ -323,7 +333,7 @@ public class Chart extends AndroidViewComponent
    *
    * @return True if legend is enabled, false otherwise
    */
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
   public boolean LegendEnabled() {
     return this.legendEnabled;
   }
@@ -339,6 +349,8 @@ public class Chart extends AndroidViewComponent
   public void LegendEnabled(boolean enabled) {
     this.legendEnabled = enabled;
     chartView.setLegendEnabled(enabled);
+    view.invalidate();
+    chartView.refresh();
   }
 
   /**
@@ -347,7 +359,7 @@ public class Chart extends AndroidViewComponent
    *
    * @return True if grid is enabled, false otherwise
    */
-  @SimpleProperty
+  @SimpleProperty(category = PropertyCategory.APPEARANCE)
   public boolean GridEnabled() {
     return this.gridEnabled;
   }
@@ -370,6 +382,8 @@ public class Chart extends AndroidViewComponent
     // grids.
     if (chartView instanceof AxisChartView) {
       ((AxisChartView<?, ?, ?, ?, ?>) chartView).setGridEnabled(enabled);
+      view.invalidate();
+      chartView.refresh();
     }
   }
 
@@ -434,6 +448,80 @@ public class Chart extends AndroidViewComponent
     // Retrieve the elements from the CSV-formatted String
     YailList labelsList = ElementsUtil.elementsFromString(labels);
     Labels(labelsList); // Set the Labels from the retrieved elements List
+  }
+
+  /**
+   * Determines whether the X axis origin is set at 0 or the minimum X value
+   * across all data series.
+   *
+   * @param zero true if the X-axis origin should be fixed at zero
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+      defaultValue = "False")
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public void XFromZero(boolean zero) {
+    this.zeroX = zero;
+
+    if (chartView instanceof AxisChartView) {
+      ((AxisChartView<?, ?, ?, ?, ?>) chartView).setXMinimum(zero);
+    }
+  }
+
+  @SimpleProperty
+  public boolean XFromZero() {
+    return zeroX;
+  }
+
+  /**
+   * Determines whether the Y axis origin is set at 0 or the minimum y value
+   * across all data series.
+   *
+   * @param zero true if the Y-axis origin should be fixed at zero
+   */
+  @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN,
+      defaultValue = "False")
+  @SimpleProperty(category = PropertyCategory.BEHAVIOR)
+  public void YFromZero(boolean zero) {
+    this.zeroY = zero;
+
+    if (chartView instanceof AxisChartView) {
+      ((AxisChartView<?, ?, ?, ?, ?>) chartView).setYMinimum(zero);
+    }
+  }
+
+  @SimpleProperty
+  public boolean YFromZero() {
+    return this.zeroY;
+  }
+
+  /**
+   * Sets the minimum and maximum for the domain of the X axis.
+   *
+   * @param minimum the lower bound for the domain
+   * @param maximum the upper bound for the domain
+   */
+  @SimpleFunction
+  public void SetDomain(double minimum, double maximum) {
+    this.zeroX = minimum == 0.0;
+
+    if (chartView instanceof AxisChartView) {
+      ((AxisChartView<?, ?, ?, ?, ?>) chartView).setXBounds(minimum, maximum);
+    }
+  }
+
+  /**
+   * Sets the minimum and maximum for the range of the Y axis.
+   *
+   * @param minimum the lower bound for the range
+   * @param maximum the upper bound for the range
+   */
+  @SimpleFunction
+  public void SetRange(double minimum, double maximum) {
+    this.zeroY = minimum == 0.0;
+
+    if (chartView instanceof AxisChartView) {
+      ((AxisChartView<?, ?, ?, ?, ?>) chartView).setYBounds(minimum, maximum);
+    }
   }
 
   /**

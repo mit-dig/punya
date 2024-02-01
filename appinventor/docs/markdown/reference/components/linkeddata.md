@@ -264,9 +264,10 @@ Provides a list picker backed by the results of a SPARQL query.
 {:id="LinkedDataListPicker.FontSize" .number} *FontSize*
 : Specifies the text font size of the `LinkedDataListPicker`, measured in sp(scale-independent pixels).
 
-{:id="LinkedDataListPicker.FontTypeface" .number .do} *FontTypeface*
+{:id="LinkedDataListPicker.FontTypeface" .text .do} *FontTypeface*
 : Specifies the text font face of the `LinkedDataListPicker` as default, serif, sans
- serif, or monospace.
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project's media.
 
 {:id="LinkedDataListPicker.Height" .number .bo} *Height*
 : Specifies the `LinkedDataListPicker`'s vertical height, measured in pixels.

@@ -379,16 +379,16 @@ class ComponentDatabase implements ComponentDatabaseInterface {
   /*
    * Enters property information into the component descriptor.
    */
-  private void findComponentProperties(ComponentDefinition component, JSONArray propertiesArray,
-      JSONArray blockPropertiesArray) {
-    Map<String, String> descriptions = new HashMap<>();
-    Map<String, String> categoryMap = new HashMap<>();
+  private void findComponentProperties(ComponentDefinition component,
+      JSONArray propertiesArray, JSONArray blockPropertiesArray) {
+    Map<String, String> descriptions = new HashMap<String, String>();
+    Map<String, String> categoryMap = new HashMap<String, String>();
     for (JSONValue block : blockPropertiesArray.getElements()) {
       Map<String, JSONValue> properties = block.asObject().getProperties();
       String name = properties.get("name").asString().getString();
-      JSONValue category = properties.get("category");
-      if (category != null) {
-        categoryMap.put(name, category.asString().getString());
+      JSONValue categoryValue = properties.get("category");
+      if (categoryValue != null) {
+        categoryMap.put(name, categoryValue.asString().getString());
       } else {
         categoryMap.put(name, "Unspecified");
       }
@@ -414,9 +414,9 @@ class ComponentDatabase implements ComponentDatabaseInterface {
 
       component.add(new PropertyDefinition(name,
           properties.get("defaultValue").asString().getString(),
-          name, category, descriptions.get(name),
-          properties.get("editorType").asString().getString(),
-          editorArgsList.toArray(new String[0])));
+          name, properties.get("editorType").asString().getString(),
+          editorArgsList.toArray(new String[0]),
+          category, descriptions.get(name)));
     }
   }
 

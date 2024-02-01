@@ -57,9 +57,10 @@ Button with the ability to detect clicks. Many aspects of its appearance can be 
 {:id="Button.FontSize" .number} *FontSize*
 : Specifies the text font size of the `Button`, measured in sp(scale-independent pixels).
 
-{:id="Button.FontTypeface" .number .do} *FontTypeface*
+{:id="Button.FontTypeface" .text .do} *FontTypeface*
 : Specifies the text font face of the `Button` as default, serif, sans
- serif, or monospace.
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project's media.
 
 {:id="Button.Height" .number .bo} *Height*
 : Specifies the `Button`'s vertical height, measured in pixels.
@@ -171,7 +172,7 @@ None
 {:id="CheckBox.FontSize" .number} *FontSize*
 : Specifies the text font size of the `CheckBox`, measured in sp(scale-independent pixels).
 
-{:id="CheckBox.FontTypeface" .number .do} *FontTypeface*
+{:id="CheckBox.FontTypeface" .text .do} *FontTypeface*
 : Specifies the text font face of the `CheckBox` as default, serif, sans
  serif, or monospace.
 
@@ -257,9 +258,10 @@ A button that, when clicked on, launches a popup dialog to allow the user to sel
 {:id="DatePicker.FontSize" .number} *FontSize*
 : Specifies the text font size of the `DatePicker`, measured in sp(scale-independent pixels).
 
-{:id="DatePicker.FontTypeface" .number .do} *FontTypeface*
+{:id="DatePicker.FontTypeface" .text .do} *FontTypeface*
 : Specifies the text font face of the `DatePicker` as default, serif, sans
- serif, or monospace.
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project's media.
 
 {:id="DatePicker.Height" .number .bo} *Height*
 : Specifies the `DatePicker`'s vertical height, measured in pixels.
@@ -450,7 +452,7 @@ Labels are components used to show text.
 {:id="Label.FontSize" .number} *FontSize*
 : Specifies the label's text's font size, measured in sp(scale-independent pixels).
 
-{:id="Label.FontTypeface" .number .do} *FontTypeface*
+{:id="Label.FontTypeface" .text .do} *FontTypeface*
 : Specifies the label's text's font face as default, serif, sans
  serif, or monospace.
 
@@ -553,9 +555,10 @@ A button that, when clicked on, displays a list of texts for the user to choose 
 {:id="ListPicker.FontSize" .number} *FontSize*
 : Specifies the text font size of the `ListPicker`, measured in sp(scale-independent pixels).
 
-{:id="ListPicker.FontTypeface" .number .do} *FontTypeface*
+{:id="ListPicker.FontTypeface" .text .do} *FontTypeface*
 : Specifies the text font face of the `ListPicker` as default, serif, sans
- serif, or monospace.
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project's media.
 
 {:id="ListPicker.Height" .number .bo} *Height*
 : Specifies the `ListPicker`'s vertical height, measured in pixels.
@@ -686,11 +689,11 @@ This is a visible component that displays a list of text and image elements in y
 {:id="ListView.FontSizeDetail" .number} *FontSizeDetail*
 : Specifies the `ListView` item's text font size
 
-{:id="ListView.FontTypeface" .number .do} *FontTypeface*
+{:id="ListView.FontTypeface" .text .do} *FontTypeface*
 : Specifies the label's text's font face as default, serif, sans
  serif, or monospace.
 
-{:id="ListView.FontTypefaceDetail" .number .do} *FontTypefaceDetail*
+{:id="ListView.FontTypefaceDetail" .text .do} *FontTypefaceDetail*
 : Specifies the label's text's font face as default, serif, sans
  serif, or monospace.
 
@@ -793,6 +796,9 @@ This is a visible component that displays a list of text and image elements in y
 
 {:id="ListView.Refresh" class="method"} <i/> Refresh()
 : Reload the ListView to reflect any changes in the data.
+
+{:id="ListView.RemoveItemAtIndex" class="method"} <i/> RemoveItemAtIndex(*index*{:.number})
+: Removes Item from list at a given index
 
 ## Notifier  {#Notifier}
 
@@ -927,7 +933,7 @@ Users enter passwords in a password text box component, which hides the text tha
 {:id="PasswordTextBox.FontSize" .number} *FontSize*
 : Specifies the text font size of the `PasswordTextBox`, measured in sp(scale-independent pixels).
 
-{:id="PasswordTextBox.FontTypeface" .number .do} *FontTypeface*
+{:id="PasswordTextBox.FontTypeface" .text .do} *FontTypeface*
 : The text font face of the `PasswordTextBox`. Valid values are `0` (default), `1` (serif), `2` (sans
  serif), or `3` (monospace).
 
@@ -1056,7 +1062,8 @@ Top-level component containing all other components in the program.
  to a form behind it in the activity stack.
 
 {:id="Screen.DefaultFileScope" .com.google.appinventor.components.common.FileScopeEnum .wo .do} *DefaultFileScope*
-: Specifies the default scope used when components access files. Note that the [`File`](#File)
+: Specifies the default scope used when components access files. Note that the
+ <a href="/reference/components/storage.html#File" target="_blank">File</a>
  component has its own property for controlling file scopes.
 
 {:id="Screen.Height" .number .ro .bo} *Height*
@@ -1386,7 +1393,7 @@ A `Spinner` component that displays a dialog with a list of elements. These elem
 {:id="Switch.FontSize" .number} *FontSize*
 : Specifies the text font size of the `Switch`, measured in sp(scale-independent pixels).
 
-{:id="Switch.FontTypeface" .number .do} *FontTypeface*
+{:id="Switch.FontTypeface" .text .do} *FontTypeface*
 : Specifies the text font face of the `Switch` as default, serif, sans
  serif, or monospace.
 
@@ -1502,7 +1509,7 @@ Users enter text in a text box component.
 {:id="TextBox.FontSize" .number} *FontSize*
 : Specifies the text font size of the `TextBox`, measured in sp(scale-independent pixels).
 
-{:id="TextBox.FontTypeface" .number .do} *FontTypeface*
+{:id="TextBox.FontTypeface" .text .do} *FontTypeface*
 : The text font face of the `TextBox`. Valid values are `0` (default), `1` (serif), `2` (sans
  serif), or `3` (monospace).
 
@@ -1535,7 +1542,7 @@ Users enter text in a text box component.
 : <p>Property URI specifies the relationship between a Linked Data Form containing a TextBox, Password, etc. and the component. Common properties include the name properties in the Friend-of-a-Friend ontology (e.g. foaf:name, foaf:givenName, foaf:surname), label properties (e.g. rdfs:label, skos:prefLabel), or descriptions (e.g. rdfs:comment, dc:description).</p>
 
 {:id="TextBox.ReadOnly" .boolean} *ReadOnly*
-: Whether the TextBox is read-only. By default, this is `true`{:.logic.block}.
+: Whether the TextBox is read-only. By default, this is `false`{:.logic.block}.
 
 {:id="TextBox.SubjectIdentifier" .boolean} *SubjectIdentifier*
 : <p>If the text box is contained in a Linked Data Form and Subject Identifier is checked, then the value of the text box will be used to construct a new Uniform Resource Identifier (URI) when the form is submitted.</p>
@@ -1619,9 +1626,10 @@ A button that, when clicked on, opens a dialog to allow the user to select a tim
 {:id="TimePicker.FontSize" .number} *FontSize*
 : Specifies the text font size of the `TimePicker`, measured in sp(scale-independent pixels).
 
-{:id="TimePicker.FontTypeface" .number .do} *FontTypeface*
+{:id="TimePicker.FontTypeface" .text .do} *FontTypeface*
 : Specifies the text font face of the `TimePicker` as default, serif, sans
- serif, or monospace.
+ serif, monospace, or custom font typeface. To add a custom typeface,
+ upload a .ttf file to the project's media.
 
 {:id="TimePicker.Height" .number .bo} *Height*
 : Specifies the `TimePicker`'s vertical height, measured in pixels.

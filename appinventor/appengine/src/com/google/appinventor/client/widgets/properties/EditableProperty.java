@@ -96,7 +96,8 @@ public final class EditableProperty extends Property {
 
   public EditableProperty(EditableProperties properties, String name, String defaultValue,
       int type) {
-    this(properties, name, defaultValue, name, "", "", new TextPropertyEditor(), type, "", null);
+    this(properties, name, defaultValue, name, null, null,
+        new TextPropertyEditor(), type, "", null);
   }
 
   /**
@@ -111,8 +112,7 @@ public final class EditableProperty extends Property {
    */
   public EditableProperty(EditableProperties properties, String name, String defaultValue,
       String category, int type, String editorType, String[] editorArgs) {
-    this(properties, name, defaultValue, name, category, null, new TextPropertyEditor(), type,
-        editorType, editorArgs);
+    this(properties, name, defaultValue, name, category, null, new TextPropertyEditor(), type, editorType, editorArgs);
   }
 
   /**
@@ -207,5 +207,4 @@ public final class EditableProperty extends Property {
   public void setType(int aType) {
     this.type = aType;
   }
-
 }

@@ -8,14 +8,11 @@ package com.google.appinventor.client.explorer.commands;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
+import com.google.appinventor.client.editor.youngandroid.DesignToolbar;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.youngandroid.TextValidators;
@@ -36,6 +33,9 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A command that creates a new form.

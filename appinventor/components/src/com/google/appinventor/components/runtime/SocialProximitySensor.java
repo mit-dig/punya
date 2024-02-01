@@ -27,8 +27,8 @@ import com.google.appinventor.components.annotations.UsesPermissions;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.components.common.YaVersion;
-import com.google.appinventor.components.runtime.util.BluetoothReflection;
 import com.google.appinventor.components.runtime.util.ErrorMessages;
+import com.google.appinventor.components.runtime.util.SUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -136,7 +136,7 @@ public class SocialProximitySensor extends ProbeBase{
 	
 	private void checkBluetoothAvailabiblity(){
 		//check if Bluetooth is available, if not it will raise an exception
-		this.bluetoothAdapter = (BluetoothAdapter) BluetoothReflection.getBluetoothAdapter();
+		this.bluetoothAdapter = SUtil.getAdapter(form);
 		
 	    if (bluetoothAdapter == null) {
 	        form.dispatchErrorOccurredEvent(this, "checkBluetoothAvailabiblity",

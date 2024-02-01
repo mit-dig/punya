@@ -151,6 +151,7 @@
     "./src/generators/yail/dictionaries.js",
     "./src/generators/yail/gql.js",
     './src/generators/yail/helpers.js',
+    './src/generators/swift.js',
 
     // Repl
     "./src/replmgr.js",
