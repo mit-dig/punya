@@ -109,7 +109,23 @@ public class RunD8 extends DexTask implements AndroidTask {
       if (USE_D8_PROGUARD_RULES) {
         // Google is moving to proguard-style rules for computing the main dex in d8
         mainDexClasses.clear();
-        mainDexClasses.add("com.google.appinventor.components.runtime.ReplApplication");
+        // Components
+        mainDexClasses.add("com.google.appinventor.components.runtime.*");
+        // Multidex and other utility classes
+        mainDexClasses.add("com.google.appinventor.components.runtime.errors.*");
+        mainDexClasses.add("com.google.appinventor.components.runtime.multidex.*");
+        mainDexClasses.add("com.google.appinventor.components.runtime.util.YailDictionary");
+        mainDexClasses.add("com.google.appinventor.components.runtime.util.YailList");
+        mainDexClasses.add("com.google.appinventor.components.runtime.util.YailObject");
+        // Kawa
+        // TODO(ewpatton): Figure out why this gets triggered before Multidex completes
+        mainDexClasses.add("kawa.**.*");
+
+        // Android-related classes
+        mainDexClasses.add("androidx.core.content.FileProvider");
+        mainDexClasses.add("androidx.appcompat.**.*");
+        mainDexClasses.add("androidx.collection.*");
+        mainDexClasses.add("androidx.vectordrawable.**.*");
         mainDexClasses.add(context.getProject().getMainClass());
       }
 

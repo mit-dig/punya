@@ -539,22 +539,31 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
    */
   public final void addProperty(String name, String defaultValue, String caption,
       String editorType, String[] editorArgs, PropertyEditor editor) {
-    addProperty(name, defaultValue, caption, null, null, editorType, editorArgs, editor);
+    addProperty(name, defaultValue, caption, null, editorType, editorArgs, editor);
   }
 
   public final void addProperty(String name, String defaultValue, String caption, String category,
-      String description, String editorType, String[] editorArgs, PropertyEditor editor) {
-    int type = EditableProperty.TYPE_NORMAL;
+                                String editorType, String[] editorArgs, PropertyEditor editor) {
+
+    String propertyDesc = ComponentsTranslation.getPropertyDescription(name
+      + "PropertyDescriptions");
+    if (propertyDesc.equals(name + "PropertyDescriptions")) {
+      propertyDesc = ComponentsTranslation.getPropertyDescription((type.equals("Form")
+          ? "Screen" : type) + "." + propertyDesc);
+    }
+
+    int propertyType = EditableProperty.TYPE_NORMAL;
     if (!isPropertyPersisted(name)) {
-      type |= EditableProperty.TYPE_NONPERSISTED;
+      propertyType |= EditableProperty.TYPE_NONPERSISTED;
     }
     if (!isPropertyVisible(name)) {
-      type |= EditableProperty.TYPE_INVISIBLE;
+      propertyType |= EditableProperty.TYPE_INVISIBLE;
     }
     if (isPropertyforYail(name)) {
-      type |= EditableProperty.TYPE_DOYAIL;
+      propertyType |= EditableProperty.TYPE_DOYAIL;
     }
-    properties.addProperty(name, defaultValue, caption, category, description, editor, type, editorType, editorArgs);
+    properties.addProperty(name, defaultValue, ComponentsTranslation.getPropertyName(caption),
+        ComponentsTranslation.getCategoryName(category),  propertyDesc, editor, propertyType, editorType, editorArgs);
   }
 
   protected final void addProperty(String name) {
@@ -1243,7 +1252,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
             property.getEditorType(), property.getDefaultValue(),
             (YaFormEditor) editor, property.getEditorArgs());
         addProperty(property.getName(), property.getDefaultValue(), property.getCaption(),
-            property.getCategory(), property.getDescription(), property.getEditorType(),
+            property.getCategory(), property.getEditorType(),
             property.getEditorArgs(), propertyEditor);
       }
     }

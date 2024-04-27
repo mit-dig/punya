@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2022 MIT, All rights reserved
+// Copyright 2011-2024 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -664,9 +664,17 @@ public class YaVersion {
   // - WEB_COMPONENT_VERSION was incremented to 9
   // For YOUNG_ANDROID_VERSION 226:
   // - FORM_COMPONENT_VERSION was incremented to 31
-  // For YOUNG_ANDROID_VERSION 240:
+  // For YOUNG_ANDROID_VERSION 227:
+  // - EMAILPICKER_COMPONENT_VERSION was incremented to 7
+  // - TEXTBOX_COMPONENT_VERSION was incremented to 14
+  // - PASSWORD_TEXTBOX_VERSION was incremented to 7
+  // - CHART_COMPONENT_VERSION was incremented to 3
+  // - TRENDLINE_COMPONENT_VERSION was introduced
+  // For YOUNG_ANDROID_VERSION 228:
+  // - Renamed LineOfBestFit to Trendline
+  // For YOUNG_ANDROID_VERSION 241:
   // - appinventor-sources master was merged into punya master
-  public static final int YOUNG_ANDROID_VERSION = 240;
+  public static final int YOUNG_ANDROID_VERSION = 241;
 
   // ............................... Blocks Language Version Number ...............................
 
@@ -830,7 +838,9 @@ public class YaVersion {
   // - Extras property was added to accept a list of key-value pairs to put to the intent
   public static final int ACTIVITYSTARTER_COMPONENT_VERSION = 6;
 
-  public static final int ANOMALY_COMPONENT_VERSION = 1;
+  // For ANOMALY_COMPONENT_VERSION 2:
+  // - The DetectAnomaliesInChartData method was added.
+  public static final int ANOMALY_COMPONENT_VERSION = 2;
 
   // For BALL_COMPONENT_VERSION 2:
   // - The PointTowards method was added (for all sprites)
@@ -944,7 +954,10 @@ public class YaVersion {
   // For CHART_COMPONENT_VERSION 2:
   // - The XFromZero and YFromZero properties were added
   // - The SetDomain and SetRange methods were added
-  public static final int CHART_COMPONENT_VERSION = 2;
+  // For CHART_COMPONENT_VERSION 3:
+  // - The ExtendDomainToInclude and ExtendRangeToInclude methods were added
+  // - The Type getter block was made visible
+  public static final int CHART_COMPONENT_VERSION = 3;
 
   public static final int CHART_DATA_2D_COMPONENT_VERSION = 1;
 
@@ -1009,7 +1022,10 @@ public class YaVersion {
   // - The Alignment property was renamed to TextAlignment.
   // For EMAILPICKER_COMPONENT_VERSION 3:
   // - RequestFocus function was added (via TextBoxBase)
-  public static final int EMAILPICKER_COMPONENT_VERSION = 3;
+  // For EMAILPICKER_COMPONENT_VERSION 7:
+  // - Bumped up to be strictly greater than Kodular's EmailPicker (6).
+  // - TextChanged event, HintColor property, MoveCursorTo, MoveCursorToEnd and MoveCursorToStart methods were added.
+  public static final int EMAILPICKER_COMPONENT_VERSION = 7;
 
   // For FEATURE_COLLECTION_COMPONENT_VERSION 1:
   // - Initial FeatureCollection implementation for Maps
@@ -1409,9 +1425,12 @@ public class YaVersion {
   // - Added RequestFocus Function (via TextBoxBase)
   // For PASSWORDTEXTBOX_COMPONENT_VERSION 4:
   // - Added PasswordVisible property
-  // For For PASSWORDTEXTBOX_COMPONENT_VERSION 5:
+  // For PASSWORDTEXTBOX_COMPONENT_VERSION 5:
   // - Added NumbersOnly property
-  public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 5;
+  // For PASSWORDTEXTBOX_COMPONENT_VERSION 7:
+  // - Bumped up to be strictly greater than Kodular's PasswordTextBox (6).
+  // - TextChanged event, HintColor property, MoveCursorTo, MoveCursorToEnd and MoveCursorToStart methods were added.
+  public static final int PASSWORDTEXTBOX_COMPONENT_VERSION = 7;
 
   public static final int PEBBLESMARTWATCH_COMPONENT_VERSION = 1;	
   
@@ -1550,7 +1569,12 @@ public class YaVersion {
   // - RequestFocus method was added
   // For TEXTBOX_COMPONENT_VERSION 7:
   // - ReadOnly property was added
-  public static final int TEXTBOX_COMPONENT_VERSION = 7;
+  // For TEXTBOX_COMPONENT_VERSION 14:
+  // - Bumped up to be strictly greater than Kodular's TextBox (13).
+  // - TextChanged event, HintColor property, MoveCursorTo, MoveCursorToEnd and MoveCursorToStart methods were added.
+  // For TEXTBOX_COMPONENT_VERSION 15:
+  // - Merge appinventor-source/master into punya/master
+  public static final int TEXTBOX_COMPONENT_VERSION = 15;
 
   // For TEXTING_COMPONENT_VERSION 2:
   // Texting over Wifi was implemented using Google Voice
@@ -1624,6 +1648,10 @@ public class YaVersion {
   // For GRAPHQL_COMPONENT_VERSION 1:
   // - GraphQL component introduced.
   public static final int GRAPHQL_COMPONENT_VERSION = 1;
+
+  // For TRENDLINE_COMPONENT_VERSION 1:
+  // - Initial implementation
+  public static final int TRENDLINE_COMPONENT_VERSION = 1;
 
   // For TWITTER_COMPONENT_VERSION 2:
   // - The Authorize method and IsAuthorized event handler were added to support
@@ -1777,6 +1805,14 @@ public class YaVersion {
   public static final int LIGHTSENSOR_COMPONENT_VERSION = 1;
   public static final int THERMOMETER_COMPONENT_VERSION = 1;
 
+  // For CIRCULAR_PROGRESS_COMPONENT_VERSION 1:
+  // - Initial version
+  public static final int CIRCULAR_PROGRESS_COMPONENT_VERSION = 1;
+
+  // For LINEAR_PROGRESS_COMPONENT_VERSION 1:
+  // - Initial version
+  public static final int LINEAR_PROGRESS_COMPONENT_VERSION = 1;
+
   // Companion Versions and Update Information
 
   // The PREFERRED_COMPANION is displayed to the end-user if
@@ -1801,12 +1837,12 @@ public class YaVersion {
 
   public static final String ACCEPTABLE_COMPANION_PACKAGE = "edu.mit.appinventor.punya.aicompanion3";
 
-  public static final String PREFERRED_COMPANION = "2.69punya1";
+  public static final String PREFERRED_COMPANION = "2.70punya1";
   public static final String EMULATOR_UPDATE_URL = ""; // Should be an APK
   public static final String COMPANION_UPDATE_URL = "";
   public static final String COMPANION_UPDATE_URL1 = "";
   public static final String COMPANION_UPDATE_EMULATOR_URL = "";
-  public static final String [] ACCEPTABLE_COMPANIONS = { "2.69punya1", "2.69punya1u" };
+  public static final String [] ACCEPTABLE_COMPANIONS = { "2.70punya1", "2.70punya1u" };
 
   // Splash Screen Values
   public static final int SPLASH_SURVEY = 1;

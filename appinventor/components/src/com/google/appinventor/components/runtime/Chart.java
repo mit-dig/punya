@@ -1,5 +1,5 @@
 // -*- mode: java; c-basic-offset: 2; -*-
-// Copyright 2019-2022 MIT, All rights reserved
+// Copyright 2019-2024 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -9,10 +9,6 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-import com.github.mikephil.charting.charts.BarLineChartBase;
-import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBubbleDataSet;
 import com.google.appinventor.components.annotations.DesignerComponent;
 import com.google.appinventor.components.annotations.DesignerProperty;
 import com.google.appinventor.components.annotations.PropertyCategory;
@@ -54,7 +50,7 @@ import java.util.List;
 @UsesLibraries(libraries = "mpandroidchart.jar")
 @SuppressWarnings("checkstyle:JavadocParagraph")
 public class Chart extends AndroidViewComponent
-    implements ComponentContainer<ChartDataBase>, OnInitializeListener {
+    implements ComponentContainer<ChartComponent>, OnInitializeListener {
   // Root layout of the Chart view. This is used to make Chart
   // dynamic removal & adding easier.
   private final RelativeLayout view;
@@ -79,7 +75,7 @@ public class Chart extends AndroidViewComponent
   private int tick = 1;
 
   // Attached Data components
-  private final ArrayList<ChartDataBase> dataComponents;
+  private final List<ChartComponent> dataComponents;
 
   /**
    * Creates a new Chart component.
@@ -144,23 +140,24 @@ public class Chart extends AndroidViewComponent
   }
 
   @Override
-  public List<ChartDataBase> getChildren() {
+  public List<ChartComponent> getChildren() {
     return dataComponents;
   }
 
   @Override
-  public Iterator<ChartDataBase> iterator() {
+  public Iterator<ChartComponent> iterator() {
     return dataComponents.iterator();
   }
 
   /**
-   * Returns the type of the Chart.
+   * Specifies the type of the Chart, which determines how to visualize the data.
    *
    * @return the current type of the chart
    */
   @SimpleProperty(
       category = PropertyCategory.BEHAVIOR,
-      userVisible = false)
+      description = "Specifies the chart's type (area, bar, pie, scatter), "
+          + "which determines how to visualize the data.")
   public ChartType Type() {
     return type;
   }
@@ -173,9 +170,6 @@ public class Chart extends AndroidViewComponent
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_CHART_TYPE,
       defaultValue = "0")
-  @SimpleProperty(description = "Specifies the chart's type (area, bar, "
-      + "pie, scatter), which determines how to visualize the data.",
-      userVisible = false)
   public void Type(ChartType type) {
     // Keep track whether a ChartView already exists,
     // in which case it will have to be reinitialized.
@@ -237,7 +231,7 @@ public class Chart extends AndroidViewComponent
     // the Data components are attached to the Chart.
     // This has no effect when the Type property is default (0), since
     // the Data components are not attached yet, making the List empty.
-    for (ChartDataBase dataComponent : dataComponents) {
+    for (ChartComponent dataComponent : dataComponents) {
       dataComponent.initChartData();
     }
 
@@ -291,9 +285,12 @@ public class Chart extends AndroidViewComponent
    * @param argb background RGB color with alpha
    */
   @DesignerProperty(editorType = PropertyTypeConstants.PROPERTY_TYPE_COLOR,
-      defaultValue = Component.DEFAULT_VALUE_COLOR_NONE)
+      defaultValue = Component.DEFAULT_VALUE_COLOR_DEFAULT)
   @SimpleProperty
   public void BackgroundColor(int argb) {
+    if (argb == Component.COLOR_DEFAULT) {
+      argb = $form().isDarkTheme() ? Component.COLOR_BLACK : Component.COLOR_WHITE;
+    }
     backgroundColor = argb;
     chartView.setBackgroundColor(argb);
   }
@@ -495,6 +492,59 @@ public class Chart extends AndroidViewComponent
   }
 
   /**
+   * Extends the domain of the chart to include the provided x value. If x is already within the
+   * bounds of the domain, this method has no effect.
+   *
+   * @param x the value to show
+   */
+  @SimpleFunction
+  public void ExtendDomainToInclude(double x) {
+    if (chartView instanceof AxisChartView) {
+      double[] bounds = ((AxisChartView<?, ?, ?, ?, ?>) chartView).getXBounds();
+      if (x < bounds[0]) {
+        ((AxisChartView<?, ?, ?, ?, ?>) chartView).setXBounds(x, bounds[1]);
+      } else if (x > bounds[1]) {
+        ((AxisChartView<?, ?, ?, ?, ?>) chartView).setXBounds(bounds[0], x);
+      } else {
+        return;
+      }
+      chartView.refresh();
+    }
+  }
+
+  /**
+   * Extends the range of the chart to include the provided y value. If y is already within the
+   * bounds of the range, this method has no effect.
+   *
+   * @param y the value to show
+   */
+  @SimpleFunction
+  public void ExtendRangeToInclude(double y) {
+    if (chartView instanceof AxisChartView) {
+      double[] bounds = ((AxisChartView<?, ?, ?, ?, ?>) chartView).getYBounds();
+      if (y < bounds[0]) {
+        ((AxisChartView<?, ?, ?, ?, ?>) chartView).setYBounds(y, bounds[1]);
+      } else if (y > bounds[1]) {
+        ((AxisChartView<?, ?, ?, ?, ?>) chartView).setYBounds(bounds[0], y);
+      } else {
+        return;
+      }
+      chartView.refresh();
+    }
+  }
+
+  /**
+   * Resets the axes of the chart to their original bounds.
+   */
+  @SimpleFunction
+  public void ResetAxes() {
+    if (chartView instanceof AxisChartView) {
+      ((AxisChartView<?, ?, ?, ?, ?>) chartView).resetAxes();
+      refresh();
+    }
+  }
+
+  /**
    * Sets the minimum and maximum for the domain of the X axis.
    *
    * @param minimum the lower bound for the domain
@@ -506,6 +556,7 @@ public class Chart extends AndroidViewComponent
 
     if (chartView instanceof AxisChartView) {
       ((AxisChartView<?, ?, ?, ?, ?>) chartView).setXBounds(minimum, maximum);
+      refresh();
     }
   }
 
@@ -521,6 +572,7 @@ public class Chart extends AndroidViewComponent
 
     if (chartView instanceof AxisChartView) {
       ((AxisChartView<?, ?, ?, ?, ?>) chartView).setYBounds(minimum, maximum);
+      refresh();
     }
   }
 
@@ -568,7 +620,7 @@ public class Chart extends AndroidViewComponent
    *
    * @param dataComponent Data component object instance to add
    */
-  public void addDataComponent(ChartDataBase dataComponent) {
+  public void addDataComponent(ChartComponent dataComponent) {
     dataComponents.add(dataComponent);
   }
 

@@ -29,13 +29,17 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
   private Set<String> collisionKeys = new HashSet<>();
   private Set<String> writtenKeys = new HashSet<>();
 
+  private static String getComponentName(String qualifiedName) {
+    return qualifiedName.substring(qualifiedName.lastIndexOf('.') + 1);
+  }
+
   private void outputComponent(ComponentInfo component, Set<String> outProperties,
       Set<String> outMethods, Set<String> outEvents, Set<String> outParameters, StringBuilder sb) {
     if (component.getExternal()) { // Avoid adding entries for external components
       return;
     }
     Map<String, Parameter> parameters = new LinkedHashMap<>();
-    sb.append("\n\n/* Component: ").append(component.getName()).append(" */\n\n");
+    sb.append("\n\n    /* Component: ").append(component.getName()).append(" */\n\n");
     sb.append("    map.put(\"COMPONENT-")
         .append(component.getName())
         .append("\", MESSAGES.")
@@ -47,7 +51,7 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
         .append("-helpString\", MESSAGES.")
         .append(component.getName())
         .append("HelpStringComponentPallette());\n\n");
-    sb.append("\n\n/* Properties */\n\n");
+    sb.append("\n\n    /* Properties */\n\n");
     for (Property prop : component.properties.values()) {
       String propertyName = prop.name;
       if (outProperties.contains(propertyName)) continue;
@@ -66,7 +70,7 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
       }
     }
 
-    sb.append("\n\n/* Events */\n\n");
+    sb.append("\n\n    /* Events */\n\n");
     for (Event event : component.events.values()) {
       String propertyName = event.name;
       if (outEvents.contains(propertyName)) continue;
@@ -86,7 +90,7 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
       }
     }
 
-    sb.append("\n\n/* Methods */\n\n");
+    sb.append("\n\n    /* Methods */\n\n");
     for (Method method : component.methods.values()) {
       String propertyName = method.name;
       if (outMethods.contains(propertyName)) continue;
@@ -106,7 +110,7 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
       }
     }
 
-    sb.append("\n\n/* Parameters */\n\n");
+    sb.append("\n\n    /* Parameters */\n\n");
     // TODO: Instead of compiling the names here, can we just create a list instead of a map?
     ArrayList<String> names = new ArrayList();
     for (Parameter parameter : parameters.values()) {
@@ -384,14 +388,14 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
 
   protected void outputOptionList(OptionList optionList, StringBuilder sb) {
     String tagName = optionList.getTagName();
-    sb.append("\n\n/* OptionList ");
+    sb.append("\n\n    /* OptionList ");
     sb.append(tagName);
     sb.append(" */\n\n");
 
     // Translate tag.
     String lowerTagName = Character.toLowerCase(tagName.charAt(0))
         + tagName.substring(1);
-    sb.append("     map.put(\"OPTIONLIST-")
+    sb.append("    map.put(\"OPTIONLIST-")
       .append(tagName)
       .append("\", MESSAGES.")
       .append(lowerTagName)
@@ -434,6 +438,24 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
     }
   }
 
+  public void outputTooltips(String type, String prefix, String suffix, Map<String, String> tooltips,
+      StringBuilder sb) {
+    sb.append("\n\n  public static void setup");
+    sb.append(type);
+    sb.append("TooltipTranslations(Map<String, String> map) {\n");
+    for (String key : tooltips.keySet()) {
+      if (!key.endsWith(suffix)) {
+        continue;
+      }
+      sb.append("    map.put(\"");
+      sb.append(prefix);
+      sb.append(key.replaceAll("__", "."));
+      sb.append("\", MESSAGES.");
+      sb.append(key);
+      sb.append("());\n");
+    }
+    sb.append("  }\n");
+  }
 
   @Override
   protected void outputResults() throws IOException {
@@ -495,8 +517,6 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
     sb.append("    if(value == null) return key;\n");
     sb.append("    return value;\n");
     sb.append("  }\n");
-    sb.append("  public static HashMap<String, String> map() {\n");
-    sb.append("    HashMap<String, String> map = new HashMap<String, String>();\n");
 
     // Components are already sorted.
     Set<String> categories = new TreeSet<>();
@@ -505,41 +525,43 @@ public final class ComponentTranslationGenerator extends ComponentProcessor {
     Set<String> events = new TreeSet<>();
     Set<String> parameters = new TreeSet<>();
     for (Map.Entry<String, ComponentInfo> entry : components.entrySet()) {
+      sb.append("\n  public static void setup");
+      sb.append(getComponentName(entry.getKey()));
+      sb.append("Translations(Map<String, String> map) {\n");
       ComponentInfo component = entry.getValue();
       outputComponent(component, properties, methods, events, parameters, sb);
       categories.add(component.getCategory());
+      sb.append("  }\n");
     }
+
+    outputTooltips("Property", "PROPDESC-", "PropertyDescriptions", tooltips, sb);
+    outputTooltips("Method", "METHODDESC-", "MethodDescriptions", tooltips, sb);
+    outputTooltips("Event", "EVENTDESC-", "EventDescriptions", tooltips, sb);
+
+    sb.append("\n  public static HashMap<String, String> map() {\n");
+    sb.append("    HashMap<String, String> map = new HashMap<String, String>();\n");
+
+    for (String componentName : components.keySet()) {
+      sb.append("    setup");
+      sb.append(getComponentName(componentName));
+      sb.append("Translations(map);\n");
+    }
+    sb.append("\n    setupPropertyTooltipTranslations(map);\n");
+    sb.append("    setupMethodTooltipTranslations(map);\n");
+    sb.append("    setupEventTooltipTranslations(map);");
+    sb.append("\n\n    /* OptionList */\n\n");
     for (Map.Entry<String, OptionList> entry : optionLists.entrySet()) {
       OptionList optionList = entry.getValue();
       outputOptionList(optionList, sb);
-    }
-    sb.append("\n\n    /* Descriptions */\n\n");
-    for (String key : tooltips.keySet()) {
-      if (key.endsWith("PropertyDescriptions")) {
-        sb.append("    map.put(\"PROPDESC-");
-        sb.append(key.replaceAll("__", "."));
-        sb.append("\", MESSAGES.");
-        sb.append(key);
-        sb.append("());\n");
-      } else if (key.endsWith("MethodDescriptions")) {
-        sb.append("    map.put(\"METHODDESC-");
-        sb.append(key.replaceAll("__", "."));
-        sb.append("\", MESSAGES.");
-        sb.append(key);
-        sb.append("());\n");
-      } else if (key.endsWith("EventDescriptions")) {
-        sb.append("    map.put(\"EVENTDESC-");
-        sb.append(key.replaceAll("__", "."));
-        sb.append("\", MESSAGES.");
-        sb.append(key);
-        sb.append("());\n");
-      }
     }
     sb.append("\n\n    /* Categories */\n\n");
     for (String category : categories) {
       outputCategory(category, sb);
     }
-    sb.append("  return map;\n");
+    outputPropertyCategory("Appearance", sb);
+    outputPropertyCategory("Behavior", sb);
+    outputPropertyCategory("Unspecified", sb);
+    sb.append("    return map;\n");
     sb.append("  }\n");
     sb.append("}\n");
     FileObject src = createOutputFileObject(OUTPUT_FILE_NAME);

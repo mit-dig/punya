@@ -1020,4 +1020,22 @@ public interface Images extends Resources {
    */
   @Source("com/google/appinventor/images/get-app.png")
   ImageResource GetApp();
+
+  /**
+   * Designer palette item: progressbar circular component
+   */
+  @Source("com/google/appinventor/images/circularProgress.png")
+  ImageResource circularProgress();
+
+  /**
+   * Designer palette item: progressbar circular component
+   */
+  @Source("com/google/appinventor/images/linearProgress.png")
+  ImageResource linearProgress();
+
+  /**
+   * Designer palette item: Trendline.
+   */
+  @Source("com/google/appinventor/images/trendline.png")
+  ImageResource trendline();
 }

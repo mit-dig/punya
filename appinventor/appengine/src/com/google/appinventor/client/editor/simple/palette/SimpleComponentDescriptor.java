@@ -1,6 +1,6 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
-// Copyright 2011-2023 MIT, All rights reserved
+// Copyright 2011-2024 MIT, All rights reserved
 // Released under the Apache License, Version 2.0
 // http://www.apache.org/licenses/LICENSE-2.0
 
@@ -24,6 +24,7 @@ import com.google.appinventor.client.editor.simple.components.MockCheckBox;
 import com.google.appinventor.client.editor.simple.components.MockLinkedDataForm;
 import com.google.appinventor.client.editor.simple.components.MockLinkedDataListPicker;
 import com.google.appinventor.client.editor.simple.components.MockCircle;
+import com.google.appinventor.client.editor.simple.components.MockCircularProgress;
 import com.google.appinventor.client.editor.simple.components.MockCloudDB;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockContactPicker;
@@ -37,6 +38,7 @@ import com.google.appinventor.client.editor.simple.components.MockFusionTablesCo
 import com.google.appinventor.client.editor.simple.components.MockGoogleMap;
 import com.google.appinventor.client.editor.simple.components.MockGraph;
 import com.google.appinventor.client.editor.simple.components.MockGraphQL;
+import com.google.appinventor.client.editor.simple.components.MockLinearProgress;
 import com.google.appinventor.client.editor.simple.components.MockHorizontalArrangement;
 import com.google.appinventor.client.editor.simple.components.MockImage;
 import com.google.appinventor.client.editor.simple.components.MockImageBot;
@@ -65,6 +67,8 @@ import com.google.appinventor.client.editor.simple.components.MockTableArrangeme
 import com.google.appinventor.client.editor.simple.components.MockTextBox;
 import com.google.appinventor.client.editor.simple.components.MockTimePicker;
 import com.google.appinventor.client.editor.simple.components.MockTranslator;
+import com.google.appinventor.client.editor.simple.components.MockTrendline;
+import com.google.appinventor.client.editor.simple.components.MockTwitter;
 import com.google.appinventor.client.editor.simple.components.MockVerticalArrangement;
 import com.google.appinventor.client.editor.simple.components.MockVideoPlayer;
 import com.google.appinventor.client.editor.simple.components.MockWebViewer;
@@ -249,9 +253,12 @@ public final class SimpleComponentDescriptor {
     bundledImages.put("images/chart.png", images.chart());
     bundledImages.put("images/chartData.png", images.chartData2D());
     bundledImages.put("images/dataFile.png", images.dataFile());
+    bundledImages.put("images/circularProgress.png", images.circularProgress());
+    bundledImages.put("images/linearProgress.png", images.linearProgress());
     bundledImages.put("images/regression.png", images.regression());
     bundledImages.put("images/anomaly.png", images.anomalyDetection());
     bundledImages.put("images/filepicker.png", images.file());
+    bundledImages.put("images/trendline.png", images.trendline());
 
     imagesInitialized = true;
   }
@@ -519,6 +526,10 @@ public final class SimpleComponentDescriptor {
         return new MockFusionTablesControl(editor, name,
           getImageFromPath(SimpleComponentDatabase.getInstance(editor.getProjectId()).getIconName(name),
             null, editor.getProjectId()));
+      } else if(name.equals(MockTwitter.TYPE)) {
+        return new MockTwitter(editor, name,
+          getImageFromPath(SimpleComponentDatabase.getInstance(editor.getProjectId()).getIconName(name),
+            null, editor.getProjectId()));
       } else if(name.equals(MockTranslator.TYPE)) {
         return new MockTranslator(editor, name,
           getImageFromPath(SimpleComponentDatabase.getInstance(editor.getProjectId()).getIconName(name),
@@ -640,6 +651,12 @@ public final class SimpleComponentDescriptor {
       return new MockChart(editor);
     } else if (name.equals(MockChartData2D.TYPE)) {
       return new MockChartData2D(editor);
+    } else if (name.equals(MockCircularProgress.TYPE)) {
+      return new MockCircularProgress(editor);
+    } else if (name.equals(MockLinearProgress.TYPE)) {
+      return new MockLinearProgress(editor);
+    } else if (name.equals(MockTrendline.TYPE)) {
+      return new MockTrendline(editor);
     } else {
       // TODO(user): add 3rd party mock component proxy here
       throw new UnsupportedOperationException("unknown component: " + name);
