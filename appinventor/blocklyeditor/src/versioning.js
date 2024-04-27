@@ -3197,7 +3197,9 @@ Blockly.Versioning.AllUpgradeMaps =
     14: [
       Blockly.Versioning.changeMethodName("TextBox", "SetCursorAt", "MoveCursorTo"),
       Blockly.Versioning.changeMethodName("TextBox", "SetCursorAtEnd", "MoveCursorToEnd"),
-      Blockly.Versioning.changeEventName("TextBox", "OnTextChanged", "TextChanged")]
+      Blockly.Versioning.changeEventName("TextBox", "OnTextChanged", "TextChanged")],
+
+    15: "noUpgrade"
 
   }, // End TextBox upgraders
 
