@@ -42,6 +42,7 @@ import java.util.Locale;
 @UsesActivities(activities = {
     @ActivityElement(name = "com.google.appinventor.components.runtime.SWListActivity",
         configChanges = "orientation|keyboardHidden",
+        exported = "false",
         screenOrientation = "behind")
 })
 public class LinkedDataListPicker extends Picker implements ActivityResultListener, Deleteable, LDComponent {

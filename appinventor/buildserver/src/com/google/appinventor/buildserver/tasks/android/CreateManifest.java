@@ -363,7 +363,7 @@ public class CreateManifest implements AndroidTask {
           || context.getSimpleCompTypes().contains("com.google.appinventor.components.runtime.PctMessaging")) {
         // Declare and use a custom permission so only this application can receive GCM messages:
         out.write("<service android:name=\"com.google.appinventor.components.runtime.GCMIntentService\"></service>\n");
-        out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" >\n");
+        out.write("<receiver android:name=\"com.google.appinventor.components.runtime.GCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\" android:exported=\"true\">\n");
         out.write("    <intent-filter>");
         out.write("        <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n");
         out.write("        <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n");
@@ -387,7 +387,7 @@ public class CreateManifest implements AndroidTask {
       if (context.getSimpleCompTypes().contains("com.google.appinventor.components.runtime.Timer")) {
         out.write("<service android:name=\"com.google.appinventor.components.runtime.util.TimerManager\" android:enabled=\"true\" android:exported=\"false\">\n");
         out.write(" </service>\n");
-        out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\">\n");
+        out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\" android:exported=\"true\">\n");
         out.write("    <intent-filter>\n");
         out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
         out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
@@ -412,7 +412,7 @@ public class CreateManifest implements AndroidTask {
         if (libraries != null && libraries.contains("funf.jar")) {
           out.write("<service android:name=\"edu.mit.media.funf.FunfManager\" android:enabled=\"true\" android:exported=\"false\">\n");
           out.write(" </service>\n");
-          out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\">\n");
+          out.write("<receiver android:name=\"edu.mit.media.funf.Launcher\" android:enabled=\"true\" android:exported=\"true\">\n");
           out.write("    <intent-filter>\n");
           out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
           out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
@@ -440,7 +440,7 @@ public class CreateManifest implements AndroidTask {
       if (context.getSimpleCompTypes().contains("com.google.appinventor.components.runtime.Timer")) {
         out.write("<service android:name=\"com.google.appinventor.components.runtime.util.TimerManager\" android:enabled=\"true\" android:exported=\"false\">\n");
         out.write(" </service>\n");
-        out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\">\n");
+        out.write("<receiver android:name=\"com.google.appinventor.components.runtime.util.TimerLauncher\" android:enabled=\"true\" android:exported=\"true\">\n");
         out.write("    <intent-filter>\n");
         out.write("        <action android:name=\"android.intent.action.BATTERY_CHANGED\" />\n");
         out.write("        <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n");
