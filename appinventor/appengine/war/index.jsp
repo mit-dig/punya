@@ -73,8 +73,8 @@
     <script src="static/leaflet/Leaflet.Editable.js"></script>
     <script src="static/leaflet/leaflet.geometryutil.js"></script>
     <script src="static/leaflet/leaflet.snap.js"></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script type="text/javascript" src="static/js/jquery-ui-1.10.4.min.js"></script>
+    <script src="static/js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="static/js/jquery-ui-1.13.3.min.js"></script>
     <script>
       if (window.navigator.userAgent.indexOf("MSIE") != -1){
           document.getElementById("unsupported").style.display = 'block';
