@@ -35,6 +35,10 @@ public final class GeneralSettings extends Settings {
         null, EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this, SettingsConstants.USER_DYSLEXIC_FONT, "false",
         null, EditableProperty.TYPE_INVISIBLE, null, null));
+    addProperty(new EditableProperty(this, SettingsConstants.DARK_THEME_ENABLED, "false",
+        null, EditableProperty.TYPE_INVISIBLE, null, null));
+    addProperty(new EditableProperty(this, SettingsConstants.USER_NEW_LAYOUT, "false",
+        null, EditableProperty.TYPE_INVISIBLE, null, null));
     addProperty(new EditableProperty(this, SettingsConstants.USER_AUTOLOAD_PROJECT, "true",
         EditableProperty.TYPE_INVISIBLE));
     addProperty(new EditableProperty(this, SettingsConstants.FOLDERS, "",

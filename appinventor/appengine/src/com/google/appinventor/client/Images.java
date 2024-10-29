@@ -27,7 +27,7 @@ public interface Images extends Resources {
   ImageResource codiVert();
 
   /**
-   * App Inventor Logo
+   * App Inventor Logo 
    * {@link Ode#createWelcomeDialog(boolean)}
    */
   @Source("com/google/appinventor/images/appinvlogo-32.png")

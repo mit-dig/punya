@@ -10,18 +10,19 @@
     ui:baseMessagesInterface="com.google.appinventor.client.OdeMessages"
     ui:generateLocales="default">
 
-  <ui:with type="com.google.appinventor.client.Images" field="res" />
+  <ui:with type="com.google.appinventor.client.Images" field="res"/>
 
   <g:HTMLPanel>
-     <div class="ode-noDialogDivHeader">
+    <div class="ode-noDialogDivHeader">
       <div class="ode-noDialogDivInnerHeader">
         <h3 class="ode-headerTitle">
           <ui:msg key="welcome"
-                  description="Welcome text preceding the App Inventor logo">Welcome to</ui:msg>
+                  description="Welcome text preceding the App Inventor logo">Welcome to
+          </ui:msg>
         </h3>
 
         <div id='ode-codiLogoDiv'>
-          <g:Image resource="{res.logo}" altText="MIT App Inventor" height="64px" width="120px" />
+          <g:Image resource="{res.logo}" altText="MIT App Inventor" height="64px" width="120px"/>
         </div>
       </div>
     </div>
@@ -53,7 +54,8 @@
 
         <g:Button ui:field='goToApp1' styleName='ode-tutorialButton'>
           <ui:msg key="startTutorialButton"
-                  description="Text of the button to open a tutorial">Go to Tutorial</ui:msg>
+                  description="Text of the button to open a tutorial">Go to Tutorial
+          </ui:msg>
         </g:Button>
       </div>
 
@@ -104,17 +106,19 @@
     </div>
 
     <div class="ode-bottomRow">
-        <g:Button ui:field='noDialogNewProject' styleName="ode-noDialogNewProject">
-          <ui:msg key="startProjectButton" description="Text of the button to start a new project"
-          >Start a blank project</ui:msg>
-        </g:Button>
-        <g:Button ui:field='closeDialogBox' styleName='ode-closeDialogBox'>
-          <ui:msg key="closeButton" description="Text of the button to close the dialog box"
-          >Close</ui:msg>
-        </g:Button>
+      <g:Button ui:field='noDialogNewProject' styleName="ode-noDialogNewProject">
+        <ui:msg key="startProjectButton" description="Text of the button to start a new project"
+        >Start a blank project
+        </ui:msg>
+      </g:Button>
+      <g:Button ui:field='closeDialogBox' styleName='ode-closeDialogBox'>
+        <ui:msg key="closeButton" description="Text of the button to close the dialog box"
+        >Close
+        </ui:msg>
+      </g:Button>
     </div>
 
-      
+
   </g:HTMLPanel>
 
 </ui:UiBinder>

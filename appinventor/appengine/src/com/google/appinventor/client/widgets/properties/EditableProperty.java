@@ -207,4 +207,8 @@ public final class EditableProperty extends Property {
   public void setType(int aType) {
     this.type = aType;
   }
+
+  public EditableProperties getEditableProperties() {
+    return properties;
+  }
 }
